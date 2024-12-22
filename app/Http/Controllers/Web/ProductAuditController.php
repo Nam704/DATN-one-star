@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
+
 
 use Illuminate\Http\Request;
 
 class ProductAuditController extends Controller
-{
-    //
-}
+{ }
