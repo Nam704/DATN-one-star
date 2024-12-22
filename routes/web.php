@@ -16,6 +16,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('admin.index');
 });
-Route::get('/users', function () {
-    return view('admin.user.demoDataTable');
-});
+
+
+Route::prefix('admin')->name('admin.')->group(
+    function () {
+        Route::prefix('users')->name('user.')->group(
+            function () { }
+        );
+    }
+);
+Route::prefix('client')->name('client.')->group(
+    function () {
+        Route::prefix('users')->name('user.')->group(
+            function () { }
+        );
+    }
+);
