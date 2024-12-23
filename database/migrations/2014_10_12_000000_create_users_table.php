@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 100)->unique();
             $table->string('email')->unique();
+
             $table->string('phone')->unique()->nullable();
             $table->enum('is_lock', ['lock', 'active'])->default('active');
             $table->enum('status', ['active', 'inactive'])->default('active');
