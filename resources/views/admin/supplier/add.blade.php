@@ -71,8 +71,12 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <select name="province" class="form-select" id="province">
-                                                    <option value="{{ old('province',$province ?? '') }}">Chọn tỉnh
+                                                    @foreach($provinces as $province)
+                                                    <option value="{{ $province->id }}" {{ old('province')==$province->
+                                                        id ? 'selected' : '' }}>
+                                                        {{ $province->name }}
                                                     </option>
+                                                    @endforeach
                                                 </select>
                                                 @error('province')
                                                 <div class="text-danger">{{ $message }}</div>
@@ -128,8 +132,9 @@
         </div> <!-- end card -->
     </div><!-- end col -->
 </div><!-- end row -->
-<script src="{{ asset('admin/assets/js/jquery.min.js') }}"></script>
-<script src="{{ asset('admin/assets/js/axios.min.js') }}"></script>
 
-<script src="{{ asset('admin/api/addSupplier.js') }}"></script>
+
+{{-- <script src="{{ asset('admin/api/addSupplier.js') }}"></script> --}}
+
+
 @endsection

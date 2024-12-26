@@ -22,4 +22,8 @@ class Supplier extends Model
     {
         return $suppliers = $this->query()->select('id', 'name', 'address', 'phone', 'status')->latest('id')->paginate(10);
     }
+    public function addresses()
+    {
+        return $this->morphMany(Address::class, 'addressable'); // Định nghĩa quan hệ với Address
+    }
 }

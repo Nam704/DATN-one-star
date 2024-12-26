@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierRequest;
+use App\Models\Province;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
@@ -24,11 +25,13 @@ class SupplierController extends Controller
     }
     function getFormAdd()
     {
-        return view('admin.supplier.add');
+        $provinces = Province::all();
+        return view('admin.supplier.add', compact('provinces'));
     }
     public function add(SupplierRequest $request)
     {
         $data = $request->validated();
+
         $data["address"] =  $data["addressSelected"] . " " . $data["address"];
         $supplier = Supplier::create($data);
         return redirect()->back()->with('success', 'Supplier created successfully!');

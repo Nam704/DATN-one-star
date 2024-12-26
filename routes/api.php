@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AddressController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,13 @@ Route::prefix('admin')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+    }
+);
+Route::prefix('address')->controller(AddressController::class)->name('address.')->group(
+    function () {
+        Route::get('provinces', 'getProvinces');
+        Route::get('districts/{provinceId}',  'getDistrictsByProvince');
+        Route::get('wards/{districtId}', 'getWardsByDistrict');
     }
 );
 Route::prefix('client')->group(
