@@ -52,7 +52,7 @@
                                         @endif
                                     </a>
                                     <a type="button" class="btn btn-warning rounded-pill"
-                                        href="{{-- route('admin.users.editUser',$item->id) --}}">Edit</a>
+                                        href="{{ route('admin.suppliers.getFormUpdate',$supplier->id)}}">Edit</a>
                                 </td>
 
                             </tr>

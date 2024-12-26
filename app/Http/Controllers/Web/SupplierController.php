@@ -48,4 +48,17 @@ class SupplierController extends Controller
             return redirect()->route('admin.suppliers.list')->with('success', 'supplier locked successfully');
         }
     }
+    function getFormUpdate($id)
+    {
+        $supplier = $this->supplier->query()->find($id);
+        return view('admin.supplier.edit', compact('supplier'));
+    }
+    public function edit($id, SupplierRequest $request)
+    {
+        $supplier = $this->supplier->query()->find($id);
+        $data = $request->validated();
+        $data["address"] =  $data["addressSelected"] . " " . $data["address"];
+        $supplier->update($data);
+        return redirect()->route('admin.suppliers.list')->with('success', 'supplier updated successfully');
+    }
 }
