@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
+use App\Http\Controllers\Web\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +47,16 @@ Route::prefix('admin')->name('admin.')->group(
         });
         Route::prefix('users')->name('user.')->group(
             function () { }
+        );
+        Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate');
+                Route::get('/', 'list')->name('list');
+                Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
         );
     }
 );
