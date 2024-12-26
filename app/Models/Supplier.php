@@ -13,6 +13,7 @@ class Supplier extends Model
         'address',
         'phone',
         'status',
+        'id'
     ];
     protected $dates = [
         'deleted_at'

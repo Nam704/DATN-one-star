@@ -14,7 +14,7 @@ class SupplierController extends Controller
     {
         $this->supplier = $supplier;
 
-        // Chỉ cho phép user đã đăng nhập mới được truy cập
+        // Chỉ cho phép supplier đã đăng nhập mới được truy cập
         // $this->middleware('auth');
     }
     function list()
@@ -32,5 +32,20 @@ class SupplierController extends Controller
         $data["address"] =  $data["addressSelected"] . " " . $data["address"];
         $supplier = Supplier::create($data);
         return redirect()->back()->with('success', 'Supplier created successfully!');
+    }
+    function lockOrActive($id)
+    {
+        $supplier = $this->supplier->query()->find($id);
+
+        $isLock = ($supplier->status == 'inactive') ? true : false;
+        if ($isLock) {
+            $supplier->status = 'active';
+            $supplier->save();
+            return redirect()->route('admin.suppliers.list')->with('success', 'supplier actived successfully');
+        } else {
+            $supplier->status = 'inactive';
+            $supplier->save();
+            return redirect()->route('admin.suppliers.list')->with('success', 'supplier locked successfully');
+        }
     }
 }

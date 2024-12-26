@@ -6,16 +6,16 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">Fixed Header</h4>
+                    <h4 class="header-title">List Supplier</h4>
                     @if (session('success'))
                     <p class="alert alert-primary">
                         {{ session('success') }}
                     </p>
                     @endif
 
-                    <a href="{{-- route('admin.users.addUser') --}}" type="button" class="btn btn-sm btn-primary">
-                        Add new
-                        user</a>
+                    <a href="{{route('admin.suppliers.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
+                        Add new supplier
+                    </a>
 
                 </div>
 
@@ -43,7 +43,7 @@
                                 <td>{{ $supplier->status }}</td>
                                 <td>
                                     <a type="button" class="btn btn-danger rounded-pill"
-                                        href="{{-- route('admin.users.lock',$item->id) --}}">
+                                        href="{{ route('admin.suppliers.lockOrActive',$supplier->id) }}">
                                         @if ($supplier->status=='active')
                                         {{ 'Lock' }}
                                         @else

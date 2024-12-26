@@ -52,6 +52,7 @@ Route::prefix('admin')->name('admin.')->group(
             function () {
                 Route::get('add', 'getFormAdd')->name('getFormAdd');
                 Route::get('/', 'list')->name('list');
+                Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
                 Route::post('add', 'add')->name('add');
             }
         );
