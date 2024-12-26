@@ -71,12 +71,7 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <select name="province" class="form-select" id="province">
-                                                    @foreach($provinces as $province)
-                                                    <option value="{{ $province->id }}" {{ old('province')==$province->
-                                                        id ? 'selected' : '' }}>
-                                                        {{ $province->name }}
-                                                    </option>
-                                                    @endforeach
+                                                    <option value="">Chọn tỉnh</option>
                                                 </select>
                                                 @error('province')
                                                 <div class="text-danger">{{ $message }}</div>
@@ -99,16 +94,10 @@
                                                 <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                            <div class="col-md-12">
-                                                <input type="text" id="result" name="addressSelected" readonly
-                                                    class="form-control" placeholder="Selected address">
-                                                @error('addressSelected')
-                                                <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+
 
                                         </div>
-                                        <input type="text" id="simpleinput" name="address" class="form-control"
+                                        <input type="text" id="simpleinput" name="address_detail" class="form-control"
                                             value="{{ old('address') }}"
                                             placeholder="Detailed address: house number, street number">
                                         @error('address')
@@ -134,7 +123,10 @@
 </div><!-- end row -->
 
 
-{{-- <script src="{{ asset('admin/api/addSupplier.js') }}"></script> --}}
+
 
 
 @endsection
+@push('scripts')
+<script src="{{ asset('admin/api/addSupplier.js') }}"></script>
+@endpush

@@ -4,26 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         'name',
         'address',
         'phone',
         'status',
-        'id'
+
     ];
     protected $dates = [
         'deleted_at'
     ];
-    public function list()
+    public function scopeList($query)
     {
-        return $suppliers = $this->query()->select('id', 'name', 'address', 'phone', 'status')->latest('id')->paginate(10);
+        return $query->select('id', 'name', 'address', 'phone', 'status')
+            ->latest('id')
+            ->paginate(10);
     }
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function addresses()
     {
-        return $this->morphMany(Address::class, 'addressable'); // Định nghĩa quan hệ với Address
+        return $this->morphOne(Address::class, 'addressable');
     }
 }

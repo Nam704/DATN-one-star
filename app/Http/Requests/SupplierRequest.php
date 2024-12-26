@@ -26,12 +26,10 @@ class SupplierRequest extends FormRequest
         return [
             'name' => 'required|string|max:100|unique:suppliers,name,' . $id,
             'status' => 'required|in:active,inactive',
-            'address' => 'required|string|max:500',
+            'address_detail' => 'required|string|max:500',
             'phone' => ['required', 'string', 'regex:/^(0|\+84)[3-9][0-9]{8}$/', 'max:10'],
-            'province' => 'required|string',
-            'district' => 'required|string',
-            'ward' => 'required|string',
-            'addressSelected' => '',
+            'ward' => 'required',
+
         ];
     }
     public function messages()
