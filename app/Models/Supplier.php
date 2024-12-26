@@ -17,4 +17,8 @@ class Supplier extends Model
     protected $dates = [
         'deleted_at'
     ];
+    public function list()
+    {
+        return $suppliers = $this->query()->select('id', 'name', 'address', 'phone', 'status')->latest('id')->paginate(10);
+    }
 }

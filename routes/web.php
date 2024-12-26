@@ -51,6 +51,7 @@ Route::prefix('admin')->name('admin.')->group(
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
             function () {
                 Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('/', 'list')->name('list');
                 Route::post('add', 'add')->name('add');
             }
         );

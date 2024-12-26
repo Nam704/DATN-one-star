@@ -17,6 +17,11 @@ class SupplierController extends Controller
         // Chỉ cho phép user đã đăng nhập mới được truy cập
         // $this->middleware('auth');
     }
+    function list()
+    {
+        $suppliers = $this->supplier->list();
+        return view('admin.supplier.list', compact('suppliers'));
+    }
     function getFormAdd()
     {
         return view('admin.supplier.add');
@@ -25,7 +30,6 @@ class SupplierController extends Controller
     {
         $data = $request->validated();
         $data["address"] =  $data["addressSelected"] . " " . $data["address"];
-        // dd($data);
         $supplier = Supplier::create($data);
         return redirect()->back()->with('success', 'Supplier created successfully!');
     }
