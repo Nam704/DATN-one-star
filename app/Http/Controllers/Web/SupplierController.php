@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierRequest;
+use App\Models\Address;
 use App\Models\Province;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -18,22 +19,43 @@ class SupplierController extends Controller
         // Chỉ cho phép supplier đã đăng nhập mới được truy cập
         // $this->middleware('auth');
     }
-    function list()
+    public function list()
     {
-        $suppliers = $this->supplier->list();
+        // Lấy danh sách các Supplier kèm quan hệ address
+        $suppliers = $this->supplier->query()->with('addresses')->latest('id')->paginate(10);
+
+        // Gắn thêm full_address cho từng Supplier
+        foreach ($suppliers as $supplier) {
+            $address = $supplier->addresses;
+            if ($address) {
+                $addressDetails = Address::getAddressDetailsByWard($address->id_ward);
+
+                $supplier->full_address = $addressDetails->map(function ($detail) {
+                    return "{$detail->address_detail}, {$detail->ward_name}, {$detail->district_name}, {$detail->province_name}";
+                })->first(); // Lấy địa chỉ đầy đủ (nếu có).
+            } else {
+                $supplier->full_address = 'N/A';
+            }
+        }
+
+        // Trả về view cùng dữ liệu suppliers
         return view('admin.supplier.list', compact('suppliers'));
     }
+
     function getFormAdd()
     {
-        $provinces = Province::all();
-        return view('admin.supplier.add', compact('provinces'));
+
+        return view('admin.supplier.add');
     }
     public function add(SupplierRequest $request)
     {
         $data = $request->validated();
-
-        $data["address"] =  $data["addressSelected"] . " " . $data["address"];
         $supplier = Supplier::create($data);
+        $supplier->addresses()->create([
+            'address_detail' => $request->address_detail,
+            'is_default' => false,
+            'id_ward' => $request->ward
+        ]);
         return redirect()->back()->with('success', 'Supplier created successfully!');
     }
     function lockOrActive($id)
