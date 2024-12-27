@@ -20,14 +20,9 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                {{-- <h4 class="header-title">Input Types</h4>
-                <p class="text-muted mb-0">
-                    Most common form control, text-based input fields. Includes support for all
-                    HTML5 types: <code>text</code>, <code>password</code>, <code>datetime</code>,
-                    <code>datetime-local</code>, <code>date</code>, <code>month</code>,
-                    <code>time</code>, <code>week</code>, <code>number</code>, <code>email</code>,
-                    <code>url</code>, <code>search</code>, <code>tel</code>, and <code>color</code>.
-                </p> --}}
+                <a href="{{route('admin.suppliers.list') }}" type="button" class="btn btn-sm btn-primary">
+                    Back to list
+                </a>
             </div>
             <div class="card-body">
                 {{-- <div class="row">
@@ -48,10 +43,12 @@
                                     <div class="mb-3">
                                         <label for="example-select" class="form-label">Status</label>
                                         <select class="form-select" name="status" id="example-select">
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-
+                                            <option value="active" {{ old('status')=='active' ? 'selected' : '' }}>
+                                                Active</option>
+                                            <option value="inactive" {{ old('status')=='inactive' ? 'selected' : '' }}>
+                                                Inactive</option>
                                         </select>
+
                                     </div>
                                     <div class="mb-3">
                                         <label for="simpleinput" class="form-label">Phone</label>
@@ -71,7 +68,8 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <select name="province" class="form-select" id="province">
-                                                    <option value="">Chọn tỉnh</option>
+                                                    <option value="" {{ old('province') ? 'selected' : '' }}>Chọn tỉnh
+                                                    </option>
                                                 </select>
                                                 @error('province')
                                                 <div class="text-danger">{{ $message }}</div>
@@ -79,7 +77,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <select name="district" class="form-select" id="district">
-                                                    <option value="{{ old('district',$district ?? '') }}">Chọn quận
+                                                    <option value="" {{ old('district') ? 'selected' : '' }}>Chọn quận
                                                     </option>
                                                 </select>
                                                 @error('district')
@@ -88,7 +86,8 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <select name="ward" class="form-select" id="ward">
-                                                    <option value="{{ old('ward',$ward ?? '') }}">Chọn phường</option>
+                                                    <option value="" {{ old('ward')? 'selected' : '' }}>Chọn phường
+                                                    </option>
                                                 </select>
                                                 @error('ward')
                                                 <div class="text-danger">{{ $message }}</div>
@@ -98,14 +97,14 @@
 
                                         </div>
                                         <input type="text" id="simpleinput" name="address_detail" class="form-control"
-                                            value="{{ old('address') }}"
+                                            value="{{ old('address_detail') }}"
                                             placeholder="Detailed address: house number, street number">
-                                        @error('address')
+                                        @error('address_detail')
                                         <div class="text-danger">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="mb-3 d-grid ">
-                                        <button type="submit" class="btn btn-lg btn-success">Add new user</button>
+                                        <button type="submit" class="btn btn-lg btn-success">Add new </button>
                                     </div>
                                 </div>
                             </div>
