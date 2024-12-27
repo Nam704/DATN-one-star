@@ -26,7 +26,18 @@ class Address extends Model
             ->join('districts as d', 'w.district_id', '=', 'd.id')
             ->join('provinces as p', 'd.province_id', '=', 'p.id')
             ->where('a.id_ward', '=', $idWard)
-            ->select('a.address_detail', 'w.name as ward_name', 'd.name as district_name', 'p.name as province_name')
+            ->select('a.address_detail', 'w.name as ward_name', 'd.name as district_name', 'p.name as province_name', 'd.id as district_id', 'p.id as province_id')
+            ->get();
+    }
+    public static function getAddressSupplier($idWard, $addressable_id)
+    {
+        return DB::table('addresses as a')
+            ->join('wards as w', 'a.id_ward', '=', 'w.id')
+            ->join('districts as d', 'w.district_id', '=', 'd.id')
+            ->join('provinces as p', 'd.province_id', '=', 'p.id')
+            ->where('a.id_ward', '=', $idWard)
+            ->where('a.addressable_id', '=', $addressable_id)
+            ->select('a.address_detail', 'w.name as ward_name', 'd.name as district_name', 'p.name as province_name', 'd.id as district_id', 'p.id as province_id')
             ->get();
     }
 }

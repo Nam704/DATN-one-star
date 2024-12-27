@@ -41,11 +41,12 @@
                                     <div class="mb-3">
                                         <label for="example-select" class="form-label">Status</label>
                                         <select class="form-select" name="status" id="example-select">
-                                            <option value="active" {{ $supplier->status == 'active' ? 'selected' : ''
-                                                }}>Active</option>
-                                            <option value="inactive" {{ $supplier->status == 'inactive' ? 'selected' :
-                                                '' }}>Inactive</option>
+                                            <option value="active" {{ old('status')=='active' || $supplier->status ==
+                                                'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="inactive" {{ old('status')=='inactive' || $supplier->status
+                                                == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                         </select>
+
 
                                     </div>
                                     <div class="mb-3">
@@ -65,9 +66,15 @@
                                         <label for="simpleinput" class="form-label">Address</label>
                                         <div class="row">
                                             <div class="col-md-4">
-                                                <select name="province" class="form-select" id="province">
-                                                    <option value="{{ old('province',$province ?? '') }}">Chọn tỉnh
+                                                <select name="province" id="province" class="form-select">
+                                                    <option value="">Chọn tỉnh</option>
+                                                    @foreach ($provinces as $province)
+                                                    <option value="{{ $province->id }}" {{ old('province',
+                                                        $fullAddress['province_id'] ?? '' )==$province->id ? 'selected'
+                                                        : '' }}>
+                                                        {{ $province->name }}
                                                     </option>
+                                                    @endforeach
                                                 </select>
                                                 @error('province')
                                                 <div class="text-danger">{{ $message }}</div>
@@ -75,8 +82,14 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <select name="district" class="form-select" id="district">
-                                                    <option value="{{ old('district',$district ?? '') }}">Chọn quận
+                                                    <option value="">Chọn quận</option>
+                                                    @foreach ($districts as $district)
+                                                    <option value="{{ $district->id }}" {{ old('district',
+                                                        $fullAddress['district_id'] ?? '' )==$district->id ? 'selected'
+                                                        : '' }}>
+                                                        {{ $district->name }}
                                                     </option>
+                                                    @endforeach
                                                 </select>
                                                 @error('district')
                                                 <div class="text-danger">{{ $message }}</div>
@@ -84,25 +97,27 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <select name="ward" class="form-select" id="ward">
-                                                    <option value="{{ old('ward',$ward ?? '') }}">Chọn phường</option>
+                                                    <option value="">Chọn phường</option>
+                                                    @foreach ($wards as $ward)
+                                                    <option value="{{ $ward->id }}" {{ old('ward',
+                                                        $fullAddress['ward_id'] ?? '' )==$ward->id ? 'selected' : '' }}>
+                                                        {{ $ward->name }}
+                                                    </option>
+                                                    @endforeach
                                                 </select>
                                                 @error('ward')
                                                 <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                            <div class="col-md-12">
-                                                <input type="text" id="result" name="addressSelected" readonly
-                                                    class="form-control" placeholder="Selected address">
-                                                @error('addressSelected')
-                                                <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+
 
                                         </div>
-                                        <input type="text" id="simpleinput" name="address" class="form-control"
-                                            value="{{ old('address',$supplier->address??"") }}"
-                                            placeholder="Detailed address: house number, street number">
-                                        @error('address')
+                                        <input type="text" name="address_detail" id="address_detail"
+                                            class="form-control"
+                                            value="{{ old('address_detail', $fullAddress['address_detail'] ?? '') }}"
+                                            required placeholder="Detailed address: house number, street number">
+
+                                        @error('address_detail')
                                         <div class="text-danger">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -123,8 +138,10 @@
         </div> <!-- end card -->
     </div><!-- end col -->
 </div><!-- end row -->
-<script src="{{ asset('admin/assets/js/jquery.min.js') }}"></script>
-<script src="{{ asset('admin/assets/js/axios.min.js') }}"></script>
 
-<script src="{{ asset('admin/api/addSupplier.js') }}"></script>
+
 @endsection
+@push('scripts')
+<script src="{{ asset('admin/api/editSupplier.js') }}"></script>
+
+@endpush
