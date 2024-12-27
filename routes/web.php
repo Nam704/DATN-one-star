@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\SupplierController;
+use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,8 +46,10 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'dashboard')->name('dashboard');
         });
-        Route::prefix('users')->name('user.')->group(
-            function () { }
+        Route::prefix('users')->name('user.')->controller(UserContronler::class)->group(
+            function () {
+                Route::get('/', 'list')->name('list');
+            }
         );
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
             function () {

@@ -24,7 +24,7 @@ class SupplierController extends Controller
     public function list()
     {
         // Lấy danh sách các Supplier kèm quan hệ address
-        $suppliers = $this->supplier->query()->with('address')->latest('id')->paginate(10);
+        $suppliers = $this->supplier->query()->with('address')->latest('id')->paginate(20);
 
         // Gắn thêm full_address cho từng Supplier
         foreach ($suppliers as $supplier) {
@@ -40,7 +40,7 @@ class SupplierController extends Controller
             }
         }
 
-        // Trả về view cùng dữ liệu suppliers
+
         return view('admin.supplier.list', compact('suppliers'));
     }
 
@@ -53,7 +53,7 @@ class SupplierController extends Controller
     {
         $data = $request->validated();
         $supplier = Supplier::create($data);
-        $supplier->addresses()->create([
+        $supplier->address()->create([
             'address_detail' => $request->address_detail,
             'is_default' => false,
             'id_ward' => $request->ward

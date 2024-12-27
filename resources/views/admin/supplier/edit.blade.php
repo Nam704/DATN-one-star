@@ -20,7 +20,9 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-
+                <a href="{{route('admin.suppliers.list') }}" type="button" class="btn btn-sm btn-primary">
+                    Back to list
+                </a>
             </div>
             <div class="card-body">
                 {{-- <div class="row">
