@@ -29,6 +29,8 @@ class SupplierRequest extends FormRequest
             'address_detail' => 'required|string|max:500',
             'phone' => ['required', 'string', 'regex:/^(0|\+84)[3-9][0-9]{8}$/', 'max:10'],
             'ward' => 'required',
+            'province' => 'required',
+            'district' => 'required',
 
         ];
     }

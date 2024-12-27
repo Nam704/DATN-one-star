@@ -28,7 +28,7 @@ class Supplier extends Model
     }
     protected $hidden = ['created_at', 'updated_at'];
 
-    public function addresses()
+    public function address()
     {
         return $this->morphOne(Address::class, 'addressable');
     }
