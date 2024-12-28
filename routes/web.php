@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,8 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'dashboard')->name('dashboard');
         });
+        Route::get('list-category',[CategoryController::class,'index'])->name('admin.category.listcategory');
+        Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.category.addcategory');
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
