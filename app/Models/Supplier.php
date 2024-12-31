@@ -12,7 +12,7 @@ class Supplier extends Model
     use SoftDeletes;
     protected $fillable = [
         'name',
-        'address',
+
         'phone',
         'status',
 
@@ -20,11 +20,10 @@ class Supplier extends Model
     protected $dates = [
         'deleted_at'
     ];
-    public function scopeList($query)
+    public static function scopeList($query)
     {
-        return $query->select('id', 'name', 'address', 'phone', 'status')
-            ->latest('id')
-            ->paginate(10);
+        return $query->select('id', 'name', 'phone', 'status')
+            ->latest('id');
     }
     protected $hidden = ['created_at', 'updated_at'];
 
