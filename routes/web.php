@@ -45,8 +45,15 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'dashboard')->name('dashboard');
         });
-        Route::get('list-category',[CategoryController::class,'index'])->name('admin.category.listcategory');
-        Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.category.addcategory');
+        
+        Route::prefix('categorys')->name('categorys')->group(
+            function(){
+                Route::get('list-category',[CategoryController::class,'index'])->name('listcategory');
+                Route::get('add-category',[CategoryController::class,'addCategory'])->name('addcategory');
+            }
+        );
+
+
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
