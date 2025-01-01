@@ -3,8 +3,11 @@
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
+use App\Http\Controllers\Web\ImageController;
+use App\Http\Controllers\Web\ProductAuditController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,12 +64,33 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
+
+        Route::prefix('images')->name('images.')->controller(ImageController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::get('destroy/{id}', 'destroy')->name('destroy');
+            Route::get('show/{id}', 'show')->name('show');
+
+        });
+        Route::prefix('product_audits')->name('product_audits.')->controller(ProductAuditController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::get('destroy/{id}', 'destroy')->name('destroy');
+            Route::get('show/{id}', 'show')->name('show');
+
+        });
     }
 );
 Route::prefix('client')->name('client.')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
-            function () { }
+            function () {}
         );
     }
 );
