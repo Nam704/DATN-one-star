@@ -48,8 +48,8 @@ Route::prefix('admin')->name('admin.')->group(
 
         Route::prefix('categorys')->name('categorys')->group(
             function(){
-                Route::get('list-category',[CategoryController::class,'index'])->name('listcategory');
-                Route::get('add-category',[CategoryController::class,'addCategory'])->name('addcategory');
+                Route::get('list-category',[CategoryController::class,'index'])->name('admin.categorys.listcategory');
+                Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.categorys.addCategory');
             }
         );
 
