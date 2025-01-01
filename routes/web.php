@@ -45,7 +45,7 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'dashboard')->name('dashboard');
         });
-        
+
         Route::prefix('categorys')->name('categorys')->group(
             function(){
                 Route::get('list-category',[CategoryController::class,'index'])->name('listcategory');
