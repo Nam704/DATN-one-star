@@ -30,4 +30,8 @@ class Product extends Model
     {
         return $query->where('status', 'active');
     }
+    public function variants()
+    {
+        return $this->hasMany(Product_variant::class, 'id_product');
+    }
 }

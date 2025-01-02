@@ -31,4 +31,8 @@ class Supplier extends Model
     {
         return $this->morphOne(Address::class, 'addressable');
     }
+    public function imports()
+    {
+        return $this->hasMany(Import::class, 'id_supplier', 'id');
+    }
 }

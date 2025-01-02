@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\ImportController;
+use App\Http\Controllers\Api\ImportDetailController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ Route::prefix('admin')->group(
         Route::prefix('imports')->controller(ImportController::class)->group(
             function () {
                 // Route::get('provinces', 'getProvinces');
+                Route::get('{id}/details', [ImportController::class, 'getImportDetails']);
             }
         );
     }

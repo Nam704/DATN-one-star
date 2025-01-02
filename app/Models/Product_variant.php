@@ -13,6 +13,10 @@ class Product_variant extends Model
         'sku',
         'status'
     ];
+    public function import_details()
+    {
+        return $this->hasMany(Import_detail::class, 'id_product_variant', 'id');
+    }
     public static function scopeList($query, $idProduct)
     {
         return $query->select('product_variants.id', 'product_variants.sku', 'product_variants.status', 'products.name as product_name')
@@ -23,5 +27,9 @@ class Product_variant extends Model
     public static function scopeTotal($query, $id)
     {
         return $query->where('status', 'active')->where('id_product', $id);
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'id_product');
     }
 }

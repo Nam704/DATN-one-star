@@ -27,7 +27,8 @@
             <div class="card-body">
                 {{-- <div class="row">
                     <div class="col-lg-12"> --}}
-                        <form id="addressForm" action="" method="POST" enctype="multipart/form-data">
+                        <form id="import-form" action="{{ route('admin.imports.add') }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-12">
@@ -73,33 +74,21 @@
                                             <textarea id="note" name="note" class="form-control"></textarea>
                                         </div>
                                     </div>
-
-
                                 </div>
 
                                 <div class="col-lg-12">
                                     <!-- Thêm chi tiết nhập hàng -->
                                     <div id="import-details-container">
                                         <h5>Import Details</h5>
-                                        <div class="import-detail row" id="import-detail-template">
-                                            <div class="row product-rows-container">
-
-                                                {{-- product-row --}}
-
-
-                                                <hr>
-                                            </div>
-
+                                        <div class="product-rows-container">
+                                            <!-- Each product row will be dynamically added here -->
                                         </div>
-
-                                        <!-- More rows can be added dynamically -->
                                     </div>
 
                                     <button type="button" id="add-row-btn" class="btn btn-primary">Thêm một sản phẩm
                                     </button>
 
                                     <div class="mb-3 d-grid ">
-
                                         <button type="submit" id="btn-submit" class="btn btn-lg btn-success">Add new
                                         </button>
                                     </div>

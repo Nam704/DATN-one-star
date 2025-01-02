@@ -1,4 +1,7 @@
 $(document).ready(function () {
+    // Load existing import details
+    const importId = $(".product-rows-container").data("import-id");
+
     // Hàm xóa dấu tiếng Việt
     function removeVietnameseTones(str) {
         str = str.replace(/á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ/g, "a");
@@ -115,16 +118,75 @@ $(document).ready(function () {
     // Gọi totalProduct và xử lý Promise
     totalProduct()
         .then((result) => {
-            console.log(result); // In ra products
+            console.log("product", result); // In ra products
             let rowId = 0;
             const products = result;
             const maxProductRow = result.length;
-            // hóa 1 hàng sản phẩm
+            // render sản phẩm có sẵn
+            $.get(
+                `/api/admin/imports/${importId}/details`,
+                function (response) {
+                    var importDetails = response.importDetails;
+                    var listProduct = Object.values(response.products);
+                    console.log("import-detail", importDetails);
+                    console.log("products", listProduct);
+                    listProduct.forEach((product) => {
+                        console.log("product", product);
+                        var productRow = $(
+                            createProductRow(product.id, listProduct)
+                        );
+                        $(".product-rows-container").append(productRow);
+                        productRow
+                            .find(`select[name^="product"]`)
+                            .val(product.id);
+                        importDetails.forEach((variant) => {
+                            if (variant.product_id == product.id) {
+                                console.log(
+                                    "product_variant_id",
+                                    variant.product_variant_id
+                                );
+                                var variantRow = $(
+                                    createRowVariant(
+                                        product.id,
+                                        product.variants,
+                                        variant.product_variant_id
+                                    )
+                                );
+                                productRow
+                                    .find(".row-variant")
+                                    .append(variantRow);
+
+                                // Set variant values
+                                variantRow
+                                    .find('[name$="[quantity]"]')
+                                    .val(variant.quantity);
+                                variantRow
+                                    .find('[name$="[price_per_unit]"]')
+                                    .val(variant.price_per_unit);
+                                variantRow
+                                    .find('[name$="[expected_price]"]')
+                                    .val(variant.expected_price);
+                                variantRow
+                                    .find('[name$="[total_price]"]')
+                                    .val(variant.total_price);
+
+                                recalculateAllTotals();
+                            }
+                        });
+                    });
+                }
+            );
+
+            // xóa 1 hàng sản phẩm
             $(document).on("click", ".btn-delete-product", function (e) {
                 $(this).closest(".product-row").remove();
                 recalculateAllTotals();
             });
-
+            // xóa 1 hàng biến thể
+            $(document).on("click", ".btn-delete-variant", function () {
+                $(this).closest(".product-variant").remove();
+                recalculateAllTotals();
+            });
             // thêm 1 hàng sản phẩm
             $("#add-row-btn").click(function () {
                 const currentRowCount = $(".product-row").length; // Đếm số hàng hiện tại trong DOM
@@ -217,15 +279,7 @@ $(document).ready(function () {
                     contentType: false,
                     success: function (response) {
                         if (response.status === "success") {
-                            var check = confirm(
-                                response.message +
-                                    " Do you want to continue add import?"
-                            );
-                            if (check) {
-                                window.location.reload();
-                            } else {
-                                window.location.href = response.redirect;
-                            }
+                            window.location.href = response.redirect;
                         }
                     },
                     error: function (xhr, textStatus, errorThrown) {
@@ -324,13 +378,13 @@ $(document).ready(function () {
                         );
                         recalculateAllTotals();
                         // Lắng nghe sự kiện xóa biến thể
-                        productRow
-                            .find(".btn-delete-variant")
-                            .off("click")
-                            .on("click", function () {
-                                $(this).closest(".product-variant").remove();
-                                recalculateAllTotals();
-                            });
+                        // productRow
+                        //     .find(".btn-delete-variant")
+                        //     .off("click")
+                        //     .on("click", function () {
+                        //         $(this).closest(".product-variant").remove();
+                        //         recalculateAllTotals();
+                        //     });
                     },
                     error: function (error) {
                         console.log("Lỗi khi lấy maxVariants:", error);

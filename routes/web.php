@@ -65,11 +65,13 @@ Route::prefix('admin')->name('admin.')->group(
         Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
             function () {
                 Route::get('add', 'getFormAdd')->name('getFormAdd');
-                // Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate');
-                // Route::get('/', 'list')->name('list');
+                Route::get('detail/{id}', 'detail')->name('detail');
+
+                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
+                Route::get('/', 'list')->name('list');
                 // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
-                // Route::post('add', 'add')->name('add');
-                // Route::post('edit/{id}', 'edit')->name('edit');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
     }
