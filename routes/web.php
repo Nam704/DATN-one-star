@@ -3,6 +3,9 @@
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
+use App\Http\Controllers\Web\ImportController;
+use App\Http\Controllers\Web\SupplierController;
+use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,8 +47,32 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'dashboard')->name('dashboard');
         });
-        Route::prefix('users')->name('user.')->group(
-            function () { }
+        Route::prefix('users')->name('user.')->controller(UserContronler::class)->group(
+            function () {
+                Route::get('/', 'list')->name('list');
+            }
+        );
+        Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate');
+                Route::get('/', 'list')->name('list');
+                Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
+        );
+        Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('detail/{id}', 'detail')->name('detail');
+
+                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
+                Route::get('/', 'list')->name('list');
+                // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
         );
     }
 );

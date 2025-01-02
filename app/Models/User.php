@@ -29,7 +29,10 @@ class User extends Authenticatable
         'status',
         'deleted_at'
     ];
-
+    public function addresses()
+    {
+        return $this->morphMany(Address::class, 'addressable'); // Định nghĩa quan hệ với Address
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
