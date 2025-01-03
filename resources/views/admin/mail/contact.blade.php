@@ -1,0 +1,1 @@
+<h1> contact mail from laravel</h1>
