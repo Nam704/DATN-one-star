@@ -12,11 +12,12 @@ class AttributeController extends Controller
 
 /* Danh sách thuộc tính */
 
-    public function index()
-    {
-        $attributes = Attribute::withTrashed()->get();
-        return view('admin.attributes.index', compact('attributes'));
-    }
+public function index()
+{
+    $attributes = Attribute::all();
+    return view('admin.attributes.index', compact('attributes'));
+}
+
 
 /* Tạo thuộc tính */
 
@@ -108,9 +109,11 @@ public function toggleStatus($id)
     return response()->json([
         'success' => true,
         'message' => 'Status updated successfully',
-        'newStatus' => $attribute->status
+        'newStatus' => $attribute->status,
+        'id' => $attribute->id
     ]);
 }
+
 
 
 /* Cập nhật thuộc tính */
