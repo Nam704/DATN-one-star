@@ -14,7 +14,7 @@
             <button type="button" class="btn btn-secondary btn-sm" onclick="">Chọn tất cả</button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="">Bỏ chọn tất cả</button>
             <button type="submit" name="xoacacmucchon" class="btn btn-secondary btn-sm">Xóa các mục đã chọn</button>
-            <a href="{{ route('admin.categorys.addCategory') }}"><button type="button" class="btn btn-secondary btn-sm">Nhập thêm</button></a>
+            <a href="{{ route('admin.categories.addCategory') }}"><button type="button" class="btn btn-secondary btn-sm">Nhập thêm</button></a>
             <div class="float-right">
                 <div class="input-group">
                     <input type="text" class="form-control" name="kyw" placeholder="Tìm kiếm...">
@@ -42,23 +42,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($categories as $category)
+                        @foreach($categories as $key => $category)
                         <tr>
                             <td class="text-center"><input type="checkbox" name="select[]" value=""></td>
-                            <td class="col-1">{{ $category->id }}</td>
+                            <td class="col-1">{{ $key+1 }}</td>
                             <td class="col-2">{{$category->name}}</td>
                             <td class="col-2">{{$category->status}}</td>
                             <td class="col-2">{{$category->created_at}}</td>
                             <td class="col-2">{{$category->updated_at}}</td>
                             <td class="col-2">{{$category->delete_at}}</td>
                             <td class="col-2">
-                                <a href="">
+                                <a href="{{route('admin.categories.editCategory',$category->id)}}">
                                     <button type="button" class="btn btn-secondary btn-sm">Sửa</button>
                                 </a> |
-                                <form action="" class="d-inline" method="POST" onclick="return confirm('Ban co muon xoa khong')">
+                                <form action="{{route('admin.categories.deleteCategory',$category->id)}}" class="d-inline" method="POST" onclick="return confirm('Ban co muon xoa khong')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-sm">Xóa</button>
+                                    <button type="submit" class="btn btn-secondary btn-sm ">Xóa</button>
                                 </form>
                             </td>
                         </tr>

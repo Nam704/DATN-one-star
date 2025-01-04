@@ -46,12 +46,24 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('/', 'dashboard')->name('dashboard');
         });
 
-        Route::prefix('categorys')->name('categorys')->group(
-            function(){
-                Route::get('list-category',[CategoryController::class,'index'])->name('admin.categorys.listcategory');
-                Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.categorys.addCategory');
-            }
-        );
+        // Route::prefix('categorys')->name('categorys')->group(
+        //     function(){
+        //         Route::get('list-category',[CategoryController::class,'index'])->name('admin.categorys.listcategory');
+        //         Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.categorys.addCategory');
+        //     }
+        // );
+
+        Route::group([
+            'prefix' => 'categories',
+            'as' => 'categories.'
+        ], function() {
+            Route::get('list-category',[CategoryController::class,'listCategory'])->name('listCategory');
+            Route::get('add-category',[CategoryController::class,'addCategory'])->name('addCategory');
+            Route::post('add-category',[CategoryController::class,'addPostCategory'])->name('addPostCategory');
+            Route::get('edit-category/{id}',[CategoryController::class,'editCategory'])->name('editCategory');
+            Route::put('edit-category/{id}',[CategoryController::class,'editPutCategory'])->name('editPutCategory');
+            Route::delete('delete-category/{id}',[CategoryController::class,'deleteCategory'])->name('deleteCategory');
+        });
 
 
         Route::prefix('users')->name('user.')->group(
