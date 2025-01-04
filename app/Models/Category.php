@@ -20,6 +20,9 @@ class Category extends Model
         'deleted_at',
     ];
 
+    public function products() {
+        return $this->hasMany(Product::class, 'id_category');
+    }
     public function parent()
     {
         return $this->belongsTo(Category::class, 'id_parent');

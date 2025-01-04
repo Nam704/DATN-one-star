@@ -37,7 +37,6 @@
                             <th>Status</th>
                             <th>Created At</th>
                             <th>Update At</th>
-                            <th>Delete AT</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -50,7 +49,6 @@
                             <td class="col-2">{{$category->status}}</td>
                             <td class="col-2">{{$category->created_at}}</td>
                             <td class="col-2">{{$category->updated_at}}</td>
-                            <td class="col-2">{{$category->delete_at}}</td>
                             <td class="col-2">
                                 <a href="{{route('admin.categories.editCategory',$category->id)}}">
                                     <button type="button" class="btn btn-secondary btn-sm">Sửa</button>
