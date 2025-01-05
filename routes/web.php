@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 /*
@@ -24,6 +25,9 @@ use Illuminate\Support\Facades\Mail;
 Route::get('/', function () {
     return view('admin.index');
 });
+Route::get('/make-password', function () {
+    return Hash::make('1234');
+});
 Route::prefix('auth/')->name('auth.')->group(
     function () {
         Route::controller(GoogleController::class)->group(function () {
@@ -33,9 +37,14 @@ Route::prefix('auth/')->name('auth.')->group(
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'getFormLogin')->name('getFormLogin');
             Route::post('login', 'login')->name('login');
-
             Route::get('register', 'getFormRegister')->name('getFormRegister');
             Route::post('register', 'register')->name('register');
+            Route::get('logout', 'logout')->name('logout');
+            Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
+            Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
+
+            Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
+            Route::post('reset-password', 'resetPassword')->name('resetPassword');
         });
     }
 );
@@ -47,7 +56,7 @@ Route::prefix('admin')->name('admin.')->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
-            Route::get('/', 'dashboard')->name('dashboard');
+            Route::get('dashboard', 'dashboard')->name('dashboard');
         });
         Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
             function () {

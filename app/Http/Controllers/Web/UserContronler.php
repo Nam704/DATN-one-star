@@ -19,4 +19,9 @@ class UserContronler extends Controller
         // dd($users);
         return view('admin.user.list', compact('users'));
     }
+
+    function resetPassword($id)
+    {
+        $user = User::find($id);
+    }
 }

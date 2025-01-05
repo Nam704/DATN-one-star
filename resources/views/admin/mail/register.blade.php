@@ -19,5 +19,5 @@
     <li>Get exclusive offers</li>
 </ul>
 
-<a href="{{-- route('login') --}}" class="button">Login to Your Account</a>
+<a href="{{ route('auth.getFormLogin') }}" class="button">Login to Your Account</a>
 @endsection
