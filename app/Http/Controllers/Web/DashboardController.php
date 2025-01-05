@@ -9,6 +9,10 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
-        return view('admin.index');
+        if (auth()->check()) {
+            return view('admin.index');
+        } else {
+            return redirect()->route('auth.getFormLogin');
+        }
     }
 }
