@@ -3,12 +3,20 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserContronler extends Controller
 {
-    function list()
+    protected $user;
+    function __construct(User $user)
     {
-        return view('admin.user.demoDataTable');
+        $this->user = $user;
+    }
+    function listAdmin()
+    {
+        $users = $this->user->list();
+        // dd($users);
+        return view('admin.user.list', compact('users'));
     }
 }

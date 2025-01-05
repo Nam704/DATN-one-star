@@ -14,4 +14,8 @@ class MailController extends Controller
         $email = 'daovannam2k4@gmail.com';
         Mail::to($email)->send(new ContactMail);
     }
+    function sendRegistrationMail($userData)
+    {
+        Mail::to($userData->email)->send(new ContactMail($userData));
+    }
 }

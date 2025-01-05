@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegisterMail;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -49,6 +51,7 @@ class GoogleController extends Controller
                     'id_role' => 1
                 ]);
                 Auth::login($newUser);
+                Mail::to($email)->send(new RegisterMail($newUser));
                 return redirect()->intended('/');
             }
         } catch (Exception $e) {

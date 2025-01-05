@@ -49,9 +49,9 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'dashboard')->name('dashboard');
         });
-        Route::prefix('users')->name('user.')->controller(UserContronler::class)->group(
+        Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
             function () {
-                Route::get('/', 'list')->name('list');
+                Route::get('/', 'listAdmin')->name('list');
             }
         );
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
