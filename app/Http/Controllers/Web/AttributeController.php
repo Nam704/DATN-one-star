@@ -36,7 +36,7 @@ public function store(Request $request)
             'required',                // Trường 'name' là bắt buộc
             'max:50',                  // Giới hạn độ dài của 'name' không quá 50 ký tự
             'unique:attributes,name',  // Đảm bảo 'name' không trùng lặp trong bảng 'attributes'
-            'regex:/^[a-zA-Z]+$/',// Chỉ cho phép chữ cái
+            'regex:/^[\p{L}\s]+$/u',// Chỉ cho phép chữ cái
             'string'                   // Dữ liệu phải là kiểu chuỗi
         ],
         'description' => 'nullable|string',       // Trường 'description' không bắt buộc, nhưng nếu có phải là chuỗi
@@ -132,7 +132,7 @@ public function update(Request $request, $id)
         'name' => [
             'required',
             'max:50',
-            'regex:/^[a-zA-Z]+$/',
+            'regex:/^[\p{L}\s]+$/u',
             'string',
             Rule::unique('attributes')->ignore($id)
         ],

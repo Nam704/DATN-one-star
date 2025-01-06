@@ -29,7 +29,7 @@ class BrandController extends Controller
                 'required',
                 'max:50',
                 'unique:brands,name',
-                'regex:/^[a-zA-Z]+$/',
+                'regex:/^[\p{L}\s]+$/u',
                 'string'
             ],
             'status' => 'required|in:active,inactive'
@@ -114,7 +114,7 @@ class BrandController extends Controller
             'name' => [
                 'required',
                 'max:50',
-                'regex:/^[a-zA-Z]+$/',
+                'regex:/^[\p{L}\s]+$/u',
                 'string',
                 Rule::unique('brands')->ignore($id)
             ],
