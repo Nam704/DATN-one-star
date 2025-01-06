@@ -25,9 +25,6 @@ class Category extends Model
         return $this->belongsTo(Category::class, 'id_parent');
     }
 
-    public function products() {
-        return $this->hasMany(Product::class, 'id_category');
-    }
     public function children()
     {
         return $this->hasMany(Category::class, 'id_parent');
@@ -36,5 +33,9 @@ class Category extends Model
     public function scopeRoot($query)
     {
         return $query->whereNull('id_parent');
+    }
+
+    public function products() {
+        return $this->hasMany(Product::class, 'id_category');
     }
 }

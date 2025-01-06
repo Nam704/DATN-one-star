@@ -79,6 +79,6 @@ public function deleteProductVariant($id)
 {
     $categories=Product_variant::findOrFail($id);
         $categories->delete();
-        return redirect()->route('admin.productvariant.listVariant')->with('success','Xóa thành công');
+        return redirect()->route('admin.productvariant.listProductVariant')->with('success','Xóa thành công');
 }
 }

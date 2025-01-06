@@ -65,7 +65,7 @@ public function editPutCategory(Request $request, $id)
     }
     
     $parentCategory = Category::find($request->id_parent);
-    if ($parentCategory && $this->isDescendant($categories, $parentCategory)) {
+    if ($parentCategory && $this->isDescendant($categories  , $parentCategory)) {
         return back()->withErrors(['id_parent' => 'Danh mục không thể trở thành cha của danh mục con của chính nó.']);
     }
 
