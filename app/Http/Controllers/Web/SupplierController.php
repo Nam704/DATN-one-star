@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Web;
 
+
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierRequest;
 use App\Models\Address;
@@ -13,6 +15,8 @@ use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
+
+
     protected $supplier;
     function __construct(Supplier $supplier)
     {
@@ -124,4 +128,5 @@ class SupplierController extends Controller
         $supplier->address->update($dataAddress);
         return redirect()->route('admin.suppliers.list')->with('success', 'supplier updated successfully');
     }
+
 }

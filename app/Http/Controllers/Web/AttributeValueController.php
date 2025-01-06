@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Web;
 
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AttributeValueController extends Controller
+class AttributeController extends Controller
 {
-    //
+    
+
+
+
 }
