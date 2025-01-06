@@ -23,6 +23,18 @@ class AuthController extends Controller
     {
         return view('admin.auth.login');
     }
+    function getProfileAdmin()
+    {
+        $user = Auth::user();
+        return view('admin.auth.profile_admin', compact('user'));
+    }
+    function editProfileAdmin(Request $request)
+    {
+        $user = Auth::user();
+        $user->name = $request->input('name');
+        $user->save();
+        return redirect()->back()->with('success', 'Profile updated successfully');
+    }
     public function login(AuthRequest $request)
     {
 

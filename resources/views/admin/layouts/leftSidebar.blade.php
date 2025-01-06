@@ -28,7 +28,7 @@
             <li class="side-nav-title">Main</li>
 
             <li class="side-nav-item">
-                <a href="index.html" class="side-nav-link">
+                <a href="{{ route('admin.dashboard') }}" class="side-nav-link">
                     <i class="ri-dashboard-3-line"></i>
                     <span class="badge bg-success float-end">9+</span>
                     <span> Dashboard </span>
@@ -39,44 +39,15 @@
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false" aria-controls="sidebarPages"
                     class="side-nav-link">
                     <i class="ri-pages-line"></i>
-                    <span> Pages </span>
+                    <span> Oders </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarPages">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="pages-starter.html">Starter Page</a>
+                            <a href="pages-starter.html">List</a>
                         </li>
-                        <li>
-                            <a href="pages-contact-list.html">Contact List</a>
-                        </li>
-                        <li>
-                            <a href="pages-profile.html">Profile</a>
-                        </li>
-                        <li>
-                            <a href="pages-timeline.html">Timeline</a>
-                        </li>
-                        <li>
-                            <a href="pages-invoice.html">Invoice</a>
-                        </li>
-                        <li>
-                            <a href="pages-faq.html">FAQ</a>
-                        </li>
-                        <li>
-                            <a href="pages-pricing.html">Pricing</a>
-                        </li>
-                        <li>
-                            <a href="pages-maintenance.html">Maintenance</a>
-                        </li>
-                        <li>
-                            <a href="error-404.html">Error 404</a>
-                        </li>
-                        <li>
-                            <a href="error-404-alt.html">Error 404-alt</a>
-                        </li>
-                        <li>
-                            <a href="error-500.html">Error 500</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -85,26 +56,15 @@
                 <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
                     aria-controls="sidebarPagesAuth" class="side-nav-link">
                     <i class="ri-group-2-line"></i>
-                    <span> Authentication </span>
+                    <span> User </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarPagesAuth">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="auth-login.html">Login</a>
+                            <a href="{{ route('admin.users.list') }}">List active</a>
                         </li>
-                        <li>
-                            <a href="auth-register.html">Register</a>
-                        </li>
-                        <li>
-                            <a href="auth-logout.html">Logout</a>
-                        </li>
-                        <li>
-                            <a href="auth-forgotpw.html">Forgot Password</a>
-                        </li>
-                        <li>
-                            <a href="auth-lock-screen.html">Lock Screen</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -114,28 +74,14 @@
                     class="side-nav-link">
                     <i class="ri-layout-line"></i>
                     <span class="badge bg-warning float-end">New</span>
-                    <span> Layouts </span>
+                    <span> Product </span>
                 </a>
                 <div class="collapse" id="sidebarLayouts">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="layouts-horizontal.html" target="_blank">Horizontal</a>
+                            <a href="layouts-horizontal.html" target="_blank">List active</a>
                         </li>
-                        <li>
-                            <a href="layouts-light-sidebar.html" target="_blank">Light Sidebar</a>
-                        </li>
-                        <li>
-                            <a href="layouts-sm-sidebar.html" target="_blank">Small Sidebar</a>
-                        </li>
-                        <li>
-                            <a href="layouts-collapsed-sidebar.html" target="_blank">Collapsed Sidebar</a>
-                        </li>
-                        <li>
-                            <a href="layouts-unsticky-layout.html" target="_blank">Unsticky Layout</a>
-                        </li>
-                        <li>
-                            <a href="layouts-boxed.html" target="_blank">Boxed Layout</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -146,89 +92,15 @@
                 <a data-bs-toggle="collapse" href="#sidebarBaseUI" aria-expanded="false" aria-controls="sidebarBaseUI"
                     class="side-nav-link">
                     <i class="ri-briefcase-line"></i>
-                    <span> Base UI </span>
+                    <span> Imports </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarBaseUI">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="ui-accordions.html">Accordions</a>
+                            <a href="ui-accordions.html">List</a>
                         </li>
-                        <li>
-                            <a href="ui-alerts.html">Alerts</a>
-                        </li>
-                        <li>
-                            <a href="ui-avatars.html">Avatars</a>
-                        </li>
-                        <li>
-                            <a href="ui-buttons.html">Buttons</a>
-                        </li>
-                        <li>
-                            <a href="ui-badges.html">Badges</a>
-                        </li>
-                        <li>
-                            <a href="ui-breadcrumb.html">Breadcrumb</a>
-                        </li>
-                        <li>
-                            <a href="ui-cards.html">Cards</a>
-                        </li>
-                        <li>
-                            <a href="ui-carousel.html">Carousel</a>
-                        </li>
-                        <li>
-                            <a href="ui-collapse.html">Collapse</a>
-                        </li>
-                        <li>
-                            <a href="ui-dropdowns.html">Dropdowns</a>
-                        </li>
-                        <li>
-                            <a href="ui-embed-video.html">Embed Video</a>
-                        </li>
-                        <li>
-                            <a href="ui-grid.html">Grid</a>
-                        </li>
-                        <li>
-                            <a href="ui-links.html">Links</a>
-                        </li>
-                        <li>
-                            <a href="ui-list-group.html">List Group</a>
-                        </li>
-                        <li>
-                            <a href="ui-modals.html">Modals</a>
-                        </li>
-                        <li>
-                            <a href="ui-notifications.html">Notifications</a>
-                        </li>
-                        <li>
-                            <a href="ui-offcanvas.html">Offcanvas</a>
-                        </li>
-                        <li>
-                            <a href="ui-placeholders.html">Placeholders</a>
-                        </li>
-                        <li>
-                            <a href="ui-pagination.html">Pagination</a>
-                        </li>
-                        <li>
-                            <a href="ui-popovers.html">Popovers</a>
-                        </li>
-                        <li>
-                            <a href="ui-progress.html">Progress</a>
-                        </li>
-                        <li>
-                            <a href="ui-spinners.html">Spinners</a>
-                        </li>
-                        <li>
-                            <a href="ui-tabs.html">Tabs</a>
-                        </li>
-                        <li>
-                            <a href="ui-tooltips.html">Tooltips</a>
-                        </li>
-                        <li>
-                            <a href="ui-typography.html">Typography</a>
-                        </li>
-                        <li>
-                            <a href="ui-utilities.html">Utilities</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -237,23 +109,15 @@
                 <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false"
                     aria-controls="sidebarExtendedUI" class="side-nav-link">
                     <i class="ri-compasses-2-line"></i>
-                    <span> Extended UI </span>
+                    <span> Suppliers </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarExtendedUI">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="extended-portlets.html">Portlets</a>
+                            <a href="{{ route('admin.suppliers.list') }}">List active</a>
                         </li>
-                        <li>
-                            <a href="extended-scrollbar.html">Scrollbar</a>
-                        </li>
-                        <li>
-                            <a href="extended-range-slider.html">Range Slider</a>
-                        </li>
-                        <li>
-                            <a href="extended-scrollspy.html">Scrollspy</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -269,12 +133,7 @@
                         <li>
                             <a href="icons-remixicons.html">Remix Icons</a>
                         </li>
-                        <li>
-                            <a href="icons-bootstrap.html">Bootstrap Icons</a>
-                        </li>
-                        <li>
-                            <a href="icons-mdi.html">Material Design Icons</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -291,12 +150,7 @@
                         <li>
                             <a href="charts-apex.html">Apex Charts</a>
                         </li>
-                        <li>
-                            <a href="charts-chartjs.html">Chartjs</a>
-                        </li>
-                        <li>
-                            <a href="charts-sparklines.html">Sparkline Charts</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -313,27 +167,7 @@
                         <li>
                             <a href="form-elements.html">Basic Elements</a>
                         </li>
-                        <li>
-                            <a href="form-advanced.html">Form Advanced</a>
-                        </li>
-                        <li>
-                            <a href="form-validation.html">Form Validation</a>
-                        </li>
-                        <li>
-                            <a href="form-wizard.html">Form Wizard</a>
-                        </li>
-                        <li>
-                            <a href="form-fileuploads.html">File Uploads</a>
-                        </li>
-                        <li>
-                            <a href="form-editors.html">Form Editors</a>
-                        </li>
-                        <li>
-                            <a href="form-image-crop.html">Image Crop</a>
-                        </li>
-                        <li>
-                            <a href="form-x-editable.html">X Editable</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -350,15 +184,7 @@
                         <li>
                             <a href="tables-basic.html">Basic Tables</a>
                         </li>
-                        <li>
-                            <a href="tables-datatable.html">Data Tables</a>
-                        </li>
-                        <li>
-                            <a href="tables-editable.html">Editable Tables</a>
-                        </li>
-                        <li>
-                            <a href="tables-responsive.html">Responsive Table</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>
@@ -375,9 +201,7 @@
                         <li>
                             <a href="maps-google.html">Google Maps</a>
                         </li>
-                        <li>
-                            <a href="maps-vector.html">Vector Maps</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>

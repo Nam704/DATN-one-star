@@ -45,6 +45,7 @@ Route::prefix('auth/')->name('auth.')->group(
 
             Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
             Route::post('reset-password', 'resetPassword')->name('resetPassword');
+            Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
         });
     }
 );
