@@ -12,10 +12,10 @@ use App\Http\Controllers\Controller;
 class BrandController extends Controller
 {
     public function index()
-{
-    $brands = Brand::withoutTrashed()->latest()->get();
-    return view('admin.brands.index', compact('brands'));
-}
+    {
+        $brands = Brand::withoutTrashed()->latest()->get();
+        return view('admin.brands.index', compact('brands'));
+    }
 
 
     public function create()
@@ -110,7 +110,7 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         $brand = Brand::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -133,4 +133,4 @@ class BrandController extends Controller
         return redirect()->route('admin.brands.index')
             ->with('success', 'Brand updated successfully');
     }
-
+}
