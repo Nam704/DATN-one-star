@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -76,6 +77,18 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('edit-product/{id}',[ProductController::class,'editProduct'])->name('editProduct');
             Route::put('edit-product/{id}',[ProductController::class,'editPutProduct'])->name('editPutProduct');
             Route::delete('delete-product/{id}',[ProductController::class,'deleteProduct'])->name('deleteProduct');
+        });
+
+        Route::group([
+            'prefix' => 'productvariant',
+            'as' => 'productvariant.'
+        ], function() {
+            Route::get('list-productvariant',[ProductVariantController::class,'listProductVariant'])->name('listProductVariant');
+            Route::get('add-productvariant',[ProductVariantController::class,'addProductVariant'])->name('addProductVariant');
+            Route::post('add-productvariant',[ProductVariantController::class,'addPostProductVariant'])->name('addPostProductVariant');
+            Route::get('edit-productvariant/{id}',[ProductVariantController::class,'editProductVariant'])->name('editProductVariant');
+            Route::put('edit-productvariant/{id}',[ProductVariantController::class,'editPutProductVariant'])->name('editPutProductVariant');
+            Route::delete('delete-productvariant/{id}',[ProductVariantController::class,'deleteProductVariant'])->name('deleteProductVariant');
         });
 
 

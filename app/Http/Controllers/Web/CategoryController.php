@@ -63,6 +63,11 @@ public function editPutCategory(Request $request, $id)
     if ($request->id_parent == $id) {
         return back()->withErrors(['id_parent' => 'Danh mục không thể là cha của chính nó.']);
     }
+    
+    $parentCategory = Category::find($request->id_parent);
+    if ($parentCategory && $this->isDescendant($categories, $parentCategory)) {
+        return back()->withErrors(['id_parent' => 'Danh mục không thể trở thành cha của danh mục con của chính nó.']);
+    }
 
     $categories->update([
         'name' => $request->name,
