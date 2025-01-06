@@ -17,7 +17,7 @@
                     <div class="form-group">
                         <label for="url">Hình Ảnh</label>
                         <div class="mb-3">
-                            <img src="{{ asset('storage/' . $image->url) }}" class="img-fluid rounded" alt="Hình ảnh">
+                            <img src="{{ asset('storage/' . $image->url) }}" class="img-fluid rounded" alt="Hình ảnh" style="max-width: 500px; height: auto;">
                         </div>
                     </div>
 
