@@ -8,7 +8,7 @@
 
 @endif
 <div class="container-fluid">
-    <h1 class="h3 mb-2 text-gray-800 mb-5">Danh sách danh mục</h1>
+    <h1 class="h3 mb-2 text-gray-800 mb-5 mt-2">Danh sách danh mục</h1>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <button type="button" class="btn btn-secondary btn-sm" onclick="">Chọn tất cả</button>
@@ -34,6 +34,7 @@
                             <th></th>
                             <th>Stt</th>
                             <th>Name</th>
+                            <td>Parent</td>
                             <th>Status</th>
                             <th>Created At</th>
                             <th>Update At</th>
@@ -46,7 +47,8 @@
                             <td class="text-center"><input type="checkbox" name="select[]" value=""></td>
                             <td class="col-1">{{ $key+1 }}</td>
                             <td class="col-2">{{$category->name}}</td>
-                            <td class="col-2">{{$category->status}}</td>
+                            <td class="col-2">{{ $category->parent->name ?? 'Không có danh mục cha' }}</td>
+                            <td class="col-1">{{$category->status}}</td>
                             <td class="col-2">{{$category->created_at}}</td>
                             <td class="col-2">{{$category->updated_at}}</td>
                             <td class="col-2">

@@ -67,7 +67,43 @@ public function editProduct($id){
 
 public function editPutProduct(Request $request, $id)
 {
+ 
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'id_brand' => 'required|exists:brands,id',
+        'id_category' => 'required|exists:categories,id',
+        'description' => 'nullable|string',
+        'image_primary' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+        'status' => 'required|in:active,inactive',
+    ]);
+
+    $product = Product::findOrFail($id);
+    $product->fill($request->except('image_primary'));
+
+    $imagePath = null;
+    if ($request->hasFile('image_primary')) {
+        if ($product->image_primary && Storage::disk('public')->exists($product->image_primary)) {
+            Storage::disk('public')->delete($product->image_primary);
+        }
+        $imagePath= $request->file('image_primary')->store('uploads/products', 'public') ;
+    }
+    else{
+        $imagePath=$product->image_primary; // Giữ lại hình ảnh hiện tại nếu không có hình ảnh mới
+    }
     
+     $product->update([
+        'name'=>$request->name,
+        'id_brand'=>$request->id_brand,
+        'id_category'=>$request->id_category,
+        'description'=>$request->description,
+        'image_primary'=>$imagePath,
+        'status'=>$request->status
+        
+     ]);
+    
+    
+    return redirect()->route('admin.products.listProduct')->with('success', 'Sản phẩm đã được cập nhật.');
+
 }
 
 public function deleteProduct($id)

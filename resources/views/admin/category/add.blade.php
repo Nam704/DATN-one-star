@@ -19,6 +19,15 @@
                     @enderror
                 </div>
                 <div class="mb-3">
+                    <label for="id_parent">Danh mục cha:</label>
+                    <select name="id_parent" id="id_parent" class="form-control">
+                        <option value="">Không có</option>
+                        @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="status">Status</label>
                     <select class="form-select" aria-label="Default select example" name="status">
                         <option value="active">Active</option>

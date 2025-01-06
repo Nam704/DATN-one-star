@@ -19,6 +19,20 @@
                     <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="">
+                    <label for="id_parent">Danh mục cha:</label>
+                    <select name="id_parent" id="id_parent" class="form-control">
+                        <option value="">Không có</option>
+                        @foreach($category_parent as $parent)
+                        <option value="{{ $parent->id }}" {{ $categories->id_parent == $parent->id ? 'selected' : '' }}>
+                            {{ $parent->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @error('id_parent')
+                    <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
                 <div class="mb-3">
                     <label for="status">Status</label>
                     <select class="form-select" aria-label="Default select example" name="status">

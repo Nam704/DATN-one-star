@@ -8,9 +8,9 @@
     </div>
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form action="" method="post" enctype="multipart/form-data" class="form">
+            <form action="{{route('admin.products.editPutProduct',$product->id)}}" method="post" enctype="multipart/form-data" class="form">
                 @csrf
-                @method('PUT')  <!-- Method spoofing for PUT request -->
+                @method('PUT') 
 
                 <div class="mb-3">
                     <label for="name" class="form-label">Tên sản phẩm</label>

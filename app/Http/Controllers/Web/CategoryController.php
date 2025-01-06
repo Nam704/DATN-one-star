@@ -19,15 +19,18 @@ class CategoryController extends Controller
     }
 
     public function addCategory(){
-        return view('admin.category.add');
+        $categories=Category::all();
+        return view('admin.category.add')->with([
+            'categories' => $categories
+        ]);
     }
 
 
     public function addPostCategory(CategoryRequest $request)
 {
-
     Category::create([
         'name' => $request->name,
+        'id_parent'=>$request->id_parent,
         'status' => $request->status,
     ]);
 
@@ -36,13 +39,18 @@ class CategoryController extends Controller
 
 public function editCategory($id){
     $categories = Category::findOrFail($id);
+
+    $category_parent=Category::all();
     return view('admin.category.edit')->with([
-        'categories' => $categories
+        'categories' => $categories,
+        'category_parent' => $category_parent
     ]);
 }
 
 public function editPutCategory(Request $request, $id)
 {
+ 
+    $categories = Category::findOrFail($id); 
     $request->validate([
         'name' => 'required|string|max:255',
     ],
@@ -52,9 +60,13 @@ public function editPutCategory(Request $request, $id)
     ]
     );
 
-    $categories = Category::findOrFail($id);
+    if ($request->id_parent == $id) {
+        return back()->withErrors(['id_parent' => 'Danh mục không thể là cha của chính nó.']);
+    }
+
     $categories->update([
         'name' => $request->name,
+        'id_parent'=>$request->id_parent,
         'status' => $request->status,
     ]);
 
