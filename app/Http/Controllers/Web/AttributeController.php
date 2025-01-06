@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use Illuminate\Http\Request;
@@ -151,6 +152,7 @@ public function update(Request $request, $id)
     return redirect()->route('admin.attributes.index')
         ->with('success', 'Attribute updated successfully');
 }
+
 
 
 }

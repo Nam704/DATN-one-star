@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -132,4 +133,4 @@ class BrandController extends Controller
         return redirect()->route('admin.brands.index')
             ->with('success', 'Brand updated successfully');
     }
-}
+

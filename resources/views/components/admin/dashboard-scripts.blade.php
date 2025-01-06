@@ -29,3 +29,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 
+
+<script src="{{ asset('admin/assets/js/pages/dashboard.js') }}"></script>

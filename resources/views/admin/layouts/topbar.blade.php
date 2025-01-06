@@ -355,12 +355,24 @@
                 <a class="nav-link dropdown-toggle arrow-none nav-user" data-bs-toggle="dropdown" href="#" role="button"
                     aria-haspopup="false" aria-expanded="false">
                     <span class="account-user-avatar">
-                        <img src="{{ asset('admin/assets/images/users/avatar-1.jpg') }}" alt="user-image" width="32"
+
+
+                        {{-- <img src="{{ asset('admin/assets/images/users/avatar-1.jpg') }}" alt="user-image"
+                            width="32" class="rounded-circle"> --}}
+                        @if(Auth::check())
+                        <img src="{{ Storage::url(Auth::user()->profile_image) }}" alt="Profile Image" width="32"
                             class="rounded-circle">
+                        @endif
                     </span>
                     <span class="d-lg-block d-none">
-                        <h5 class="my-0 fw-normal">Thomson <i
-                                class="ri-arrow-down-s-line d-none d-sm-inline-block align-middle"></i></h5>
+                        <h5 class="my-0 fw-normal">@if(Auth::check())
+                            {{ Auth::user()->name }}
+                            @else
+                            Guest
+                            @endif
+                            <i class="ri-arrow-down-s-line d-none d-sm-inline-block align-middle"></i>
+                        </h5>
+
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated profile-dropdown">
