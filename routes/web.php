@@ -45,7 +45,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return view('admin.index');
     });
-    
+
     Route::get('/users', function () {
         return view('admin.user.demoDataTable');
     });
@@ -68,7 +68,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
     Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
     Route::resource('brands', BrandController::class);
-
 });
 
 
@@ -118,42 +117,42 @@ Route::prefix('admin')->name('admin.')->group(
         Route::group([
             'prefix' => 'categories',
             'as' => 'categories.'
-        ], function() {
-            Route::get('list-category',[CategoryController::class,'listCategory'])->name('listCategory');
-            Route::get('add-category',[CategoryController::class,'addCategory'])->name('addCategory');
-            Route::post('add-category',[CategoryController::class,'addPostCategory'])->name('addPostCategory');
-            Route::get('edit-category/{id}',[CategoryController::class,'editCategory'])->name('editCategory');
-            Route::put('edit-category/{id}',[CategoryController::class,'editPutCategory'])->name('editPutCategory');
-            Route::delete('delete-category/{id}',[CategoryController::class,'deleteCategory'])->name('deleteCategory');
+        ], function () {
+            Route::get('list-category', [CategoryController::class, 'listCategory'])->name('listCategory');
+            Route::get('add-category', [CategoryController::class, 'addCategory'])->name('addCategory');
+            Route::post('add-category', [CategoryController::class, 'addPostCategory'])->name('addPostCategory');
+            Route::get('edit-category/{id}', [CategoryController::class, 'editCategory'])->name('editCategory');
+            Route::put('edit-category/{id}', [CategoryController::class, 'editPutCategory'])->name('editPutCategory');
+            Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');
         });
 
         Route::group([
             'prefix' => 'products',
             'as' => 'products.'
-        ], function() {
-            Route::get('list-product',[ProductController::class,'listProduct'])->name('listProduct');
-            Route::get('add-product',[ProductController::class,'addProduct'])->name('addProduct');
-            Route::post('add-product',[ProductController::class,'addPostProduct'])->name('addPostProduct');
-            Route::get('edit-product/{id}',[ProductController::class,'editProduct'])->name('editProduct');
-            Route::put('edit-product/{id}',[ProductController::class,'editPutProduct'])->name('editPutProduct');
-            Route::delete('delete-product/{id}',[ProductController::class,'deleteProduct'])->name('deleteProduct');
+        ], function () {
+            Route::get('list-product', [ProductController::class, 'listProduct'])->name('listProduct');
+            Route::get('add-product', [ProductController::class, 'addProduct'])->name('addProduct');
+            Route::post('add-product', [ProductController::class, 'addPostProduct'])->name('addPostProduct');
+            Route::get('edit-product/{id}', [ProductController::class, 'editProduct'])->name('editProduct');
+            Route::put('edit-product/{id}', [ProductController::class, 'editPutProduct'])->name('editPutProduct');
+            Route::delete('delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('deleteProduct');
         });
 
         Route::group([
             'prefix' => 'productvariant',
             'as' => 'productvariant.'
-        ], function() {
-            Route::get('list-productvariant',[ProductVariantController::class,'listProductVariant'])->name('listProductVariant');
-            Route::get('add-productvariant',[ProductVariantController::class,'addProductVariant'])->name('addProductVariant');
-            Route::post('add-productvariant',[ProductVariantController::class,'addPostProductVariant'])->name('addPostProductVariant');
-            Route::get('edit-productvariant/{id}',[ProductVariantController::class,'editProductVariant'])->name('editProductVariant');
-            Route::put('edit-productvariant/{id}',[ProductVariantController::class,'editPutProductVariant'])->name('editPutProductVariant');
-            Route::delete('delete-productvariant/{id}',[ProductVariantController::class,'deleteProductVariant'])->name('deleteProductVariant');
+        ], function () {
+            Route::get('list-productvariant', [ProductVariantController::class, 'listProductVariant'])->name('listProductVariant');
+            Route::get('add-productvariant', [ProductVariantController::class, 'addProductVariant'])->name('addProductVariant');
+            Route::post('add-productvariant', [ProductVariantController::class, 'addPostProductVariant'])->name('addPostProductVariant');
+            Route::get('edit-productvariant/{id}', [ProductVariantController::class, 'editProductVariant'])->name('editProductVariant');
+            Route::put('edit-productvariant/{id}', [ProductVariantController::class, 'editPutProductVariant'])->name('editPutProductVariant');
+            Route::delete('delete-productvariant/{id}', [ProductVariantController::class, 'deleteProductVariant'])->name('deleteProductVariant');
         });
 
 
-        Route::prefix('users')->name('user.')->group(
-            function () { }
+        // Route::prefix('users')->name('user.')->group(
+        //     function () { }
 
         Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
             function () {
@@ -197,4 +196,3 @@ Route::prefix('client')->name('client.')->group(
         );
     }
 );
-
