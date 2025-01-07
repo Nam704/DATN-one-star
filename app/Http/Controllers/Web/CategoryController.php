@@ -85,4 +85,5 @@ public function deleteCategory($id)
         return redirect()->route('admin.categories.listCategory')->with('success','Xóa thành công');
 }
 ////
+
 }

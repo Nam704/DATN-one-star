@@ -19,7 +19,7 @@
                     <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="">
+                <div class="mb-3">
                     <label for="id_parent">Danh mục cha:</label>
                     <select name="id_parent" id="id_parent" class="form-control">
                         <option value="">Không có</option>
@@ -50,5 +50,11 @@
 
 
 </div>
-<!-- /.container-fluid -->
 @endsection
+@push('styles')
+    <x-admin.data-table-styles />
+@endpush
+
+@push('scripts')
+    <x-admin.data-table-scripts />
+@endpush
