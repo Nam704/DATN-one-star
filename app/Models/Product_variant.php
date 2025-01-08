@@ -12,7 +12,7 @@ class Product_variant extends Model
     protected $fillale = [
         'id_product',
         'sku',
-        'status'
+        'status', 'quantity'
     ];
     public function import_details()
     {
@@ -20,7 +20,7 @@ class Product_variant extends Model
     }
     public static function scopeList($query, $idProduct)
     {
-        return $query->select('product_variants.id', 'product_variants.sku', 'product_variants.status', 'products.name as product_name')
+        return $query->select('product_variants.id', 'product_variants.sku', 'product_variants.status', 'product_variants.quantity', 'products.name as product_name')
             ->join('products', 'product_variants.id_product', '=', 'products.id') // Thực hiện JOIN với bảng products
             ->where('id_product', '=', $idProduct)
             ->latest('product_variants.id'); // Sắp xếp theo id của product_variants

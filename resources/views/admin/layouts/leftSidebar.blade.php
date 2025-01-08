@@ -99,7 +99,7 @@
                 <div class="collapse" id="sidebarBaseUI">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="ui-accordions.html">List</a>
+                            <a href="{{ route('admin.imports.list') }}">List</a>
                         </li>
 
                     </ul>

@@ -10,7 +10,7 @@ use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Web\ImageController;
 use App\Http\Controllers\Web\ProductAuditController;
-
+use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 
@@ -61,6 +61,11 @@ Route::prefix('admin')->name('admin.')->group(
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
             function () {
                 Route::get('/contact', 'sendMail')->name('sendMail');
+            }
+        );
+        Route::prefix('product_variants')->name('product_variants.')->controller(ProductVariantController::class)->group(
+            function () {
+                Route::get('/{id}', 'list')->name('list');
             }
         );
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
