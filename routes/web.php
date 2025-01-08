@@ -4,10 +4,21 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
+
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ProductVariantController;
+
+use App\Http\Controllers\Web\ImportController;
+use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\SupplierController;
+use App\Http\Controllers\Web\UserContronler;
+use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Web\BrandController;
+
+use Illuminate\Support\Facades\Mail;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,8 +30,51 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+
 Route::get('/', function () {
     return view('admin.index');
+});
+
+
+Route::get('/users', function () {
+    return view('admin.user.demoDataTable');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return view('admin.index');
+    });
+    
+    Route::get('/users', function () {
+        return view('admin.user.demoDataTable');
+    });
+
+    Route::get('attributes/{id}/edit', [\App\Http\Controllers\Web\AttributeController::class, 'edit'])->name('attributes.edit');
+    Route::put('attributes/{id}', [\App\Http\Controllers\Web\AttributeController::class, 'update'])->name('attributes.update');
+    Route::post('attributes/{id}/toggle-status', [\App\Http\Controllers\Web\AttributeController::class, 'toggleStatus'])->name('attributes.toggle-status');
+    Route::get('attributes/trash', [\App\Http\Controllers\Web\AttributeController::class, 'trash'])->name('attributes.trash');
+    Route::delete('attributes/{id}/force-delete', [\App\Http\Controllers\Web\AttributeController::class, 'forceDelete'])->name('attributes.force-delete');
+    Route::post('attributes/{id}/restore', [\App\Http\Controllers\Web\AttributeController::class, 'restore'])->name('attributes.restore');
+    Route::delete('/attributes/{id}', [\App\Http\Controllers\Web\AttributeController::class, 'destroy'])->name('attributes.destroy');
+    Route::resource('attributes', \App\Http\Controllers\Web\AttributeController::class);
+
+    //brand
+    Route::get('brands/{id}/edit', [BrandController::class, 'edit'])->name('brands.edit');
+    Route::put('brands/{id}', [BrandController::class, 'update'])->name('brands.update');
+    Route::post('brands/{id}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
+    Route::get('brands/trash', [BrandController::class, 'trash'])->name('brands.trash');
+    Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.force-delete');
+    Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
+    Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
+    Route::resource('brands', BrandController::class);
+
+});
+
+
+
+Route::get('/make-password', function () {
+    return Hash::make('1234');
 });
 Route::prefix('auth/')->name('auth.')->group(
     function () {
@@ -31,9 +85,14 @@ Route::prefix('auth/')->name('auth.')->group(
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'getFormLogin')->name('getFormLogin');
             Route::post('login', 'login')->name('login');
-
             Route::get('register', 'getFormRegister')->name('getFormRegister');
             Route::post('register', 'register')->name('register');
+            Route::get('logout', 'logout')->name('logout');
+            Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
+            Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
+
+            Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
+            Route::post('reset-password', 'resetPassword')->name('resetPassword');
         });
     }
 );
@@ -45,8 +104,9 @@ Route::prefix('admin')->name('admin.')->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
-            Route::get('/', 'dashboard')->name('dashboard');
+            Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+
 
         // Route::prefix('categorys')->name('categorys')->group(
         //     function(){
@@ -94,6 +154,39 @@ Route::prefix('admin')->name('admin.')->group(
 
         Route::prefix('users')->name('user.')->group(
             function () { }
+
+        Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
+            function () {
+                Route::get('/', 'listAdmin')->name('list');
+            }
+        );
+        Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
+            function () {
+                Route::get('/contact', 'sendMail')->name('sendMail');
+            }
+        );
+        Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate');
+                Route::get('/', 'list')->name('list');
+                Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
+        );
+        Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('detail/{id}', 'detail')->name('detail');
+
+                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
+                Route::get('/', 'list')->name('list');
+                // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
+
         );
     }
 );
@@ -104,3 +197,4 @@ Route::prefix('client')->name('client.')->group(
         );
     }
 );
+

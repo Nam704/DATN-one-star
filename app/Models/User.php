@@ -29,6 +29,33 @@ class User extends Authenticatable
         'status',
         'deleted_at'
     ];
+    public function addresses()
+    {
+        return $this->morphMany(Address::class, 'addressable'); // Định nghĩa quan hệ với Address
+    }
+    public function scopeList($query, $name = null)
+    {
+        $baseQuery = $query
+            ->join('roles', 'users.id_role', '=', 'roles.id')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.status',
+                'users.profile_image',
+                'users.phone',
+                'users.is_lock',
+                'users.id_role',
+                'roles.name as role_name'
+            )
+            ->orderBy('users.id', 'DESC');
+
+        if ($name) {
+            $baseQuery->where('roles.name', '=', $name);
+        }
+
+        return $baseQuery->paginate(100);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -39,7 +66,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
+    public function role()
+    {
+        return $this->hasOne(Role::class, 'id', 'id_role');
+    }
     /**
      * The attributes that should be cast.
      *
