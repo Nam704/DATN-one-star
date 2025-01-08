@@ -73,3 +73,10 @@
 </div>
 <!-- /.container-fluid -->
 @endsection
+@push('styles')
+<x-admin.data-table-styles />
+@endpush
+
+@push('scripts')
+<x-admin.data-table-scripts />
+@endpush
