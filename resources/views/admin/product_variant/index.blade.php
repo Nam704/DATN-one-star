@@ -24,38 +24,42 @@
                         class="table table-striped dt-responsive nowrap table-striped w-100">
                         <thead>
                             <tr>
-                                <th></th>
                                 <th>Stt</th>
                                 <th>Product Name</th>
                                 <td>Sku</td>
                                 <th>Status</th>
-                                <th>Created At</th>
-                                <th>Update At</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
+                        <tbody>
                         @foreach($product_variant as $key => $variant)
                         <tr>
-                            <td class="text-center"><input type="checkbox" name="select[]" value=""></td>
                             <td>{{ $key+1 }}</td>
                             <td>{{$variant->product->name}}</td>
                             <td>{{$variant->sku}}</td>
                             <td>{{$variant->status}}</td>
-                            <td>{{$variant->created_at}}</td>
-                            <td>{{$variant->updated_at}}</td>
                             <td>
                                 <a href="{{route('admin.productvariant.editProductVariant',$variant->id)}}">
-                                    <button type="button" class="btn btn-secondary btn-sm">Sửa</button>
+                                    <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
                                 </a> |
                                 <form action="{{route('admin.productvariant.deleteProductVariant',$variant->id)}}" class="d-inline" method="POST" onclick="return confirm('Ban co muon xoa khong')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-sm ">Xóa</button>
+                                    <button type="submit" class="btn btn-secondary btn-danger ">Xóa</button>
                                 </form>
                             </td>
                         </tr>
                         @endforeach
-
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Stt</th>
+                                <th>Product Name</th>
+                                <td>Sku</td>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div> <!-- end card body-->
             </div> <!-- end card -->

@@ -151,15 +151,12 @@ Route::prefix('admin')->name('admin.')->group(
             Route::delete('delete-productvariant/{id}',[ProductVariantController::class,'deleteProductVariant'])->name('deleteProductVariant');
         });
 
-
-        Route::prefix('users')->name('user.')->group(
-            function () { }
-
         Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
             function () {
                 Route::get('/', 'listAdmin')->name('list');
             }
         );
+
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
             function () {
                 Route::get('/contact', 'sendMail')->name('sendMail');

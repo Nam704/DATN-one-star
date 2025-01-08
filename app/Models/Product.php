@@ -29,6 +29,7 @@ class Product extends Model
 
     public function Brand(){
         return $this->belongsTo(Brand::class,'id_brand');
+    }
 
     //     public static function scopeList($query, $idProduct)
     // {

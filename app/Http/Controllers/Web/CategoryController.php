@@ -77,6 +77,11 @@ public function editPutCategory(Request $request, $id)
 
     return redirect()->route('admin.categories.listCategory')->with('success', 'Sửa danh mục thành công');
 }
+public function isDescendant($id,$parentCategory)
+    {
+        // Thêm logic kiểm tra ở đây
+        return true; // Hoặc kết quả phù hợp
+    }
 
 public function deleteCategory($id)
 {
