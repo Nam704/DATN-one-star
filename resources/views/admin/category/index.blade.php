@@ -1,27 +1,24 @@
 @extends('admin.layouts.layout')
 @section('content')
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="mt-4">
+                <div class="card-header">
+                    <h4 class="header-title">Fixed Header</h4>
 
-                    <h1 class="text-center">Product Audit</h1>
 
-                    @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
+                    <a href="{{ route('admin.productvariant.addProductVariant') }}" type="button" class="btn btn-sm btn-primary">
+                        Add new
+                        category</a>
+
                 </div>
 
-
                 <div class="card-body">
-                    <div class="mb-3">
-                        <a href="{{ route('admin.categories.addCategory') }}" class="btn btn-primary">Thêm mới</a>
-                    </div>
-
 
                     <table id="fixed-header-datatable"
-                        class="table table-striped dt-responsive nowrap table-striped w-100">
+                        class="table table-striped dt-responsive nowrap table-striped  w-100">
                         <thead>
                             <tr>
                                 <th>Stt</th>
@@ -31,25 +28,28 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                        @foreach($categories as $key => $category)
-                        <tr>
-                            <td>{{ $key+1 }}</td>
-                            <td>{{$category->name}}</td>
-                            <td>{{ $category->parent->name ?? 'Không có danh mục cha' }}</td>
-                            <td>{{$category->status}}</td>
-                            <td>
-                                <a href="{{route('admin.categories.editCategory',$category->id)}}">
-                                    <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
-                                </a> |
-                                <form action="{{route('admin.categories.deleteCategory',$category->id)}}" class="d-inline" method="POST" onclick="return confirm('Ban co muon xoa khong')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-danger ">Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
+                            @foreach($categories as $key => $category)
+                            <tr>
+                                <td>{{ $key+1 }}</td>
+                                <td>{{$category->name}}</td>
+                                <td>{{ $category->parent->name ?? 'Không có danh mục cha' }}</td>
+                                <td>{{$category->status}}</td>
+                                <td>
+                                    <a href="{{route('admin.categories.editCategory',$category->id)}}">
+                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
+                                    </a> |
+                                    <form action="{{route('admin.categories.deleteCategory',$category->id)}}" class="d-inline" method="POST" onclick="return confirm('Ban co muon xoa khong')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-secondary btn-danger ">Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+
+
                         </tbody>
                         <tfoot>
                             <tr>
@@ -60,13 +60,13 @@
                                 <th>Action</th>
                             </tr>
                         </tfoot>
-
                     </table>
                 </div> <!-- end card body-->
             </div> <!-- end card -->
         </div><!-- end col-->
     </div> <!-- end row-->
 </div>
+
 @endsection
 @push('styles')
 <x-admin.data-table-styles />
