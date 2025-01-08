@@ -32,6 +32,7 @@ class Product_variant extends Model
     {
         return $this->belongsTo(Product::class, 'id_product');
     }
+<<<<<<< HEAD
     public function images()
     {
         return $this->hasMany(Image::class, 'id_product_variant');
@@ -39,4 +40,6 @@ class Product_variant extends Model
     public function productAudits() {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
+=======
+>>>>>>> 57cc27f7916fcab5e41eac144eb0fd4f5a1aef9c
 }

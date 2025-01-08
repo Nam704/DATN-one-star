@@ -3,13 +3,21 @@
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
+<<<<<<< HEAD
 use App\Http\Controllers\Web\ImageController;
 use App\Http\Controllers\Web\ProductAuditController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
 
+=======
+use App\Http\Controllers\Web\ImportController;
+use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\SupplierController;
+use App\Http\Controllers\Web\UserContronler;
+use Illuminate\Support\Facades\Hash;
+>>>>>>> 57cc27f7916fcab5e41eac144eb0fd4f5a1aef9c
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Mail;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,8 +29,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/', function () {
     return view('admin.index');
+});
+Route::get('/make-password', function () {
+    return Hash::make('1234');
 });
 Route::prefix('auth/')->name('auth.')->group(
     function () {
@@ -33,9 +45,14 @@ Route::prefix('auth/')->name('auth.')->group(
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'getFormLogin')->name('getFormLogin');
             Route::post('login', 'login')->name('login');
-
             Route::get('register', 'getFormRegister')->name('getFormRegister');
             Route::post('register', 'register')->name('register');
+            Route::get('logout', 'logout')->name('logout');
+            Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
+            Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
+
+            Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
+            Route::post('reset-password', 'resetPassword')->name('resetPassword');
         });
     }
 );
@@ -47,11 +64,16 @@ Route::prefix('admin')->name('admin.')->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
-            Route::get('/', 'dashboard')->name('dashboard');
+            Route::get('dashboard', 'dashboard')->name('dashboard');
         });
-        Route::prefix('users')->name('user.')->controller(UserContronler::class)->group(
+        Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
             function () {
-                Route::get('/', 'list')->name('list');
+                Route::get('/', 'listAdmin')->name('list');
+            }
+        );
+        Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
+            function () {
+                Route::get('/contact', 'sendMail')->name('sendMail');
             }
         );
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
@@ -64,6 +86,7 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
+<<<<<<< HEAD
 
         Route::prefix('images')->name('images.')->controller(ImageController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -85,6 +108,20 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('show/{id}', 'show')->name('show');
 
         });
+=======
+        Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('detail/{id}', 'detail')->name('detail');
+
+                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
+                Route::get('/', 'list')->name('list');
+                // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
+        );
+>>>>>>> 57cc27f7916fcab5e41eac144eb0fd4f5a1aef9c
     }
 );
 Route::prefix('client')->name('client.')->group(
