@@ -73,7 +73,6 @@ Route::prefix('admin')->name('admin.')->group(
             Route::put('update/{id}', 'update')->name('update');
             Route::get('destroy/{id}', 'destroy')->name('destroy');
             Route::get('show/{id}', 'show')->name('show');
-
         });
         Route::prefix('product_audits')->name('product_audits.')->controller(ProductAuditController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -83,14 +82,13 @@ Route::prefix('admin')->name('admin.')->group(
             Route::put('update/{id}', 'update')->name('update');
             Route::get('destroy/{id}', 'destroy')->name('destroy');
             Route::get('show/{id}', 'show')->name('show');
-
         });
     }
 );
 Route::prefix('client')->name('client.')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
-            function () {}
+            function () { }
         );
     }
 );
