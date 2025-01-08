@@ -24,7 +24,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table class="table table-centered w-100 dt-responsive nowrap" id="brands-table">
+                        <table id="fixed-header-database"
+                         class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -75,86 +76,12 @@
 @endsection
 
 @push('styles')
-    <x-admin.dashboard-styles />
+<x-admin.data-table-styles />
 @endpush
 
 @push('scripts')
-    <x-admin.dashboard-scripts />
-    <script>
-        $(document).ready(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            });
-
-            $('#brands-table').DataTable({
-                responsive: true,
-                pageLength: 10,
-                ordering: true
-            });
-
-            $('.delete-brand').click(function() {
-                const id = $(this).data('id');
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: `/admin/brands/${id}`,
-                            type: 'DELETE',
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire(
-                                        'Deleted!',
-                                        response.message,
-                                        'success'
-                                    ).then(() => {
-                                        location.reload();
-                                    });
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-
-            $('.toggle-status').click(function() {
-                const id = $(this).data('id');
-                const button = $(this);
-                const statusBadge = button.closest('tr').find('.badge');
-
-                $.ajax({
-                    url: `/admin/brands/${id}/toggle-status`,
-                    type: 'POST',
-                    success: function(response) {
-                        if (response.success) {
-                            const newStatus = response.newStatus;
-                            button.data('status', newStatus);
-
-                            if (newStatus === 'active') {
-                                button.html('<i class="ri-lock-unlock-line"></i>');
-                                button.removeClass('btn-danger').addClass('btn-success');
-                                statusBadge.removeClass('bg-danger').addClass('bg-success')
-                                    .text('Active');
-                            } else {
-                                button.html('<i class="ri-lock-line"></i>');
-                                button.removeClass('btn-success').addClass('btn-danger');
-                                statusBadge.removeClass('bg-success').addClass('bg-danger')
-                                    .text('Inactive');
-                            }
-                            toastr.success(response.message);
-                        }
-                    }
-                });
-            });
-        });
-    </script>
+<x-admin.data-table-scripts />
+    <script src="{{ asset('admin/api/brands.js') }}"></script>
 @endpush
+
+

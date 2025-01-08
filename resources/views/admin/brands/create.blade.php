@@ -57,9 +57,9 @@
 @endsection
 
 @push('styles')
-    <x-admin.dashboard-styles />
+<x-admin.data-table-styles />
 @endpush
 
 @push('scripts')
-    <x-admin.dashboard-scripts />
+<x-admin.data-table-scripts />
 @endpush
