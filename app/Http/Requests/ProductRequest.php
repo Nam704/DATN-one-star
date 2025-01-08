@@ -26,7 +26,6 @@ class ProductRequest extends FormRequest
             'name' => 'required|string|max:255|unique:products,name'.$productId,
             'id_brand' => 'required',
             'id_category' => 'required',
-            'description' => 'required|string',
             'image_primary' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'status' => 'required|in:active,inactive',
         ];
@@ -43,7 +42,6 @@ class ProductRequest extends FormRequest
         'image_primary.image' => 'Tệp tải lên phải là hình ảnh.',
         'image_primary.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, hoặc gif.',
         'image_primary.max' => 'Kích thước hình ảnh không được vượt quá 2MB.',
-        'description.required' => 'Vui lòng điền mô tả',
         'status.required' => 'Trạng thái sản phẩm là bắt buộc.',
         'status.in' => 'Trạng thái phải là "active" hoặc "inactive".',
         ];
