@@ -1,29 +1,26 @@
 @extends('admin.layouts.layout')
 @section('content')
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="mt-4">
+                <div class="card-header">
+                    <h4 class="header-title">Fixed Header</h4>
 
-                    <h1 class="text-center">Product Audit</h1>
 
-                    @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
+                    <a href="{{ route('admin.products.addProduct') }}" type="button" class="btn btn-sm btn-primary">
+                        Add new
+                        product</a>
+
                 </div>
 
-
                 <div class="card-body">
-                    <div class="mb-3">
-                        <a href="{{ route('admin.products.addProduct') }}" class="btn btn-primary">Thêm mới</a>
-                    </div>
-
 
                     <table id="fixed-header-datatable"
-                        class="table table-striped dt-responsive nowrap table-striped w-100">
+                        class="table table-striped dt-responsive nowrap table-striped  w-100">
                         <thead>
-                            <tr>
+                        <tr>
                                 <th>STT</th>
                                 <th>Name</th>
                                 <th>Brand</th>
@@ -34,6 +31,7 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
+
                         <tbody>
                         @foreach ($products as $key => $product)
                         <tr>
@@ -56,9 +54,11 @@
                             </td>
                         </tr>
                         @endforeach
+
+
                         </tbody>
                         <tfoot>
-                            <tr>
+                        <tr>
                                 <th>STT</th>
                                 <th>Name</th>
                                 <th>Brand</th>
@@ -75,6 +75,7 @@
         </div><!-- end col-->
     </div> <!-- end row-->
 </div>
+
 @endsection
 @push('styles')
 <x-admin.data-table-styles />
