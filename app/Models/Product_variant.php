@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product_variant extends Model
 {
@@ -31,5 +32,15 @@ class Product_variant extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'id_product');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(Image::class, 'id_product_variant');
+    }
+
+    public function productAudits()
+    {
+        return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
 }

@@ -8,18 +8,12 @@ use App\Http\Controllers\Web\MailController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Web\ImageController;
+use App\Http\Controllers\Web\ProductAuditController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+
 
 
 Route::get('/', function () {
@@ -91,6 +85,25 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
+
+        Route::prefix('images')->name('images.')->controller(ImageController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::get('destroy/{id}', 'destroy')->name('destroy');
+            Route::get('show/{id}', 'show')->name('show');
+        });
+        Route::prefix('product_audits')->name('product_audits.')->controller(ProductAuditController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::get('destroy/{id}', 'destroy')->name('destroy');
+            Route::get('show/{id}', 'show')->name('show');
+        });
     }
 );
 Route::prefix('client')->name('client.')->group(

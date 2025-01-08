@@ -34,6 +34,20 @@
                     <span> Dashboard </span>
                 </a>
             </li>
+            <li class="side-nav-item">
+                <a href="{{ route('admin.images.index') }}" class="side-nav-link">
+                    <i class="ri-dashboard-3-line"></i>
+                    <span class="badge bg-success float-end">9+</span>
+                    <span> IMAGE </span>
+                </a>
+            </li>
+            <li class="side-nav-item">
+                <a href="{{ route('admin.product_audits.index') }}" class="side-nav-link">
+                    <i class="ri-dashboard-3-line"></i>
+                    <span class="badge bg-success float-end">9+</span>
+                    <span> Product Audit </span>
+                </a>
+            </li>
 
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false" aria-controls="sidebarPages"
