@@ -12,10 +12,30 @@
                         {{ session('success') }}
                     </p>
                     @endif
+                    <div>
+                        @if ($errors->any()||session('error'))
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                                @if (session('error'))
+                                <li>{{ session('error') }}</li>
+                                @endif
+                            </ul>
+                        </div>
+                        @endif
 
+                    </div>
                     <a href="{{route('admin.imports.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
                         Add new import
                     </a>
+                    <form action="{{ route('admin.imports.upload') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <input type="file" name="file" required>
+                        <button type="submit">Upload</button>
+                    </form>
+
 
                 </div>
 

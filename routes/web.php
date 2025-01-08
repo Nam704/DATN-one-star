@@ -82,6 +82,7 @@ Route::prefix('admin')->name('admin.')->group(
             function () {
                 Route::get('add', 'getFormAdd')->name('getFormAdd');
                 Route::get('detail/{id}', 'detail')->name('detail');
+                Route::post('/upload', 'importExcel')->name('upload');
 
                 Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
                 Route::get('/', 'list')->name('list');
