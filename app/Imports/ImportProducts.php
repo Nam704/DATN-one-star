@@ -11,9 +11,24 @@ use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use App\Services\ProductAuditService;
+use Illuminate\Support\Facades\Auth;
 
 class ImportProducts
 {
+    protected $productAuditService;
+    protected $user;
+
+    public function __construct(ProductAuditService $productAuditService)
+    {
+        $this->user = Auth::user();
+        if (!$this->user) {
+            throw new \Exception("Không xác định được người dùng đang thực hiện import.");
+        }
+
+        $this->productAuditService = $productAuditService;
+    }
+
     public function process(array $importData, array $detailsData)
     {
         $today = date('Y-m-d H:i:s');
@@ -59,8 +74,8 @@ class ImportProducts
                     throw new \Exception("Product Variant SKU: {$detail[0]} không tồn tại");
                 }
                 $totalPrice = $detail[1] * $detail[2];
-
                 $totalAmount += $totalPrice;
+                $quantity = $detail[1];
                 Import_detail::create([
                     'id_import' => $import->id,
                     'id_product_variant' => $productVariant->id,
@@ -69,7 +84,13 @@ class ImportProducts
                     'expected_price' => $detail[3],
                     'total_price' => $totalPrice,
                 ]);
-
+                $this->productAuditService->createAudit([
+                    'id_user' => $this->user->id,
+                    'id_product_variant' => $productVariant->id,
+                    'action_type' => 'import',
+                    'quantity' => $quantity,
+                    'reason' => "" //$this->user->name . " import" . " at: " . $today,
+                ]);
                 $productVariant->quantity += $detail[1];
                 $productVariant->save();
             }

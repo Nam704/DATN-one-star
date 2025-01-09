@@ -13,6 +13,7 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\ProductAuditService;
 
 class ImportController extends Controller
 {
@@ -21,7 +22,7 @@ class ImportController extends Controller
     {
         $this->import = $import;
     }
-    public function importExcel(Request $request)
+    public function importExcel(Request $request, ProductAuditService $productAuditService)
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,csv',
@@ -33,7 +34,7 @@ class ImportController extends Controller
             $data = Excel::toArray([], $file);
             // dd($data);
             // Truyền dữ liệu vào class ImportProducts (xử lý logic đầy đủ)
-            $importProducts = new ImportProducts();
+            $importProducts = new ImportProducts($productAuditService);
             $importProducts->process($data[0], $data[1]);
 
             // return response()->json(['status' => 'success', 'message' => 'File imported successfully!']);
@@ -44,77 +45,7 @@ class ImportController extends Controller
         }
     }
 
-    // public function importExcel(Request $request)
-    // {
-    //     // $request->validate([
-    //     //     'file' => 'required|mimes:xlsx,csv',
-    //     // ]);
-    //     // try {
-    //     //     // Sử dụng class ImportProducts để xử lý file Excel
-    //     //     Excel::import(new ImportProducts, $request->file('file'));
 
-    //     //     return response()->json(['status' => 'success', 'message' => 'File imported successfully!']);
-    //     // } catch (\Exception $e) {
-    //     //     return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-    //     // }
-    //     // try {
-    //     //     // Đọc dữ liệu từ file Excel
-    //     //     $file = $request->file('file');
-    //     //     $data = Excel::toArray([], $file);
-    //     //     dd($data);
-    //     //     DB::beginTransaction();
-
-    //     //     foreach ($data[0] as $row) {
-    //     //         // 1. Kiểm tra hoặc tạo nhà cung cấp
-    //     //         if (!isset($row['supplier_name']) || !isset($row['supplier_phone'])) {
-    //     //             throw new \Exception("File Excel thiếu cột 'supplier_name' hoặc 'supplier_phone'");
-    //     //         }
-    //     //         $supplier = Supplier::firstOrCreate(
-    //     //             ['name' => $row['supplier_name']],
-    //     //             ['phone' => $row['supplier_phone'], 'status' => 'active']
-    //     //         );
-
-    //     //         // 2. Tạo bản ghi nhập hàng
-    //     //         $import = Import::create([
-    //     //             'id_supplier' => $supplier->id,
-    //     //             'name' => $row['import_name'],
-    //     //             'import_date' => $row['import_date'],
-    //     //             'total_amount' => $row['total_amount'],
-    //     //             'note' => $row['note'] ?? null,
-    //     //         ]);
-
-    //     //         // 3. Tạo chi tiết nhập hàng
-    //     //         foreach ($row['details'] as $detail) {
-    //     //             $productVariant = ProductVariant::find($detail['product_variant_id']);
-
-    //     //             if (!$productVariant) {
-    //     //                 throw new \Exception("Product Variant ID {$detail['product_variant_id']} không tồn tại");
-    //     //             }
-
-    //     //             // Tạo chi tiết nhập
-    //     //             ImportDetail::create([
-    //     //                 'id_import' => $import->id,
-    //     //                 'id_product_variant' => $detail['product_variant_id'],
-    //     //                 'quantity' => $detail['quantity'],
-    //     //                 'price_per_unit' => $detail['price_per_unit'],
-    //     //                 'expected_price' => $detail['expected_price'],
-    //     //                 'total_price' => $detail['total_price'],
-    //     //             ]);
-
-    //     //             // Cập nhật số lượng sản phẩm
-    //     //             $productVariant->quantity += $detail['quantity'];
-    //     //             $productVariant->save();
-    //     //         }
-    //     //     }
-
-    //     //     DB::commit();
-
-    //     //     return response()->json(['status' => 'success', 'message' => 'Import thành công!']);
-    //     // } catch (\Exception $e) {
-    //     //     DB::rollBack();
-    //     //     return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-    //     // }
-    // }
     function detail($id)
     {
         $import = Import::find($id);
