@@ -30,11 +30,15 @@
                     <a href="{{route('admin.imports.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
                         Add new import
                     </a>
-                    <form action="{{ route('admin.imports.upload') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <input type="file" name="file" required>
-                        <button type="submit">Upload</button>
-                    </form>
+                    <div class="row mt-2">
+                        <form class="col-6 d-flex" action="{{ route('admin.imports.upload') }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <input type="file" name="file" required class="form-control">
+                            <button type="submit" class=" ms-1 btn btn-primary">Import</button>
+                        </form>
+                    </div>
+
 
 
                 </div>
