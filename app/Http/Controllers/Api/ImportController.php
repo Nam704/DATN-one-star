@@ -44,4 +44,31 @@ class ImportController extends Controller
             // "variants" => $variants
         ]);
     }
+    public function confirmImport(Request $request)
+    {
+        $request->validate([
+            'import_id' => 'required|exists:imports,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $import = Import::findOrFail($request->import_id);
+
+            // Cập nhật trạng thái xác nhận
+            $import->update(['status' => 'approved']);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Import has been confirmed successfully.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

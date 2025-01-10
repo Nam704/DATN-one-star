@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Events\ImportNotificationSent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImportRequest;
 use App\Imports\ImportProducts;
@@ -14,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\ProductAuditService;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 
 class ImportController extends Controller
 {
@@ -35,8 +38,10 @@ class ImportController extends Controller
             // dd($data);
             // Truyền dữ liệu vào class ImportProducts (xử lý logic đầy đủ)
             $importProducts = new ImportProducts($productAuditService);
-            $importProducts->process($data[0], $data[1]);
-
+            $importData =   $importProducts->process($data[0], $data[1]);
+            // Log::info('Event Dispatching: ', ['importData' => $importData]);
+            Event::dispatch(new ImportNotificationSent($importData));
+            // Log::info('Event Dispatched Successfully');
             // return response()->json(['status' => 'success', 'message' => 'File imported successfully!']);
             return redirect()->route('admin.imports.list')->with('success', 'Import thành công!');
         } catch (\Exception $e) {

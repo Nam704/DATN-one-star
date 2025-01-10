@@ -31,6 +31,7 @@ Route::prefix('admin')->group(
             function () {
                 // Route::get('provinces', 'getProvinces');
                 Route::get('{id}/details', [ImportController::class, 'getImportDetails']);
+                Route::post('/confirm-import', [ImportController::class, 'confirmImport'])->name('import.confirm');
             }
         );
     }
