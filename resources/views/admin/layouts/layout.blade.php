@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
+<meta name="csrf-token" content="{{ csrf_token() }}">   
 <!-- Mirrored from themes.getappui.com/techzaa/velonic/layouts/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 10 Mar 2024 13:03:29 GMT -->
 @include('admin.layouts.header')
 {{-- header --}}
@@ -76,3 +76,5 @@
 <!-- Mirrored from themes.getappui.com/techzaa/velonic/layouts/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 10 Mar 2024 13:03:30 GMT -->
 
 </html>
+
+

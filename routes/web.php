@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Web\BrandController;
+use App\Http\Controllers\Web\AttributeController;
 
 use Illuminate\Support\Facades\Mail;
 
@@ -119,7 +120,32 @@ Route::prefix('admin')->name('admin.')->group(
             Route::put('edit-category/{id}', [CategoryController::class, 'editPutCategory'])->name('editPutCategory');
             Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');
         });
+        Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
 
+        // Brands Routes
+        Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
         Route::group([
             'prefix' => 'products',
             'as' => 'products.'
@@ -207,3 +233,4 @@ Route::prefix('client')->name('client.')->group(
         );
     }
 );
+    // Attributes Routes

@@ -140,11 +140,11 @@ public function update(Request $request, $id)
         'description' => 'nullable|string',
         'status' => 'required|in:active,inactive'
     ], [
-        'name.required' => 'The name field must not be empty',
-        'name.max' => 'The name must not exceed 50 characters',
-        'name.regex' => 'Only letters are allowed in the name',
-        'name.unique' => 'This attribute name already exists',
-        'status.required' => 'Please select a status'
+        'name.required' => 'Trường tên không được để trống',
+        'name.max' => 'Tên không được vượt quá 50 ký tự',
+        'name.regex' => 'Chỉ được phép có chữ cái trong tên',
+        'name.unique' => 'Tên thuộc tính này đã tồn tại',
+        'status.required' => 'Vui lòng chọn một trạng thái'
     ]);
 
     $attribute->update($validated);

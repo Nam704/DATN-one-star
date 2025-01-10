@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\API\BrandController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('attributes')->group(function () {
@@ -62,3 +63,15 @@ Route::prefix('client')->group(
         );
     }
 );
+
+Route::prefix('brands')->group(function () {
+    Route::get('/', [BrandController::class, 'index']);
+    Route::post('/', [BrandController::class, 'store']);
+    Route::get('/trash', [BrandController::class, 'trash']);
+    Route::get('/{id}', [BrandController::class, 'show']);
+    Route::put('/{id}', [BrandController::class, 'update']);
+    Route::delete('/{id}', [BrandController::class, 'destroy']);
+    Route::post('/{id}/toggle-status', [BrandController::class, 'toggleStatus']);
+    Route::post('/{id}/restore', [BrandController::class, 'restore']);
+    Route::delete('/{id}/force-delete', [BrandController::class, 'forceDelete']);
+});

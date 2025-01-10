@@ -20,7 +20,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table class="table table-centered w-100 dt-responsive nowrap">
+                        <table id="fixed-header-database"
+                         class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -36,8 +37,7 @@
                                         <td>{{ $brand->id }}</td>
                                         <td>{{ $brand->name }}</td>
                                         <td>
-                                            <span
-                                                class="badge bg-{{ $brand->status === 'active' ? 'success' : 'danger' }}">
+                                            <span class="badge bg-{{ $brand->status === 'active' ? 'success' : 'danger' }}">
                                                 {{ ucfirst($brand->status) }}
                                             </span>
                                         </td>
@@ -65,84 +65,11 @@
     </div>
 @endsection
 
+@push('styles')
+<x-admin.data-table-styles />
+@endpush
+
 @push('scripts')
-<x-admin.dashboard-scripts />
-<script>
-    $(document).ready(function() {
-        // Initialize DataTable
-        $('.table').DataTable({
-            responsive: true,
-            pageLength: 10,
-            ordering: true
-        });
-
-        // Restore functionality
-        $('.restore-brand').click(function() {
-            const id = $(this).data('id');
-            
-            Swal.fire({
-                title: 'Restore Brand?',
-                text: "This will restore the brand!",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, restore it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/brands/${id}/restore`,
-                        type: 'POST',
-                        data: {
-                            "_token": "{{ csrf_token() }}"
-                        },
-                        success: function() {
-                            Swal.fire(
-                                'Restored!',
-                                'Brand has been restored.',
-                                'success'
-                            ).then(() => {
-                                location.reload();
-                            });
-                        }
-                    });
-                }
-            });
-        });
-
-        // Force Delete functionality
-        $('.force-delete-brand').click(function() {
-            const id = $(this).data('id');
-            
-            Swal.fire({
-                title: 'Delete Permanently?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete permanently!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/brands/${id}/force-delete`,
-                        type: 'DELETE',
-                        data: {
-                            "_token": "{{ csrf_token() }}"
-                        },
-                        success: function() {
-                            Swal.fire(
-                                'Deleted!',
-                                'Brand has been permanently deleted.',
-                                'success'
-                            ).then(() => {
-                                location.reload();
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    });
-</script>
+<x-admin.data-table-scripts />
+<script src="{{ asset('admin/api/trashBrands.js') }}"></script>
 @endpush
