@@ -18,7 +18,7 @@ class StoreAttributeRequest extends FormRequest
                 'required',
                 'max:50',
                 'unique:attributes,name',
-                'regex:/^[a-zA-Z]+$/',
+                'regex:/^[\p{L}\s]+$/u',
                 'string'
             ],
             'description' => 'nullable|string',
@@ -29,11 +29,11 @@ class StoreAttributeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The name field must not be empty',
-            'name.max' => 'The name must not exceed 50 characters',
-            'name.unique' => 'This attribute name already exists',
-            'name.regex' => 'Only letters are allowed in the name',
-            'status.required' => 'Please select a status'
+            'name.required' => 'Trường tên không được để trống',
+            'name.max' => 'Tên không được vượt quá 50 ký tự',
+            'name.regex' => 'Chỉ được phép có chữ cái trong tên',
+            'name.unique' => 'Tên thuộc tính này đã tồn tại',
+            'status.required' => 'Vui lòng chọn một trạng thái'
         ];
     }
 }

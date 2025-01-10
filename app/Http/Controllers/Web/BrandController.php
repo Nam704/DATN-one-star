@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\Controller;
-
 
 class BrandController extends Controller
 {
@@ -15,7 +15,7 @@ class BrandController extends Controller
     $brands = Brand::withoutTrashed()->latest()->get();
     return view('admin.brands.index', compact('brands'));
 }
-
+    
 
     public function create()
     {
