@@ -11,14 +11,16 @@ class Product_variant extends Model
 
     use HasFactory, SoftDeletes;
 
+
+
+    protected $table = 'product_variants';
     protected $fillable = [
         'id_product',
         'sku',
         'status',
-        'created_at',
-        'updated_at',
-        'deleted_at',
     ];
+
+
 
 
     public function import_details()
@@ -40,5 +42,14 @@ class Product_variant extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'id_product');
+    }
+    public function images()
+    {
+        return $this->hasMany(Image::class, 'id_product_variant');
+    }
+
+    public function productAudits()
+    {
+        return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
 }
