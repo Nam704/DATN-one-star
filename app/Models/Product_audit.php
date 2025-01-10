@@ -10,7 +10,6 @@ class Product_audit extends Model
     use HasFactory;
 
     protected $table = 'product_audits';
-    
 
     protected $fillable = [
         'id_user',

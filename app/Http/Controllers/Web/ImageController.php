@@ -90,10 +90,9 @@ class ImageController extends Controller
     }
 
     public function show($id)
-{
-    $image = Image::with('productVariant')->findOrFail($id);
-    return view('admin.images.show', compact('image'));
-}
-
-
+    {
+        $image = Image::with('productVariant')->findOrFail($id);
+        $productVariants = Product_variant::all();
+        return view('admin.images.show', compact('image', 'productVariants'));
+    }
 }
