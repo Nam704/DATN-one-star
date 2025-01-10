@@ -382,13 +382,13 @@
                     </div>
 
                     <!-- item-->
-                    <a href="pages-profile.html" class="dropdown-item">
+                    <a href="{{ route('auth.getProfileAdmin') }}" class="dropdown-item">
                         <i class="ri-account-circle-line fs-18 align-middle me-1"></i>
                         <span>My Account</span>
                     </a>
 
                     <!-- item-->
-                    <a href="pages-profile.html" class="dropdown-item">
+                    {{-- <a href="pages-profile.html" class="dropdown-item">
                         <i class="ri-settings-4-line fs-18 align-middle me-1"></i>
                         <span>Settings</span>
                     </a>
@@ -403,10 +403,10 @@
                     <a href="auth-lock-screen.html" class="dropdown-item">
                         <i class="ri-lock-password-line fs-18 align-middle me-1"></i>
                         <span>Lock Screen</span>
-                    </a>
+                    </a> --}}
 
                     <!-- item-->
-                    <a href="auth-logout-2.html" class="dropdown-item">
+                    <a href="{{ route('auth.logout') }}" class="dropdown-item">
                         <i class="ri-logout-box-line fs-18 align-middle me-1"></i>
                         <span>Logout</span>
                     </a>

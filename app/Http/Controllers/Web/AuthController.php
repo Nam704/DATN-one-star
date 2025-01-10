@@ -16,12 +16,25 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use App\Events\UserLogin;
 
 class AuthController extends Controller
 {
     public function getFormLogin()
     {
         return view('admin.auth.login');
+    }
+    function getProfileAdmin()
+    {
+        $user = Auth::user();
+        return view('admin.auth.profile_admin', compact('user'));
+    }
+    function editProfileAdmin(Request $request)
+    {
+        $user = Auth::user();
+        $user->name = $request->input('name');
+        $user->save();
+        return redirect()->back()->with('success', 'Profile updated successfully');
     }
     public function login(AuthRequest $request)
     {
@@ -34,6 +47,7 @@ class AuthController extends Controller
 
                 // dd($request);
                 $user = Auth::user();
+                broadcast(new UserLogin($user))->toOthers();
                 // dd($user);
                 if ($user->role->name === 'admin') {
                     return redirect()->route('admin.dashboard'); // Admin dashboard
@@ -57,6 +71,7 @@ class AuthController extends Controller
     function logout()
     {
         Auth::logout();
+
         return redirect()->route('auth.login');
     }
     public function getFormRegister()

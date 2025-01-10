@@ -83,4 +83,11 @@ class ProductVariantController extends Controller
         $categories->delete();
         return redirect()->route('admin.productvariant.listProductVariant')->with('success', 'Xóa thành công');
     }
+    public function list($id)
+    {
+        $product = Product::find($id);
+        $productVariants = Product_variant::list($id)->get();
+        // dd($productVariants);
+        return view('admin.product_variant.list', compact('productVariants', 'product'));
+    }
 }

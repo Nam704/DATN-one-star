@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<meta name="csrf-token" content="{{ csrf_token() }}">   
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Mirrored from themes.getappui.com/techzaa/velonic/layouts/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 10 Mar 2024 13:03:29 GMT -->
 @include('admin.layouts.header')
 {{-- header --}}
@@ -61,7 +61,8 @@
     <script src="{{ asset('admin/assets/js/axios.min.js') }}"></script>
 
     @stack('scripts')
-
+    @vite('resources/js/app.js')
+    @vite('resources/js/public.js')
 
     <!-- App js -->
     <script src="{{ asset('admin/assets/js/app.min.js') }}"></script>
@@ -70,11 +71,8 @@
 
     <!-- Thêm JS của Select2 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
 </body>
 
 <!-- Mirrored from themes.getappui.com/techzaa/velonic/layouts/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 10 Mar 2024 13:03:30 GMT -->
 
 </html>
-
-

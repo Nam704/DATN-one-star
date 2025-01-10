@@ -5,18 +5,19 @@ use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ProductController;
-use App\Http\Controllers\Web\ProductVariantController;
-use App\Http\Controllers\Web\ImageController;
-use App\Http\Controllers\Web\ProductAuditController;
-use App\Http\Controllers\Web\SupplierController;
-use App\Http\Controllers\Web\UserContronler;
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\SupplierController;
+use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Web\ImageController;
+use App\Http\Controllers\Web\ProductAuditController;
+use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
 use Illuminate\Support\Facades\Mail;
+
 
 Route::get('/', function () {
     return view('admin.index');
@@ -27,34 +28,7 @@ Route::get('/users', function () {
     return view('admin.user.demoDataTable');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', function () {
-        return view('admin.index');
-    });
 
-    Route::get('/users', function () {
-        return view('admin.user.demoDataTable');
-    });
-
-    Route::get('attributes/{id}/edit', [\App\Http\Controllers\Web\AttributeController::class, 'edit'])->name('attributes.edit');
-    Route::put('attributes/{id}', [\App\Http\Controllers\Web\AttributeController::class, 'update'])->name('attributes.update');
-    Route::post('attributes/{id}/toggle-status', [\App\Http\Controllers\Web\AttributeController::class, 'toggleStatus'])->name('attributes.toggle-status');
-    Route::get('attributes/trash', [\App\Http\Controllers\Web\AttributeController::class, 'trash'])->name('attributes.trash');
-    Route::delete('attributes/{id}/force-delete', [\App\Http\Controllers\Web\AttributeController::class, 'forceDelete'])->name('attributes.force-delete');
-    Route::post('attributes/{id}/restore', [\App\Http\Controllers\Web\AttributeController::class, 'restore'])->name('attributes.restore');
-    Route::delete('/attributes/{id}', [\App\Http\Controllers\Web\AttributeController::class, 'destroy'])->name('attributes.destroy');
-    Route::resource('attributes', \App\Http\Controllers\Web\AttributeController::class);
-
-    //brand
-    Route::get('brands/{id}/edit', [BrandController::class, 'edit'])->name('brands.edit');
-    Route::put('brands/{id}', [BrandController::class, 'update'])->name('brands.update');
-    Route::post('brands/{id}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
-    Route::get('brands/trash', [BrandController::class, 'trash'])->name('brands.trash');
-    Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.force-delete');
-    Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
-    Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
-    Route::resource('brands', BrandController::class);
-});
 
 
 
@@ -78,6 +52,7 @@ Route::prefix('auth/')->name('auth.')->group(
 
             Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
             Route::post('reset-password', 'resetPassword')->name('resetPassword');
+            Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
         });
     }
 );
@@ -173,12 +148,30 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('/contact', 'sendMail')->name('sendMail');
             }
         );
+        Route::prefix('product_variants')->name('product_variants.')->controller(ProductVariantController::class)->group(
+            function () {
+                Route::get('/{id}', 'list')->name('list');
+            }
+        );
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
             function () {
                 Route::get('add', 'getFormAdd')->name('getFormAdd');
                 Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate');
                 Route::get('/', 'list')->name('list');
                 Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
+                Route::post('add', 'add')->name('add');
+                Route::post('edit/{id}', 'edit')->name('edit');
+            }
+        );
+        Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
+            function () {
+                Route::get('add', 'getFormAdd')->name('getFormAdd');
+                Route::get('detail/{id}', 'detail')->name('detail');
+                Route::post('/upload', 'importExcel')->name('upload');
+
+                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
+                Route::get('/', 'list')->name('list');
+                // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
                 Route::post('add', 'add')->name('add');
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
@@ -202,19 +195,6 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('destroy/{id}', 'destroy')->name('destroy');
             Route::get('show/{id}', 'show')->name('show');
         });
-        Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
-            function () {
-                Route::get('add', 'getFormAdd')->name('getFormAdd');
-                Route::get('detail/{id}', 'detail')->name('detail');
-
-                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
-                Route::get('/', 'list')->name('list');
-                // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
-                Route::post('add', 'add')->name('add');
-                Route::post('edit/{id}', 'edit')->name('edit');
-            }
-
-        );
     }
 );
 Route::prefix('client')->name('client.')->group(
@@ -224,4 +204,3 @@ Route::prefix('client')->name('client.')->group(
         );
     }
 );
-    // Attributes Routes
