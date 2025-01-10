@@ -4,28 +4,19 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
-
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ProductVariantController;
-
 use App\Http\Controllers\Web\ImageController;
 use App\Http\Controllers\Web\ProductAuditController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
-
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
 use Illuminate\Support\Facades\Hash;
-
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
-
 use Illuminate\Support\Facades\Mail;
-
-
-
 
 Route::get('/', function () {
     return view('admin.index');
