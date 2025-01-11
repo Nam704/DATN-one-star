@@ -45,7 +45,7 @@ class ProductController extends Controller
             'name' => $request->name,
             'id_brand' => $request->id_brand,
             'id_category' => $request->id_category,
-            'description' => $request->description,
+            'description' => $request->input('description'),
             'image_primary' => $profile,
             'status' => $request->status,
         ]);
