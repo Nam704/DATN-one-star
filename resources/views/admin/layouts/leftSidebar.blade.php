@@ -99,9 +99,14 @@
                 <div class="collapse" id="sidebarBaseUI">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{ route('admin.imports.list') }}">List</a>
+                            <a href="{{ route('admin.imports.listPending') }}">List pending</a>
                         </li>
-
+                        <li>
+                            <a href="{{ route('admin.imports.listApproved') }}">List approved</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.imports.listRejected') }}">List rejected</a>
+                        </li>
                     </ul>
                 </div>
             </li>

@@ -40,11 +40,9 @@ class ImportController extends Controller
             // Truyền dữ liệu vào class ImportProducts (xử lý logic đầy đủ)
             $importProducts = new ImportProducts($productAuditService);
             $importData =   $importProducts->process($data[0], $data[1]);
-            // Log::info('Event Dispatching: ', ['importData' => $importData]);
-            Event::dispatch(new ImportNotificationSent($importData));
-            // Log::info('Event Dispatched Successfully');
+            broadcast(new ImportNotificationSent($importData));
             // return response()->json(['status' => 'success', 'message' => 'File imported successfully!']);
-            return redirect()->route('admin.imports.list')->with('success', 'Import thành công!');
+            return redirect()->route('admin.imports.listApproved')->with('success', 'Import thành công!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
             // return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
@@ -139,9 +137,9 @@ class ImportController extends Controller
         $products = Product::list()->get();
         return view('admin.import.add', compact('suppliers', 'products'));
     }
-    function list()
+    function listApproved()
     {
-        $imports = Import::list();
+        $imports = Import::listPending()->paginate(100);
         return view('admin.import.list', compact('imports'));
     }
     function add(ImportRequest $request)

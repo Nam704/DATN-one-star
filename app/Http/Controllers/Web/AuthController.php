@@ -49,13 +49,16 @@ class AuthController extends Controller
                 $user = Auth::user();
                 broadcast(new UserLogin($user))->toOthers();
                 // dd($user);
-                if ($user->role->name === 'admin') {
+                if ($user->isAdmin()) {
                     return redirect()->route('admin.dashboard'); // Admin dashboard
-                } elseif ($user->role->name === 'user') {
-                    return "go to user dashboard";
+                } elseif ($user->isUser()) {
+                    // return "go to user dashboard";
+
                     // return redirect()->route('user.dashboard'); // User dashboard
-                } elseif ($user->role->name === 'employee') {
-                    return "go to employee dashboard";
+                } elseif ($user->isEmployee()) {
+                    return redirect()->route('admin.dashboard'); // Admin dashboard
+
+                    // return "go to employee dashboard";
                     // return redirect()->route('employee.dashboard'); // Client dashboard
                 }
             } else {

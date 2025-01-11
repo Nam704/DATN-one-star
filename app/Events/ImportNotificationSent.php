@@ -24,12 +24,16 @@ class ImportNotificationSent implements ShouldBroadcast
     public function broadcastOn()
     {
 
-        return new Channel('admin.imports');
+        return new PrivateChannel('imports');
     }
 
-    public function broadcastAs()
+    public function broadcastWith()
     {
 
-        return 'import.notification';
+        return [
+            // 'importData' => $this->importData,
+            'message' => 'Import completed successfully',
+            // "user" => $this->user
+        ];
     }
 }

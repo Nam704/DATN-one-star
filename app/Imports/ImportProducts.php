@@ -95,6 +95,7 @@ class ImportProducts
                 $productVariant->save();
             }
             $import->update(['total_amount' => $totalAmount]);
+
             DB::commit();
         }
         return $import;

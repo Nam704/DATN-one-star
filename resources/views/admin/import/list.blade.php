@@ -106,7 +106,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                    {{-- {{ $imports->links() }} --}}
+                    {{ $imports->links() }}
                 </div> <!-- end card body-->
             </div> <!-- end card -->
         </div><!-- end col-->

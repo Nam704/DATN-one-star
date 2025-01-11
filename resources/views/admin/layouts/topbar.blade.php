@@ -360,9 +360,12 @@
                         {{-- <img src="{{ asset('admin/assets/images/users/avatar-1.jpg') }}" alt="user-image"
                             width="32" class="rounded-circle"> --}}
                         @if(Auth::check())
-                        <img src="{{ Storage::url(Auth::user()->profile_image) }}" alt="Profile Image" width="32"
+                        <img src="{{ Auth::user()->profile_image 
+                                ? asset('storage/' . Auth::user()->profile_image) 
+                                : asset('storage/avatars/default-avatar.png') }}" alt="Profile Image" width="32"
                             class="rounded-circle">
                         @endif
+
                     </span>
                     <span class="d-lg-block d-none">
                         <h5 class="my-0 fw-normal">@if(Auth::check())

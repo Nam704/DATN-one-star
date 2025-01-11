@@ -170,7 +170,10 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('/upload', 'importExcel')->name('upload');
 
                 Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
-                Route::get('/', 'list')->name('list');
+                Route::get('/list-approved', 'listApproved')->name('listApproved');
+                Route::get('/list-pending', 'listPending')->name('listPending');
+                Route::get('/list-rejected', 'listRejected')->name('listRejected');
+
                 // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
                 Route::post('add', 'add')->name('add');
                 Route::post('edit/{id}', 'edit')->name('edit');
