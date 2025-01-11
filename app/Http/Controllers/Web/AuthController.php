@@ -53,6 +53,7 @@ class AuthController extends Controller
                     return redirect()->route('admin.dashboard'); // Admin dashboard
                 } elseif ($user->isUser()) {
                     // return "go to user dashboard";
+                    return redirect()->route('admin.dashboard'); // Admin dashboard
 
                     // return redirect()->route('user.dashboard'); // User dashboard
                 } elseif ($user->isEmployee()) {

@@ -25,6 +25,10 @@ class ImportController extends Controller
     function __construct(Import $import)
     {
         $this->import = $import;
+        $this->middleware('role:admin')->only('approveImport');
+
+        // Employee có thể truy cập viewImport
+        $this->middleware('role:employee')->only('viewImport');
     }
     public function importExcel(Request $request, ProductAuditService $productAuditService)
     {
@@ -42,7 +46,7 @@ class ImportController extends Controller
             $importData =   $importProducts->process($data[0], $data[1]);
             broadcast(new ImportNotificationSent($importData));
             // return response()->json(['status' => 'success', 'message' => 'File imported successfully!']);
-            return redirect()->route('admin.imports.listApproved')->with('success', 'Import thành công!');
+            return redirect()->route('admin.imports.listApproved')->with('success', 'Thông báo đã được gửi đi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
             // return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
@@ -139,9 +143,62 @@ class ImportController extends Controller
     }
     function listApproved()
     {
+        $imports = Import::listApproved()->paginate(100);
+        return view('admin.import.list', compact('imports'));
+    }
+    function listPending()
+    {
         $imports = Import::listPending()->paginate(100);
         return view('admin.import.list', compact('imports'));
     }
+    function listRejected()
+    {
+        $imports = Import::listReject()->paginate(100);
+        return view('admin.import.list', compact('imports'));
+    }
+
+    function accept(Request $request, $id)
+    {
+        try {
+            $import = Import::findOrFail($id);
+            if ($import->status == 'approved') {
+                return redirect()->back()->with('error', 'Import đã được chấp nhận trước đó!');
+            } elseif ($import->status == 'rejected') {
+                return redirect()->back()->with('error', 'Import đã bị từ chối trước đó!');
+            } elseif ($import->status == 'pending') {
+                $import->status = 'approved';
+                $import->save();
+                return redirect()->route('admin.imports.listApproved')->with('success', 'Import đã được chấp nhận!');
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    function reject(Request $request, $id)
+    {
+        try {
+            $import = Import::findOrFail($id);
+            if ($import->status == 'approved') {
+                return redirect()->back()->with(
+                    'error',
+                    'Import đã được chấp nhận trước đó!'
+                );
+            } elseif ($import->status == 'rejected') {
+                return redirect()->back()->with(
+                    'error',
+                    'Import đã bị từ chối trước đó!'
+                );
+            } elseif ($import->status == 'pending') {
+                $import->status = 'rejected';
+                $import->save();
+                return redirect()->route('admin.imports.listRejected')
+                    ->with('success', 'Import đã bị từ chối!');
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     function add(ImportRequest $request)
     {
         // dd($request->all());

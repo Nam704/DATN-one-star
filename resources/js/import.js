@@ -1,6 +1,6 @@
 import "./bootstrap";
 console.log("Hello from Vite!");
-Pusher.logToConsole = true;
+// Pusher.logToConsole = true;
 Echo.private("imports").listen("ImportNotificationSent", (event) => {
     console.log("Received event:", event);
     console.log("New Import Notification:", event.importData);

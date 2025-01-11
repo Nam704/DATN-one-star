@@ -60,7 +60,7 @@ Route::prefix('auth/')->name('auth.')->group(
 
 
 
-Route::prefix('admin')->name('admin.')->group(
+Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
@@ -68,12 +68,6 @@ Route::prefix('admin')->name('admin.')->group(
         });
 
 
-        // Route::prefix('categorys')->name('categorys')->group(
-        //     function(){
-        //         Route::get('list-category',[CategoryController::class,'index'])->name('admin.categorys.listcategory');
-        //         Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.categorys.addCategory');
-        //     }
-        // );
 
         Route::group([
             'prefix' => 'categories',
@@ -177,6 +171,8 @@ Route::prefix('admin')->name('admin.')->group(
                 // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
                 Route::post('add', 'add')->name('add');
                 Route::post('edit/{id}', 'edit')->name('edit');
+                Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
+                Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');;
             }
         );
 
