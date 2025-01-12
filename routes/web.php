@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
+use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -66,6 +67,17 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+        Route::prefix('export')->name('export.')->controller(TemplateExportController::class)->group(
+            function () {
+                Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
+
+                // Route::get('product', [ProductController::class, 'exportProduct'])->name('product');
+                // Route::get('supplier', [SupplierController::class, 'exportSupplier'])->name('supplier');
+                // Route::get('user', [UserContronler::class, 'exportUser'])->name('user');
+                // Route::get('import', [ImportController::class, 'exportImport'])->name('import');
+
+            }
+        );
 
 
 

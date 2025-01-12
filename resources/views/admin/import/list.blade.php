@@ -31,6 +31,8 @@
                     <a href="{{route('admin.imports.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
                         Add new import
                     </a>
+                    <a href="{{ route('admin.export.exportSamplefile') }}" class="btn btn-sm btn-primary">Get Sample
+                        file</a>
                     <div class="row mt-2">
                         <form class="col-6 d-flex" action="{{ route('admin.imports.upload') }}" method="POST"
                             enctype="multipart/form-data">
@@ -47,7 +49,8 @@
                 <div class="card-body">
                     {{-- <form action="route('admin.imports.acceptAll')" method="post"> --}}
                         {{-- @csrf --}}
-                        @if (Route::is('admin.imports.listPending'))
+                        @if (Route::is('admin.imports.listPending') && $imports->count() > 0 && Auth::user()->role ==
+                        'admin')
                         <button type="submit" class="btn btn-success mt-2" id="acceppt_select">Accept Selected</button>
                         <button type="submit" class="btn btn-danger mt-2" id="reject_select">Reject Selected</button>
                         @endif
@@ -97,12 +100,14 @@
                                         @else
 
                                         @endif
-
+                                        @if ( Route::is('admin.imports.listPending') && Auth::user()->role == 'admin')
                                         <a href="{{route('admin.imports.edit',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i>
                                             Edit
                                         </a>
+                                        @endif
+
                                     </td>
                                     </td>
                                 </tr>
