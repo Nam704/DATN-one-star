@@ -7,6 +7,13 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class Sheet2Export implements FromArray, WithHeadings
 {
+    protected $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
     public function headings(): array
     {
         return [
@@ -19,9 +26,17 @@ class Sheet2Export implements FromArray, WithHeadings
 
     public function array(): array
     {
-        return [
-            ['Iphone-14-plus-violet-512GB', 10, 1000, 800],
-            ['Samsung-s22-ultra-sliver-1TB', 12, 2000, 3000],
-        ];
+        $data = []; // Khởi tạo mảng rỗng
+
+        foreach ($this->data as $item) {
+            $data[] = [
+                $item->sku,
+                // $item->quantity,
+                // $item->price_per_unit,
+                // $item->expected_price,
+            ];
+        }
+
+        return $data; // Trả về dữ liệu
     }
 }
