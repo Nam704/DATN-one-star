@@ -10,10 +10,11 @@ class ForgotPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $user;
     public $token;
-
-    public function __construct($token)
+    public function __construct($user, $token)
     {
+        $this->user = $user;
         $this->token = $token;
     }
 
@@ -22,8 +23,12 @@ class ForgotPasswordMail extends Mailable
         return $this->subject('Password Reset Request')
             ->view('admin.mail.forgot-password')
             ->with([
-                'password_reset_token' => $this->token,
-                'resetLink' => route('auth.getfromResetPassword', ['token' => $this->token]),
+                'user' => $this->user,
+
+                'resetLink' => route(
+                    'auth.getfromResetPassword',
+                    ['id' => $this->user->id, 'token' => $this->token]
+                ),
             ]);
     }
 }

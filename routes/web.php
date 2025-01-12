@@ -51,7 +51,7 @@ Route::prefix('auth/')->name('auth.')->group(
             Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
             Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
 
-            Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
+            Route::get('reset-password/{id}/{token}', 'getfromResetPassword')->name('getfromResetPassword');
             Route::post('reset-password', 'resetPassword')->name('resetPassword');
             Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
         });

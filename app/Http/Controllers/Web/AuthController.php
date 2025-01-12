@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Events\UserLogin;
+use App\Models\Password_reset_token;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -105,9 +107,17 @@ class AuthController extends Controller
     {
         return view('admin.auth.forgotpw');
     }
-    function getfromResetPassword($token)
+    function getfromResetPassword($id, $token)
     {
-        return view('admin.auth.change-pw', compact('token'));
+        $user = User::find($id);
+
+        // dd($user->email);
+        $password_reset = Password_reset_token::where('email', $user->email)->first();
+        // dd($password_reset);
+        if (!$password_reset) {
+            return redirect()->back()->with('error', 'Email not found');
+        }
+        return view('admin.auth.change-pw', compact('password_reset', 'token'));
     }
     public function sendPasswordResetEmail(Request $request)
     {
@@ -119,15 +129,16 @@ class AuthController extends Controller
             return redirect()->back()->with('error', 'Email not found');
         }
 
-        $password_reset_token = bin2hex(random_bytes(16));
+        $password_reset_token_plaintext = Str::random(32); // Token plaintext
+        $password_reset_token_hashed = Hash::make($password_reset_token_plaintext);
         $expires_at = Carbon::now()->addMinutes(10);
 
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
-            ['token' => $password_reset_token, 'created_at' => now(), 'expires_at' => $expires_at]
+            ['token' => $password_reset_token_hashed, 'created_at' => now(), 'expires_at' => $expires_at]
         );
 
-        Mail::to($user->email)->send(new ForgotPasswordMail($password_reset_token));
+        Mail::to($user->email)->send(new ForgotPasswordMail($user, $password_reset_token_plaintext));
 
         return redirect()->back()->with('success', 'Password reset
         email sent. Please check your email.');
@@ -135,13 +146,18 @@ class AuthController extends Controller
     public function resetPassword(PasswordResetRequest $request)
     {
         $request->validated();
-
+        // dd($request->password_reset_token);
 
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
         // dd($record);
-        if (!$record || $record->token !== $request->password_reset_token || Carbon::parse($record->expires_at)->isPast()) {
+        if (
+            !$record ||
+            !Hash::check($request->password_reset_token, $record->token) ||
+            Carbon::parse($record->expires_at)->isPast()
+        ) {
             return redirect()->back()->with('error', 'Invalid password reset token');
         }
+
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {

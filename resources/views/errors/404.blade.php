@@ -1,13 +1,13 @@
 @extends('admin.auth.layouts.auth')
-@section('title', '403')
+@section('title', '404')
 @section('content')
 <div class="d-flex justify-content-center mb-5">
     <img src="assets/images/svg/404.svg" alt="" class="img-fluid">
 </div>
 
 <div class="text-center">
-    <h1 class="mb-3">403</h1>
-    <h4 class="fs-20"> Unauthorized action. </h4>
+    <h1 class="mb-3">404</h1>
+    <h4 class="fs-20">Page not found</h4>
     <p class="text-muted mb-3"> It's looking like you may have taken a wrong
         turn. Don't worry... it happens to the best of us.</p>
 </div>
