@@ -44,7 +44,8 @@
                             </div>
 
                             <div class="mt-2">
-                                <a type="submit" href="{{ route('admin.images.index') }}" class="btn btn-primary">Về trang chủ</a>
+                                <a type="submit" href="{{ route('admin.images.index') }}" class="btn btn-primary">Về trang
+                                    chủ</a>
                             </div>
                         </form>
                     </div> <!-- end card body-->

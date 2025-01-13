@@ -15,7 +15,8 @@
 
 
                     <div class="card-body">
-                        <form action="{{ route('admin.images.update', $image->id) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('admin.images.update', $image->id) }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -28,7 +29,8 @@
                                 <label for="id_product_variant">Sản phẩm</label>
                                 <select name="id_product_variant" class="form-control" required>
                                     @foreach ($productVariants as $variant)
-                                        <option value="{{ $variant->id }}" {{ $image->id_product_variant == $variant->id ? 'selected' : '' }}>
+                                        <option value="{{ $variant->id }}"
+                                            {{ $image->id_product_variant == $variant->id ? 'selected' : '' }}>
                                             {{ $variant->sku }}
                                         </option>
                                     @endforeach
@@ -38,8 +40,10 @@
                             <div class="form-group">
                                 <label for="status">Trạng thái</label>
                                 <select name="status" class="form-control" required>
-                                    <option value="active" {{ $image->status == 'active' ? 'selected' : '' }}>Hoạt động</option>
-                                    <option value="inactive" {{ $image->status == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
+                                    <option value="active" {{ $image->status == 'active' ? 'selected' : '' }}>Hoạt động
+                                    </option>
+                                    <option value="inactive" {{ $image->status == 'inactive' ? 'selected' : '' }}>Không hoạt
+                                        động</option>
                                 </select>
                             </div>
 

@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Product_variant extends Model
 {
     use HasFactory;
-    protected $fillale = [
-        'id_product',
+    protected $fillable = [
+        'product_id',
         'sku',
-        'status'
+        'status',
     ];
     public function import_details()
     {
@@ -28,11 +28,11 @@ class Product_variant extends Model
     {
         return $query->where('status', 'active')->where('id_product', $id);
     }
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'id_product');
-    }
-<<<<<<< HEAD
+    public function variants()
+{
+    return $this->hasMany(Product_variant::class, 'product_id');
+}
+
     public function images()
     {
         return $this->hasMany(Image::class, 'id_product_variant');
@@ -40,6 +40,9 @@ class Product_variant extends Model
     public function productAudits() {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
-=======
->>>>>>> 57cc27f7916fcab5e41eac144eb0fd4f5a1aef9c
+    public function attributes()
+    {
+        return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
+    }
+
 }

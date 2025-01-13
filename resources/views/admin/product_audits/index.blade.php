@@ -24,7 +24,7 @@
                             class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>ID</th>
                                     <th>Người dùng</th>
                                     <th>Biến thể sản phẩm</th>
                                     <th>Số lượng</th>

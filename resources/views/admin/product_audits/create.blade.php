@@ -18,7 +18,7 @@
                         <form action="{{ route('admin.product_audits.store') }}" method="POST">
                             @csrf
 
-                            <!-- Người dùng -->
+
                             <div class="mb-3">
                                 <label for="id_user" class="form-label">Người dùng</label>
                                 <select name="id_user" id="id_user" class="form-select">
@@ -32,7 +32,7 @@
                                 @enderror
                             </div>
 
-                            <!-- Biến thể sản phẩm -->
+
                             <div class="mb-3">
                                 <label for="id_product_variant" class="form-label">Biến thể sản phẩm</label>
                                 <select name="id_product_variant" id="id_product_variant" class="form-select">
@@ -46,16 +46,17 @@
                                 @enderror
                             </div>
 
-                            <!-- Số lượng -->
+
                             <div class="mb-3">
                                 <label for="quantity" class="form-label">Số lượng</label>
-                                <input type="number" name="quantity" id="quantity" class="form-control" value="{{ old('quantity') }}">
+                                <input type="number" name="quantity" id="quantity" class="form-control"
+                                    value="{{ old('quantity') }}">
                                 @error('quantity')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
-                            <!-- Loại hành động -->
+
                             <div class="mb-3">
                                 <label for="action_type" class="form-label">Loại hành động</label>
                                 <select name="action_type" id="action_type" class="form-select">
@@ -69,7 +70,7 @@
                                 @enderror
                             </div>
 
-                            <!-- Lý do -->
+
                             <div class="mb-3">
                                 <label for="reason" class="form-label">Lý do</label>
                                 <textarea name="reason" id="reason" class="form-control">{{ old('reason') }}</textarea>
