@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\API\BrandController;
+use App\Http\Controllers\Web\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('attributes')->group(function () {
@@ -77,4 +78,8 @@ Route::prefix('brands')->group(function () {
     Route::post('/{id}/toggle-status', [BrandController::class, 'toggleStatus']);
     Route::post('/{id}/restore', [BrandController::class, 'restore']);
     Route::delete('/{id}/force-delete', [BrandController::class, 'forceDelete']);
+});
+
+Route::prefix('categories')->group(function(){
+    Route::post('/',[CategoryController::class,'store']);
 });

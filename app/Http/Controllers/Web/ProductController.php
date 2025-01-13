@@ -44,7 +44,7 @@ class ProductController extends Controller
         Product::query()->create([
             'name' => $request->name,
             'id_brand' => $request->id_brand,
-            'id_category' => $request->id_category,
+            'id_category' => $request->input('id_category'),
             'description' => $request->input('description'),
             'image_primary' => $profile,
             'status' => $request->status,

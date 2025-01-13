@@ -17,7 +17,10 @@
 
                         <div class="form-group">
                             <label for="name" class="font-weight-bold">Tên sản phẩm:</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên sản phẩm" required>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên sản phẩm" value="{{old('name')}}">
+                            @error('name')
+                            <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
@@ -41,21 +44,34 @@
                         <label class="font-weight-bold">Chọn danh mục:</label>
                         <div class="border p-2 rounded">
                             @foreach ($categories as $category)
+                            @if ($category->id_parent == null)
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="category_{{ $category->id }}" name="categories[]" value="{{ $category->id }}">
+                                <input class="form-check-input" type="checkbox" id="category_{{ $category->id }}" name="id_category[]" value="{{ $category->id }}">
                                 <label class="form-check-label" for="category_{{ $category->id }}">{{ $category->name }}</label>
                             </div>
+
+                            @foreach ($categories as $child)
+                            @if ($child->id_parent == $category->id)
+                            <div class="form-check ms-4">
+                                <input class="form-check-input" type="checkbox" id="category_{{ $child->id }}" name="id_category[]" value="{{ $child->id }}">
+                                <label class="form-check-label" for="category_{{ $child->id }}">{{ $child->name }}</label>
+                            </div>
+                            @endif
+                            @endforeach
+                            @endif
                             @endforeach
                         </div>
+                        @error('id_category')
+                        <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Add New Category Section -->
+
                     <div class="form-group mt-3">
                         <label for="new_category_name" class="font-weight-bold">Thêm danh mục mới:</label>
                         <div id="add-category-section">
-                            <!-- Initially Hidden Input Fields -->
                             <input type="text" class="form-control mb-2" id="new_category_name" name="new_category_name" placeholder="Tên danh mục mới" style="display: none;">
-                            <select class="form-control mb-2" id="parent_category" name="parent_category" style="display: none;">
+                            <select class="form-control mb-2" id="id_parent" name="id_parent" style="display: none;">
                                 <option value="">-- Chọn danh mục cha --</option>
                                 @foreach ($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -65,6 +81,7 @@
                         </div>
                         <button type="button" id="show_add_category" class="btn btn-link">+ Add new category</button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -122,71 +139,68 @@
     });
 
 
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const editorContent = quill.root.innerHTML;
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'description';
-        hiddenInput.value = editorContent;
-        this.appendChild(hiddenInput);
+    // document.querySelector('form').addEventListener('submit', function(e) {
+    //     const editorContent = quill.root.innerHTML;
+    //     const hiddenInput = document.createElement('input');
+    //     hiddenInput.type = 'hidden';
+    //     hiddenInput.name = 'description';
+    //     hiddenInput.value = editorContent;
+    //     this.appendChild(hiddenInput);
+    // });
+
+
+    document.getElementById('show_add_category').addEventListener('click', function() {
+        document.getElementById('new_category_name').style.display = 'block';
+        document.getElementById('id_parent').style.display = 'block';
+        document.getElementById('confirm_add_category').style.display = 'block';
+        this.style.display = 'none';
     });
 
+    document.getElementById('confirm_add_category').addEventListener('click', function() {
+        const newCategoryName = document.getElementById('new_category_name').value.trim();
+        const parentCategory = document.getElementById('id_parent').value;
 
-    document.getElementById('show_add_category').addEventListener('click', function () {
-    // Show the input fields for adding a new category
-    document.getElementById('new_category_name').style.display = 'block';
-    document.getElementById('parent_category').style.display = 'block';
-    document.getElementById('confirm_add_category').style.display = 'block';
-    this.style.display = 'none'; // Hide the "+ Add new category" button
-});
-
-document.getElementById('confirm_add_category').addEventListener('click', function () {
-    const newCategoryName = document.getElementById('new_category_name').value.trim();
-    const parentCategory = document.getElementById('parent_category').value;
-
-    if (!newCategoryName) {
-        alert('Vui lòng nhập tên danh mục!');
-        return;
-    }
-
-    // Gửi yêu cầu AJAX tới server
-    fetch("{{ route('admin.categories.addCategory') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            name: newCategoryName,
-            parent_id: parentCategory || null
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Thêm danh mục mới vào danh sách checkbox
-            const categoryList = document.querySelector('.form-group .border');
-            const newCheckbox = `
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="category_${data.category.id}" name="categories[]" value="${data.category.id}">
-                    <label class="form-check-label" for="category_${data.category.id}">${data.category.name}</label>
-                </div>`;
-            categoryList.insertAdjacentHTML('beforeend', newCheckbox);
-
-            // Reset input
-            document.getElementById('new_category_name').value = '';
-            document.getElementById('parent_category').value = '';
-            alert('Thêm danh mục thành công!');
-        } else {
-            alert('Thêm danh mục thất bại!');
+        if (!newCategoryName) {
+            alert('Vui lòng nhập tên danh mục!');
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Đã xảy ra lỗi khi thêm danh mục!');
-    });
+
+        console.log('Sending data:', {
+            name: newCategoryName,
+            id_parent: parentCategory
+        });
+$.ajax({
+    type: "Post",
+    url: "url",
+    data: "data",
+    dataType: "dataType",
+    success: function (response) {
+        
+    }
 });
-
-
+        // fetch("{{ route('admin.categories.addPostCategory') }}", {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //         },
+        //         body: JSON.stringify({
+        //             name: newCategoryName,
+        //             id_parent: parentCategory || null
+        //         })
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         if (data.success) {
+        //             alert('Thêm danh mục thành công!');
+        //         } else {
+        //             alert('Thêm danh mục thất bại!');
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         alert('Đã xảy ra lỗi khi thêm danh mục!');
+        //     });
+    });
 </script>
 @endpush

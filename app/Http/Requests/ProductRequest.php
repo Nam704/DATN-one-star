@@ -25,7 +25,7 @@ class ProductRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:products,name'.$productId,
             'id_brand' => 'required',
-            'id_category' => 'required',
+            'id_category' => 'required|array|min:1',
             'image_primary' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'status' => 'required|in:active,inactive',
         ];
@@ -38,6 +38,7 @@ class ProductRequest extends FormRequest
         'name.unique' => 'Tên sản phẩm đã tồn tại',
         'id_branch.required' => 'Vui lòng chọn thương hiệu.',
         'id_category.required' => 'Vui lòng chọn danh mục.',
+        'id_category.array' => 'Vui lòng chọn ít  nhất 1 danh mục',
         'image_primary.required' => 'Vui lòng tải lên hình ảnh sản phẩm.',
         'image_primary.image' => 'Tệp tải lên phải là hình ảnh.',
         'image_primary.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, hoặc gif.',

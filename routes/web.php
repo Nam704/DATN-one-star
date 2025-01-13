@@ -61,7 +61,7 @@ Route::prefix('auth/')->name('auth.')->group(
 //->middleware(['role:admin,employee'])
 
 
-Route::prefix('admin')->name('admin.')->group(
+Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
