@@ -31,6 +31,8 @@ Route::prefix('admin')->group(
         );
         Route::prefix('imports')->controller(ImportController::class)->group(
             function () {
+                Route::post('accept-all', 'acceptAll')->name('acceptAll');
+                Route::post('reject-all', 'rejectAll')->name('rejectAll');
                 // Route::get('provinces', 'getProvinces');
                 Route::get('{id}/details', [ImportController::class, 'getImportDetails']);
                 Route::post('/confirm-import', [ImportController::class, 'confirmImport'])->name('import.confirm');

@@ -4,7 +4,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <a href="{{route('admin.imports.list')}}" class="btn btn-sm btn-primary">Back to list</a>
+                <a href="{{route('admin.imports.listApproved')}}" class="btn btn-sm btn-primary">Back to list</a>
             </div>
             <div class="card-body">
                 <form id="import-form" action="{{ route('admin.imports.edit', $import->id) }}" method="POST">

@@ -91,8 +91,8 @@ class ImportProducts
                     'quantity' => $quantity,
                     'reason' => "" //$this->user->name . " import" . " at: " . $today,
                 ]);
-                $productVariant->quantity += $detail[1];
-                $productVariant->save();
+                // $productVariant->quantity += $detail[1];
+                // $productVariant->save();
             }
             $import->update(['total_amount' => $totalAmount]);
 

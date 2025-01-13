@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
+use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -50,7 +51,7 @@ Route::prefix('auth/')->name('auth.')->group(
             Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
             Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
 
-            Route::get('reset-password/{token}', 'getfromResetPassword')->name('getfromResetPassword');
+            Route::get('reset-password/{id}/{token}', 'getfromResetPassword')->name('getfromResetPassword');
             Route::post('reset-password', 'resetPassword')->name('resetPassword');
             Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
         });
@@ -60,20 +61,25 @@ Route::prefix('auth/')->name('auth.')->group(
 
 
 
-Route::prefix('admin')->name('admin.')->group(
+Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+        Route::prefix('export')->name('export.')->controller(TemplateExportController::class)->group(
+            function () {
+                Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
+
+                // Route::get('product', [ProductController::class, 'exportProduct'])->name('product');
+                // Route::get('supplier', [SupplierController::class, 'exportSupplier'])->name('supplier');
+                // Route::get('user', [UserContronler::class, 'exportUser'])->name('user');
+                // Route::get('import', [ImportController::class, 'exportImport'])->name('import');
+
+            }
+        );
 
 
-        // Route::prefix('categorys')->name('categorys')->group(
-        //     function(){
-        //         Route::get('list-category',[CategoryController::class,'index'])->name('admin.categorys.listcategory');
-        //         Route::get('add-category',[CategoryController::class,'addCategory'])->name('admin.categorys.addCategory');
-        //     }
-        // );
 
         Route::group([
             'prefix' => 'categories',
@@ -177,6 +183,8 @@ Route::prefix('admin')->name('admin.')->group(
                 // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
                 Route::post('add', 'add')->name('add');
                 Route::post('edit/{id}', 'edit')->name('edit');
+                Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
+                Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');;
             }
         );
 

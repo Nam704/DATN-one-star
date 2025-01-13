@@ -6,7 +6,26 @@
 <h4 class="fs-20">Forgot Password?</h4>
 <p class="text-muted mb-3">Enter your email address and we'll send you an email
     with instructions to reset your password.</p>
+<div>
+    @if (session('success'))
+    <p class="alert alert-primary">
+        {{ session('success') }}
+    </p>
+    @endif
+    @if ($errors->any()||session('error'))
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+            @if (session('error'))
+            <li>{{ session('error') }}</li>
+            @endif
+        </ul>
+    </div>
+    @endif
 
+</div>
 
 <!-- form -->
 <form action="{{ route('auth.sendPasswordResetEmail') }}" method="POST">
