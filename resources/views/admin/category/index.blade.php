@@ -9,7 +9,7 @@
                     <h4 class="header-title">Fixed Header</h4>
 
 
-                    <a href="{{ route('admin.productvariant.addProductVariant') }}" type="button" class="btn btn-sm btn-primary">
+                    <a href="{{ route('admin.categories.addCategory') }}" type="button" class="btn btn-sm btn-primary">
                         Add new
                         category</a>
 

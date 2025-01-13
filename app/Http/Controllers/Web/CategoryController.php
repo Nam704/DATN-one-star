@@ -28,13 +28,20 @@ class CategoryController extends Controller
 
     public function addPostCategory(CategoryRequest $request)
 {
-    Category::create([
+  $category= Category::create([
         'name' => $request->name,
         'id_parent'=>$request->id_parent,
-        'status' => $request->status,
+        'status' => $request->status ?? 1,
     ]);
-
     return redirect()->route('admin.categories.listCategory')->with('success', 'Thêm danh mục thành công');
+    return response()->json([
+        'success' => true,
+        'category' => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'status' => $category->status,
+        ],
+    ]);
 }
 
 public function editCategory($id){

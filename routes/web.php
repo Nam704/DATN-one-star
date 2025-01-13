@@ -58,10 +58,10 @@ Route::prefix('auth/')->name('auth.')->group(
     }
 );
 
+//->middleware(['role:admin,employee'])
 
 
-
-Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
+Route::prefix('admin')->name('admin.')->group(
 
     function () {
         Route::controller(DashboardController::class)->group(function () {
@@ -92,6 +92,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::put('edit-category/{id}', [CategoryController::class, 'editPutCategory'])->name('editPutCategory');
             Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');
         });
+        
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
