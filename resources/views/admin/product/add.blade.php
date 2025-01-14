@@ -8,13 +8,11 @@
     </div>
 
     <div class="row">
-
         <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-body">
-                    <form action="{{route('admin.products.addPostProduct')}}" method="post" enctype="multipart/form-data" class="form">
-                        @csrf
-
+            <form action="{{route('admin.products.addPostProduct')}}" method="post" enctype="multipart/form-data" class="form">
+                @csrf
+                <div class="card shadow mb-4">
+                    <div class="card-body">
                         <div class="form-group">
                             <label for="name" class="font-weight-bold">Tên sản phẩm:</label>
                             <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên sản phẩm" value="{{old('name')}}">
@@ -26,10 +24,11 @@
                         <div class="form-group">
                             <label for="description" class="font-weight-bold">Mô tả sản phẩm:</label>
                             <div id="snow-editor" style="height: 300px; border: 1px solid #ddd; border-radius: 5px;"></div>
+                            <!-- <input type="text" name="description" id="description-input"> -->
                         </div>
 
+                    </div>
                 </div>
-            </div>
         </div>
 
 
@@ -45,26 +44,48 @@
                         <div class="border p-2 rounded">
                             @foreach ($categories as $category)
                             @if ($category->id_parent == null)
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="category_{{ $category->id }}" name="id_category[]" value="{{ $category->id }}">
-                                <label class="form-check-label" for="category_{{ $category->id }}">{{ $category->name }}</label>
-                            </div>
+                            <!-- Danh mục cha -->
+                            <div class="category-item" id="category_{{ $category->id }}">
+                                <label class="toggle-subcategories" data-category-id="{{ $category->id }}">
+                                    <input type="checkbox" class="form-check-input" name="id_category" value="{{ $category->id }}">
+                                    {{ $category->name }}
+                                </label>
 
-                            @foreach ($categories as $child)
-                            @if ($child->id_parent == $category->id)
-                            <div class="form-check ms-4">
-                                <input class="form-check-input" type="checkbox" id="category_{{ $child->id }}" name="id_category[]" value="{{ $child->id }}">
-                                <label class="form-check-label" for="category_{{ $child->id }}">{{ $child->name }}</label>
+                                <!-- Danh mục con -->
+                                <div class="subcategory-container" id="subcategories_{{ $category->id }}" style="display: none;">
+                                    @foreach ($categories as $child)
+                                    @if ($child->id_parent == $category->id)
+                                    <div class="category-item" id="category_{{ $child->id }}">
+                                        <label class="toggle-subcategories" data-category-id="{{ $child->id }}">
+                                            <input type="checkbox" class="form-check-input" name="id_category" value="{{ $child->id }}">
+                                            {{ $child->name }}
+                                        </label>
+
+                                        <!-- Danh mục cháu -->
+                                        <div class="subcategory-container" id="subcategories_{{ $child->id }}" style="display: none;">
+                                            @foreach ($categories as $grandchild)
+                                            @if ($grandchild->id_parent == $child->id)
+                                            <div class="category-item">
+                                                <input class="form-check-input" type="checkbox" name="id_category" value="{{ $grandchild->id }}">
+                                                <label class="form-check-label">
+                                                    {{ $grandchild->name }}
+                                                </label>
+                                            </div>
+                                            @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
+                                    @endforeach
+                                </div>
                             </div>
-                            @endif
-                            @endforeach
                             @endif
                             @endforeach
                         </div>
-                        @error('id_category')
-                        <div class="text-danger">{{ $message }}</div>
-                        @enderror
                     </div>
+
+
+
 
 
                     <div class="form-group mt-3">
@@ -86,15 +107,14 @@
             </div>
         </div>
         <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-success mr-2">Lưu sản phẩm</button>
+            <button type="submit" class="btn btn-success mr-2">Thêm sản phẩm</button>
             <a href="{{ route('admin.products.listProduct')}}" class="btn btn-secondary ms-2">Quay lại</a>
         </div>
         </form>
     </div>
+
 </div>
-
 @endsection
-
 @push('styles')
 <x-admin.data-table-styles />
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
@@ -107,6 +127,21 @@
     .ql-container {
         border-radius: 0 0 5px 5px;
         border: 1px solid #ddd;
+    }
+
+    .subcategory-container {
+        margin-left: 20px;
+        /* Điều chỉnh mức độ thụt lề tại đây */
+    }
+
+    .subcategory-container .category-item {
+        margin-left: 20px;
+        /* Điều chỉnh mức độ thụt lề tại đây */
+    }
+
+    .category-item {
+        margin-bottom: 10px;
+        /* Khoảng cách giữa các danh mục */
     }
 </style>
 @endpush
@@ -138,6 +173,30 @@
         }
     });
 
+    document.querySelectorAll('.toggle-subcategories').forEach(function(label) {
+        label.addEventListener('click', function(event) {
+            event.preventDefault(); // Ngừng hành động mặc định của nhấp vào label
+
+            // Lấy id danh mục từ data-category-id
+            var categoryId = this.getAttribute('data-category-id');
+
+            // Lấy checkbox tương ứng
+            var checkbox = document.querySelector('#category_' + categoryId + ' input[type="checkbox"]');
+
+            // Toggle trạng thái checkbox (tích hoặc bỏ tích)
+            checkbox.checked = !checkbox.checked;
+
+            // Toggle hiển thị hoặc ẩn các danh mục con
+            var subcategoryContainer = document.getElementById('subcategories_' + categoryId);
+            subcategoryContainer.style.display = subcategoryContainer.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+
+
+
+
+
 
     // document.querySelector('form').addEventListener('submit', function(e) {
     //     const editorContent = quill.root.innerHTML;
@@ -147,7 +206,10 @@
     //     hiddenInput.value = editorContent;
     //     this.appendChild(hiddenInput);
     // });
-
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const editorContent = quill.root.innerHTML;
+        document.getElementById('description-input').value = editorContent;
+    });
 
     document.getElementById('show_add_category').addEventListener('click', function() {
         document.getElementById('new_category_name').style.display = 'block';
@@ -165,42 +227,25 @@
             return;
         }
 
-        console.log('Sending data:', {
-            name: newCategoryName,
-            id_parent: parentCategory
+        $.ajax({
+            type: "POST",
+            url: "{{ route('admin.categories.addCategoryProduct') }}",
+            data: {
+                name: newCategoryName,
+                id_parent: parentCategory,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+                }
+            },
+            error: function(xhr) {
+                alert('Lỗi khi gửi dữ liệu: ' + xhr.responseText);
+            }
         });
-$.ajax({
-    type: "Post",
-    url: "url",
-    data: "data",
-    dataType: "dataType",
-    success: function (response) {
-        
-    }
-});
-        // fetch("{{ route('admin.categories.addPostCategory') }}", {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //         },
-        //         body: JSON.stringify({
-        //             name: newCategoryName,
-        //             id_parent: parentCategory || null
-        //         })
-        //     })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         if (data.success) {
-        //             alert('Thêm danh mục thành công!');
-        //         } else {
-        //             alert('Thêm danh mục thất bại!');
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.error('Error:', error);
-        //         alert('Đã xảy ra lỗi khi thêm danh mục!');
-        //     });
     });
 </script>
 @endpush

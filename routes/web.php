@@ -88,6 +88,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('list-category', [CategoryController::class, 'listCategory'])->name('listCategory');
             Route::get('add-category', [CategoryController::class, 'addCategory'])->name('addCategory');
             Route::post('add-category', [CategoryController::class, 'addPostCategory'])->name('addPostCategory');
+            Route::post('add-category', [CategoryController::class, 'addCategoryProduct'])->name('addCategoryProduct');
             Route::get('edit-category/{id}', [CategoryController::class, 'editCategory'])->name('editCategory');
             Route::put('edit-category/{id}', [CategoryController::class, 'editPutCategory'])->name('editPutCategory');
             Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');

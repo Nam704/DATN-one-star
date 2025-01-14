@@ -13,11 +13,11 @@ class Product extends Model
 
     protected $fillable = [
         'name',
-        'id_brand',
+        // 'id_brand',
         'id_category',
         'description',
-        'image_primary',
-        'status',
+        // 'image_primary',
+        // 'status',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -27,12 +27,17 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'id_category');
     }
-
-
-    public function Brand()
+    
+    public function categories()
     {
-        return $this->belongsTo(Brand::class, 'id_brand');
+        return $this->belongsToMany(Category::class, 'category_product');
     }
+
+
+    // public function Brand()
+    // {
+    //     return $this->belongsTo(Brand::class, 'id_brand');
+    // }
 
 
     //     public static function scopeList($query, $idProduct)

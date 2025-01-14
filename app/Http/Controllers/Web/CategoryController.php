@@ -44,6 +44,26 @@ class CategoryController extends Controller
     ]);
 }
 
+public function addCategoryProduct(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'id_parent' => 'nullable|exists:categories,id',
+    ]);
+
+    try {
+        $category = new Category();
+        $category->name = $request->name;
+        $category->id_parent = $request->id_parent;
+        $category->save();
+
+        return response()->json(['success' => true, 'message' => 'Danh mục đã được thêm thành công.']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
+    }
+}
+
+
 public function editCategory($id){
     $categories = Category::findOrFail($id);
 

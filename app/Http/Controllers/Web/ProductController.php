@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function listProduct()
     {
-        $products = Product::with(['brand', 'category'])->get();;
+        $products = Product::with([ 'category'])->get();;
         return view('admin.product.index')->with([
             'products' => $products
         ]);
@@ -33,22 +33,28 @@ class ProductController extends Controller
     }
 
 
-    public function addPostProduct(ProductRequest $request)
+    public function addPostProduct(Request $request)
     {
-        if ($request->hasFile('image_primary')) {
-            $profile = $request->file('image_primary')->store('uploads/products', 'public');
-        } else {
-            $profile = null;
+        // if ($request->hasFile('image_primary')) {
+        //     $profile = $request->file('image_primary')->store('uploads/products', 'public');
+        // } else {
+        //     $profile = null;
+        // }
+
+      $product  =  Product::create([
+            'name' => $request->name,
+            // 'id_brand' => $request->id_brand,
+            'id_category' => $request->input('id_category'),
+            // 'description' => $request->description,
+            // 'image_primary' => $profile,
+            // 'status' => $request->status,
+        ]);
+
+        if ($request->has('id_category')) {
+            $product->categories()->sync($request->input('id_category'));
         }
 
-        Product::query()->create([
-            'name' => $request->name,
-            'id_brand' => $request->id_brand,
-            'id_category' => $request->input('id_category'),
-            'description' => $request->input('description'),
-            'image_primary' => $profile,
-            'status' => $request->status,
-        ]);
+    
 
         return redirect()->route('admin.products.listProduct')->with('success', 'Thêm sản phẩm thành công');
     }

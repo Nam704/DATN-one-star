@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\API\BrandController;
-use App\Http\Controllers\Web\CategoryController;
+use App\Http\Controllers\API\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('attributes')->group(function () {
@@ -81,5 +81,6 @@ Route::prefix('brands')->group(function () {
 });
 
 Route::prefix('categories')->group(function(){
-    Route::post('/',[CategoryController::class,'store']);
+        Route::get('/', [CategoryController::class, 'index']);
+        Route::post('/add', [CategoryController::class, 'addCategory']);
 });
