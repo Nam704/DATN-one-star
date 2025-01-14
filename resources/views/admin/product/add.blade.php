@@ -23,8 +23,7 @@
 
                         <div class="form-group">
                             <label for="description" class="font-weight-bold">Mô tả sản phẩm:</label>
-                            <div id="snow-editor" style="height: 300px; border: 1px solid #ddd; border-radius: 5px;"></div>
-                            <!-- <input type="text" name="description" id="description-input"> -->
+                            <textarea id="description" name="description" class="form-control"></textarea>
                         </div>
 
                     </div>
@@ -117,7 +116,8 @@
 @endsection
 @push('styles')
 <x-admin.data-table-styles />
-<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<!-- <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"> -->
+<link href="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.css" rel="stylesheet">
 <style>
     .ql-toolbar {
         border-radius: 5px 5px 0 0;
@@ -131,81 +131,68 @@
 
     .subcategory-container {
         margin-left: 20px;
-        /* Điều chỉnh mức độ thụt lề tại đây */
+
     }
 
     .subcategory-container .category-item {
         margin-left: 20px;
-        /* Điều chỉnh mức độ thụt lề tại đây */
+
     }
 
     .category-item {
         margin-bottom: 10px;
-        /* Khoảng cách giữa các danh mục */
+
     }
 </style>
 @endpush
 
 @push('scripts')
 <x-admin.data-table-scripts />
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<!-- <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.0/tinymce.min.js"></script>
 <script>
-    var quill = new Quill('#snow-editor', {
-        theme: 'snow',
-        placeholder: 'Nhập nội dung sản phẩm tại đây...',
-        modules: {
-            toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                [{
-                    'header': [1, 2, 3, false]
-                }],
-                [{
-                    'list': 'ordered'
-                }, {
-                    'list': 'bullet'
-                }],
-                ['link', 'image', 'video'],
-                [{
-                    'align': []
-                }],
-                ['clean']
-            ]
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        tinymce.init({
+            selector: '#description',
+            plugins: 'lists link image table code',
+            toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | table | code',
+            height: 300,
+            forced_root_block: '',
+            placeholder: 'Nhập nội dung sản phẩm tại đây...',
+            setup: function(editor) {
+            
+                editor.on('change', function() {
+                    tinymce.triggerSave(); 
+                });
+            },
+            init_instance_callback: function(editor) {
+                var oldDescription = "{{ old('description') }}";
+                if (oldDescription) {
+                    editor.setContent(oldDescription);
+                }
+            }
+        });
+
     });
 
     document.querySelectorAll('.toggle-subcategories').forEach(function(label) {
         label.addEventListener('click', function(event) {
-            event.preventDefault(); // Ngừng hành động mặc định của nhấp vào label
+            event.preventDefault();
 
-            // Lấy id danh mục từ data-category-id
+
             var categoryId = this.getAttribute('data-category-id');
 
-            // Lấy checkbox tương ứng
+
             var checkbox = document.querySelector('#category_' + categoryId + ' input[type="checkbox"]');
 
-            // Toggle trạng thái checkbox (tích hoặc bỏ tích)
+
             checkbox.checked = !checkbox.checked;
 
-            // Toggle hiển thị hoặc ẩn các danh mục con
+
             var subcategoryContainer = document.getElementById('subcategories_' + categoryId);
             subcategoryContainer.style.display = subcategoryContainer.style.display === 'none' ? 'block' : 'none';
         });
-    });
-
-
-
-
-
-
-
-    // document.querySelector('form').addEventListener('submit', function(e) {
-    //     const editorContent = quill.root.innerHTML;
-    //     const hiddenInput = document.createElement('input');
-    //     hiddenInput.type = 'hidden';
-    //     hiddenInput.name = 'description';
-    //     hiddenInput.value = editorContent;
-    //     this.appendChild(hiddenInput);
-    // });
+    });;
     document.querySelector('form').addEventListener('submit', function(e) {
         const editorContent = quill.root.innerHTML;
         document.getElementById('description-input').value = editorContent;

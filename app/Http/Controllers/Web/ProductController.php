@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function listProduct()
     {
-        $products = Product::with([ 'category'])->get();;
+        $products = Product::with(['category'])->get();;
         return view('admin.product.index')->with([
             'products' => $products
         ]);
@@ -45,7 +45,7 @@ class ProductController extends Controller
             'name' => $request->name,
             // 'id_brand' => $request->id_brand,
             'id_category' => $request->input('id_category'),
-            // 'description' => $request->description,
+            'description' => $request->description,
             // 'image_primary' => $profile,
             // 'status' => $request->status,
         ]);
