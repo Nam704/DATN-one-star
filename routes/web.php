@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\ProductVariantController;
+use App\Http\Controllers\Web\AttributeController;
 use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\BrandController;
+use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ImageController;
@@ -88,13 +92,68 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('destroy/{id}', 'destroy')->name('destroy');
             Route::get('show/{id}', 'show')->name('show');
         });
-        Route::prefix('products')->name('products.')->controller(ProductController::class)->group(function () {
-            Route::get('index', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('store', 'store')->name('store');
-            Route::get('edit-product/{id}', 'editProduct')->name('editProduct');
-            Route::put('edit-product/{id}', 'editPutProduct')->name('editPutProduct');
-            Route::delete('delete-product/{id}', 'deleteProduct')->name('deleteProduct');
+        Route::group([
+            'prefix' => 'products',
+            'as' => 'products.'
+        ], function () {
+            Route::get('list-product', [ProductController::class, 'listProduct'])->name('listProduct');
+            Route::get('add-product', [ProductController::class, 'addProduct'])->name('addProduct');
+            Route::post('add-product', [ProductController::class, 'addPostProduct'])->name('addPostProduct');
+            Route::get('edit-product/{id}', [ProductController::class, 'editProduct'])->name('editProduct');
+            Route::put('edit-product/{id}', [ProductController::class, 'editPutProduct'])->name('editPutProduct');
+            Route::delete('delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('deleteProduct');
+        });
+        Route::group([
+            'prefix' => 'categories',
+            'as' => 'categories.'
+        ], function () {
+            Route::get('list-category', [CategoryController::class, 'listCategory'])->name('listCategory');
+            Route::get('add-category', [CategoryController::class, 'addCategory'])->name('addCategory');
+            Route::post('add-category', [CategoryController::class, 'addPostCategory'])->name('addPostCategory');
+            Route::get('edit-category/{id}', [CategoryController::class, 'editCategory'])->name('editCategory');
+            Route::put('edit-category/{id}', [CategoryController::class, 'editPutCategory'])->name('editPutCategory');
+            Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');
+
+            Route::post('add-category', [CategoryController::class, 'addCategoryProduct'])->name('addCategoryProduct');
+        });
+
+
+        Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+        Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+        Route::group([
+            'prefix' => 'productvariant',
+            'as' => 'productvariant.'
+        ], function () {
+            Route::get('list-productvariant', [ProductVariantController::class, 'listProductVariant'])->name('listProductVariant');
+            Route::get('add-productvariant', [ProductVariantController::class, 'addProductVariant'])->name('addProductVariant');
+            Route::post('add-productvariant', [ProductVariantController::class, 'addPostProductVariant'])->name('addPostProductVariant');
+            Route::get('edit-productvariant/{id}', [ProductVariantController::class, 'editProductVariant'])->name('editProductVariant');
+            Route::put('edit-productvariant/{id}', [ProductVariantController::class, 'editPutProductVariant'])->name('editPutProductVariant');
+            Route::delete('delete-productvariant/{id}', [ProductVariantController::class, 'deleteProductVariant'])->name('deleteProductVariant');
         });
     }
 );

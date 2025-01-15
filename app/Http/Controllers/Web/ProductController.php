@@ -18,55 +18,47 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function listProduct()
     {
-        $products = Product::with(['brand', 'category'])->get();
+        $products = Product::with(['brand', 'categories'])->get();
         return view('admin.product.index')->with([
             'products' => $products
         ]);
     }
 
-    public function create()
+    public function addProduct()
     {
         $brands = Brand::all();
         $variants = Product_variant::all();
         $categories = Category::all();
         $attributes = Attribute::with('values')->get();
 
-        return view('admin.product.create', compact('brands', 'categories', 'attributes'));
+        return view('admin.product.add', compact('brands', 'variants', 'categories', 'attributes'));
     }
-
-    /**
-     * Lưu sản phẩm mới vào cơ sở dữ liệu.
-     */
-    // App\Http\Controllers\Web\ProductController.php
-
-    public function store(Request $request)
+    public function addPostProduct(ProductRequest $request)
     {
-        // Validate và tạo sản phẩm
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'id_brand' => 'required|exists:brands,id',
-            'id_category' => 'required|exists:categories,id',
-            'description' => 'required|string',
-            'image_primary' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'variants.*.sku' => 'required|string|distinct|unique:product_variants,sku',
-            'variants.*.status' => 'required|boolean',
-        ]);
-
-        // Upload ảnh chính
+        // Lưu ảnh chính của sản phẩm
         $primaryImagePath = $request->file('image_primary')->store('products', 'public');
 
-        // Tạo sản phẩm
+        // Kiểm tra xem có id_category trong request hay không, nếu không thì mặc định là [1]
+        $idCategory = $request->has('id_category') ? $request->id_category : [1]; // Mặc định là category 1
+
+        // Tạo sản phẩm mới
         $product = Product::create([
-            'name' => $validated['name'],
-            'id_brand' => $validated['id_brand'],
-            'id_category' => $validated['id_category'],
-            'description' => $validated['description'],
+            'name' => $request->name,
+            'id_brand' => $request->id_brand,
+            'description' => $request->description,
             'image_primary' => $primaryImagePath,
+            'status' => $request->status,
+            'id_category' => $idCategory[0], // Gán category đầu tiên nếu có nhiều category
         ]);
 
-        // Thêm các biến thể
+        // Đồng bộ các danh mục với sản phẩm nếu có nhiều danh mục được chọn
+        if ($request->has('id_category') && is_array($request->id_category)) {
+            $product->categories()->sync($request->id_category);
+        }
+
+        // Lưu các biến thể cho sản phẩm
         if ($request->has('variants')) {
             foreach ($request->variants as $variant) {
                 // Tạo một biến thể và liên kết với sản phẩm
@@ -108,6 +100,8 @@ class ProductController extends Controller
         }
 
 
-        return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
+
+        // Trả về thông báo thành công sau khi lưu sản phẩm và các dữ liệu liên quan
+        return redirect()->route('admin.products.listProduct')->with('success', 'Thêm sản phẩm thành công');
     }
 }

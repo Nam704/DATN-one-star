@@ -9,7 +9,7 @@ class Product_variant extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'product_id',
+        'id_product',
         'sku',
         'status',
     ];
@@ -28,21 +28,22 @@ class Product_variant extends Model
     {
         return $query->where('status', 'active')->where('id_product', $id);
     }
-    public function variants()
-{
-    return $this->hasMany(Product_variant::class, 'product_id');
-}
 
-    public function images()
+    public function productAudits()
     {
-        return $this->hasMany(Image::class, 'id_product_variant');
-    }
-    public function productAudits() {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
     public function attributes()
     {
         return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
     }
+    public function product()
+{
+    return $this->belongsTo(Product::class, 'id_product');
+}
 
+public function images()
+    {
+        return $this->hasMany(Image::class, 'id_product_variant');
+    }
 }

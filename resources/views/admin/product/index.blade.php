@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="header-title">Product List</h4>
-                    <a href="{{ route('admin.products.create') }}" class="btn btn-sm btn-primary">Add New Product</a>
+                    <a href="{{ route('admin.products.addProduct') }}" class="btn btn-sm btn-primary">Add New Product</a>
                 </div>
 
                 <div class="card-body">
@@ -31,8 +31,11 @@
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $product->name }}</td>
                                 <td>{{ $product->brand->name ?? 'N/A' }}</td>
-                                <td>{{ $product->category->name ?? 'N/A' }}</td>
-                                <td>{{ $product->description }}</td>
+                                <td>
+                                    @foreach ($product->categories as $category)
+                                        {{ $category->name }}@if (!$loop->last), @endif
+                                    @endforeach
+                                </td>                                <td>{{ $product->description }}</td>
                                 <td>
                                     @if ($product->image_primary)
                                         <img src="{{ asset('storage/' . $product->image_primary) }}" alt="Product Image" height="60px">
@@ -41,7 +44,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    {{ $product->status == 1 ? 'Active' : 'Inactive' }}
+                                    {{ $product->status }}
                                 </td>
                                 <td>
                                     <a href="{{route('admin.products.editProduct', $product->id)}}"><button type="button" class="btn btn-secondary btn-warning">Sửa</button></a>|
