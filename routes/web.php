@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
+use App\Http\Controllers\Web\ProductController;
+
 
 Route::get('/', function () {
     return view('admin.index');
@@ -47,5 +49,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
         Route::post('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}', 'destroy')->name('destroy');
+    });
+
+    // Products Routes
+    Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
     });
 });
