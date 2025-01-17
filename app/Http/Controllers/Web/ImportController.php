@@ -32,24 +32,21 @@ class ImportController extends Controller
     }
     public function importExcel(Request $request, ProductAuditService $productAuditService)
     {
+        $user = auth()->user();
         $request->validate([
             'file' => 'required|mimes:xlsx,csv',
         ]);
 
         try {
-            // Đọc dữ liệu từ file Excel
             $file = $request->file('file');
             $data = Excel::toArray([], $file);
-            // dd($data);
-            // Truyền dữ liệu vào class ImportProducts (xử lý logic đầy đủ)
             $importProducts = new ImportProducts($productAuditService);
             $importData =   $importProducts->process($data[0], $data[1]);
-            broadcast(new ImportNotificationSent($importData));
-            // return response()->json(['status' => 'success', 'message' => 'File imported successfully!']);
+            // dd($importData);
+            broadcast(new ImportNotificationSent($importData, $user));
             return redirect()->route('admin.imports.listApproved')->with('success', 'Thông báo đã được gửi đi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
-            // return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 

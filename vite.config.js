@@ -8,7 +8,7 @@ export default defineConfig({
                 "resources/css/app.css",
                 "resources/js/app.js",
                 "resources/js/public.js",
-                "resources/js/import.js",
+                "resources/js/private.js",
             ],
             refresh: true,
         }),

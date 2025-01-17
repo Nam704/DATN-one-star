@@ -15,10 +15,11 @@ class ImportNotificationSent implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $importData;
-
-    public function __construct($importData)
+    public $user;
+    public function __construct($importData, $user)
     {
         $this->importData = $importData;
+        $this->user = $user;
     }
 
     public function broadcastOn()
@@ -31,9 +32,9 @@ class ImportNotificationSent implements ShouldBroadcast
     {
 
         return [
-            // 'importData' => $this->importData,
-            'message' => 'Import completed successfully',
-            // "user" => $this->user
+            'title' => 'Import Notification',
+            'message' => $this->user->name . " đã thêm sản phẩm mới vào hệ thống",
+            'id' => $this->importData->id,
         ];
     }
 }

@@ -8,7 +8,9 @@
 
 <div class="reset-section">
     <p>Click the button below to reset your password:</p>
-    <a href="{{ $resetLink }}" class="button">Reset Password</a>
+    <a href="{{ $resetLink }}" class="button">
+        <p style="color: white">Reset Password</p>
+    </a>
 </div>
 
 <p>If you did not request a password reset, no further action is required.</p>

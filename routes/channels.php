@@ -10,6 +10,11 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('imports', function ($user) {
     return $user->isAdmin();
 });
+Broadcast::channel('return-imports', function ($user) {
+    if ($user->isAdmin() || $user->isEmployee()) {
+        return true;
+    }
+});
 // Broadcast::channel('user-login', function ($user) {
 //     return true;
 // });

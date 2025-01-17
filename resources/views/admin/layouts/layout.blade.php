@@ -61,7 +61,7 @@
     @stack('scripts')
     @vite('resources/js/app.js')
     @vite('resources/js/public.js')
-    @vite('resources/js/import.js')
+    @vite('resources/js/private.js')
 
     <!-- App js -->
     <script src="{{ asset('admin/assets/js/app.min.js') }}"></script>
