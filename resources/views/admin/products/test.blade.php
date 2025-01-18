@@ -525,24 +525,20 @@
         }
 
 
-function createVariationCard(index, combination) {
-    const variationCard = $('<div>').addClass('card mb-3');
+        function createVariationCard(index, isManual = false, combination = null) {
+            const variationCard = $('<div>').addClass('card mb-3');
     
     // Card Header
     const header = $('<div>').addClass('card-header d-flex justify-content-between align-items-center');
     const title = $('<h6>').addClass('mb-0').text(`Biến thể ${index + 1}`);
     const headerButtons = $('<div>').addClass('d-flex gap-2');
-        
     
     // Toggle button
     const toggleButton = $('<button>').addClass('btn btn-sm btn-primary collapse-toggle')
         .attr('type', 'button')
         .attr('data-bs-toggle', 'collapse')
         .attr('data-bs-target', `#variation${index}`)
-        .html('<i class="fas fa-chevron-down"></i>')
-        .on('click', function(e) {
-            e.stopPropagation();
-        });
+        .html('<i class="fas fa-chevron-down"></i>');
         
     // Delete button
     const deleteButton = $('<button>').addClass('btn btn-sm btn-danger delete-variation')
@@ -550,22 +546,7 @@ function createVariationCard(index, combination) {
         .html('<i class="fas fa-trash"></i>')
         .on('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-            
-            Swal.fire({
-                title: 'Xóa biến thể?',
-                text: 'Bạn có chắc chắn muốn xóa biến thể này?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    variationCard.fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                }
-            });
+            variationCard.remove();
         });
 
     headerButtons.append(toggleButton, deleteButton);
@@ -578,18 +559,23 @@ function createVariationCard(index, combination) {
     
     // Attribute Selects Row
     const selectsRow = $('<div>').addClass('row mb-3');
-    tempStorage.attributes.forEach(attr => {
+    tempStorage.attributes.forEach((attr, attrIndex) => {
         const col = $('<div>').addClass('col-md');
         const formGroup = $('<div>').addClass('form-group');
         const label = $('<label>').addClass('form-label').text(attr.name);
         const select = $('<select>').addClass('form-select')
             .attr('name', `variations[${index}][${attr.id}]`);
-            
+
+        // Add all possible values for each attribute
         tempStorage.selectedValues[attr.id].forEach(val => {
             const option = $('<option>')
                 .val(val.id)
-                .text(val.value)
-                .prop('selected', val.value === combination[attr.name]);
+                .text(val.value);
+            
+            if (combination && combination[attrIndex].valueId === val.id) {
+                option.prop('selected', true);
+            }
+            
             select.append(option);
         });
         
@@ -603,14 +589,17 @@ function createVariationCard(index, combination) {
     
     // SKU
     const skuCol = $('<div>').addClass('col-md-4').append(
-        $('<div>').addClass('form-group').append(
-            $('<label>').addClass('form-label').text('SKU'),
+    $('<div>').addClass('form-group').append(
+        $('<label>').addClass('form-label').text('SKU'),
+        $('<div>').addClass('input-group').append(
+            $('<span>').addClass('input-group-text').text('SKU-'),
             $('<input>').addClass('form-control')
                 .attr('type', 'text')
                 .attr('name', `variations[${index}][sku]`)
-                .val(`SKU-${(index + 1).toString().padStart(2, '0')}`)
+                .attr('placeholder', 'Nhập mã')
         )
-    );
+    )
+);
 
     // Price
     const priceCol = $('<div>').addClass('col-md-4').append(
@@ -621,6 +610,7 @@ function createVariationCard(index, combination) {
                 .attr('min', '0')
                 .attr('step', '1000')
                 .attr('name', `variations[${index}][price]`)
+                .attr('placeholder', 'Nhập giá')
         )
     );
 
@@ -632,6 +622,7 @@ function createVariationCard(index, combination) {
                 .attr('type', 'number')
                 .attr('min', '0')
                 .attr('name', `variations[${index}][stock]`)
+                .attr('placeholder', 'Nhập số lượng')
         )
     );
 
@@ -642,20 +633,8 @@ function createVariationCard(index, combination) {
             $('<input>').addClass('form-control variation-image')
                 .attr('type', 'file')
                 .attr('accept', 'image/*')
-                .attr('name', `variations[${index}][image]`)
-                .on('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            $(this).siblings('.image-preview').html(
-                                `<img src="${e.target.result}" class="img-thumbnail mt-2" style="max-height: 150px;">`
-                            );
-                        }.bind(this);
-                        reader.readAsDataURL(file);
-                    }
-                }),
-            $('<div>').addClass('image-preview')
+                .attr('name', `variations[${index}][image]`),
+            $('<div>').addClass('image-preview mt-2')
         )
     );
 
@@ -671,47 +650,55 @@ function generateVariationSelects() {
     const container = $('#variationsContainer');
     container.empty();
 
+    const combinations = generateCombinations();
+    combinations.forEach((combination, index) => {
+        const variationCard = createVariationCard(index, combination);
+        container.append(variationCard);
+    });
+}
+// Add manual variation handler
+$('#addManualVariation').click(() => {
+    const newIndex = $('#variationsContainer .card').length;
+    const manualVariation = createVariationCard(newIndex, true);
+    $('#variationsContainer').append(manualVariation);
+});
+
+// For auto-generated variations
+function generateVariationSelects() {
+    const container = $('#variationsContainer');
+    container.empty();
     const combinations = generateCombinations(tempStorage.selectedValues);
-    
     combinations.forEach((combination, index) => {
         const variationCard = createVariationCard(index, combination);
         container.append(variationCard);
     });
 }
 
-// Add manual variation handler
-$('#addManualVariation').click(function() {
-    if (tempStorage.attributes.length === 0) {
-        Swal.fire({
-            title: 'Lỗi',
-            text: 'Vui lòng lưu thuộc tính trước khi thêm biến thể',
-            icon: 'error'
-        });
-        return;
-    }
-
-    const newIndex = $('#variationsContainer .card').length;
-    const manualVariation = createVariationCard(newIndex, true);
-    $('#variationsContainer').append(manualVariation);
-});
 
 
 
-
-
-function generateCombinations(selectedValues) {
-    let combinations = [{}];
+function generateCombinations() {
+    let combinations = [[]];
+    let usedCombinations = new Set();
     
-    Object.entries(tempStorage.attributes).forEach(([_, attr]) => {
+    tempStorage.attributes.forEach(attr => {
         const values = tempStorage.selectedValues[attr.id];
         const newCombinations = [];
         
         combinations.forEach(combo => {
             values.forEach(val => {
-                newCombinations.push({
-                    ...combo,
-                    [attr.name]: val.value
-                });
+                const newCombo = [...combo, {
+                    attributeId: attr.id,
+                    attributeName: attr.name,
+                    valueId: val.id,
+                    value: val.value
+                }];
+                
+                const comboKey = JSON.stringify(newCombo.map(c => c.valueId));
+                if (!usedCombinations.has(comboKey)) {
+                    usedCombinations.add(comboKey);
+                    newCombinations.push(newCombo);
+                }
             });
         });
         
@@ -720,6 +707,8 @@ function generateCombinations(selectedValues) {
 
     return combinations;
 }
+
+
 
 $('#saveVariations').click(function() {
     const variations = [];
@@ -741,12 +730,11 @@ $('#saveVariations').click(function() {
     });
 
     tempStorage.variations = variations;
-    console.log('Current tempStorage:', tempStorage);
-    console.log('Saved Variations:', tempStorage.variations);
-    console.log('Number of variations:', tempStorage.variations.length);
+    console.log('Saved variations:', tempStorage.variations);
     
     Swal.fire('Thành công', 'Đã lưu thay đổi biến thể', 'success');
-});
+})
+
 
 
         document.addEventListener('DOMContentLoaded', function() {

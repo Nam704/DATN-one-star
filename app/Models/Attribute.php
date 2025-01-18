@@ -11,7 +11,11 @@ class Attribute extends Model
 
     protected $fillable = [
         'name',
-        'description',
         'status'
     ];
+
+    public function attributeValues()
+    {
+        return $this->hasMany(Attribute_value::class, 'id_attribute');
+    }
 }
