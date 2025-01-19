@@ -18,15 +18,6 @@ class Product extends Model
         'status'
     ];
 
-    public function variants()
-{
-    return $this->hasMany(Product_variant::class, 'id_product');
-}
-
-    public function categories()
-    {
-        return $this->belongsToMany(Category::class, 'product_category');
-    }
 
     public function brand()
     {
@@ -34,13 +25,17 @@ class Product extends Model
     }
     public function images()
     {
-        return $this->hasManyThrough(
-            Image::class,
-            Product_variant::class,
-            'id_product', // Khóa ngoại trong bảng `product_variants`
-            'id_product_variant', // Khóa ngoại trong bảng `images`
-            'id', // Khóa chính trong bảng `products`
-            'id' // Khóa chính trong bảng `product_variants`
-        );
+        return $this->hasManyThrough(Image::class, Product_variant::class, 'id_product', 'id_product_variant');
     }
+
+    public function variants()
+    {
+        return $this->hasMany(Product_variant::class, 'id_product');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'product_category');
+    }
+
 }

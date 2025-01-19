@@ -118,31 +118,31 @@ Route::prefix('admin')->name('admin.')->group(
         });
 
 
-        Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
+        // Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
+        //     Route::get('/', 'index')->name('index');
+        //     Route::get('/create', 'create')->name('create');
+        //     Route::post('/', 'store')->name('store');
+        //     Route::get('/{id}/edit', 'edit')->name('edit');
+        //     Route::put('/{id}', 'update')->name('update');
+        //     Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+        //     Route::get('/trash', 'trash')->name('trash');
+        //     Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+        //     Route::post('/{id}/restore', 'restore')->name('restore');
+        //     Route::delete('/{id}', 'destroy')->name('destroy');
+        // });
 
-        Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
+        // Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
+        //     Route::get('/', 'index')->name('index');
+        //     Route::get('/create', 'create')->name('create');
+        //     Route::post('/', 'store')->name('store');
+        //     Route::get('/{id}/edit', 'edit')->name('edit');
+        //     Route::put('/{id}', 'update')->name('update');
+        //     Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+        //     Route::get('/trash', 'trash')->name('trash');
+        //     Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+        //     Route::post('/{id}/restore', 'restore')->name('restore');
+        //     Route::delete('/{id}', 'destroy')->name('destroy');
+        // });
 
         Route::group([
             'prefix' => 'productvariant',
@@ -154,7 +154,10 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('edit-productvariant/{id}', [ProductVariantController::class, 'editProductVariant'])->name('editProductVariant');
             Route::put('edit-productvariant/{id}', [ProductVariantController::class, 'editPutProductVariant'])->name('editPutProductVariant');
             Route::delete('delete-productvariant/{id}', [ProductVariantController::class, 'deleteProductVariant'])->name('deleteProductVariant');
+
+            // Route::post('add', [ProductVariantController::class, 'add'])->name('add'); // This is your add route
         });
+
     }
 );
 Route::prefix('client')->name('client.')->group(

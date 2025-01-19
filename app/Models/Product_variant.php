@@ -38,12 +38,12 @@ class Product_variant extends Model
         return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
     }
     public function product()
-{
-    return $this->belongsTo(Product::class, 'id_product');
-}
-
-public function images()
     {
-        return $this->hasMany(Image::class, 'id_product_variant');
+        return $this->belongsTo(Product::class, 'id_product');
     }
+    public function images()
+    {
+        return $this->hasMany(Image::class, 'id_product_variant', 'id');
+    }
+
 }

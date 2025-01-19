@@ -11,9 +11,10 @@ class Image extends Model
 
     protected $fillable = [ 'url', 'id_product_variant','status'];
 
-    public function product_variant()
+
+    public function productVariant()
     {
-        return $this->belongsTo(Product_variant::class, 'id_product_variant');
+        return $this->belongsTo(Product_variant::class, 'id_product_variant', 'id');
     }
 
 }
