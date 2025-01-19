@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 
 use App\Events\ImportNotificationSent;
+use App\Events\PrivateNotification;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImportRequest;
 use App\Imports\ImportProducts;
@@ -51,7 +52,17 @@ class ImportController extends Controller
         try {
             $file = $request->file('file');
             $importData = $this->ImportService->importByExcel($file);
-            $this->NotificationService->sendImport($importData, $user);
+            $dataNotification = [
+                'title' => 'System Maintenance',
+                'message' => 'We will have scheduled maintenance on Sunday at 2:00 AM.',
+                'from_user_id' => $user->id,
+                'to_user_id' => null,
+                'type' => 'system',
+                'status' => 'unread',
+            ];
+            $this->NotificationService->sendPrivate($dataNotification);
+
+            // $this->NotificationService->sendImport($importData, $user);
             return redirect()->route('admin.imports.listApproved')->with('success', 'Thông báo đã được gửi đi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

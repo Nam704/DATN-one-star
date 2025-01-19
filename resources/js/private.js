@@ -1,18 +1,12 @@
+import Echo from "laravel-echo";
 import "./bootstrap";
-console.log("Hello from Vite!");
-Echo.private("imports").listen("ImportNotificationSent", (event) => {
-    alert(`New Import Request from Employee: ${event.message}`);
+console.log("hello vite, this is private");
+window.Echo.private("private-notifications").listen(
+    "PrivateNotification",
+    (event) => {
+        alert(`New notification: ${event.title}`);
+    }
+);
+window.Echo.private("imports").listen("ImportNotificationSent", (event) => {
+    alert(`New notification: ${event.title}`);
 });
-function confirmImport(importId) {
-    axios
-        .post("/admin/confirm-import", {
-            import_id: importId,
-        })
-        .then((response) => {
-            alert(response.data.message);
-        })
-        .catch((error) => {
-            console.error(error.response.data.message);
-            alert("Failed to confirm import.");
-        });
-}

@@ -3,18 +3,64 @@
 namespace App\Services;
 
 use App\Events\ImportNotificationSent;
+use App\Events\PrivateNotification;
+use App\Events\PublicNotification;
 use App\Models\Notification;
+use App\Models\User;
+use GuzzleHttp\Exception\TooManyRedirectsException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Broadcasting\PendingBroadcast;
 
 class NotificationService
 {
+
     public function __construct()
     {
         // Constructor logic
     }
     function sendImport($importData, $user)
     {
-        broadcast(new ImportNotificationSent($importData, $user));
+        broadcast(new ImportNotificationSent($importData, $user))->toOthers();
     }
+    public function sendPublic($data)
+    {
+        $this->createNotification([
+            'type' => 'public',
+            'title' => $data['title'],
+            'message' => $data['message'],
+            'from_user_id' => $data['from_user_id'],
+            'to_user_id' => $data['to_user_id'],
+        ]);
+        broadcast(new PublicNotification($data));
+    }
+    public function sendPrivate($data)
+    {
+        // Lọc người dùng có vai trò admin và employee
+        $recipients = User::whereHas('role', function ($query) {
+            $query->whereIn('name', ['admin', 'employee']);
+        })->get();
+        // dd($recipients);
+        // Tạo thông báo cho từng người nhận
+        foreach ($recipients as $recipient) {
+            $this->createNotification([
+                'type' => 'private',
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'from_user_id' => $data['from_user_id'],
+                'to_user_id' => $recipient->id,
+                'status' => 'unread',
+            ]);
+        }
+
+        // Gửi thông báo qua broadcasting
+
+        broadcast(new PrivateNotification($data))->toOthers();
+        Log::info('Broadcast sent with toOthers', [
+            'data' => $data,
+            'user_id' => auth()->id(), // Người phát sự kiện
+        ]);
+    }
+
     public function createNotification(array $data)
     {
         return Notification::create([
@@ -27,12 +73,6 @@ class NotificationService
         ]);
     }
 
-    /**
-     * Mark a notification as read.
-     *
-     * @param int $notificationId
-     * @return bool
-     */
     public function markAsRead(int $notificationId, int $userId)
     {
         // Lấy thông báo thuộc về user hiện tại
@@ -50,12 +90,7 @@ class NotificationService
         return $notification->save();
     }
 
-    /**
-     * Get all notifications for a specific user.
-     *
-     * @param int $userId
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
+
     public function getNotificationsByUser(int $userId)
     {
         return Notification::where('to_user_id', $userId)
@@ -63,12 +98,7 @@ class NotificationService
             ->get();
     }
 
-    /**
-     * Get unread notifications for a specific user.
-     *
-     * @param int $userId
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
+
     public function getUnreadNotifications(int $userId)
     {
         return Notification::where('to_user_id', $userId)
@@ -77,12 +107,7 @@ class NotificationService
             ->get();
     }
 
-    /**
-     * Delete a notification by ID.
-     *
-     * @param int $notificationId
-     * @return bool
-     */
+
     public function deleteNotification(int $notificationId)
     {
         $notification = Notification::findOrFail($notificationId);

@@ -15,7 +15,7 @@ class Import extends Model
         'import_date',
         'total_amount',
         'note',
-
+        'status',
     ];
     public function scopeList($query)
     {
