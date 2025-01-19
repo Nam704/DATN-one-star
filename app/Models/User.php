@@ -102,4 +102,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product_audit::class, 'id_user');
     }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'to_user_id');
+    }
 }

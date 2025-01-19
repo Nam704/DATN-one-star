@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Services\ProductAuditService;
+use App\Services\ProductService;
 use Illuminate\Support\Facades\Auth;
 
 class ImportProducts
@@ -19,18 +20,19 @@ class ImportProducts
     protected $productAuditService;
     protected $user;
 
-    public function __construct(ProductAuditService $productAuditService)
-    {
-        $this->user = Auth::user();
-        if (!$this->user) {
-            throw new \Exception("Không xác định được người dùng đang thực hiện import.");
-        }
+    public function __construct(
+        ProductAuditService $productAuditService,
+        ProductService $productService
 
+    ) {
+
+        $this->productService = $productService;
         $this->productAuditService = $productAuditService;
     }
-
     public function process(array $importData, array $detailsData)
     {
+        $this->user = Auth::user();
+
         $today = date('Y-m-d H:i:s');
 
         foreach ($importData as $index => $row) {
@@ -84,6 +86,7 @@ class ImportProducts
                     'expected_price' => $detail[3],
                     'total_price' => $totalPrice,
                 ]);
+                $this->productService->updateStock($productVariant->id, $quantity, true);
                 $this->productAuditService->createAudit([
                     'id_user' => $this->user->id,
                     'id_product_variant' => $productVariant->id,
@@ -91,8 +94,6 @@ class ImportProducts
                     'quantity' => $quantity,
                     'reason' => "" //$this->user->name . " import" . " at: " . $today,
                 ]);
-                // $productVariant->quantity += $detail[1];
-                // $productVariant->save();
             }
             $import->update(['total_amount' => $totalAmount]);
 

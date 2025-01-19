@@ -49,7 +49,8 @@
                 <div class="card-body">
                     {{-- <form action="route('admin.imports.acceptAll')" method="post"> --}}
                         {{-- @csrf --}}
-                        @if (Route::is('admin.imports.listPending') && $imports->count() > 0 && Auth::user()->role ==
+                        @if (Route::is('admin.imports.listPending') && $imports->count() > 0 && Auth::user()->role->name
+                        ==
                         'admin')
                         <button type="submit" class="btn btn-success mt-2" id="acceppt_select">Accept Selected</button>
                         <button type="submit" class="btn btn-danger mt-2" id="reject_select">Reject Selected</button>
@@ -88,6 +89,14 @@
 
                                     </td>
                                     <td>
+
+                                        @if ( Route::is('admin.imports.listPending') && Auth::user()->role->name ==
+                                        'admin')
+                                        <a href="{{route('admin.imports.edit',['id'=>$import->id]) }}"
+                                            class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+                                        </a>
                                         @if ($import->status == 'pending')
                                         <a href="{{ route('admin.imports.accept',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
@@ -96,18 +105,17 @@
                                         </a>
                                         <a href="{{ route('admin.imports.reject',['id'=>$import->id]) }}"
                                             class="btn btn-danger btn-sm">Reject</a>
-
-                                        @else
-
                                         @endif
-                                        @if ( Route::is('admin.imports.listPending') && Auth::user()->role == 'admin')
+                                        @endif
+                                        @if (Route::is('admin.imports.listPending') && Auth::user()->role->name
+                                        =="employee")
                                         <a href="{{route('admin.imports.edit',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i>
                                             Edit
                                         </a>
-                                        @endif
 
+                                        @endif
                                     </td>
                                     </td>
                                 </tr>

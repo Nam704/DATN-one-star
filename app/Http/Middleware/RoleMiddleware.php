@@ -12,7 +12,7 @@ class RoleMiddleware
     {
         // Kiểm tra người dùng đã đăng nhập
         if (!auth()->check()) {
-            return redirect('/login'); // Chuyển hướng nếu chưa đăng nhập
+            return redirect()->route('auth.getFormLogin'); // Chuyển hướng nếu chưa đăng nhập
         }
 
         $userRole = auth()->user()->role->name; // Lấy vai trò người dùng
