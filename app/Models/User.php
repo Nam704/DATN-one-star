@@ -70,6 +70,24 @@ class User extends Authenticatable
     {
         return $this->hasOne(Role::class, 'id', 'id_role');
     }
+    public function isAdmin()
+    {
+        if ($this->role->name == "admin") {
+            return true;
+        }
+    }
+    public function isUser()
+    {
+        if ($this->role->name == "user") {
+            return true;
+        }
+    }
+    public function isEmployee()
+    {
+        if ($this->role->name == "employee") {
+            return true;
+        }
+    }
     /**
      * The attributes that should be cast.
      *
@@ -78,4 +96,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+    public function productAudits()
+    {
+        return $this->hasMany(Product_audit::class, 'id_user');
+    }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'to_user_id');
+    }
 }

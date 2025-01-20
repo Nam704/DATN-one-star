@@ -15,10 +15,19 @@ class UserContronler extends Controller
     }
     function listAdmin()
     {
-        $users = $this->user->list();
-        // dd($users);
+        $userCurrent = auth()->user();
+
+        if ($userCurrent->isAdmin()) {
+            $users = $this->user->list();
+        } elseif ($userCurrent->isEmployee()) {
+            $users = $this->user->list()->whereIn('role_name', ['employee', 'user']);
+        } else {
+            return redirect()->route('auth.getFormLogin');
+        }
+
         return view('admin.user.list', compact('users'));
     }
+
 
     function resetPassword($id)
     {
