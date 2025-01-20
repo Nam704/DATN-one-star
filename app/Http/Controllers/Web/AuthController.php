@@ -28,8 +28,10 @@ class AuthController extends Controller
     }
     function getProfileAdmin()
     {
-        $user = Auth::user();
-        return view('admin.auth.profile_admin', compact('user'));
+        $user = auth()->user();
+        $notifications = $user->notifications->sortByDesc('created_at');
+        $productAudits = $user->productAudits->sortByDesc('created_at');
+        return view('admin.auth.profile_admin', compact('user', 'notifications', 'productAudits'));
     }
     function editProfileAdmin(Request $request)
     {

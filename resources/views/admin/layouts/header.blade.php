@@ -25,6 +25,8 @@
 
     <!-- Thêm CSS của Select2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    {{-- demo simpleBar --}}
+    <link href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.css" rel="stylesheet">
 
 
 </head>

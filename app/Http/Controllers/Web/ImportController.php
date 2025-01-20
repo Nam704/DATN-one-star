@@ -30,6 +30,7 @@ class ImportController extends Controller
     protected $ProductService;
     protected $ImportService;
     protected $NotificationService;
+
     function __construct(
         Import $import,
         NotificationService $notificationService,
@@ -40,29 +41,22 @@ class ImportController extends Controller
         $this->NotificationService = $notificationService;
         $this->ImportService = $importService;
         $this->import = $import;
+
         $this->middleware('role:admin')->only('approveImport');
         $this->middleware('role:employee')->only('viewImport');
     }
     public function importExcel(Request $request)
     {
+
+
         $user = auth()->user();
+
         $request->validate([
             'file' => 'required|mimes:xlsx,csv',
         ]);
         try {
             $file = $request->file('file');
             $importData = $this->ImportService->importByExcel($file);
-            $dataNotification = [
-                'title' => 'System Maintenance',
-                'message' => 'We will have scheduled maintenance on Sunday at 2:00 AM.',
-                'from_user_id' => $user->id,
-                'to_user_id' => null,
-                'type' => 'system',
-                'status' => 'unread',
-            ];
-            $this->NotificationService->sendPrivate($dataNotification);
-
-            // $this->NotificationService->sendImport($importData, $user);
             return redirect()->route('admin.imports.listApproved')->with('success', 'Thông báo đã được gửi đi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -98,6 +92,7 @@ class ImportController extends Controller
                 'variant-product' => $request->input('variant-product'),
             ];
             $import = $this->ImportService->updateImport($id, $data);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Import updated successfully',

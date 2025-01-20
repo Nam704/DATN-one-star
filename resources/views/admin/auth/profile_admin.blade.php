@@ -54,7 +54,7 @@
                         <ul class="nav nav-underline nav-justified gap-0">
                             <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
                                     data-bs-target="#aboutme" type="button" role="tab" aria-controls="home"
-                                    aria-selected="true" href="#aboutme">About</a>
+                                    aria-selected="true" href="#aboutme">Notifications</a>
                             </li>
                             <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
                                     data-bs-target="#user-activities" type="button" role="tab" aria-controls="home"
@@ -66,7 +66,7 @@
                                     type="button" role="tab" aria-controls="home" aria-selected="true"
                                     href="#projects">Projects</a></li>
                         </ul>
-
+                        {{-- Notification --}}
                         <div class="tab-content m-0 p-4">
                             <div class="tab-pane active" id="aboutme" role="tabpanel" aria-labelledby="home-tab"
                                 tabindex="0">
@@ -79,26 +79,56 @@
                                     </p>
 
                                     <h5 class="mt-4 fs-17 text-dark">Contact Information</h5>
-                                    <table class="table table-condensed mb-0 border-top">
+                                    <table id="fixed-header-datatable"
+                                        class="table table-striped dt-responsive nowrap table-striped  w-100">
+                                        <thead>
+                                            <tr>
+                                                <th>From </th>
+                                                <th>Title</th>
+                                                <th>Message</th>
+                                                <th>Date</th>
+
+                                                <th>Action</th>
+                                            </tr>
                                         <tbody>
-
+                                            @foreach ($notifications as $item)
                                             <tr>
-                                                <th scope="row">Email</th>
                                                 <td>
-                                                    <a href="#" class="ng-binding">
-                                                        {{ $user->email }}
-                                                    </a>
+                                                    @if ($item->status == 'unread')
+                                                    <i class="bi bi-circle-fill text-danger" title="Unread"></i>
+                                                    @else
+                                                    <i class="bi bi-circle-fill text-success" title="Read"></i>
+                                                    @endif
+                                                    {{ $item->fromUser->name }}
                                                 </td>
-                                            </tr>
+                                                <td>{{ $item->title }}</td>
+                                                <td>{{ $item->message }}</td>
+                                                <td>{{ $item->created_at }}</td>
+                                                @if ($item->type == 'imports')
 
-                                            <tr>
-                                                <th scope="row">Phone</th>
-                                                <td class="ng-binding">{{ $user->phone ? $user->phone : "Phone number
-                                                    not updated" }}</td>
-                                            </tr>
+                                                <td>
+                                                    <a href="{{route('admin.imports.detail',$item->goto_id) }}"
+                                                        class="btn btn-primary">View</a>
+                                                </td>
+                                                @endif
 
+
+
+
+                                            </tr>
+                                            @endforeach
 
                                         </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>From </th>
+                                                <th>Title</th>
+                                                <th>Message</th>
+                                                <th>Date</th>
+
+                                                <th>Action</th>
+                                            </tr>
+                                        </tfoot>
                                     </table>
                                 </div> <!-- end profile-desk -->
                             </div> <!-- about-me -->
@@ -253,9 +283,12 @@
 
 </div>
 @endsection
+@push('styles')
+<x-admin.data-table-styles />
+@endpush
 @push('scripts')
 <!-- Chart.js -->
-
+<x-admin.data-table-scripts />
 <script src="{{ asset('admin/assets/vendor/chart.js/chart.min.js') }}"></script>
 
 <!-- Profile Demo App js -->

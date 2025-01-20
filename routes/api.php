@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\API\BrandController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('attributes')->group(function () {
@@ -28,6 +29,11 @@ Route::prefix('admin')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
             function () { }
+        );
+        Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(
+            function () {
+                Route::get('/unread/{userId}', 'getUnreadCount');
+            }
         );
         Route::prefix('imports')->controller(ImportController::class)->group(
             function () {

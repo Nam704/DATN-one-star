@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\AdminNotification;
+use App\Events\EmployeeNotification;
 use App\Events\ImportNotificationSent;
 use App\Events\PrivateNotification;
 use App\Events\PublicNotification;
+use App\Events\UserNotification;
 use App\Models\Notification;
 use App\Models\User;
 use GuzzleHttp\Exception\TooManyRedirectsException;
@@ -33,32 +36,104 @@ class NotificationService
         ]);
         broadcast(new PublicNotification($data));
     }
-    public function sendPrivate($data)
+    function sendUser($data)
     {
-        // Lọc người dùng có vai trò admin và employee
         $recipients = User::whereHas('role', function ($query) {
-            $query->whereIn('name', ['admin', 'employee']);
-        })->get();
-        // dd($recipients);
+            $query->whereIn('name', ['user']);
+        })
+            ->where('id', '!=', $data['from_user_id'])
+            ->get();
+
         // Tạo thông báo cho từng người nhận
         foreach ($recipients as $recipient) {
             $this->createNotification([
-                'type' => 'private',
+                'type' => $data['type'],
                 'title' => $data['title'],
                 'message' => $data['message'],
                 'from_user_id' => $data['from_user_id'],
                 'to_user_id' => $recipient->id,
-                'status' => 'unread',
+                'status' => $data['status'],
+                'goto_id' => $data['goto_id'] ?? "",
+            ]);
+        }
+        // Gửi thông báo qua broadcasting
+        broadcast(new UserNotification($data))->toOthers();
+    }
+    function sendEmployee($data)
+    {
+        $recipients = User::whereHas('role', function ($query) {
+            $query->whereIn('name', ['employee']);
+        })
+            ->where('id', '!=', $data['from_user_id'])
+            ->get();
+
+        // Tạo thông báo cho từng người nhận
+        foreach ($recipients as $recipient) {
+            $this->createNotification([
+                'type' => $data['type'],
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'from_user_id' => $data['from_user_id'],
+                'to_user_id' => $recipient->id,
+                'status' => $data['status'],
+                'goto_id' => $data['goto_id'] ?? "",
             ]);
         }
 
         // Gửi thông báo qua broadcasting
 
+        broadcast(new EmployeeNotification($data))->toOthers();
+    }
+    function sendAdmin($data)
+    {
+        $recipients = User::whereHas('role', function ($query) {
+            $query->whereIn('name', ['admin']);
+        })
+            ->where('id', '!=', $data['from_user_id'])
+            ->get();
+
+        // Tạo thông báo cho từng người nhận
+        foreach ($recipients as $recipient) {
+            $this->createNotification([
+                'type' => $data['type'],
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'from_user_id' => $data['from_user_id'],
+                'to_user_id' => $recipient->id,
+                'status' => $data['status'],
+                'goto_id' => $data['goto_id'] ?? "",
+            ]);
+        }
+
+        // Gửi thông báo qua broadcasting
+
+        broadcast(new AdminNotification($data))->toOthers();
+    }
+
+    public function sendPrivate($data)
+    {
+        // Lọc người dùng có vai trò admin và employee
+        $recipients = User::whereHas('role', function ($query) {
+            $query->whereIn('name', ['admin', 'employee']);
+        })
+            ->where('id', '!=', $data['from_user_id'])
+            ->get();
+        // dd($recipients);
+        // Tạo thông báo cho từng người nhận
+        foreach ($recipients as $recipient) {
+            $this->createNotification([
+                'type' => $data['type'],
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'from_user_id' => $data['from_user_id'],
+                'to_user_id' => $recipient->id,
+                'status' => $data['status'],
+                'goto_id' => $data['goto_id'] ?? "",
+            ]);
+        }
+
+        // Gửi thông báo qua broadcasting
         broadcast(new PrivateNotification($data))->toOthers();
-        Log::info('Broadcast sent with toOthers', [
-            'data' => $data,
-            'user_id' => auth()->id(), // Người phát sự kiện
-        ]);
     }
 
     public function createNotification(array $data)
@@ -69,7 +144,8 @@ class NotificationService
             'message' => $data['message'], // Nội dung
             'from_user_id' => $data['from_user_id'] ?? null, // ID người gửi (nullable)
             'to_user_id' => $data['to_user_id'], // ID người nhận
-            'status' => 'unread', // Mặc định là chưa đọc
+            'status' => $data['status'],
+            'goto_id' => $data['goto_id'] ?? null,
         ]);
     }
 

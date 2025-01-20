@@ -19,6 +19,7 @@ class Notification extends Model
         'to_user_id',
         'status',
         'read_at',
+        'goto_id'
     ];
     public function user()
     {
