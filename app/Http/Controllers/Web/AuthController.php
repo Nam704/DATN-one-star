@@ -49,10 +49,7 @@ class AuthController extends Controller
 
             if (Auth::attempt($credentials, $request->filled('remember'))) {
 
-                // dd($request);
                 $user = Auth::user();
-                broadcast(new UserLogin($user))->toOthers();
-                // dd($user);
                 if ($user->isAdmin()) {
                     return redirect()->route('admin.dashboard'); // Admin dashboard
                 } elseif ($user->isUser()) {

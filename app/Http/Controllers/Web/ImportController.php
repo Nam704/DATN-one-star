@@ -30,7 +30,7 @@ class ImportController extends Controller
     protected $ProductService;
     protected $ImportService;
     protected $NotificationService;
-
+    // protected $user;
     function __construct(
         Import $import,
         NotificationService $notificationService,
@@ -41,9 +41,8 @@ class ImportController extends Controller
         $this->NotificationService = $notificationService;
         $this->ImportService = $importService;
         $this->import = $import;
-
-        $this->middleware('role:admin')->only('approveImport');
-        $this->middleware('role:employee')->only('viewImport');
+        // $this->user = auth()->user();
+        $this->middleware('role:admin')->only('accept', 'reject');
     }
     public function importExcel(Request $request)
     {
@@ -57,7 +56,7 @@ class ImportController extends Controller
         try {
             $file = $request->file('file');
             $importData = $this->ImportService->importByExcel($file);
-            return redirect()->route('admin.imports.listApproved')->with('success', 'Thông báo đã được gửi đi!');
+            return redirect()->route('admin.imports.listPending')->with('success', 'Thông báo đã được gửi đi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -81,7 +80,7 @@ class ImportController extends Controller
 
     function edit(ImportRequest $request, $id)
     {
-
+        $user = auth()->user();
         try {
             $data = [
                 'supplier' => $request->supplier,
@@ -91,8 +90,19 @@ class ImportController extends Controller
                 'note' => $request->note,
                 'variant-product' => $request->input('variant-product'),
             ];
+            // dd($data);
             $import = $this->ImportService->updateImport($id, $data);
-
+            $dataNotification = [
+                'title' => 'Update Import',
+                'message' => $user->name . ' đã cập nhật phiếu nhập ' . $import->name . ', vui lòng kiểm tra và xác nhận!',
+                'from_user_id' => $user->id,
+                'to_user_id' => null,
+                'type' => 'imports',
+                'status' => 'unread',
+                'goto_id' => $import->id,
+            ];
+            // dd($dataNotification);
+            $this->NotificationService->sendAdmin($dataNotification);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Import updated successfully',
@@ -137,14 +147,27 @@ class ImportController extends Controller
             } elseif ($import->status == 'rejected') {
                 return redirect()->back()->with('error', 'Import đã bị từ chối trước đó!');
             } elseif ($import->status == 'pending') {
+                DB::beginTransaction();
+
+                // Cập nhật trạng thái nhập hàng
                 $import->status = 'approved';
                 $import->save();
+
+                // Cộng stock cho từng chi tiết nhập hàng
+                $importDetails = Import_detail::where('id_import', $import->id)->get();
+                foreach ($importDetails as $detail) {
+                    $this->ProductService->updateStock($detail->id_product_variant, $detail->quantity, true);
+                }
+
+                DB::commit();
                 return redirect()->route('admin.imports.listApproved')->with('success', 'Import đã được chấp nhận!');
             }
         } catch (\Throwable $th) {
+            DB::rollBack();
             throw $th;
         }
     }
+
     function reject(Request $request, $id)
     {
         try {

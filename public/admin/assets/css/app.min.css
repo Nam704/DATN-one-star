@@ -4439,7 +4439,7 @@ fieldset:disabled .btn {
 }
 
 .dropdown-menu {
-    --tz-dropdown-zindex: 1000;
+    --tz-dropdown-zindex: 1050;
     --tz-dropdown-min-width: 10rem;
     --tz-dropdown-padding-x: 0;
     --tz-dropdown-padding-y: 0.25rem;
@@ -17342,6 +17342,14 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     z-index: 1060
 }
 
+#notification_simplebar {
+    position: relative;
+    max-height: 300px;
+    /* Giới hạn chiều cao */
+    overflow-y: auto;
+    /* Kích hoạt cuộn dọc */
+}
+
 .notification-list {
     margin-left: 0
 }
@@ -17360,7 +17368,9 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 }
 
 .notification-list .notify-item {
-    padding: 10px 20px
+
+    padding: 10px 20px;
+    transition: all 0.3s ease-in-out;
 }
 
 .notification-list .notify-item.unread-noti {

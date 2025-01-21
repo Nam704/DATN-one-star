@@ -86,15 +86,23 @@ class NotificationService
     }
     function sendAdmin($data)
     {
+        $data['from_user_name'] = User::find($data['from_user_id'])->name;
+        // Lấy danh sách admin ngoại trừ người gửi
         $recipients = User::whereHas('role', function ($query) {
             $query->whereIn('name', ['admin']);
         })
             ->where('id', '!=', $data['from_user_id'])
             ->get();
 
+        // Nếu người gửi là admin, thêm họ vào danh sách người nhận
+        $sender = User::find($data['from_user_id']);
+        if ($sender && $sender->role->name === 'admin') {
+            $recipients->push($sender); // Thêm người gửi vào danh sách
+        }
+
         // Tạo thông báo cho từng người nhận
         foreach ($recipients as $recipient) {
-            $this->createNotification([
+            $notification = $this->createNotification([
                 'type' => $data['type'],
                 'title' => $data['title'],
                 'message' => $data['message'],
@@ -106,9 +114,9 @@ class NotificationService
         }
 
         // Gửi thông báo qua broadcasting
-
-        broadcast(new AdminNotification($data))->toOthers();
+        broadcast(new AdminNotification($notification))->toOthers();
     }
+
 
     public function sendPrivate($data)
     {
@@ -180,6 +188,7 @@ class NotificationService
         return Notification::where('to_user_id', $userId)
             ->where('status', 'unread')
             ->orderBy('created_at', 'desc')
+
             ->get();
     }
 

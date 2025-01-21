@@ -225,31 +225,7 @@ $(document).ready(function () {
                 formData.append("import_date", $("#import-date").val());
                 formData.append("total_amount", $("#total-amount").val());
                 formData.append("note", $("#note").val());
-                // Log main import data
-                // console.log("Supplier:", $("#supplier-name").val());
-                // console.log("Name:", $("#import-name").val());
-                // console.log("Import Date:", $("#import-date").val());
-                // console.log("Total Amount:", $("#total-amount").val());
-                // $(".product-variant").each(function (index) {
-                //     const variant = $(this);
-                //     console.log(`Variant ${index}:`, {
-                //         product_variant_id: variant
-                //             .find('[name$="[product_variant_id]"]')
-                //             .val(),
-                //         quantity: variant.find('[name$="[quantity]"]').val(),
-                //         price_per_unit: variant
-                //             .find('[name$="[price_per_unit]"]')
-                //             .val(),
-                //         expected_price: variant
-                //             .find('[name$="[expected_price]"]')
-                //             .val(),
-                //         total_price: variant
-                //             .find('[name$="[total_price]"]')
-                //             .val(),
-                //     });
-                // });
-                // Collect all product and variant data
-                // Add variant data with sequential indexing
+
                 $(".product-variant").each(function (index) {
                     const variant = $(this);
                     const prefix = `variant-product[${index}]`;
