@@ -6,20 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('brands', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100);
-            $table->string('phone', 20);
-            $table->string('status')->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('brands');
     }
 };

@@ -6,14 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('price_configuration', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_variant_id');
-            $table->string('use_price_from')->default('variant');
+            $table->enum('use_price_from', ['variant', 'import'])->default('variant'); // nguồn giá
             $table->timestamps();
 
+            // Ràng buộc khóa ngoại
             $table->foreign('product_variant_id')
                 ->references('id')
                 ->on('product_variants')
@@ -21,6 +25,9 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('price_configuration');
