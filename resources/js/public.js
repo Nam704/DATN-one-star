@@ -33,7 +33,7 @@ function updateNotificationList(data, type) {
                     "http://127.0.0.1:8000/admin/imports/detail/" +
                     notification.goto_id;
             }
-            // item.href = link;
+            item.href = link;
             item.className = "dropdown-item notify-item unread-noti";
             item.innerHTML = `
                 <div class="notify-icon bg-primary-subtle">
@@ -47,7 +47,7 @@ function updateNotificationList(data, type) {
                 </p>
             `;
             item.addEventListener("click", (e) => {
-                markNotificationAsRead(notification.id, link); // Gửi API
+                markNotificationAsRead(notification.id); // Gửi API
             });
 
             list.appendChild(item);
@@ -71,7 +71,7 @@ function fetchUnreadNotifications() {
         });
 }
 // Hàm gửi API để chuyển trạng thái thông báo sang 'read' bằng Axios
-function markNotificationAsRead(notificationId, link) {
+function markNotificationAsRead(notificationId) {
     axios
         .post(
             `http://127.0.0.1:8000/api/admin/notifications/mark-read/${notificationId}`,
@@ -80,7 +80,7 @@ function markNotificationAsRead(notificationId, link) {
             }
         )
         .then((response) => {
-            window.location.href = link;
+            // window.location.href = link;
             console.log(`Notification ${notificationId} marked as read.`);
         })
         .catch((error) => {

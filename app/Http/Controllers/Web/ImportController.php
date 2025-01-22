@@ -196,7 +196,7 @@ class ImportController extends Controller
     function add(ImportRequest $request)
     {
         // dd($request->all());
-
+        $user = auth()->user();
         try {
             $data = [
                 'supplier' => $request->supplier,
@@ -207,7 +207,17 @@ class ImportController extends Controller
                 'variant-product' => $request->input('variant-product'),
             ];
             $import = $this->ImportService->createImport($data);
-
+            $dataNotification = [
+                'title' => 'New Import',
+                'message' => $user->name . ' đã thêm mới phiếu nhập ' . $import->name . ', vui lòng kiểm tra và xác nhận!',
+                'from_user_id' => $user->id,
+                'to_user_id' => null,
+                'type' => 'imports',
+                'status' => 'unread',
+                'goto_id' => $import->id,
+            ];
+            // dd($dataNotification);
+            $this->NotificationService->sendAdmin($dataNotification);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Import created successfully',

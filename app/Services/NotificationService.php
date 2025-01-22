@@ -86,7 +86,7 @@ class NotificationService
     }
     function sendAdmin($data)
     {
-        $data['from_user_name'] = User::find($data['from_user_id'])->name;
+
         // Lấy danh sách admin ngoại trừ người gửi
         $recipients = User::whereHas('role', function ($query) {
             $query->whereIn('name', ['admin']);

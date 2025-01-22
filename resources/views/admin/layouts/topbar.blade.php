@@ -135,10 +135,13 @@
 
 
                     <!-- All -->
+                    @if (auth()->user())
                     <a href="{{ route('auth.getProfileAdmin', ['id' => auth()->user()->id]) }}"
                         class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
                         View All
                     </a>
+                    @endif
+
                 </div>
             </li>
 

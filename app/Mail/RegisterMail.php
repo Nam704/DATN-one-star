@@ -25,6 +25,10 @@ class RegisterMail extends Mailable
             subject: 'Welcome to Our Store - Registration Successful',
         );
     }
+    /**
+     * Get the message content definition.
+     *
+     * */
     public function content(): Content
     {
         return new Content(
@@ -41,4 +45,5 @@ class RegisterMail extends Mailable
     {
         return [];
     }
+    
 }

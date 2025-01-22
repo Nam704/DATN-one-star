@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Events\Register;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthRequest;
 use App\Http\Requests\ClientRegisterRequest;
@@ -96,7 +97,7 @@ class AuthController extends Controller
             'id_role' => 3 // Regular user role
         ]);
 
-        Mail::to($user->email)->send(new RegisterMail($user));
+        Register::dispatch($user);
 
         Auth::login($user);
 

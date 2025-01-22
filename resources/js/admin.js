@@ -26,7 +26,7 @@ function updateNotification(event) {
             "http://127.0.0.1:8000/admin/imports/detail/" +
             notification.goto_id;
     }
-    // item.href = link;
+    item.href = link;
     item.className = "dropdown-item notify-item unread-noti";
     item.innerHTML = `
         <div class="notify-icon bg-primary-subtle">
@@ -39,9 +39,9 @@ function updateNotification(event) {
             ).toLocaleString()}</small>
         </p>
     `;
-    item.addEventListener("click", (e) => {
-        markNotificationAsRead(notification.id, link); // Gửi API
-    });
+    // item.addEventListener("click", (e) => {
+    //     markNotificationAsRead(notification.id, link); // Gửi API
+    // });
 
     // Thêm vào đầu danh sách nội dung
     listContent.prepend(item);

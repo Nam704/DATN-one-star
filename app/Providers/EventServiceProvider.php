@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Events\ImportNotificationSent;
+use App\Events\Register;
+use App\Listeners\RegisterNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -19,7 +21,7 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-       
+        Register::class => [RegisterNotification::class]
     ];
 
     /**
