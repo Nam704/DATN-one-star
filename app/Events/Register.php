@@ -9,15 +9,20 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class UserLogin implements ShouldBroadcast
+class Register
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $user;
-    public function __construct($user)
+    /**
+     * Create a new event instance.
+     */
+    public $data;
+    public function __construct($data)
     {
-        $this->user = $user;
+        // Log::info($data);
+        $this->data = $data;
     }
 
     /**
@@ -28,13 +33,7 @@ class UserLogin implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('user-login'),
-        ];
-    }
-    public function broadcastWith()
-    {
-        return [
-            'user' => $this->user,
+            new PrivateChannel('channel-name'),
         ];
     }
 }

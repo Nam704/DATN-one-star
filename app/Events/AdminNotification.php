@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -28,11 +29,14 @@ class AdminNotification implements ShouldBroadcast
     }
     public function broadcastWith()
     {
+        $from_user_name = User::where('id', $this->data['from_user_id'])->first()->name;
         return [
             'title' => $this->data['title'],
             'message' => $this->data['message'],
             'from_user_id' => $this->data['from_user_id'],
             'status' => $this->data['status'],
+            'created_at' => $this->data['created_at'],
+            'from_user_name' => $from_user_name,
         ];
     }
 }

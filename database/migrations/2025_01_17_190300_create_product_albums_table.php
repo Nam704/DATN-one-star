@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('product_albums', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_product');
-            $table->string('image_path'); // Đường dẫn ảnh
+            $table->string('image_path');
             $table->timestamps();
 
             $table->foreign('id_product')
@@ -24,9 +21,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('product_albums');

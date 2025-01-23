@@ -33,6 +33,7 @@ Route::prefix('admin')->group(
         Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(
             function () {
                 Route::get('/unread/{userId}', 'getUnreadCount');
+                Route::post('/mark-read/{id}',  'markAsRead');
             }
         );
         Route::prefix('imports')->controller(ImportController::class)->group(

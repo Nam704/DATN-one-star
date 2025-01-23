@@ -58,6 +58,7 @@
                         <p><strong>Note:</strong> {{ $import->note }}</p>
                     </div>
                 </div>
+                @if ($import->status == 'pending')
                 <div class="row col-12 mt-4 d-flex justify-content-between">
                     <a href="{{ route('admin.imports.accept',['id'=>$import->id]) }}"
                         class="btn btn-primary btn-sm col-5">
@@ -70,6 +71,8 @@
                         Reject
                     </a>
                 </div>
+                @endif
+
                 <div class="mt-4">
                     <h5>Import Details</h5>
                     <div class="table-responsive">

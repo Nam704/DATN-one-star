@@ -81,7 +81,8 @@ class ImportService
 
     public function updateImport($id, $data)
     {
-        $this->user = Auth::user();
+        // dd($data);
+        $this->user = auth()->user();
 
         DB::beginTransaction();
         try {
@@ -113,7 +114,7 @@ class ImportService
                     'quantity' => $variant['quantity'],
                     'reason' => ""
                 ];
-                $this->productAuditService->createProductAudit($dataAudit);
+                $this->productAuditService->createAudit($dataAudit);
                 $this->productService->updateStock($variant['product_variant_id'], $variant['quantity'], true);
             }
             foreach ($oldDetails as $oldDetail) {

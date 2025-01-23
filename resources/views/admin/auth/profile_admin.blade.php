@@ -141,10 +141,8 @@
                                             <div class="text-muted">5 minutes ago</div>
                                             <p><strong><a href="#" class="text-info">John
                                                         Doe</a></strong>Uploaded a photo</p>
-                                            <img src="assets/images/small/small-3.jpg" alt="" height="40" width="60"
-                                                class="rounded-1">
-                                            <img src="assets/images/small/small-4.jpg" alt="" height="40" width="60"
-                                                class="rounded-1">
+                                            <img src="" alt="" height="40" width="60" class="rounded-1">
+                                            <img src="" alt="" height="40" width="60" class="rounded-1">
                                         </div>
                                     </div>
 

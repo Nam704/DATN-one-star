@@ -89,7 +89,7 @@ class ImportProducts
                     'expected_price' => $detail[3],
                     'total_price' => $totalPrice,
                 ]);
-                $this->productService->updateStock($productVariant->id, $quantity, true);
+                // $this->productService->updateStock($productVariant->id, $quantity, true);
                 $this->productAuditService->createAudit([
                     'id_user' => $this->user->id,
                     'id_product_variant' => $productVariant->id,
@@ -110,6 +110,7 @@ class ImportProducts
                 'type' => 'imports',
                 'status' => 'unread',
                 'goto_id' => $import->id,
+
             ];
             // dd($dataNotification);
             $this->notificationService->sendAdmin($dataNotification);

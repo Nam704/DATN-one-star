@@ -9,7 +9,7 @@ $(document).ready(function () {
         });
     $("#acceppt_select").click(function (e) {
         // e.preventDefault();
-        let checkboxes = document.getElementsByClassName("import-checkbox");
+        let checkboxes = document.querySelectorAll(".import-checkbox:checked");
         let check = false;
 
         var ids = Array.from(checkboxes).map(function (checkbox) {
@@ -35,7 +35,7 @@ $(document).ready(function () {
     });
     $("#reject_select").click(function (e) {
         e.preventDefault();
-        let checkboxes = document.getElementsByClassName("import-checkbox");
+        let checkboxes = document.querySelectorAll(".import-checkbox:checked");
         let check = false;
 
         var ids = Array.from(checkboxes).map(function (checkbox) {

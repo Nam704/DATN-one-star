@@ -7,18 +7,36 @@ use App\Models\Import;
 use App\Models\Import_detail;
 use App\Models\Product;
 use App\Models\Product_variant;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ImportController extends Controller
 {
+    protected $ProductService;
+    public function __construct(ProductService $productService)
+    {
+        $this->ProductService = $productService;
+    }
     function acceptAll(Request $request)
     {
         $ids = $request->input('ids');
 
         $imports = Import::whereIn('id', $ids)->get();
         foreach ($imports as $import) {
+            DB::beginTransaction();
+
+            // Cập nhật trạng thái nhập hàng
             $import->status = 'approved';
             $import->save();
+
+            // Cộng stock cho từng chi tiết nhập hàng
+            $importDetails = Import_detail::where('id_import', $import->id)->get();
+            foreach ($importDetails as $detail) {
+                $this->ProductService->updateStock($detail->id_product_variant, $detail->quantity, true);
+            }
+
+            DB::commit();
         }
         // return redirect()->route('admin.imports.listApproved')->with('success', 'Đã chấp nhận ' . count($imports) . ' import!');
         return response()->json(['status' => 'success', 'message' => 'Đã chấp nhận ' . count($imports) . ' import!']);
