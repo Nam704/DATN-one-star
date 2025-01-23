@@ -21,7 +21,7 @@ class Register
     public $data;
     public function __construct($data)
     {
-        Log::info($data);
+        // Log::info($data);
         $this->data = $data;
     }
 

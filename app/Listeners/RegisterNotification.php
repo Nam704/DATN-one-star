@@ -32,6 +32,6 @@ class RegisterNotification implements ShouldQueue
     public function failed(Register $event, Throwable $exception)
     {
         Log::error("message not sent: " . $event->data);
-        Log::error($exception);
+        Log::error("In Register: " . $exception);
     }
 }

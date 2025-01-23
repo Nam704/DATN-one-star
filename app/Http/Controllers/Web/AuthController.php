@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Events\Register;
+use App\Events\ResetPassword;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthRequest;
 use App\Http\Requests\ClientRegisterRequest;
@@ -138,7 +139,13 @@ class AuthController extends Controller
             ['token' => $password_reset_token_hashed, 'created_at' => now(), 'expires_at' => $expires_at]
         );
 
-        Mail::to($user->email)->send(new ForgotPasswordMail($user, $password_reset_token_plaintext));
+        // Send email
+        $data = [
+            'user' => $user,
+            'token' => $password_reset_token_plaintext,
+
+        ];
+        ResetPassword::dispatch($data);
 
         return redirect()->back()->with('success', 'Password reset
         email sent. Please check your email.');

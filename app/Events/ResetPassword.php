@@ -9,15 +9,20 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class ImportNotificationReturn implements ShouldBroadcast
+class ResetPassword
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $import;
-    public function __construct($import)
+    /**
+     * Create a new event instance.
+     */
+    public $data;
+    public function __construct($data)
     {
-        $this->import = $import;
+        $this->data = $data;
+        Log::info("In ResetPassword: ", $this->data);
     }
 
     /**
@@ -28,7 +33,7 @@ class ImportNotificationReturn implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('return-imports'),
+            new PrivateChannel('channel-name'),
         ];
     }
 }
