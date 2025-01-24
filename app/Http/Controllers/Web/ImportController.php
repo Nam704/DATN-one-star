@@ -11,6 +11,7 @@ use App\Imports\ImportProducts;
 use App\Models\Import;
 use App\Models\Import_detail;
 use App\Models\Product;
+use App\Models\Product_audit;
 use App\Models\Product_variant;
 use App\Models\Supplier;
 use App\Services\ImportService;
@@ -30,19 +31,28 @@ class ImportController extends Controller
     protected $ProductService;
     protected $ImportService;
     protected $NotificationService;
+    protected $ProductAuditService;
     // protected $user;
     function __construct(
         Import $import,
         NotificationService $notificationService,
         ImportService $importService,
-        ProductService $productService
+        ProductService $productService,
+        ProductAuditService $productAuditService
     ) {
         $this->ProductService = $productService;
         $this->NotificationService = $notificationService;
         $this->ImportService = $importService;
         $this->import = $import;
+        $this->ProductAuditService = $productAuditService;
         // $this->user = auth()->user();
         $this->middleware('role:admin')->only('accept', 'reject');
+    }
+    function listAudit()
+    {
+        $audits = $this->ProductAuditService->getAllAudits();
+
+        return view('admin.import.listAudit', compact('audits'));
     }
     public function importExcel(Request $request)
     {
@@ -151,6 +161,8 @@ class ImportController extends Controller
 
                 // Cập nhật trạng thái nhập hàng
                 $import->status = 'approved';
+                Product_audit::where('id_import', $import->id)->update(['status' => 'approved']);
+
                 $import->save();
 
                 // Cộng stock cho từng chi tiết nhập hàng

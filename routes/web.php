@@ -185,6 +185,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::post('edit/{id}', 'edit')->name('edit');
                 Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
                 Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');;
+                Route::get('list-audit', 'listAudit')->name('listAudit');
             }
         );
 

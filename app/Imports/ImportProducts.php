@@ -94,6 +94,8 @@ class ImportProducts
                     'id_user' => $this->user->id,
                     'id_product_variant' => $productVariant->id,
                     'action_type' => 'import',
+                    'status' => 'pending',
+                    'id_import' => $import->id,
                     'quantity' => $quantity,
                     'reason' => "" //$this->user->name . " import" . " at: " . $today,
                 ]);
