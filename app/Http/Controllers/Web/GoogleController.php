@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Events\Register;
 use App\Http\Controllers\Controller;
 use App\Mail\RegisterMail;
 use App\Models\User;
@@ -52,7 +53,8 @@ class GoogleController extends Controller
                     'id_role' => 1
                 ]);
                 Auth::login($newUser);
-                Mail::to($email)->send(new RegisterMail($newUser));
+                // Mail::to($email)->send(new RegisterMail($newUser));
+                Register::dispatch($newUser);
                 return redirect()->intended('/');
             }
         } catch (Exception $e) {

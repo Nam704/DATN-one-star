@@ -64,6 +64,8 @@ class ImportService
                     'id_user' => $this->user->id,
                     'id_product_variant' => $variant['product_variant_id'],
                     'action_type' => 'import',
+                    'status' => 'pending',
+                    'id_import' => $import->id,
                     'quantity' => $variant['quantity'],
                     'reason' => ""
                 ];
@@ -107,10 +109,13 @@ class ImportService
                     'expected_price' => $variant['expected_price'],
                     'total_price' => $variant['total_price']
                 ]);
+                $this->productAuditService->deleteAudit($import->id);
                 $dataAudit = [
                     'id_user' => $this->user->id,
                     'id_product_variant' => $variant['product_variant_id'],
                     'action_type' => 'import',
+                    'status' => 'pending',
+                    'id_import' => $import->id,
                     'quantity' => $variant['quantity'],
                     'reason' => ""
                 ];

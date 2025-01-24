@@ -15,7 +15,7 @@ class ProductAuditService
 
     public function getAllAudits()
     {
-        return Product_audit::with(['user', 'productVariant'])->get();
+        return Product_audit::WithProductAndUserSummary()->paginate(100);
     }
     public function getAuditsByUser(int $userId)
     {
@@ -30,5 +30,19 @@ class ProductAuditService
         $audit = Product_audit::findOrFail($id);
         $audit->update($data);
         return $audit;
+    }
+    public function deleteAudit(int $id)
+    {
+        $audit = Product_audit::where('id_import', $id)->first();
+        if (!$audit) {
+            return response()->json([
+                'message' => 'Audit not found',
+            ], 404);
+        }
+        $audit->delete();
+        return response()->json([
+            'message' => 'Audit deleted successfully',
+            'audit' => $audit
+        ], 200);
     }
 }
