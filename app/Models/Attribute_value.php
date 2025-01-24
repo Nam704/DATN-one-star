@@ -4,8 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class Attribute_value extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'attribute_values';
+
+    protected $fillable = [
+        'id_attribute',
+        'value',
+        'status'
+    ];
+
+    public function attribute()
+    {
+        return $this->belongsTo(Attribute::class, 'id_attribute');
+    }
+
+    public function productVariants()
+    {
+        return $this->belongsToMany(Product_variant::class, 'product_variant_attributes', 'id_attribute_value', 'id_product_variant')
+            ->withTimestamps();
+    }
 }

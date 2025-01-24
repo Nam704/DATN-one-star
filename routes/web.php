@@ -7,6 +7,9 @@ use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\ProductVariantAttributeController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -61,6 +64,45 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
+
+        // attribute_values ( Bảng giá trị thuộc tính)
+        Route::prefix('attribute_values')->controller(AttributeValueController::class)->name('attribute_values.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+        });
+
+        // attribute_values ( Bảng cặp giá trị thuộc tính)
+        Route::prefix('product_variant_attributes')->controller(ProductVariantAttributeController::class)->name('product_variant_attributes.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 );
 Route::prefix('client')->name('client.')->group(
@@ -70,3 +112,5 @@ Route::prefix('client')->name('client.')->group(
         );
     }
 );
+
+

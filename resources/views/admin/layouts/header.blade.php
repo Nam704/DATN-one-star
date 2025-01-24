@@ -19,5 +19,19 @@
     <link href="{{ asset('admin/assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- Thêm CSS của Select2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    {{-- css --}}
+    <link href="{{ asset('admin/assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css"
+        id="bootstrap-stylesheet">
+
+    <!-- Plugins css -->
+    <link href="{{ asset('admin/assets/libs/bootstrap-tagsinput/bootstrap-tagsinput.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/assets/libs/switchery/switchery.min.css') }}" rel="stylesheet" type="text/css">
+
+    <link href="{{ asset('admin/assets/libs/select2/select2.min.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ asset('admin/assets/libs/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/assets/libs/bootstrap-timepicker/bootstrap-timepicker.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/assets/libs/bootstrap-colorpicker/bootstrap-colorpicker.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/assets/libs/bootstrap-datepicker/bootstrap-datepicker.css') }}" rel="stylesheet">
+    
 
 </head>
