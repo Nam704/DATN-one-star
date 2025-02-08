@@ -14,4 +14,8 @@ class Attribute extends Model
         'description',
         'status'
     ];
+    public function values()
+    {
+        return $this->hasMany(Attribute_value::class, 'id_attribute');
+    }
 }

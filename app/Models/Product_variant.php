@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product_variant extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $fillale = [
+    protected $fillable  = [
         'id_product',
         'sku',
-        'status', 'quantity'
+        'status',
+        'quantity'
     ];
     public function import_details()
     {
@@ -37,11 +38,16 @@ class Product_variant extends Model
 
     public function images()
     {
-        return $this->hasMany(Image::class, 'id_product_variant');
+        return $this->hasOne(Image::class, 'id_product_variant');
     }
 
     public function productAudits()
     {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
+    }
+    public function attributeValues()
+    {
+        return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value')
+            ->withTimestamps();
     }
 }

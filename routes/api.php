@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Http\Controllers\API\AttributeController;
+use App\Http\Controllers\Api\AttributeController;
 
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\ImportController;
@@ -10,26 +10,45 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
 
-use App\Http\Controllers\API\BrandController;
+use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ProductImageDescriptionController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('attributes')->group(function () {
-    Route::get('/', [AttributeController::class, 'index']);
-    Route::post('/', [AttributeController::class, 'store']);
-    Route::get('/trash', [AttributeController::class, 'trash']);
-    Route::get('/{id}', [AttributeController::class, 'show']);
-    Route::put('/{id}', [AttributeController::class, 'update']);
-    Route::delete('/{id}', [AttributeController::class, 'destroy']);
-    Route::post('/{id}/toggle-status', [AttributeController::class, 'toggleStatus']);
-    Route::post('/{id}/restore', [AttributeController::class, 'restore']);
-    Route::delete('/{id}/force-delete', [AttributeController::class, 'forceDelete']);
-});
+
 Route::prefix('admin')->group(
     function () {
+        Route::prefix('attributes')->controller(AttributeController::class)->group(function () {
+            Route::get('get-all', 'getAll');
+            Route::get('get-by-id/{id}', 'getAttributeById');
+            Route::post('creat-values/{id}', 'createValue');
+            // Route::post('update/{id}', 'update');
+            // Route::delete('delete/{id}', 'delete');
+
+        });
+        Route::prefix('brands')->controller(BrandController::class)->group(function () {
+            Route::post('add', 'store');
+        });
+
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+        Route::prefix('categories')->controller(CategoryController::class)->group(
+            function () {
+
+                Route::post('add', 'store');
+            }
+        );
+        Route::prefix('product-images-description')
+            ->controller(ProductImageDescriptionController::class)
+            ->group(
+                function () {
+                    Route::post('/upload', 'uploadImage'); // Upload ảnh
+                    Route::delete('/{id}', 'deleteImage'); // Xóa ảnh
+                    Route::post('/update-description',  'updateDescription'); // Cập nhật nội dung mô tả
+                }
+            );
         Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(
             function () {
                 Route::get('/unread/{userId}', 'getUnreadCount');
@@ -73,15 +92,3 @@ Route::prefix('client')->group(
         );
     }
 );
-
-Route::prefix('brands')->group(function () {
-    Route::get('/', [BrandController::class, 'index']);
-    Route::post('/', [BrandController::class, 'store']);
-    Route::get('/trash', [BrandController::class, 'trash']);
-    Route::get('/{id}', [BrandController::class, 'show']);
-    Route::put('/{id}', [BrandController::class, 'update']);
-    Route::delete('/{id}', [BrandController::class, 'destroy']);
-    Route::post('/{id}/toggle-status', [BrandController::class, 'toggleStatus']);
-    Route::post('/{id}/restore', [BrandController::class, 'restore']);
-    Route::delete('/{id}/force-delete', [BrandController::class, 'forceDelete']);
-});

@@ -118,29 +118,15 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('/{id}/restore', 'restore')->name('restore');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
-        Route::group([
-            'prefix' => 'products',
-            'as' => 'products.'
-        ], function () {
-            Route::get('list-product', [ProductController::class, 'listProduct'])->name('listProduct');
-            Route::get('add-product', [ProductController::class, 'addProduct'])->name('addProduct');
-            Route::post('add-product', [ProductController::class, 'addPostProduct'])->name('addPostProduct');
-            Route::get('edit-product/{id}', [ProductController::class, 'editProduct'])->name('editProduct');
-            Route::put('edit-product/{id}', [ProductController::class, 'editPutProduct'])->name('editPutProduct');
-            Route::delete('delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('deleteProduct');
-        });
 
-        Route::group([
-            'prefix' => 'productvariant',
-            'as' => 'productvariant.'
-        ], function () {
-            Route::get('list-productvariant', [ProductVariantController::class, 'listProductVariant'])->name('listProductVariant');
-            Route::get('add-productvariant', [ProductVariantController::class, 'addProductVariant'])->name('addProductVariant');
-            Route::post('add-productvariant', [ProductVariantController::class, 'addPostProductVariant'])->name('addPostProductVariant');
-            Route::get('edit-productvariant/{id}', [ProductVariantController::class, 'editProductVariant'])->name('editProductVariant');
-            Route::put('edit-productvariant/{id}', [ProductVariantController::class, 'editPutProductVariant'])->name('editPutProductVariant');
-            Route::delete('delete-productvariant/{id}', [ProductVariantController::class, 'deleteProductVariant'])->name('deleteProductVariant');
-        });
+        Route::prefix('products')
+            ->controller(ProductController::class)
+            ->name('products.')->group(function () {
+                Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
+                Route::post('/store',  'store')->name('store');
+                Route::get('/',  'list')->name('list');
+            });
+
 
 
         Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(

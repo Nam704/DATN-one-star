@@ -80,9 +80,11 @@
                 <div class="collapse" id="sidebarLayouts">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="layouts-horizontal.html" target="_blank">List active</a>
+                            <a href="{{-- route('admin.products.listProduct') --}}">List active</a>
                         </li>
-
+                        <li>
+                            <a href="{{ route('admin.products.create') }}">Create</a>
+                        </li>
                     </ul>
                 </div>
             </li>
