@@ -4439,7 +4439,11 @@ fieldset:disabled .btn {
 }
 
 .dropdown-menu {
+<<<<<<< HEAD
     --tz-dropdown-zindex: 1000;
+=======
+    --tz-dropdown-zindex: 1050;
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
     --tz-dropdown-min-width: 10rem;
     --tz-dropdown-padding-x: 0;
     --tz-dropdown-padding-y: 0.25rem;
@@ -17342,6 +17346,17 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     z-index: 1060
 }
 
+<<<<<<< HEAD
+=======
+#notification_simplebar {
+    position: relative;
+    max-height: 300px;
+    /* Giới hạn chiều cao */
+    overflow-y: auto;
+    /* Kích hoạt cuộn dọc */
+}
+
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
 .notification-list {
     margin-left: 0
 }
@@ -17360,7 +17375,13 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 }
 
 .notification-list .notify-item {
+<<<<<<< HEAD
     padding: 10px 20px
+=======
+
+    padding: 10px 20px;
+    transition: all 0.3s ease-in-out;
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
 }
 
 .notification-list .notify-item.unread-noti {
@@ -17423,6 +17444,93 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     display: block
 }
 
+<<<<<<< HEAD
+=======
+/* message-list start*/
+.message-list {
+    margin-left: 0
+}
+
+.message-list .noti-title {
+    background-color: transparent;
+    padding: 15px 20px
+}
+
+.message-list .noti-icon-badge {
+    display: inline-block;
+    position: absolute;
+    top: 14px;
+    right: -4px;
+    border-radius: 50%
+}
+
+.message-list .notify-item {
+    padding: 10px 20px
+}
+
+.message-list .notify-item.unread-noti {
+    background-color: var(--tz-tertiary-bg)
+}
+
+.message-list .notify-item.read-noti {
+    background-color: transparent;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out
+}
+
+.message-list .notify-item.read-noti:hover {
+    background-color: var(--tz-tertiary-bg)
+}
+
+.message-list .notify-item .card-body {
+    padding: 14px
+}
+
+.message-list .notify-item .card-body .noti-close-btn {
+    position: absolute;
+    top: 3px;
+    right: 15px
+}
+
+.message-list .notify-item .card-body .noti-item-title {
+    margin: 0 0 2px
+}
+
+.message-list .notify-item .card-body .noti-item-subtitle,
+.message-list .notify-item .card-body .noti-item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.message-list .notify-item .notify-icon {
+    float: left;
+    height: 36px;
+    width: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 50%;
+    color: #fff
+}
+
+.message-list .notify-item .notify-details {
+    margin-bottom: 0;
+    overflow: hidden;
+    margin-left: 45px
+}
+
+.message-list .notify-item .notify-details b {
+    font-weight: 500
+}
+
+.message-list .notify-item .notify-details .small,
+.message-list .notify-item .notify-details small {
+    display: block
+}
+
+/* message-list end*/
+
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
 .profile-dropdown {
     min-width: 170px
 }
@@ -23064,6 +23172,7 @@ span.flatpickr-weekday {
     padding: .5rem .75rem
 }
 
+<<<<<<< HEAD
 /*# sourceMappingURL=app.min.css.map */
 
 .bootstrap-tagsinput {
@@ -23108,3 +23217,6 @@ span.flatpickr-weekday {
     border-radius: 3px;
     font-weight: 600
 }
+=======
+/*# sourceMappingURL=app.min.css.map */
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
