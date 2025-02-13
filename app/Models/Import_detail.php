@@ -9,7 +9,12 @@ class Import_detail extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'id_import', 'id_product_variant', 'quantity', 'price_per_unit', 'expected_price', 'total_price'
+        'id_import',
+        'id_product_variant',
+        'quantity',
+        'price_per_unit',
+        'expected_price',
+        'total_price'
     ];
     public function product_variant()
     {
@@ -18,5 +23,10 @@ class Import_detail extends Model
     public function import()
     {
         return $this->belongsTo(Import::class, 'id_import', 'id');
+    }
+
+    public function productVariant()
+    {
+        return $this->belongsTo(Product_variant::class, 'id_product_variant');
     }
 }

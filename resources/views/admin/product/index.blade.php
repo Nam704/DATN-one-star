@@ -40,7 +40,8 @@
                             <td>{{ $product->brand->name }}</td>
                             <td>{{$product->category->name }}</td>
                             <td>{{ $product->description }}</td>
-                            <td><img src="{{Storage::url($product->image_primary) }}" alt="err" height="60px"></td>
+                            <td><img src="{{ asset('storage/' . $product->image_primary) }}" alt="{{ $product->name }} " width="50px">
+                            </td>
                             <td>{{ $product->status }}</td>
 
                             <td>

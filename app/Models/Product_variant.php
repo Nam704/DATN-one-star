@@ -44,4 +44,10 @@ class Product_variant extends Model
     {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
+
+    public function importDetails()
+    {
+        return $this->hasMany(Import_detail::class, 'id_product_variant');
+    }
+
 }

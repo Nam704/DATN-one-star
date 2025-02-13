@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -41,6 +42,12 @@ Route::prefix('auth/')->name('auth.')->group(
         Route::controller(GoogleController::class)->group(function () {
             Route::get('google', 'redirectToGoogle')->name('google');
             Route::get('google/callback', 'handleGoogleCallback');
+        });
+
+        Route::controller(ShopController::class)->group(function () {
+            Route::get('shop', 'shop')->name('shop');
+            Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');
+
         });
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'getFormLogin')->name('getFormLogin');
@@ -212,7 +219,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 Route::prefix('client')->name('client.')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
-            function () { }
+            function () {}
         );
     }
 );
