@@ -10,10 +10,14 @@ class Category extends Model
 {
     use HasFactory, SoftDeletes;
 
+    
     protected $fillable = [
         'name',
         'id_parent',
-        'status'
+        'status',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     public function parent()
@@ -26,8 +30,17 @@ class Category extends Model
         return $this->hasMany(Category::class, 'id_parent');
     }
 
-    public function products()
+    public function scopeRoot($query)
     {
+        return $query->whereNull('id_parent');
+    }
+
+    public function products() {
         return $this->hasMany(Product::class, 'id_category');
+    }
+
+    public function product()
+    {
+        return $this->belongsToMany(Product::class, 'category_product');
     }
 }

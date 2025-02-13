@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Web;
 
+
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Validation\Rule;
@@ -11,11 +13,13 @@ use Illuminate\Validation\Rule;
 class BrandController extends Controller
 {
     public function index()
-{
-    $brands = Brand::withoutTrashed()->latest()->get();
-    return view('admin.brands.index', compact('brands'));
-}
-    
+
+
+    {
+        $brands = Brand::withoutTrashed()->latest()->get();
+        return view('admin.brands.index', compact('brands'));
+    }
+
 
     public function create()
     {
@@ -109,7 +113,7 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         $brand = Brand::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => [
                 'required',

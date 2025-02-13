@@ -5,128 +5,90 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
+    // Lấy danh sách danh mục
     public function index()
     {
-        try {
-            $data = Category::all();
-            return response()->json([
-                'message' => 'List of categories',
-                'data' => $data
-            ]);
-        } catch (\Throwable $th) {
-            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
-            return response()->json([
-                'message' => 'Error getting categories list',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // Lấy danh sách các category và trả về dưới dạng JSON
+        $listCategory = Category::select('id', 'name', 'id_parent', 'status')->get();
+
+        return response()->json([
+            'message' => 'success',
+            'data' => $listCategory
+        ], 200);
     }
 
-    public function store(Request $request)
+
+    public function getChildCategories($parentId)
     {
-        try {
-            $data = Category::create($request->validated());
-            return response()->json([
-                'message' => 'Category created successfully',
-                'data' => $data
-            ], Response::HTTP_CREATED);
-        } catch (\Throwable $th) {
-            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
-            return response()->json([
-                'message' => 'Error creating category',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // Lấy tất cả danh mục con có id_parent bằng $parentId
+        $childCategories = Category::where('id_parent', $parentId)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $childCategories
+        ]);
     }
 
-    public function show($id)
-    {
-        try {
-            $data = Category::findOrFail($id);
-            return response()->json([
-                'message' => 'Category details',
-                'data' => $data
-            ]);
-        } catch (\Throwable $th) {
-            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
-            if ($th instanceof ModelNotFoundException) {
-                return response()->json([
-                    'message' => 'Category not found',
-                ], Response::HTTP_NOT_FOUND);
-            }
-            return response()->json([
-                'message' => 'Error finding category',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+    public function getRootCategories()
+{
+    
+    $rootCategories = Category::whereNull(columns: 'id_parent')->get();
 
-    public function update(Request $request, $id)
-    {
-        try {
-            $category = Category::findOrFail($id);
-            $category->update($request->validated());
-            return response()->json([
-                'message' => 'Category updated successfully',
-                'data' => $category
-            ]);
-        } catch (\Throwable $th) {
-            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
-            if ($th instanceof ModelNotFoundException) {
-                return response()->json([
-                    'message' => 'Category not found',
-                ], Response::HTTP_NOT_FOUND);
-            }
-            return response()->json([
-                'message' => 'Error updating category',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+    return response()->json([
+        'success' => true,
+        'data' => $rootCategories
+    ]);
+}
 
-    public function destroy($id)
+    // Thêm mới danh mục
+    public function addCategory(Request $request)
     {
-        try {
-            $category = Category::findOrFail($id);
-            $category->delete();
-            return response()->json([
-                'message' => 'Category deleted successfully'
-            ]);
-        } catch (\Throwable $th) {
-            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
-            if ($th instanceof ModelNotFoundException) {
-                return response()->json([
-                    'message' => 'Category not found',
-                ], Response::HTTP_NOT_FOUND);
-            }
-            return response()->json([
-                'message' => 'Error deleting category',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+        // Xác thực dữ liệu đầu vào
+        $validate = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:255|unique:categories,name',
+                'status' => 'required|in:active,inactive', // Giới hạn status là active hoặc inactive
+            ],
+            [
+                'name.required' => 'Tên danh mục không được để trống',
+                'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
+                'name.unique' => 'Tên danh mục đã tồn tại',
+                'status.required' => 'Trạng thái không được để trống',
+                'status.in' => 'Trạng thái phải là active hoặc inactive',
+            ]
+        );
 
-    public function toggleStatus($id)
-    {
-        try {
-            $category = Category::findOrFail($id);
-            $category->status = $category->status === 'active' ? 'inactive' : 'active';
-            $category->save();
+        // Nếu lỗi, trả về thông báo lỗi
+        if ($validate->fails()) {
             return response()->json([
-                'message' => 'Status updated successfully',
-                'data' => $category
-            ]);
-        } catch (\Throwable $th) {
-            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
-            if ($th instanceof ModelNotFoundException) {
-                return response()->json([
-                    'message' => 'Category not found',
-                ], Response::HTTP_NOT_FOUND);
-            }
-            return response()->json([
-                'message' => 'Error updating status',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                'message' => 'error',
+                'errors' => $validate->errors()
+            ], 422);
         }
+
+        // Lưu danh mục mới
+        $data = [
+            'name' => $request->name,
+            'id_parent' => $request->id_parent, // Có thể null nếu không có danh mục cha
+            'status' => $request->status,
+        ];
+
+        $category = Category::create($data);
+
+        // Trả về kết quả thành công
+        return response()->json([
+            'message' => 'Category created successfully',
+            'data' => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'id_parent' => $category->id_parent,
+                'status' => $category->status,
+            ]
+        ], 201);
     }
 }

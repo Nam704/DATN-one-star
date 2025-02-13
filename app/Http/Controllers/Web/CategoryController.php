@@ -3,111 +3,117 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+
+use function Ramsey\Uuid\v1;
 
 class CategoryController extends Controller
 {
-    public function index()
-    {
+    public function listCategory(){
         $categories = Category::all();
-        return view('admin.categories.index', compact('categories'));
-    }
-
-    public function create()
-    {
-        $categories = Category::where('status', 'active')->get();
-        return view('admin.categories.create', compact('categories'));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'max:255',
-                'unique:categories,name',
-                'string'
-            ],
-            'id_parent' => 'nullable|exists:categories,id',
-            'status' => 'required|in:active,inactive'
+        return view('admin.category.index')->with([
+            'categories' => $categories
         ]);
-
-        Category::create($validated);
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Category created successfully');
     }
 
-    public function edit($id)
-    {
-        $category = Category::findOrFail($id);
-        $categories = Category::where('id', '!=', $id)
-            ->where('status', 'active')
-            ->get();
-        return view('admin.categories.edit', compact('category', 'categories'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-        
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'max:255',
-                'string',
-                Rule::unique('categories')->ignore($id)
-            ],
-            'id_parent' => [
-                'nullable',
-                'exists:categories,id',
-                function ($attribute, $value, $fail) use ($id) {
-                    if ($value == $id) {
-                        $fail('Category cannot be its own parent.');
-                    }
-                }
-            ],
-            'status' => 'required|in:active,inactive'
+    public function addCategory(){
+        $categories=Category::all();
+        return view('admin.category.add')->with([
+            'categories' => $categories
         ]);
-
-        $category->update($validated);
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Category updated successfully');
     }
 
-    public function destroy($id)
-    {
-        $category = Category::findOrFail($id);
-        $category->delete();
-        return response()->json(['success' => true]);
-    }
 
-    public function trash()
-    {
-        $trashedCategories = Category::onlyTrashed()->get();
-        return view('admin.categories.trash', compact('trashedCategories'));
-    }
+    public function addPostCategory(CategoryRequest $request)
+{
+  $category= Category::create([
+        'name' => $request->name,
+        'id_parent'=>$request->id_parent,
+        'status' => $request->status ?? 1,
+    ]);
+    return redirect()->route('admin.categories.listCategory')->with('success', 'Thêm danh mục thành công');
+    return response()->json([
+        'success' => true,
+        'category' => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'status' => $category->status,
+        ],
+    ]);
+}
 
-    public function restore($id)
-    {
-        $category = Category::withTrashed()->findOrFail($id);
-        $category->restore();
-        return response()->json(['success' => true]);
-    }
+public function addCategoryProduct(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'id_parent' => 'nullable|exists:categories,id',
+    ]);
 
-    public function forceDelete($id)
-    {
-        $category = Category::withTrashed()->findOrFail($id);
-        $category->forceDelete();
-        return response()->json(['success' => true]);
-    }
-
-    public function toggleStatus($id)
-    {
-        $category = Category::findOrFail($id);
-        $category->status = $category->status === 'active' ? 'inactive' : 'active';
+    try {
+        $category = new Category();
+        $category->name = $request->name;
+        $category->id_parent = $request->id_parent;
         $category->save();
-        return response()->json(['success' => true]);
+
+        return response()->json(['success' => true, 'message' => 'Danh mục đã được thêm thành công.']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
     }
+}
+
+
+public function editCategory($id){
+    $categories = Category::findOrFail($id);
+
+    $category_parent=Category::all();
+    return view('admin.category.edit')->with([
+        'categories' => $categories,
+        'category_parent' => $category_parent
+    ]);
+}
+
+public function editPutCategory(Request $request, $id)
+{
+ 
+    $categories = Category::findOrFail($id); 
+    $request->validate([
+        'name' => 'required|string|max:255',
+    ],
+    [
+        'name.required' => 'Tên danh mục không được trống',
+        'name.max' => 'Tên danh mục không quá 255 ký tự',
+    ]
+    );
+
+    if ($request->id_parent == $id) {
+        return back()->withErrors(['id_parent' => 'Danh mục không thể là cha của chính nó.']);
+    }
+    
+    $parentCategory = Category::find($request->id_parent);
+    if ($parentCategory && $this->isDescendant($categories  , $parentCategory)) {
+        return back()->withErrors(['id_parent' => 'Danh mục không thể trở thành cha của danh mục con của chính nó.']);
+    }
+
+    $categories->update([
+        'name' => $request->name,
+        'id_parent'=>$request->id_parent,
+        'status' => $request->status,
+    ]);
+
+    return redirect()->route('admin.categories.listCategory')->with('success', 'Sửa danh mục thành công');
+}
+public function isDescendant($id,$parentCategory)
+    {
+        // Thêm logic kiểm tra ở đây
+        return true; // Hoặc kết quả phù hợp
+    }
+
+public function deleteCategory($id)
+{
+    $categories=Category::findOrFail($id);
+        $categories->delete();
+        return redirect()->route('admin.categories.listCategory')->with('success','Xóa thành công');
+}
 }

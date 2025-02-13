@@ -3,185 +3,234 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
+use App\Http\Requests\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\Product_variant;
 use App\Models\Product_variant_attribute;
+use App\Models\Image;
+
+use App\Models\Category_product;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function listProduct()
     {
-        $products = Product::with(['brand', 'category'])->get();
-        return view('admin.products.index', compact('products'));
-    }
-
-    public function create()
-    {
-        $brands = Brand::where('status', 'active')->get();
-        $categories = Category::where('status', 'active')->get();
-        $attributes = Attribute::with('attributeValues')
-            ->where('status', 'active')
-            ->get();
-        return view('admin.products.create', compact('brands', 'categories', 'attributes'));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'id_brand' => 'required|exists:brands,id',
-            'id_category' => 'required|exists:categories,id',
-            'description' => 'required|string',
-            'base_price' => 'required|numeric|min:0',
-            'base_stock' => 'required|integer|min:0',
-            'image_primary' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        $products = Product::with(['category'])->get();
+        ;
+        return view('admin.product.index')->with([
+            'products' => $products
         ]);
+    }
 
-        $imagePath = 'products/default.jpg'; // Default image path
+    public function addProduct()
+    {
+        $categories = Category::all();
+        $brands = Brand::all();
+        return view('admin.product.add')->with(
+            [
+                'categories' => $categories,
+                'brands' => $brands
+            ]
+        );
+    }
 
-        if ($request->hasFile('image_primary') && $request->file('image_primary')->isValid()) {
-            $imagePath = $request->file('image_primary')->store('products', 'public');
+
+    public function addPostProduct(Request $request)
+    {
+        echo '<pre>';
+        var_dump($request->all());
+        echo '</pre>';
+
+        // Xử lý ảnh chính
+        if ($request->hasFile('image-primary')) {
+            $image = $request->file('image-primary');
+            if ($image->isValid()) {
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $path = $image->storeAs('uploads/products', $imageName, 'public'); // Lưu ảnh vào storage/app/public/uploads/products/
+                $imageUrl = str_replace('storage/', '', Storage::url($path));
+                $imageUrl = url('storage/uploads/products/' . $imageName);
+            } else {
+                return response()->json(['error' => 'Invalid image'], 400);
+            }
+        } else {
+            $imageUrl = '';
         }
 
-        $product = Product::create([
-            'name' => $validated['name'],
-            'id_brand' => $validated['id_brand'],
-            'id_category' => $validated['id_category'],
-            'description' => $validated['description'],
-            'image_primary' => $imagePath,
-            'status' => 'active'
-        ]);
+        // Tạo sản phẩm
+        $newProductData = [
+            'product_type' => $request->product_type,
+            'name' => $request->name,
+            'description' => $request->description,
+            'image_primary' => $imageUrl,
+            'id_brand' => $request->id_brand,
+        ];
 
-        if ($request->has('attributes')) {
-            $combinations = $this->generateVariantCombinations($request->attribute_values);
+        // Kiểm tra loại sản phẩm 'simple' và gán giá
+        if ($request->product_type == 'simple') {
+            $newProductData['price'] = $request->price ?? 0;
+            $newProductData['price_sale'] = $request->price_sale ?? 0;
+        }
 
-            foreach ($combinations as $combination) {
-                $variant = Product_variant::create([
-                    'id_product' => $product->id,
-                    'sku' => 'SKU-' . uniqid(),
-                    'price' => $validated['base_price'],
-                    'stock' => $validated['base_stock'],
-                    'status' => 'active'
-                ]);
+        $product = Product::create($newProductData);
 
-                foreach ($combination as $attributeId => $valueId) {
-                    Product_variant_attribute::create([
-                        'id_product_variant' => $variant->id,
-                        'id_attribute_value' => $valueId
+
+        // xử lý ảnh pgụ
+        if ($request->hasFile('images')) {
+
+            foreach ($request->file('images') as $image) {
+                if ($image->isValid()) {
+                    $imageName = time() . '_' . $image->getClientOriginalName();
+
+
+                    $path = $image->storeAs('uploads/products', $imageName, 'public');
+                    $imageUrl = str_replace('storage/', '', Storage::url($path));
+                    Image::create([
+                        'product_id' => $product->id,
+                        'url' => $imageUrl,
+                        'status' => 'active'
                     ]);
+                } else {
+                    return response()->json(['error' => 'Invalid image'], 400);
                 }
+            }
+        } else {
+            return response()->json(['error' => 'No images provided'], 400);
+        }
+
+
+        // Xử lý danh mục cho sản phẩm
+        if (!empty($request->categories)) {
+            foreach ($request->categories as $categoryId) {
+                Category_product::create([
+                    'product_id' => $product->id,
+                    'category_id' => $categoryId,
+                ]);
             }
         }
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product created successfully');
+        // Xử lý sản phẩm có biến thể
+        if ($request->product_type == 'variants') {
+
+            // Kiểm tra tổng số biến thể
+            for ($i = 0; $i < $request->total_variant; $i++) {
+                if (
+                    isset($request->price_product_variant[$i]) &&
+                    isset($request->quantity_product_variant[$i]) &&
+                    isset($request->description_product_variant[$i])
+                ) {
+
+                    // Xử lý ảnh cho biến thể
+                    $imageUrl = '';
+                    if ($request->hasFile('image_product_variant') && isset($request->image_product_variant[$i])) {
+                        $image = $request->file('image_product_variant')[$i];
+                        if ($image->isValid()) {
+                            $imageName = time() . '_' . $image->getClientOriginalName();
+                            $path = $image->storeAs('uploads/products', $imageName, 'public');
+                            $imageUrl = str_replace('storage/', '', Storage::url($path));
+                            $imageUrl = url('storage/uploads/products/' . $imageName);
+                        }
+                    }
+ 
+                    // Tạo sản phẩm biến thểe
+                    $product_variant = Product_variant::create([
+                        'id_product' => $product->id,
+                        'sku' => 'test' . $i,
+                        'quantity' => $request->quantity_product_variant[$i],
+                        'price' => $request->price_product_variant[$i],
+                        'description' => $request->description_product_variant[$i],
+                        'image' => $imageUrl,
+                    ]);
+
+                    // Xử lý biến thể (attributes)
+                    if (isset($request->variants[$i])) {
+                        $Configurations = json_decode($request->variants[$i]);
+
+                        // Kiểm tra nếu json_decode thành công và trả về một mảng
+                        if (is_array($Configurations)) {
+                            foreach ($Configurations as $config) {
+
+                                if (isset($config->attribute_id) && isset($config->attribute_value_id)) {
+
+                                    Product_variant_attribute::create([
+                                        'id_product_variant' => $product_variant->id,
+                                        'id_attribute' => $config->attribute_id,
+                                        'id_attribute_value' => $config->attribute_value_id,
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return redirect()->route('admin.products.listProduct')->with('success', 'Sản phẩm đã được thêm thành công!');
     }
 
-    public function edit($id)
+
+    public function editProduct($id)
     {
-        $product = Product::with(['variants.attributes'])->findOrFail($id);
-        $brands = Brand::where('status', 'active')->get();
-        $categories = Category::where('status', 'active')->get();
-        $attributes = Attribute::with('attributeValues')
-            ->where('status', 'active')
-            ->get();
-        return view('admin.products.edit', compact('product', 'brands', 'categories', 'attributes'));
+        $brands = Brand::all();
+        $categories = Category::all();
+        $products = Product::findOrFail($id);
+
+        return view('admin.product.edit')->with([
+            'brands' => $brands,
+            'categories' => $categories,
+            'product' => $products
+        ]);
     }
 
-    public function update(Request $request, $id)
+    public function editPutProduct(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
 
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'id_brand' => 'required|exists:brands,id',
             'id_category' => 'required|exists:categories,id',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
+            'image_primary' => 'nullable|image|mimes:jpg,jpeg,png,webp',
             'status' => 'required|in:active,inactive',
-            'image_primary' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        if ($request->hasFile('image_primary') && $request->file('image_primary')->isValid()) {
-            if ($product->image_primary && $product->image_primary !== 'products/default.jpg') {
+        $product = Product::findOrFail($id);
+        $product->fill($request->except('image_primary'));
+
+        $imagePath = null;
+        if ($request->hasFile('image_primary')) {
+            if ($product->image_primary && Storage::disk('public')->exists($product->image_primary)) {
                 Storage::disk('public')->delete($product->image_primary);
             }
-            $validated['image_primary'] = $request->file('image_primary')->store('products', 'public');
+            $imagePath = $request->file('image_primary')->store('uploads/products', 'public');
+        } else {
+            $imagePath = $product->image_primary; // Giữ lại hình ảnh hiện tại nếu không có hình ảnh mới
         }
 
-        $product->update($validated);
+        $product->update([
+            'name' => $request->name,
+            'id_brand' => $request->id_brand,
+            'id_category' => $request->id_category,
+            'description' => $request->description,
+            'image_primary' => $imagePath,
+            'status' => $request->status
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product updated successfully');
+        ]);
+
+
+        return redirect()->route('admin.products.listProduct')->with('success', 'Sản phẩm đã được cập nhật.');
     }
 
-    public function destroy($id)
+    public function deleteProduct($id)
     {
-        $product = Product::findOrFail($id);
-
-        if ($product->image_primary && $product->image_primary !== 'products/default.jpg') {
-            Storage::disk('public')->delete($product->image_primary);
+        $products = Product::findOrFail($id);
+        if ($products->image_primary && Storage::disk('public')->exists($products->image_primary)) {
+            Storage::disk('public')->delete($products->image_primary);
         }
-
-        $product->delete();
-
-        return response()->json(['success' => true]);
-    }
-
-    public function trash()
-    {
-        $trashedProducts = Product::with(['brand', 'category'])
-            ->onlyTrashed()
-            ->get();
-        return view('admin.products.trash', compact('trashedProducts'));
-    }
-
-    public function restore($id)
-    {
-        $product = Product::withTrashed()->findOrFail($id);
-        $product->restore();
-        return response()->json(['success' => true]);
-    }
-
-    public function forceDelete($id)
-    {
-        $product = Product::withTrashed()->findOrFail($id);
-
-        if ($product->image_primary && $product->image_primary !== 'products/default.jpg') {
-            Storage::disk('public')->delete($product->image_primary);
-        }
-
-        $product->forceDelete();
-
-        return response()->json(['success' => true]);
-    }
-
-    public function toggleStatus($id)
-    {
-        $product = Product::findOrFail($id);
-        $product->status = $product->status === 'active' ? 'inactive' : 'active';
-        $product->save();
-        return response()->json(['success' => true]);
-    }
-
-    private function generateVariantCombinations($attributeValues)
-    {
-        $result = [[]];
-
-        foreach ($attributeValues as $attributeId => $values) {
-            $tmp = [];
-            foreach ($result as $combination) {
-                foreach ($values as $valueId) {
-                    $tmp[] = $combination + [$attributeId => $valueId];
-                }
-            }
-            $result = $tmp;
-        }
-
-        return $result;
+        $products->delete();
+        return redirect()->route('admin.products.listProduct')->with('success', 'Xóa thành công');
     }
 }

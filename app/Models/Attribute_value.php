@@ -2,21 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attribute_value extends Model
 {
-    use SoftDeletes;
-    
+    use HasFactory;
+    protected $table = 'attribute_values'; 
     protected $fillable = [
         'id_attribute',
         'value',
-        'status'
+        'status',
     ];
-
-    public function attribute()
-    {
-        return $this->belongsTo(Attribute::class, 'id_attribute');
-    }
 }

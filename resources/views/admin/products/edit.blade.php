@@ -6,7 +6,7 @@
             <div class="col-12">
                 <div class="page-title-box">
                     <div class="page-title-right">
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.products.listProduct') }}" class="btn btn-secondary">
                             <i class="ri-arrow-left-line align-middle me-1"></i>
                             Back to List
                         </a>
@@ -20,7 +20,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('admin.products.editPutProduct', $product->id) }}" method="post" enctype="multipart/form-data" class="form">
                             @csrf
                             @method('PUT')
                             
