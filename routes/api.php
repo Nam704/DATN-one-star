@@ -1,36 +1,48 @@
 <?php
 
+
+use App\Http\Controllers\API\AttributeController;
+
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\ImportDetailController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
+
+use App\Http\Controllers\API\BrandController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('attributes')->group(function () {
+    Route::get('/', [AttributeController::class, 'index']);
+    Route::post('/', [AttributeController::class, 'store']);
+    Route::get('/trash', [AttributeController::class, 'trash']);
+    Route::get('/{id}', [AttributeController::class, 'show']);
+    Route::put('/{id}', [AttributeController::class, 'update']);
+    Route::delete('/{id}', [AttributeController::class, 'destroy']);
+    Route::post('/{id}/toggle-status', [AttributeController::class, 'toggleStatus']);
+    Route::post('/{id}/restore', [AttributeController::class, 'restore']);
+    Route::delete('/{id}/force-delete', [AttributeController::class, 'forceDelete']);
 });
 Route::prefix('admin')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+        Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(
+            function () {
+                Route::get('/unread/{userId}', 'getUnreadCount');
+                Route::post('/mark-read/{id}',  'markAsRead');
+            }
+        );
         Route::prefix('imports')->controller(ImportController::class)->group(
             function () {
+                Route::post('accept-all', 'acceptAll')->name('acceptAll');
+                Route::post('reject-all', 'rejectAll')->name('rejectAll');
                 // Route::get('provinces', 'getProvinces');
                 Route::get('{id}/details', [ImportController::class, 'getImportDetails']);
+                Route::post('/confirm-import', [ImportController::class, 'confirmImport'])->name('import.confirm');
             }
         );
     }
@@ -61,3 +73,15 @@ Route::prefix('client')->group(
         );
     }
 );
+
+Route::prefix('brands')->group(function () {
+    Route::get('/', [BrandController::class, 'index']);
+    Route::post('/', [BrandController::class, 'store']);
+    Route::get('/trash', [BrandController::class, 'trash']);
+    Route::get('/{id}', [BrandController::class, 'show']);
+    Route::put('/{id}', [BrandController::class, 'update']);
+    Route::delete('/{id}', [BrandController::class, 'destroy']);
+    Route::post('/{id}/toggle-status', [BrandController::class, 'toggleStatus']);
+    Route::post('/{id}/restore', [BrandController::class, 'restore']);
+    Route::delete('/{id}/force-delete', [BrandController::class, 'forceDelete']);
+});

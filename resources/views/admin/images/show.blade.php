@@ -1,48 +1,49 @@
 @extends('admin.layouts.layout')
 @section('content')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="mt-4">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="mt-4">
 
-                        <h1 class="text-center">IMAGE</h1>
+                    <h1 class="text-center">IMAGE</h1>
 
-                        @if (session('success'))
-                            <div class="alert alert-success">{{ session('success') }}</div>
-                        @endif
-                    </div>
+                    @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                </div>
 
 
-                    <div class="card-body">
-                        <form action="{{ route('admin.images.store') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
+                <div class="card-body">
+                    <form action="{{ route('admin.images.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
 
-                            <div class="form-group">
-                                <label for="url">Chọn ảnh</label>
-                                <div class="col-md-4">
-                                    <img src="{{ asset('storage/' . $image->url) }}" class="img-fluid rounded"
-                                        alt="Hình ảnh">
-                                </div>
+                        <div class="form-group">
+                            <label for="url">Chọn ảnh</label>
+                            <div class="col-md-4">
+                                <img src="{{ asset('storage/' . $image->url) }}" class="img-fluid rounded"
+                                    alt="Hình ảnh">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="id_product_variant">Sản phẩm</label>
-                                <select name="id_product_variant" class="form-control" required disabled>
-                                    @foreach ($productVariants as $variant)
-                                        <option value="{{ $variant->id }}">{{ $variant->sku }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label for="id_product_variant">Sản phẩm</label>
+                            <select name="id_product_variant" class="form-control" required disabled>
+                                @foreach ($productVariants as $variant)
+                                <option value="{{ $variant->id }}">{{ $variant->sku }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="status">Trạng thái</label>
-                                <select name="status" class="form-control" required disabled>
-                                    <option value="active">active</option>
-                                    <option value="inactive">inactive</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label for="status">Trạng thái</label>
+                            <select name="status" class="form-control" required disabled>
+                                <option value="active">active</option>
+                                <option value="inactive">inactive</option>
+                            </select>
+                        </div>
 
+<<<<<<< HEAD
                             <div class="mt-2">
                                 <a type="submit" href="{{ route('admin.images.index') }}" class="btn btn-primary">Về trang
                                     chủ</a>
@@ -53,11 +54,23 @@
             </div><!-- end col-->
         </div> <!-- end row-->
     </div>
+=======
+                        <div class="mt-2">
+                            <a type="submit" href="{{ route('admin.images.index') }}" class="btn btn-primary">Về trang
+                                chủ</a>
+                        </div>
+                    </form>
+                </div> <!-- end card body-->
+            </div> <!-- end card -->
+        </div><!-- end col-->
+    </div> <!-- end row-->
+</div>
+>>>>>>> 7e4fffbd8e3ac0d6e2a89b68e60e3b1247343418
 @endsection
 @push('styles')
-    <x-admin.data-table-styles />
+<x-admin.data-table-styles />
 @endpush
 
 @push('scripts')
-    <x-admin.data-table-scripts />
+<x-admin.data-table-scripts />
 @endpush

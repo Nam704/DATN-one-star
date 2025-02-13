@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7e4fffbd8e3ac0d6e2a89b68e60e3b1247343418
 @extends('admin.layouts.layout')
 @section('content')
 
@@ -10,7 +13,11 @@
                     <h4 class="header-title">Fixed Header</h4>
 
 
+<<<<<<< HEAD
                     <a href="{{ route('admin.categories.addCategory') }}" type="button" class="btn btn-sm btn-primary">
+=======
+                    <a href="{{ route('admin.productvariant.addProductVariant') }}" type="button" class="btn btn-sm btn-primary">
+>>>>>>> 7e4fffbd8e3ac0d6e2a89b68e60e3b1247343418
                         Add new
                         category</a>
 
@@ -75,4 +82,8 @@
 
 @push('scripts')
 <x-admin.data-table-scripts />
+<<<<<<< HEAD
 @endpush
+=======
+@endpush
+>>>>>>> 7e4fffbd8e3ac0d6e2a89b68e60e3b1247343418

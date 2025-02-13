@@ -22,17 +22,28 @@ $(document).ready(function () {
     }
 
     // Lấy thời gian hiện tại theo múi giờ Asia/Ho_Chi_Minh
-    const now = new Date().toLocaleString("vi-VN", {
+    // Tạo đối tượng Date theo múi giờ Asia/Ho_Chi_Minh
+    const now = new Date();
+    const options = {
         timeZone: "Asia/Ho_Chi_Minh",
-    });
-    console.log(now);
-    // Chuyển đổi chuỗi thành đối tượng Date
-    const today = new Date(now);
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    };
+    const formatter = new Intl.DateTimeFormat("vi-VN", options);
+    const formattedNow = formatter.format(now);
 
-    // Lấy ngày theo định dạng yyyy-MM-dd
+    // Chuyển đổi chuỗi thành đối tượng Date chuẩn
+    const today = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })
+    );
+
+    // Định dạng ngày và giờ
     const formattedDate = today.toISOString().split("T")[0];
-
-    // Lấy giờ, phút, giây theo định dạng HH:mm:ss
     const formattedTime = today.toTimeString().split(" ")[0];
 
     console.log("Ngày:", formattedDate); // yyyy-MM-dd
@@ -118,7 +129,7 @@ $(document).ready(function () {
     // Gọi totalProduct và xử lý Promise
     totalProduct()
         .then((result) => {
-            console.log("product", result); // In ra products
+            // console.log("product", result); // In ra products
             let rowId = 0;
             const products = result;
             const maxProductRow = result.length;
@@ -128,10 +139,10 @@ $(document).ready(function () {
                 function (response) {
                     var importDetails = response.importDetails;
                     var listProduct = Object.values(response.products);
-                    console.log("import-detail", importDetails);
-                    console.log("products", listProduct);
+                    // console.log("import-detail", importDetails);
+                    // console.log("products", listProduct);
                     listProduct.forEach((product) => {
-                        console.log("product", product);
+                        // console.log("product", product);
                         var productRow = $(
                             createProductRow(product.id, listProduct)
                         );
@@ -141,10 +152,10 @@ $(document).ready(function () {
                             .val(product.id);
                         importDetails.forEach((variant) => {
                             if (variant.product_id == product.id) {
-                                console.log(
-                                    "product_variant_id",
-                                    variant.product_variant_id
-                                );
+                                // console.log(
+                                //     "product_variant_id",
+                                //     variant.product_variant_id
+                                // );
                                 var variantRow = $(
                                     createRowVariant(
                                         product.id,
@@ -214,31 +225,7 @@ $(document).ready(function () {
                 formData.append("import_date", $("#import-date").val());
                 formData.append("total_amount", $("#total-amount").val());
                 formData.append("note", $("#note").val());
-                // Log main import data
-                // console.log("Supplier:", $("#supplier-name").val());
-                // console.log("Name:", $("#import-name").val());
-                // console.log("Import Date:", $("#import-date").val());
-                // console.log("Total Amount:", $("#total-amount").val());
-                // $(".product-variant").each(function (index) {
-                //     const variant = $(this);
-                //     console.log(`Variant ${index}:`, {
-                //         product_variant_id: variant
-                //             .find('[name$="[product_variant_id]"]')
-                //             .val(),
-                //         quantity: variant.find('[name$="[quantity]"]').val(),
-                //         price_per_unit: variant
-                //             .find('[name$="[price_per_unit]"]')
-                //             .val(),
-                //         expected_price: variant
-                //             .find('[name$="[expected_price]"]')
-                //             .val(),
-                //         total_price: variant
-                //             .find('[name$="[total_price]"]')
-                //             .val(),
-                //     });
-                // });
-                // Collect all product and variant data
-                // Add variant data with sequential indexing
+
                 $(".product-variant").each(function (index) {
                     const variant = $(this);
                     const prefix = `variant-product[${index}]`;
@@ -305,7 +292,7 @@ $(document).ready(function () {
                             // Handle non-JSON errors
                             errorMessage += `Status: ${xhr.status}\nError: ${errorThrown}`;
                         }
-
+                        console.log(errorMessage);
                         alert(errorMessage);
                     },
                 });

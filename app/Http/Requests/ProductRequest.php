@@ -21,6 +21,7 @@ class ProductRequest extends FormRequest
      */
     public function rules(): array
     {
+
         $productId = $this->route('id');
         return [
             'name' => 'required|string|max:255|unique:products,name,' . $productId,
@@ -35,6 +36,7 @@ class ProductRequest extends FormRequest
             'additional_images' => 'nullable|array',
             'additional_images.*' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ];
+
     }
 
     public function messages()
@@ -59,6 +61,7 @@ class ProductRequest extends FormRequest
             'additional_images.*.image' => 'Tệp tải lên phải là hình ảnh.',
             'additional_images.*.mimes' => 'Hình ảnh phải có định dạng jpg, jpeg, png, hoặc gif.',
             'additional_images.*.max' => 'Kích thước hình ảnh không được vượt quá 2MB.',
+
         ];
     }
 }

@@ -74,4 +74,8 @@
 
 @push('scripts')
 <x-admin.data-table-scripts />
+<<<<<<< HEAD
 @endpush
+=======
+@endpush
+>>>>>>> 7e4fffbd8e3ac0d6e2a89b68e60e3b1247343418
