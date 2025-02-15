@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\OrderController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
@@ -42,12 +43,6 @@ Route::prefix('auth/')->name('auth.')->group(
         Route::controller(GoogleController::class)->group(function () {
             Route::get('google', 'redirectToGoogle')->name('google');
             Route::get('google/callback', 'handleGoogleCallback');
-        });
-
-        Route::controller(ShopController::class)->group(function () {
-            Route::get('shop', 'shop')->name('shop');
-            Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');
-
         });
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'getFormLogin')->name('getFormLogin');
@@ -207,5 +202,19 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () {}
         );
+        Route::controller(ShopController::class)->group(function () {
+            Route::get('shop', 'shop')->name('shop');
+            Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');
+        });
+
+        Route::controller(OrderController::class)->group(function () {
+            Route::get('/orders', [OrderController::class, 'trackOrders'])->name('orders.track');
+            Route::post('/orders/{order}/cancel', [OrderController::class, 'cancelOrder'])->name('orders.cancel');
+            Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+
+        });
+
+
+
     }
 );

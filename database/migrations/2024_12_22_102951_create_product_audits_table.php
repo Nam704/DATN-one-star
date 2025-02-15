@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('action_type'); // Không thay đổi do có migration update sau
             $table->text('reason')->nullable();
             $table->timestamps();
-            $table->foreign('id_import')->references('id')->on('imports')->onDelete('cascade');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('id_product_variant')->references('id')->on('product_variants')->onDelete('cascade');
         });

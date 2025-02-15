@@ -7,7 +7,7 @@
                 <div class="widget_inner">
                     <div class="widget_list widget_filter">
                         <h2>Lọc theo giá</h2>
-                        <form method="GET" action="{{ route('auth.shop') }}">
+                        <form method="GET" action="{{ route('client.shop') }}">
                             <!-- Thanh trượt cho khoảng giá -->
                             <div id="slider-range"></div>
                             <div class="price-display">
@@ -19,7 +19,7 @@
                         </form>
                     </div>
                     <div class="widget_list widget_categories" id="filters">
-                        <form id="filter-form" method="GET" action="{{ route('auth.shop') }}">
+                        <form id="filter-form" method="GET" action="{{ route('client.shop') }}">
                             <!-- Bộ lọc theo danh mục -->
                             <div class="widget_list widget_categories">
                                 <div id="categories">
@@ -95,7 +95,7 @@
             if (minPrice) params.append('min_price', minPrice.replace(/\./g, ''));
             if (maxPrice) params.append('max_price', maxPrice.replace(/\./g, ''));
 
-            fetch('{{ route('auth.filter') }}?' + params.toString())
+            fetch('{{ route('client.filter') }}?' + params.toString())
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('product-list').innerHTML = data.products;
@@ -174,7 +174,7 @@
                 params.append('orderby', orderby);
             }
 
-            fetch('{{ route('auth.filter') }}?' + params.toString())
+            fetch('{{ route('client.filter') }}?' + params.toString())
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('product-list').innerHTML = data.products;

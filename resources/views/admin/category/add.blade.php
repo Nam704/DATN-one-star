@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 
-=======
->>>>>>> 7e4fffbd8e3ac0d6e2a89b68e60e3b1247343418
 @extends('admin.layouts.layout')
 @section('content')
 <!-- Begin Page Content -->
