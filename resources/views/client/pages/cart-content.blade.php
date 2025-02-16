@@ -161,7 +161,11 @@
                                 </tbody>
                             </table>
                         </div>
+                    <div class="cart_submit">
+                        <button type="button" id="update-cart" class="btn">update cart</button>
                     </div>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -169,35 +173,30 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6">
                         <div class="coupon_code left">
-                            <h3>Coupon</h3>
+                            <h3>Mã giảm giá</h3>
                             <div class="coupon_inner">
-                                <p>Enter your coupon code if you have one.</p>
-                                <input placeholder="Coupon code" type="text">
-                                <button type="submit">Apply coupon</button>
+                                <p>Nhập mã giảm giá nếu có</p>
+                                <input id="voucher_code" name="voucher_code" placeholder="Nhập mã giảm giá" type="text">
+                                <button type="button" id="apply-coupon" class="button">Áp dụng</button>
                             </div>
                         </div>
+                        
                     </div>
                     <div class="col-lg-6 col-md-6">
                         <div class="coupon_code right">
                             <h3>Cart Totals</h3>
                             <div class="coupon_inner">
                                 <div class="cart_subtotal">
-                                    <p>Subtotal</p>
-                                    <p class="cart_amount">
-                                        ${{ $cart ? number_format($cart->getTotal(), 2) : '0.00' }}
-                                    </p>
+                                    <p>Thành tiền:</p>
+                                    <p class="cart_subtotal price">{{ number_format($cart->getTotal()) }}đ</p>
                                 </div>
-                                <div class="cart_subtotal ">
-                                    <p>Shipping</p>
-                                    <p class="cart_amount"><span>Flat Rate:</span> $0.00</p>
-                                </div>
-                                <a href="#">Calculate shipping</a>
-
                                 <div class="cart_subtotal">
-                                    <p>Total</p>
-                                    <p class="cart_amount">
-                                        ${{ $cart ? number_format($cart->getTotal(), 2) : '0.00' }}
-                                    </p>
+                                    <p>Giảm giá:</p>
+                                    <p class="discount_amount">0đ</p>
+                                </div>
+                                <div class="cart_subtotal">
+                                    <p>Tổng tiền:</p>
+                                    <p class="final_total price">{{ number_format($cart->getTotal()) }}đ</p>
                                 </div>
                                 <div class="checkout_btn">
                                     <a href="#">Proceed to Checkout</a>
@@ -232,3 +231,13 @@
 </style>
 
 
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#apply-coupon').click(function(e) {
+        // existing code
+    });
+});
+</script>
+@endpush

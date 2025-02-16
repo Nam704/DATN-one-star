@@ -22,7 +22,7 @@ use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\AttributeValueController;
-
+use App\Http\Controllers\VoucherController;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -46,6 +46,10 @@ Route::get('/', [HomeController::class, 'index'])->name('client.home');
 Route::get('/cart', [CartController::class, 'index'])->name('client.cart');
 Route::put('/cart/update/{id}', [CartItemController::class, 'updateQuantity'])->name('cart.update');
 Route::delete('/cart/remove/{id}', [CartItemController::class, 'removeItem'])->name('cart.remove');
+Route::post('/apply-voucher', [CartController::class, 'applyVoucher'])->name('client.apply-voucher');
+Route::get('/search', [HomeController::class, 'search'])->name('client.search');
+Route::post('/voucher/check', [VoucherController::class, 'check'])->name('voucher.check');
+Route::post('/cart/update-all', [CartController::class, 'updateAll'])->name('cart.updateAll');
 
 
 

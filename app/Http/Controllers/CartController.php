@@ -53,11 +53,62 @@ class CartController extends Controller
     $cartItem = CartItem::findOrFail($id);
     $cartItem->quantity = $request->quantity;
     $cartItem->save();
-    
+
+    // Lấy giỏ hàng và tổng tiền sau khi cập nhật
+    $cart = Cart::with('items')->first(); // Bạn có thể cần lấy giỏ hàng của người dùng hiện tại
+    $cartTotal = $cart->getTotal();
+
     return response()->json([
         'success' => true,
-        'total' => $cartItem->price * $cartItem->quantity
+        'total' => $cartItem->price * $cartItem->quantity,
+        'cartTotal' => $cartTotal
     ]);
 }
 
+    
+// CartController.php
+public function applyVoucher(Request $request)
+{
+    $voucher = Voucher::where('code', $request->voucher_code)
+        ->where('quantity', '>', 0)
+        ->where('start_date', '<=', now())
+        ->where('end_date', '>=', now())
+        ->first();
+
+    if (!$voucher) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mã giảm giá không hợp lệ'
+        ]);
+    }
+
+    $cart = Cart::first();
+    $subtotal = $cart->getSubtotal();
+    $discount = $voucher->discount_amount;
+    $total = $subtotal - $discount;
+
+    return response()->json([
+        'success' => true,
+        'subtotal' => number_format($subtotal) . 'đ',
+        'discount' => number_format($discount) . 'đ',
+        'total' => number_format($total) . 'đ'
+    ]);
+}
+public function updateAll(Request $request)
+{
+    foreach($request->items as $item) {
+        CartItem::where('id', $item['id'])->update([
+            'quantity' => $item['quantity']
+        ]);
+    }
+
+    $cart = Cart::with('items')->first();
+    $subtotal = $cart->getSubtotal();
+    $total = $cart->getTotal();
+
+    return response()->json([
+        'subtotal' => $subtotal,
+        'total' => $total
+    ]);
+}
 }

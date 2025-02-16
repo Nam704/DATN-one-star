@@ -35,9 +35,10 @@ class Category extends Model
         return $query->whereNull('id_parent');
     }
 
-    public function products() {
-        return $this->hasMany(Product::class, 'id_category');
-    }
+    public function products() 
+{
+    return $this->hasMany(Product::class, 'id_category');
+}
 
     public function product()
     {

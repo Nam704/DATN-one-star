@@ -12,16 +12,19 @@ class VouchersSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach(range(1, 10) as $index) {
+        foreach(range(1, 20) as $index) {
+            $discountAmount = $faker->randomElement([50000, 100000, 150000, 200000, 300000]);
+            $minAmount = $discountAmount * 5;
+            
             DB::table('vouchers')->insert([
-                'name' => $faker->words(2, true) . ' Voucher',
-                'code' => $faker->unique()->regexify('[A-Z]{3}[0-9]{3}'),
-                'description' => $faker->sentence(),
-                'discount_amount' => $faker->randomFloat(2, 10, 100),
+                'name' => 'Giảm ' . number_format($discountAmount) . 'đ',
+                'code' => 'SALE' . $faker->unique()->numberBetween(100, 999),
+                'description' => 'Giảm ' . number_format($discountAmount) . 'đ cho đơn hàng từ ' . number_format($minAmount) . 'đ',
+                'discount_amount' => $discountAmount,
                 'quantity' => $faker->numberBetween(10, 100),
                 'start_date' => $faker->dateTimeBetween('now', '+1 week'),
-                'end_date' => $faker->dateTimeBetween('+1 week', '+1 month'),
-                'min_amount' => $faker->randomFloat(2, 100, 500),
+                'end_date' => $faker->dateTimeBetween('+1 week', '+3 months'),
+                'min_amount' => $minAmount,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);

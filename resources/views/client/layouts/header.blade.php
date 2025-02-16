@@ -19,7 +19,8 @@
                     <div class="col-lg-6 col-md-6">
                         <div class="top_right text-end">
                             <ul>
-                                <li class="top_links"><a href="#"><i class="ion-android-person"></i> My Account<i class="ion-ios-arrow-down"></i></a>
+                                <li class="top_links"><a href="#"><i class="ion-android-person"></i> My Account<i
+                                            class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_links">
                                         <li><a href="checkout.html">Checkout </a></li>
                                         <li><a href="my-account.html">My Account </a></li>
@@ -27,10 +28,16 @@
                                         <li><a href="wishlist.html">Wishlist</a></li>
                                     </ul>
                                 </li>
-                                <li class="language"><a href="#"><img src="{{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
+                                <li class="language"><a href="#"><img
+                                            src="{{ asset('client/assets/img/logo/language.png') }}"
+                                            alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_language">
-                                        <li><a href="#"><img src="{{ asset('client/assets/img/logo/language.png') }}" alt=""> English</a></li>
-                                        <li><a href="#"><img src="{{ asset('client/assets/img/logo/language2.png') }}" alt=""> Germany</a></li>
+                                        <li><a href="#"><img
+                                                    src="{{ asset('client/assets/img/logo/language.png') }}"
+                                                    alt=""> English</a></li>
+                                        <li><a href="#"><img
+                                                    src="{{ asset('client/assets/img/logo/language2.png') }}"
+                                                    alt=""> Germany</a></li>
                                     </ul>
                                 </li>
                                 <li class="currency"><a href="#">$ USD<i class="ion-ios-arrow-down"></i></a>
@@ -65,13 +72,14 @@
                 <div class="col-lg-9 col-md-9">
                     <div class="middel_right">
                         <div class="search-container">
-                            <form action="#">
+                            <form action="{{ route('client.search') }}" method="GET">
                                 <div class="search_box">
-                                    <input placeholder="Search entire store here ..." type="text">
+                                    <input name="keyword" placeholder="Tìm kiếm sản phẩm..." type="text" value="{{ request('keyword') }}">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>
                         </div>
+                        
                         <div class="middel_right_info">
 
                             <div class="header_wishlist">
@@ -79,9 +87,11 @@
                                 <span class="wishlist_quantity">3</span>
                             </div>
                             <div class="mini_cart_wrapper">
-                                <a href="javascript:void(0)"><span class="lnr lnr-cart"></span>My Cart </a>
-                                <span class="cart_quantity">2</span>
+                                <a href="">
+                                    <a href="javascript:void(0)"><span class="lnr lnr-cart"></span>My Cart </a>
+                                <span class="cart_quantity">{{ $cart->items->count() }}</span>
                             </div>
+
                         </div>
 
                     </div>
@@ -90,70 +100,59 @@
         </div>
     </div>
     <!--header middel end-->
-    
+
     <!--mini cart-->
     <div class="mini_cart">
         <div class="cart_close">
             <div class="cart_text">
-                <h3>cart</h3>
+                <h3>Cart</h3>
             </div>
             <div class="mini_cart_close">
                 <a href="javascript:void(0)"><i class="ion-android-close"></i></a>
             </div>
         </div>
-        <div class="cart_item">
-            <div class="cart_img">
-                <a href="#"><img src="{{ asset('client/assets/img/s-product/product.jpg') }}" alt=""></a>
-            </div>
-            <div class="cart_info">
-                <a href="#">JBL Flip 3 Splasroof Portable Bluetooth 2</a>
 
-                <span class="quantity">Qty: 1</span>
-                <span class="price_cart">$60.00</span>
+        @if ($cart && $cart->items->count() > 0)
+            @foreach ($cart->items as $item)
+                <div class="cart_item">
+                    <div class="cart_img">
+                        <a href="#">
+                            <img src="{{ Storage::url($item->productVariant->image) }}" alt="">
+                        </a>
+                    </div>
+                    <div class="cart_info">
+                        <a href="#">{{ $item->productVariant->product->name }}</a>
+                        <span class="quantity">Số lượng: {{ $item->quantity }}</span>
+                        <span class="price_cart">{{ number_format($item->price) }}đ</span>
+                    </div>
+                    <div class="cart_remove">
+                        <a href="#" class="remove-item" data-id="{{ $item->id }}"><i
+                                class="ion-android-close"></i></a>
+                    </div>
+                </div>
+            @endforeach
 
+            <div class="mini_cart_table">
+                <div class="cart_total">
+                    <span>Tổng tiền:</span>
+                    <span class="price">{{ number_format($cart->getTotal()) }}đ</span>
+                </div>
             </div>
-            <div class="cart_remove">
-                <a href="#"><i class="ion-android-close"></i></a>
-            </div>
-        </div>
-        <div class="cart_item">
-            <div class="cart_img">
-                <a href="#">
-                    <img src="{{ asset('client/assets/img/s-product/product.jpg') }}" alt="cart product">
-                </a>
-            </div>
-            
-            <div class="cart_info">
-                <a href="#">Koss Porta Pro On Ear Headphones </a>
-                <span class="quantity">Qty: 1</span>
-                <span class="price_cart">$69.00</span>
-            </div>
-            <div class="cart_remove">
-                <a href="#"><i class="ion-android-close"></i></a>
-            </div>
-        </div>
-        <div class="mini_cart_table">
-            <div class="cart_total">
-                <span>Sub total:</span>
-                <span class="price">$138.00</span>
-            </div>
-            <div class="cart_total mt-10">
-                <span>total:</span>
-                <span class="price">$138.00</span>
-            </div>
-        </div>
+        @else
+            <p class="text-center">Giỏ hàng trống</p>
+        @endif
 
         <div class="mini_cart_footer">
             <div class="cart_button">
-                <a href="cart.html">View cart</a>
+                <a href="{{ route('client.cart') }}">Xem giỏ hàng</a>
             </div>
             <div class="cart_button">
-                <a class="active" href="checkout.html">Checkout</a>
+                <a class="active" href="#">Thanh toán</a>
             </div>
-
         </div>
-
     </div>
+
+
     <!--mini cart end-->
 
     <!--header bottom satrt-->
@@ -183,7 +182,8 @@
                                                     <li><a href="shop-fullwidth.html">Full Width</a></li>
                                                     <li><a href="shop-fullwidth-list.html">Full Width list</a></li>
                                                     <li><a href="shop-right-sidebar.html">Right Sidebar </a></li>
-                                                    <li><a href="shop-right-sidebar-list.html"> Right Sidebar list</a></li>
+                                                    <li><a href="shop-right-sidebar-list.html"> Right Sidebar list</a>
+                                                    </li>
                                                     <li><a href="shop-list.html">List View</a></li>
                                                 </ul>
                                             </li>
@@ -218,10 +218,11 @@
                                         </ul>
                                         <div class="banner_static_menu">
                                             <a href="shop.html">
-                                                <img src="{{ asset('/public/client/assets/img/bg/banner1.jpg') }}" alt="banner">
+                                                <img src="{{ asset('/public/client/assets/img/bg/banner1.jpg') }}"
+                                                    alt="banner">
                                             </a>
                                         </div>
-                                        
+
                                     </div>
                                 </li>
                                 <li><a href="blog.html">blog<i class="fa fa-angle-down"></i></a>

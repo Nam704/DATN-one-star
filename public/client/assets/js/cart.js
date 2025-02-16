@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    // Quantity update handlers
     $('.btn-increase').click(function() {
         let input = $(this).siblings('.quantity-input');
         let newValue = parseInt(input.val()) + 1;
@@ -19,8 +20,6 @@ $(document).ready(function() {
         const itemId = input.data('item-id');
         const row = input.closest('tr');
         
-        console.log('Updating quantity:', {itemId, newValue}); // Debug log
-
         $.ajax({
             url: `/cart/update/${itemId}`,
             method: 'PUT',
@@ -31,43 +30,108 @@ $(document).ready(function() {
                 quantity: newValue
             },
             success: function(response) {
-                console.log('Response:', response); // Debug log
                 input.val(newValue);
-                row.find('.product_total').text('$' + response.total.toFixed(2));
-                $('.cart_amount').text('$' + response.cartTotal.toFixed(2));
-            },
-            error: function(xhr, status, error) {
-                console.log('Error:', error); // Debug log
+                row.find('.product_total').text(response.total.toLocaleString() + 'đ');
+                $('.cart_amount').text(response.cartTotal.toLocaleString() + 'đ');
             }
         });
     }
+
+    // Remove item handler
+    $('.remove-item').click(function() {
+        const button = $(this);
+        const itemId = button.data('id');
+        const row = button.closest('tr');
+
+        if(confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+            $.ajax({
+                url: `/cart/remove/${itemId}`,
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    row.fadeOut(400, function() {
+                        row.remove();
+                    });
+                    $('.cart_amount').text(response.cartTotal.toLocaleString() + 'đ');
+                    toastr.success('Đã xóa sản phẩm khỏi giỏ hàng');
+                }
+            });
+        }
+    });
+
+    // Update cart button handler
+    // In cart.js
+$('#update-cart').click(function() {
+    console.log('Update cart button clicked');
+    let cartItems = [];
+    $('.quantity-input').each(function() {
+        const row = $(this).closest('tr');
+        const itemId = $(this).data('item-id');
+        const quantity = parseInt($(this).val());
+        const price = parseInt(row.find('.product_price').text().replace(/[^0-9]/g, ''));
+        
+        cartItems.push({
+            id: itemId,
+            quantity: quantity,
+            price: price
+        });
+        console.log('Cart item:', {id: itemId, quantity: quantity, price: price});
+    });
+
+    $.ajax({
+        url: '/cart/update-all', // Thay bằng URL chính xác
+        type: 'POST',
+        data: {
+            quantity: newQuantity,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            // Cập nhật tổng tiền cho từng sản phẩm
+            row.find('.product_total').text(response.total.toLocaleString() + 'đ');
+    
+            // Cập nhật tổng tiền giỏ hàng
+            $('.cart_subtotal .price').text(response.cartTotal.toLocaleString() + 'đ');
+            $('.final_total .price').text(response.cartTotal.toLocaleString() + 'đ');
+        },
+        error: function() {
+            alert('Có lỗi xảy ra khi cập nhật số lượng!');
+        }
+    });    
 });
 
-// Thêm xử lý xóa sản phẩm
-$('.remove-item').click(function() {
-    const button = $(this);
-    const itemId = button.data('id');
-    const row = button.closest('tr');
 
-    if(confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+    // Voucher application handler
+    $('#apply-coupon').click(function(e) {
+        e.preventDefault();
+        let code = $('input[name="voucher_code"]').val();
+        
         $.ajax({
-            url: `/cart/remove/${itemId}`,
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            type: 'POST',
+            url: '/voucher/check',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                voucher_code: code
             },
             success: function(response) {
-                console.log('Success:', response);
-                row.fadeOut(400, function() {
-                    row.remove();
-                });
-                $('.cart_amount').text('$' + response.cartTotal.toFixed(2));
-                alert('Đã xóa sản phẩm khỏi giỏ hàng');
+                if(response.success) {
+                    let subtotal = parseInt($('.cart_subtotal .price').text().replace(/[^0-9]/g, ''));
+                    let discount = response.discount;
+                    let total = subtotal - discount;
+                    
+                    $('.cart_subtotal .price').text(subtotal.toLocaleString() + 'đ');
+                    $('.discount_amount').text(discount.toLocaleString() + 'đ');
+                    $('.final_total .price').text(total.toLocaleString() + 'đ');
+                    
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message);
+                }
             },
-            error: function(xhr, status, error) {
-                console.log('Error:', error);
-                alert('Có lỗi xảy ra khi xóa sản phẩm');
+            error: function() {
+                toastr.error('Có lỗi xảy ra, vui lòng thử lại');
             }
         });
-    }
+    });
 });
