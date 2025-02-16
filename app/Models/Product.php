@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
+
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -16,7 +17,10 @@ class Product extends Model
         'id_category',
         'description',
         'image_primary',
-        'status'
+        'status',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     public function Category()
@@ -31,30 +35,22 @@ class Product extends Model
     }
 
 
-    //     public static function scopeList($query, $idProduct)
-    // {
-    //     return $query->select('suppliers.id', 'suppliers.name', 'suppliers.status', 'products.name as product_name')  // Thêm cột 'product_name' từ bảng 'products'
-    //         ->join('products', 'suppliers.product_id', '=', 'products.id')  // Thực hiện JOIN giữa 'suppliers' và 'products'
-    //         ->where('products.id', $idProduct)  // Lọc theo 'idProduct'
-    //         ->latest('suppliers.id');  // Sắp xếp theo 'id' của bảng 'suppliers'
-    // }
-    // public static function scopeList($query)
-    // {
-    //     return $this->belongsTo(Brand::class, 'id_brand');
-    // }
-    public function images()
-    {
-        return $this->hasManyThrough(Image::class, Product_variant::class, 'id_product', 'id_product_variant');
-    }
 
+    public static function scopeList($query)
+    {
+        return $query->select('id', 'name', 'status')
+            ->latest('id');
+    }
+    public static function scopeTotal($query)
+    {
+        return $query->where('status', 'active');
+    }
     public function variants()
     {
         return $this->hasMany(Product_variant::class, 'id_product');
     }
-
-    public function categories()
+    public function product_albums()
     {
-        return $this->belongsToMany(Category::class, 'product_category');
+        return $this->hasMany(Product_albums::class, 'id_product');
     }
-
 }

@@ -27,12 +27,17 @@
                                         <li><a href="wishlist.html">Wishlist</a></li>
                                     </ul>
                                 </li>
-                                <li class="language"><a href="#"><img src="{{ asset ('client/assets/img/logo/language.png')}}"
+                                <li class="language"><a href="#"><img
+                                            src="{{ asset('client/assets/img/logo/language.png') }}"
                                             alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_language">
-                                        <li><a href="#"><img src="{{ asset ('client/assets/img/logo/language.png')}}" alt="">
+                                        <li><a href="#"><img
+                                                    src="{{ asset('client/assets/img/logo/language.png') }}"
+                                                    alt="">
                                                 English</a></li>
-                                        <li><a href="#"><img src="{{ asset ('client/assets/img/logo/language2.png')}}" alt="">
+                                        <li><a href="#"><img
+                                                    src="{{ asset('client/assets/img/logo/language2.png') }}"
+                                                    alt="">
                                                 Germany</a></li>
                                     </ul>
                                 </li>
@@ -59,19 +64,23 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-6">
                     <div class="logo">
-                        <a href="index.html"><img src="{{ asset ('client/assets/img/logo/logo.png')}}" alt=""></a>
+                        <a href="index.html"><img src="{{ asset('client/assets/img/logo/logo.png') }}"
+                                alt=""></a>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-6">
                     <div class="middel_right">
-                        <div class="search-container">
+                        <div class="search-container desktop-search" style="position: relative;">
                             <form action="#">
                                 <div class="search_box">
-                                    <input placeholder="Search entire store here ..." type="text">
+                                    <input type="text" class="search-input" placeholder="Search entire store here ..." autocomplete="off">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>
+                            <div class="search-result" style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                         </div>
+
+
                         <div class="middel_right_info">
 
                             <div class="header_wishlist">
@@ -103,7 +112,7 @@
         </div>
         <div class="cart_item">
             <div class="cart_img">
-                <a href="#"><img src="{{ asset ('client/assets/img/s-product/product.jpg')}}" alt=""></a>
+                <a href="#"><img src="{{ asset('client/assets/img/s-product/product.jpg') }}" alt=""></a>
             </div>
             <div class="cart_info">
                 <a href="#">JBL Flip 3 Splasroof Portable Bluetooth 2</a>
@@ -118,7 +127,8 @@
         </div>
         <div class="cart_item">
             <div class="cart_img">
-                <a href="#"><img src="{{ asset ('client/assets/img/s-product/product2.jpg')}}" alt=""></a>
+                <a href="#"><img src="{{ asset('client/assets/img/s-product/product2.jpg') }}"
+                        alt=""></a>
             </div>
             <div class="cart_info">
                 <a href="#">Koss Porta Pro On Ear Headphones </a>
@@ -215,7 +225,8 @@
                                             </li>
                                         </ul>
                                         <div class="banner_static_menu">
-                                            <a href="shop.html"><img src="{{ asset ('client/assets/img/bg/banner1.jpg')}}"
+                                            <a href="shop.html"><img
+                                                    src="{{ asset('client/assets/img/bg/banner1.jpg') }}"
                                                     alt=""></a>
                                         </div>
                                     </div>
@@ -279,12 +290,17 @@
                                     <li><a href="wishlist.html">Wishlist</a></li>
                                 </ul>
                             </li>
-                            <li class="language"><a href="#"><img src="{{ asset ('client/assets/img/logo/language.png')}}"
+                            <li class="language"><a href="#"><img
+                                        src="{{ asset('client/assets/img/logo/language.png') }}"
                                         alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                 <ul class="dropdown_language">
-                                    <li><a href="#"><img src="{{ asset ('client/assets/img/logo/language.png')}}" alt="">
+                                    <li><a href="#"><img
+                                                src="{{ asset('client/assets/img/logo/language.png') }}"
+                                                alt="">
                                             English</a></li>
-                                    <li><a href="#"><img src="{{ asset ('client/assets/img/logo/language2.png')}}" alt="">
+                                    <li><a href="#"><img
+                                                src="{{ asset('client/assets/img/logo/language2.png') }}"
+                                                alt="">
                                             Germany</a></li>
                                 </ul>
                             </li>
@@ -308,14 +324,19 @@
                             <li><a href="#"><i class="ion-social-youtube"></i></a></li>
                         </ul>
                     </div>
-                    <div class="search-container">
+                    <div class="search-container mobile-search" style="position: relative;">
                         <form action="#">
                             <div class="search_box">
-                                <input placeholder="Search entire store here ..." type="text">
+                                <input type="text" class="search-input" placeholder="Search entire store here ..." autocomplete="off">
                                 <button type="submit"><i class="ion-ios-search-strong"></i></button>
                             </div>
                         </form>
+                        <div class="search-result" style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                     </div>
+
+
+
+
                     <div id="menu" class="text-left ">
                         <ul class="offcanvas_main_menu">
                             <li class="menu-item-has-children">
@@ -423,3 +444,34 @@
     </div>
 </div>
 <!--breadcrumbs area end-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.search-input').on('keyup', function(){
+        var query = $(this).val();
+        // Tìm container chứa ô tìm kiếm hiện hành và phần kết quả tương ứng
+        var searchResultContainer = $(this).closest('.search-container').find('.search-result');
+        if(query != ''){
+            $.ajax({
+                url: "{{ route('client.search') }}",
+                type: "GET",
+                data: { query: query },
+                success: function(data){
+                    searchResultContainer.fadeIn();
+                    searchResultContainer.html(data);
+                }
+            });
+        } else {
+            searchResultContainer.fadeOut();
+            searchResultContainer.html("");
+        }
+    });
+
+    // Ẩn kết quả gợi ý khi click bên ngoài container search
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-container').length) {
+            $('.search-result').fadeOut();
+        }
+    });
+});
+</script>

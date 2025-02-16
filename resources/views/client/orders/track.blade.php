@@ -33,7 +33,7 @@
               Thành tiền: {{ number_format($detail->total_price, 2) }}
             </p>
             <div>
-              @if($detail->productVariant && $detail->productVariant->images->isNotEmpty())
+                @if($detail->productVariant && $detail->productVariant->images && $detail->productVariant->images->count() > 0)
                 <img src="{{ $detail->productVariant->images->first()->url }}" alt="{{ $detail->product_name }}" width="100">
               @else
                 <p>Không có hình ảnh</p>

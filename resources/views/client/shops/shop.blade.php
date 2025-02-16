@@ -199,5 +199,6 @@
             document.getElementById('min-price').addEventListener('input', fetchFilteredProducts);
             document.getElementById('max-price').addEventListener('input', fetchFilteredProducts);
         });
+        
     </script>
 @endsection

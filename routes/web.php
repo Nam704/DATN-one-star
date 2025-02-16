@@ -18,6 +18,7 @@ use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
+use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
 
@@ -206,6 +207,10 @@ Route::prefix('client')->name('client.')->group(
             Route::get('shop', 'shop')->name('shop');
             Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');
         });
+        Route::controller(SearchController::class)->group(function () {
+            Route::get('/search', [SearchController::class, 'search'])->name('search');
+        });
+
 
         Route::controller(OrderController::class)->group(function () {
             Route::get('/orders', [OrderController::class, 'trackOrders'])->name('orders.track');
