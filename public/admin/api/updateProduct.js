@@ -1,6 +1,164 @@
+let productAttributes = {};
+
+// Duyệt qua từng biến thể
+productVariants.forEach((variant) => {
+    if (variant.values) {
+        variant.values.forEach((attrValue) => {
+            let attrId = attrValue.attribute_id;
+            let attrName = attrValue.name;
+            let attrValueText = {
+                value: attrValue.value,
+                id: attrValue.value_id,
+            };
+
+            // Nếu thuộc tính chưa tồn tại, tạo mới
+            if (!productAttributes[attrId]) {
+                productAttributes[attrId] = {
+                    id: attrId,
+                    name: attrName,
+                    values: new Set(), // Dùng Set để tránh trùng lặp
+                };
+            }
+
+            // Chuyển object thành chuỗi để so sánh (Set không thể lưu object trực tiếp)
+            productAttributes[attrId].values.add(JSON.stringify(attrValueText));
+        });
+    }
+});
+
+// Chuyển Set thành mảng và parse lại object
+let formattedAttributes = Object.values(productAttributes).map((attr) => ({
+    id: attr.id,
+    name: attr.name,
+    values: Array.from(attr.values).map((value) => JSON.parse(value)), // Chuyển lại thành object
+}));
+
+console.log("Danh sách thuộc tính sau khi xử lý:", formattedAttributes);
+
+function renderProductVariants() {
+    var container = $("#container-variations");
+    container.empty(); // Xóa nội dung cũ trong container
+
+    if (!productVariants || productVariants.length === 0) {
+        container.append("<p>Không có biến thể nào được tạo.</p>");
+        return;
+    }
+
+    productVariants.forEach((variant, index) => {
+        var nestedVariant = variant.values.map((v) => ({
+            attribute_id: v.attribute_id,
+            attribute_name: v.name,
+            value: {
+                id_value: v.value_id,
+                value: v.value,
+            },
+        }));
+
+        // Chuyển đổi nestedVariant thành chuỗi dễ đọc
+        var variantDetails = nestedVariant
+            .map((v) => `${v.attribute_name}: ${v.value.value}`)
+            .join(", ");
+
+        var variantRow = `
+            <div class="variant-row border rounded p-1 mb-1" data-id="${index}">
+                <div class="row mb-1 variant-title">
+                    <div class="col-12 d-flex justify-content-between">
+                        <h6 class="mb-0">#${index + 1} - ${variantDetails}</h6>
+                        <div>
+                            <button type="button" class="btn btn-outline-danger remove-variant me-3">Xóa</button>
+                            <button type="button" class="btn btn-outline-primary edit-variant">Sửa</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-1 variant-content" style="display:none;">
+                   <input type="hidden" name="variant_attribute_values_${index}" value='${JSON.stringify(
+            nestedVariant
+        )}' />
+        <input type="hidden" name="id_variant_${index}" value="${variant.id}">
+                    <div class="col-md-2 text-center">
+                        <div class="image-placeholder border d-flex align-items-center justify-content-center image-variant" style="height: 100px; position: relative;">
+                            <input type="file" class="form-control image-input" name="image_variant_${index}" accept="image/*" style="opacity: 0; position: absolute; width: 100%; height: 100%;">
+                            <img src="${
+                                variant.image || "default-image.jpg"
+                            }" alt="Preview" class="image-preview" style="max-height: 100%; max-width: 100%;">
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Mã sản phẩm</label>
+                                <input type="text" class="form-control" name="product_code_${index}" value="${
+            variant.sku
+        }">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Giá ($)</label>
+                                <input type="number" class="form-control" name="product_price_${index}" value="${
+            variant.price
+        }">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.append(variantRow);
+    });
+
+    $(".remove-variant").on("click", function () {
+        $(this).closest(".variant-row").remove();
+    });
+}
+
+// Gọi hàm khi trang tải xong
+
 $(document).ready(function () {
     var selected = [];
 
+    function renderProductAttributes() {
+        const attributeContainer = $("#new-attribute-row-container");
+        attributeContainer.html(""); // Xóa nội dung cũ
+
+        if (!formattedAttributes || formattedAttributes.length === 0) {
+            return;
+        }
+
+        formattedAttributes.forEach((attribute) => {
+            console.log("attribute: ", attribute);
+
+            // Thêm thuộc tính vào giao diện
+            addNewAttributeRow(attribute.id, attribute.name);
+
+            // Tìm hàng hiện tại vừa thêm vào
+            var attributeRow = $(`.attribute-row[data-id="${attribute.id}"]`);
+            var container = attributeRow.find(".attribute_value_current");
+
+            // Xóa nội dung cũ trước khi thêm mới
+            container.empty();
+
+            // Duyệt qua từng giá trị và thêm vào container
+            attribute.values.forEach((value) => {
+                console.log("value: ", value);
+                container.append(`
+                    <span class="badge bg-info m-1 p-2 attribute-value" data-key="${value.id}">
+                        ${value.value} <span class="ms-2 text-bg-info remove-value" style="cursor: pointer;">&times;</span>
+                    </span>
+                `);
+            });
+
+            // Đảm bảo selected chứa danh sách ID đã thêm
+            if (!selected.includes(attribute.id)) {
+                selected.push(attribute.id);
+            }
+        });
+
+        console.log("selected: ", selected);
+    }
+
+    renderProductAttributes();
+    renderProductVariants();
     function initEvents() {
         $("#attributeSelect").change(handleAttributeSelectChange);
         $(document).on("click", ".btn-remove-attribute", handleRemoveAttribute);
@@ -235,6 +393,7 @@ $(document).ready(function () {
                 <div class="variant-row border rounded p-1 mb-1" data-id="${index}">
                     <div class="row mb-1 variant-title">
                         <div class="col-12 d-flex justify-content-between">
+                        
                             <h6 class="mb-0">#${
                                 index + 1
                             } - ${variantDetails}</h6>
@@ -249,6 +408,9 @@ $(document).ready(function () {
                         <input type="hidden" name="variant_attribute_values_${index}" value='${JSON.stringify(
                 variant
             )}' />
+            <input type="hidden" name="id_variant_${index}" value="${
+                variant.id
+            }">
                         <div class="col-md-2 text-center">
                             <div class="image-placeholder border d-flex align-items-center justify-content-center image-variant" style="height: 100px; position: relative;">
                                 <input type="file" class="form-control image-input" name="image_variant_${index}" accept="image/*" style="opacity: 0; position: absolute; width: 100%; height: 100%;">
@@ -257,11 +419,11 @@ $(document).ready(function () {
                         </div>
                         <div class="col-md-10">
                             <div class="row mb-2">
-                                <div class="col-md-12">
-                                    <label class="form-label">Mã sản phẩm(SKU)</label>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mã sản phẩm</label>
                                     <input type="text" class="form-control" name="product_code_${index}" placeholder="Nhập mã sản phẩm">
                                 </div>
-                                <div class="" style="display:none;">
+                                <div class="col-md-6">
                                     <label class="form-label">Giá ($)</label>
                                     <input type="number" class="form-control" name="product_price_${index}" placeholder="Nhập giá sản phẩm">
                                 </div>
@@ -357,7 +519,7 @@ $(document).ready(function () {
             contentType: false,
             processData: false,
             success: function (response) {
-                alert("Thêm sản phẩm thành công!");
+                alert(response.message);
                 console.log("Dữ liệu trả về từ server", response);
             },
             error: function (xhr) {
@@ -384,6 +546,9 @@ function prepareProductData() {
     // Thu thập dữ liệu từng biến thể sản phẩm
     $(".variant-row").each(function (index) {
         // Mã sản phẩm và giá
+        let id_variant = $(this)
+            .find(`input[name='id_variant_${index}']`)
+            .val();
         let productCode = $(this)
             .find(`input[name='product_code_${index}']`)
             .val();
@@ -398,6 +563,9 @@ function prepareProductData() {
         attributeValues = JSON.parse(attributeValues); // Chuyển chuỗi JSON thành object
 
         // Thêm dữ liệu vào FormData
+        // Trong prepareProductData(), thêm ID biến thể nếu có
+        formData.append(`variants[${index}][id]`, id_variant || "");
+
         formData.append(`variants[${index}][code]`, productCode);
         formData.append(`variants[${index}][price]`, productPrice);
         formData.append(

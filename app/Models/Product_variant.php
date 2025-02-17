@@ -13,7 +13,8 @@ class Product_variant extends Model
         'id_product',
         'sku',
         'status',
-        'quantity'
+        'quantity',
+        'price',
     ];
     public function import_details()
     {
@@ -47,7 +48,6 @@ class Product_variant extends Model
     }
     public function attributeValues()
     {
-        return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value')
-            ->withTimestamps();
+        return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value');
     }
 }

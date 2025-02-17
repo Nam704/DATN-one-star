@@ -109,7 +109,7 @@ class NotificationService
                 'from_user_id' => $data['from_user_id'],
                 'to_user_id' => $recipient->id,
                 'status' => $data['status'],
-                'goto_id' => $data['goto_id'] ?? "",
+                'goto_id' => $data['goto_id'] ?? null,
             ]);
         }
 

@@ -28,6 +28,9 @@ Route::get('/', function () {
 Route::get('/users', function () {
     return view('admin.user.demoDataTable');
 });
+Route::get('/detail-product', function () {
+    return view('admin.product.detailBase');
+});
 
 
 
@@ -125,6 +128,11 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
                 Route::post('/store',  'store')->name('store');
                 Route::get('/',  'list')->name('list');
+                Route::get('/edit/{id}',  'edit')->name('edit');
+                Route::post('/update/{id}',  'update')->name('update');
+                Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
+                Route::post('import-product', 'import')->name('importProduct');
+                Route::get('detail/{id}', 'detail')->name('detail');
             });
 
 
@@ -170,8 +178,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::post('add', 'add')->name('add');
                 Route::post('edit/{id}', 'edit')->name('edit');
                 Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
-                Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');;
-                Route::get('list-audit', 'listAudit')->name('listAudit');
+                Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');
+                Route::get('update-price/{id}', 'updatePrice')->name('updatePrice');
             }
         );
 
@@ -184,15 +192,17 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('destroy/{id}', 'destroy')->name('destroy');
             Route::get('show/{id}', 'show')->name('show');
         });
-        Route::prefix('product_audits')->name('product_audits.')->controller(ProductAuditController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('store', 'store')->name('store');
-            Route::get('edit/{id}', 'edit')->name('edit');
-            Route::put('update/{id}', 'update')->name('update');
-            Route::get('destroy/{id}', 'destroy')->name('destroy');
-            Route::get('show/{id}', 'show')->name('show');
-        });
+        Route::prefix('product_audits')->name('product_audits.')
+            ->controller(ProductAuditController::class)->group(function () {
+                Route::get('list', 'list')->name('list');
+                Route::get('/', 'index')->name('index');
+                Route::get('create', 'create')->name('create');
+                Route::post('store', 'store')->name('store');
+                Route::get('edit/{id}', 'edit')->name('edit');
+                Route::put('update/{id}', 'update')->name('update');
+                Route::get('destroy/{id}', 'destroy')->name('destroy');
+                Route::get('show/{id}', 'show')->name('show');
+            });
     }
 );
 Route::prefix('client')->name('client.')->group(

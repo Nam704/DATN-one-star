@@ -23,6 +23,7 @@ Route::prefix('admin')->group(
             Route::get('get-all', 'getAll');
             Route::get('get-by-id/{id}', 'getAttributeById');
             Route::post('creat-values/{id}', 'createValue');
+            Route::post('add', 'store');
             // Route::post('update/{id}', 'update');
             // Route::delete('delete/{id}', 'delete');
 

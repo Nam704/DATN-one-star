@@ -18,4 +18,8 @@ class Attribute extends Model
     {
         return $this->hasMany(Attribute_value::class, 'id_attribute');
     }
+    public static function findOrCreate($name)
+    {
+        return self::firstOrCreate(['name' => $name]);
+    }
 }
