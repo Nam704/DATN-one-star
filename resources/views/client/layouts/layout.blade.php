@@ -14,7 +14,7 @@
 
      <!-- CSS
     ========================= -->
-    
+
      <!--bootstrap min css-->
     @include('client.layouts.css')
 
@@ -43,12 +43,9 @@
  <!-- JS
 ============================================ -->
 <!--jquery min js-->
-@include('client.layouts.js')
-
-
 
 </body>
 
-
-<!-- Mirrored from htmldemo.net/autima/autima/shop.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 18 Dec 2024 14:56:29 GMT -->
 </html>
+
+@include('client.layouts.js')

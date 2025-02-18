@@ -213,9 +213,8 @@ Route::prefix('client')->name('client.')->group(
 
 
         Route::controller(OrderController::class)->group(function () {
-            Route::get('/orders', [OrderController::class, 'trackOrders'])->name('orders.track');
-            Route::post('/orders/{order}/cancel', [OrderController::class, 'cancelOrder'])->name('orders.cancel');
-            Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
 
         });
 

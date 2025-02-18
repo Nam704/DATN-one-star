@@ -52,7 +52,6 @@ class ShopController extends Controller
         $brands = $request->input('brands', []);
         $minPrice = $request->input('min_price', 0);
         $maxPrice = $request->input('max_price', 50000000);
-        $search = $request->input('search', ''); // từ khóa tìm kiếm
 
         // Xử lý giá tối đa mặc định (nếu không có input, giá mặc định là 50.000.000)
         $maxPriceDefault = 50000000;

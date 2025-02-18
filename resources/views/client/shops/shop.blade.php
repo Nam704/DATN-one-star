@@ -53,7 +53,6 @@
                                     </ul>
                                 </div>
                             </div>
-                            <!-- (Không cần nút lọc vì AJAX được kích hoạt khi thay đổi) -->
                         </form>
                     </div>
                 </div>
@@ -64,87 +63,22 @@
             <div class="row shop_wrapper" id="product-list">
                 @include('client.shops.product-list')
             </div>
+
             <div class="shop_toolbar t_bottom" id="pagination">
                 @include('client.shops.pagination')
             </div>
         </div>
     </div>
 @endsection
-
 @section('scripts')
     <script>
-        // Sử dụng 1 hàm fetchFilteredProducts duy nhất
-        function fetchFilteredProducts() {
-            let params = new URLSearchParams();
-
-            // Lấy danh sách category được chọn
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('categories[]', el.value);
-                }
-            });
-            // Lấy danh sách brand được chọn
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('brands[]', el.value);
-                }
-            });
-            // Lấy giá trị khoảng giá
-            let minPrice = document.getElementById('min-price').value;
-            let maxPrice = document.getElementById('max-price').value;
-            if (minPrice) params.append('min_price', minPrice.replace(/\./g, ''));
-            if (maxPrice) params.append('max_price', maxPrice.replace(/\./g, ''));
-
-            fetch('{{ route('client.filter') }}?' + params.toString())
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('product-list').innerHTML = data.products;
-                    document.getElementById('pagination').innerHTML = data.pagination;
-                })
-                .catch(error => console.error('Error:', error));
+        // Hàm định dạng số: chuyển số nguyên thành chuỗi với dấu chấm phân cách (ví dụ: 50000000 => 50.000.000)
+        function formatNumber(num) {
+            num = parseInt(num) || 0;
+            return num.toLocaleString('vi-VN');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const categoryFilters = document.querySelectorAll('.category-filter');
-            const brandFilters = document.querySelectorAll('.brand-filter');
-            const minPriceInput = document.getElementById('min-price');
-            const maxPriceInput = document.getElementById('max-price');
-
-            // Lắng nghe sự kiện thay đổi trên checkbox và input
-            categoryFilters.forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-            brandFilters.forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-            minPriceInput.addEventListener('input', fetchFilteredProducts);
-            maxPriceInput.addEventListener('input', fetchFilteredProducts);
-        });
-
-        $(function() {
-            $("#slider-range").slider({
-                range: true,
-                min: 0,
-                max: 50000000,
-                step: 100000,
-                values: [0, 50000000],
-                slide: function(event, ui) {
-                    // Cập nhật hiển thị giá với định dạng có dấu phân cách hàng nghìn
-                    $("#amount").val(ui.values[0].toLocaleString('vi-VN') + " - " + ui.values[1]
-                        .toLocaleString('vi-VN'));
-                    // Cập nhật giá trị cho các input dùng cho AJAX
-                    $("#min-price").val(ui.values[0]);
-                    $("#max-price").val(ui.values[1]);
-                    // Gọi hàm AJAX để cập nhật sản phẩm ngay khi kéo thả
-                    fetchFilteredProducts();
-                }
-            });
-            // Thiết lập hiển thị giá ban đầu (nếu cần, thêm phần hiển thị input "amount" vào HTML nếu chưa có)
-            $("#amount").val($("#slider-range").slider("values", 0).toLocaleString('vi-VN') +
-                " - " + $("#slider-range").slider("values", 1).toLocaleString('vi-VN'));
-        });
-
-
+        // Hàm gửi dữ liệu lọc sản phẩm qua AJAX
         function fetchFilteredProducts() {
             let params = new URLSearchParams();
 
@@ -154,24 +88,22 @@
                     params.append('categories[]', el.value);
                 }
             });
-
             // Lấy danh sách brand được chọn
             document.querySelectorAll('.brand-filter').forEach(function(el) {
                 if (el.checked) {
                     params.append('brands[]', el.value);
                 }
             });
-
-            // Lấy giá trị khoảng giá từ các input ẩn
-            let minPrice = document.getElementById('min-price').value;
-            let maxPrice = document.getElementById('max-price').value;
+            // Lấy giá trị khoảng giá từ input, loại bỏ dấu phân cách
+            let minPrice = document.getElementById('min-price').value.replace(/\./g, '');
+            let maxPrice = document.getElementById('max-price').value.replace(/\./g, '');
             if (minPrice) params.append('min_price', minPrice);
             if (maxPrice) params.append('max_price', maxPrice);
 
-            // Lấy giá trị sắp xếp từ select dropdown
-            let orderby = document.getElementById('short').value;
-            if (orderby) {
-                params.append('orderby', orderby);
+            // Lấy giá trị sắp xếp nếu có
+            let sortEl = document.getElementById('short');
+            if (sortEl && sortEl.value) {
+                params.append('orderby', sortEl.value);
             }
 
             fetch('{{ route('client.filter') }}?' + params.toString())
@@ -182,23 +114,63 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
-        document.addEventListener('DOMContentLoaded', function() {
-            const sortSelect = document.getElementById('short');
 
-            sortSelect.addEventListener('change', function() {
+        $(document).ready(function() {
+            // Khởi tạo slider với giá trị từ 0 đến 50.000.000
+            $("#slider-range").slider({
+                range: true,
+                min: 0,
+                max: 50000000,
+                step: 100000,
+                values: [0, 50000000],
+                slide: function(event, ui) {
+                    // Cập nhật hiển thị khoảng giá với định dạng số có dấu phân cách
+                    $("#amount").val(formatNumber(ui.values[0]) + " - " + formatNumber(ui.values[1]));
+                    // Cập nhật giá trị cho các input hiển thị (có định dạng)
+                    $("#min-price").val(formatNumber(ui.values[0]));
+                    $("#max-price").val(formatNumber(ui.values[1]));
+                    fetchFilteredProducts();
+                }
+            });
+            // Thiết lập hiển thị ban đầu cho slider và input
+            $("#amount").val(
+                formatNumber($("#slider-range").slider("values", 0)) +
+                " - " +
+                formatNumber($("#slider-range").slider("values", 1))
+            );
+            $("#min-price").val(formatNumber($("#slider-range").slider("values", 0)));
+            $("#max-price").val(formatNumber($("#slider-range").slider("values", 1)));
+
+            // Khi người dùng nhập tay vào input tối thiểu
+            $('#min-price').on('input', function() {
+                let rawVal = $(this).val().replace(/\./g, '');
+                let numeric = parseInt(rawVal) || 0;
+                $(this).val(formatNumber(numeric));
+                $("#slider-range").slider("values", 0, numeric);
                 fetchFilteredProducts();
             });
 
-            // Các sự kiện khác của checkbox, input price… (như đã có)
+            // Khi người dùng nhập tay vào input tối đa
+            $('#max-price').on('input', function() {
+                let rawVal = $(this).val().replace(/\./g, '');
+                let numeric = parseInt(rawVal) || 50000000;
+                $(this).val(formatNumber(numeric));
+                $("#slider-range").slider("values", 1, numeric);
+                fetchFilteredProducts();
+            });
+
+            // Lắng nghe sự thay đổi của checkbox category và brand
             document.querySelectorAll('.category-filter').forEach(function(el) {
                 el.addEventListener('change', fetchFilteredProducts);
             });
             document.querySelectorAll('.brand-filter').forEach(function(el) {
                 el.addEventListener('change', fetchFilteredProducts);
             });
-            document.getElementById('min-price').addEventListener('input', fetchFilteredProducts);
-            document.getElementById('max-price').addEventListener('input', fetchFilteredProducts);
+            // Lắng nghe sự thay đổi của dropdown sắp xếp (nếu có)
+            let sortSelect = document.getElementById('short');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', fetchFilteredProducts);
+            }
         });
-        
     </script>
 @endsection

@@ -10,70 +10,36 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
-    public function trackOrders()
+    public function index(Request $request)
     {
-        // Lấy đơn hàng của người dùng hiện tại kèm quan hệ trạng thái, chi tiết và voucher (nếu có)
-        $orders = Order::with([
-            'orderStatus',
-            'orderDetails.productVariant.images', // nạp luôn productVariant và hình ảnh của nó
-            'voucher'
-        ])->where('id_user', auth()->id())->get();
+        // Lấy tham số status từ URL, nếu không có mặc định là "all"
+        $status = $request->get('status', 'all');
 
-        return view('client.orders.track', compact('orders'));
+        // Lấy đơn hàng kèm quan hệ (orderStatus và orderDetails)
+        $query = Order::with('orderStatus', 'orderDetails');
+
+        if ($status != 'all') {
+            // Lọc theo tên trạng thái (ví dụ: pending, processing, shipped, completed, cancelled)
+            $query->whereHas('orderStatus', function ($q) use ($status) {
+                $q->where('name', $status);
+            });
+        }
+        $orders = $query->orderBy('created_at', 'desc')->get();
+
+        return view('client.orders.index', compact('orders', 'status'));
     }
 
-
-    public function cancelOrder(Order $order)
+    // Phương thức hiển thị chi tiết đơn hàng (nếu cần)
+    public function getOrderDetails($id)
     {
-        // Kiểm tra quyền: đơn hàng phải thuộc về người dùng hiện tại
-        if ($order->id_user !== Auth::id()) {
-            return redirect()->back()->with('error', 'Bạn không có quyền hủy đơn hàng này.');
+        $order = Order::with('orderDetails.productVariant')->find($id);
+
+        if (!$order) {
+            return response('Order not found.', 404);
         }
 
-        // Chỉ cho phép hủy nếu đơn hàng đang ở trạng thái "Pending"
-        if ($order->orderStatus->name !== 'pending') {
-            return redirect()->back()->with('error', 'Chỉ đơn hàng đang ở trạng thái "Pending" mới có thể hủy.');
-        }
-
-        // Lấy trạng thái "Cancelled"
-        $cancelledStatus = Order_status::where('name', 'Cancelled')->first();
-        if (!$cancelledStatus) {
-            return redirect()->back()->with('error', 'Trạng thái "Cancelled" không tồn tại.');
-        }
-
-        // Cập nhật trạng thái đơn hàng thành "Cancelled"
-        $order->id_order_status = $cancelledStatus->id;
-        $order->save();
-
-        return redirect()->back()->with('success', 'Đơn hàng đã được hủy thành công.');
+        return view('client.orders.partials.order_details', compact('order'));
     }
-
-
-
-    public function reorder(Order $order)
-{
-    // Kiểm tra quyền: đơn hàng phải thuộc về người dùng hiện tại
-    if ($order->id_user !== Auth::id()) {
-        return redirect()->back()->with('error', 'Bạn không có quyền mua lại đơn hàng này.');
-    }
-
-    // Chỉ cho phép mua lại nếu đơn hàng đã ở trạng thái "Cancelled"
-    if ($order->orderStatus->name !== 'cancelled') {
-        return redirect()->back()->with('error', 'Chỉ đơn hàng đã hủy mới có thể mua lại.');
-    }
-
-    // Lấy trạng thái "Pending" để khôi phục đơn hàng
-    $pendingStatus = Order_status::where('name', 'Pending')->first();
-    if (!$pendingStatus) {
-        return redirect()->back()->with('error', 'Trạng thái "Pending" không tồn tại.');
-    }
-
-    // Cập nhật lại trạng thái đơn hàng thành "Pending"
-    $order->id_order_status = $pendingStatus->id;
-    $order->save();
-
-    return redirect()->back()->with('success', 'Đơn hàng đã được khôi phục thành công.');
-}
 
 
 }
