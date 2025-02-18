@@ -32,9 +32,6 @@ Route::get('/detail-product', function () {
 });
 
 
-
-
-
 Route::get('/make-password', function () {
     return Hash::make('1234');
 });

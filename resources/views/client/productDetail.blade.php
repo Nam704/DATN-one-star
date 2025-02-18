@@ -111,20 +111,20 @@
                             <input type="hidden" name="selected_variant_id" id="selected-variant-id"
                                 value="{{ $variants->first()->id }}">
                             <div class="product_variant quantity mt-3">
-                                <label>Quantity</label>
+                                <label>Số lượng</label>
                                 <input name="quantity" min="1" max="100" value="1" type="number"
                                     id="quantity">
                                 <button type="submit" id="add-to-cart-btn">Thêm vào giỏ hàng</button>
                                 <button type="button" id="buy-now-btn">Mua ngay</button>
                             </div>
                             <div class="product_meta">
-                                <span>Category: <a href="#">{{ $product->category->name }}</a></span>
+                                <span>Danh mục: <a href="#">{{ $product->category->name }}</a></span>
                             </div>
                         </form>
                         <div class="product_social">
                             <ul>
                                 <li><a class="facebook" href="#" title="facebook"><i class="fa fa-facebook"></i>
-                                        Like</a></li>
+                                        Facebook</a></li>
                                 <li><a class="twitter" href="#" title="twitter"><i class="fa fa-twitter"></i>
                                         Tweet</a></li>
                                 <li><a class="pinterest" href="#" title="pinterest"><i class="fa fa-pinterest"></i>
@@ -152,7 +152,7 @@
                             <ul class="nav" role="tablist" id="nav-tab">
                                 <li>
                                     <a class="active" data-toggle="tab" href="#info" role="tab" aria-controls="info"
-                                        aria-selected="false">Description</a>
+                                        aria-selected="false">Mô tả</a>
                                 </li>
                                 {{-- <li>
                                     <a data-toggle="tab" href="#sheet" role="tab" aria-controls="sheet"
@@ -160,7 +160,7 @@
                                 </li> --}}
                                 <li>
                                     <a data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
-                                        aria-selected="false">Reviews (1)</a>
+                                        aria-selected="false">Đánh giá (1)</a>
                                 </li>
                             </ul>
                         </div>
