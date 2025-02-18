@@ -15,6 +15,7 @@ use App\Http\Controllers\Web\ProductAuditController;
 use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
+use App\Http\Controllers\Web\CheckoutController;
 use App\Http\Controllers\Web\AttributeController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
@@ -78,7 +79,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 // Route::get('supplier', [SupplierController::class, 'exportSupplier'])->name('supplier');
                 // Route::get('user', [UserContronler::class, 'exportUser'])->name('user');
                 // Route::get('import', [ImportController::class, 'exportImport'])->name('import');
-
+        
             }
         );
 
@@ -125,11 +126,11 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         Route::prefix('products')
             ->controller(ProductController::class)
             ->name('products.')->group(function () {
-                Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
-                Route::post('/store',  'store')->name('store');
-                Route::get('/',  'list')->name('list');
-                Route::get('/edit/{id}',  'edit')->name('edit');
-                Route::post('/update/{id}',  'update')->name('update');
+                Route::get('/create', 'create')->name('create'); // Hiển thị form thêm sản phẩm
+                Route::post('/store', 'store')->name('store');
+                Route::get('/', 'list')->name('list');
+                Route::get('/edit/{id}', 'edit')->name('edit');
+                Route::post('/update/{id}', 'update')->name('update');
                 Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
                 Route::post('import-product', 'import')->name('importProduct');
                 Route::get('detail/{id}', 'detail')->name('detail');
@@ -210,5 +211,17 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+
+        Route::prefix('products')->name('product.')->group(function () {
+            Route::get('checkout/', [ProductController::class, 'checkoutProduct'])->name('checkout');
+
+            Route::get('detail/{id}', [ProductController::class, 'productDetail'])->name('detail');
+
+            Route::post('/add-to-cart', [ProductController::class, 'addCart'])->name('add-to-cart');
+
+
+            Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+            Route::post('/checkout', [CheckoutController::class, 'store'])->name('store');
+        });
     }
 );

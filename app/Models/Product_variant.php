@@ -9,20 +9,38 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product_variant extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $fillable  = [
+    protected $fillable = [
         'id_product',
         'sku',
         'status',
         'quantity',
         'price',
     ];
+
+    protected $table = 'product_variants';
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'id_product');
+    }
+
+    public function attributes()
+    {
+        return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
+    }
+
+    public function attributeValues()
+    {
+        return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'variant_id', 'attribute_value_id');
+    }
+
     public function import_details()
     {
         return $this->hasMany(Import_detail::class, 'id_product_variant', 'id');
     }
     public static function scopeList($query, $idProduct)
     {
-        return $query->select('product_variants.id', 'product_variants.sku', 'product_variants.status', 'product_variants.quantity', 'products.name as product_name')
+        return $query->select('product_variants.id', 'product_variants.sku', 'product_variants.status', 'products.name as product_name')
             ->join('products', 'product_variants.id_product', '=', 'products.id') // Thực hiện JOIN với bảng products
             ->where('id_product', '=', $idProduct)
             ->latest('product_variants.id'); // Sắp xếp theo id của product_variants
@@ -32,22 +50,18 @@ class Product_variant extends Model
         return $query->where('status', 'active')->where('id_product', $id);
     }
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'id_product');
-    }
-
-    public function images()
-    {
-        return $this->hasOne(Image::class, 'id_product_variant');
-    }
-
     public function productAudits()
     {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
-    public function attributeValues()
+
+    public function images()
     {
-        return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value');
+        return $this->hasMany(Image::class, 'id_product_variant');
+    }
+
+    public function productVariantAttributes()
+    {
+        return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
     }
 }
