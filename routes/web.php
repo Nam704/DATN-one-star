@@ -18,8 +18,6 @@ use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\CheckoutController;
 use App\Http\Controllers\Web\AttributeController;
 use App\Http\Controllers\Web\TemplateExportController;
-use Illuminate\Support\Facades\Mail;
-
 
 Route::get('/', function () {
     return view('admin.index');
