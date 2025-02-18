@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -43,22 +44,13 @@ class CartItemController extends Controller
 
     // Xóa sản phẩm khỏi giỏ hàng
     public function removeItem($id)
-{
-    try {
-        $cartItem = CartItem::findOrFail($id);
-        $cart = $cartItem->cart;
-        $cartItem->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sản phẩm đã được xóa',
-            'cartTotal' => $cart->getTotal()
-        ]);
-    } catch (\Exception $e) {
-        \Log::error($e->getMessage());
-        return response()->json(['error' => $e->getMessage()], 500);
+    {
+        $cartItem = CartItem::find($id);
+        if($cartItem) {
+            $cartItem->delete();
+        }
+        return response()->json(['success' => true]);
     }
-}
 
 
 

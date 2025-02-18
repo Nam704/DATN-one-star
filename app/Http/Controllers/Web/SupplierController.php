@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Web;
 
-
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierRequest;
 use App\Models\Address;

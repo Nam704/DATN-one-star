@@ -21,7 +21,7 @@ $(document).ready(function() {
         const row = input.closest('tr');
         
         $.ajax({
-            url: `/cart/update/${itemId}`,
+            url: `/client/cart/update/${itemId}`,  // Updated URL path
             method: 'PUT',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -32,34 +32,32 @@ $(document).ready(function() {
             success: function(response) {
                 input.val(newValue);
                 row.find('.product_total').text(response.total.toLocaleString() + 'đ');
-                $('.cart_amount').text(response.cartTotal.toLocaleString() + 'đ');
             }
         });
     }
+    
+    
 
     // Remove item handler
     $('.remove-item').click(function() {
         const button = $(this);
         const itemId = button.data('id');
         const row = button.closest('tr');
-
+    
         if(confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
             $.ajax({
-                url: `/cart/remove/${itemId}`,
+                url: `/client/cart/remove/${itemId}`,
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                success: function(response) {
-                    row.fadeOut(400, function() {
-                        row.remove();
-                    });
-                    $('.cart_amount').text(response.cartTotal.toLocaleString() + 'đ');
-                    toastr.success('Đã xóa sản phẩm khỏi giỏ hàng');
+                success: function() {
+                    row.remove();
                 }
             });
         }
     });
+    
 
     // Update cart button handler
     // In cart.js

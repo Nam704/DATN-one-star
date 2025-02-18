@@ -117,7 +117,7 @@
                 <div class="cart_item">
                     <div class="cart_img">
                         <a href="#">
-                            <img src="{{ Storage::url($item->productVariant->image) }}" alt="">
+                            <img src="{{ Storage::url($item->productVariant->product->image_primary) }}" alt="">
                         </a>
                     </div>
                     <div class="cart_info">
@@ -163,17 +163,7 @@
                     <div class="main_menu header_position">
                         <nav>
                             <ul>
-                                <li><a href="index.html">home<i class="fa fa-angle-down"></i></a>
-                                    <ul class="sub_menu">
-                                        <li><a href="index.html">Home 1</a></li>
-                                        <li><a href="index-2.html">Home 2</a></li>
-                                        <li><a href="index-3.html">Home 3</a></li>
-                                        <li><a href="index-4.html">Home 4</a></li>
-                                        <li><a href="index-5.html">Home 5</a></li>
-                                        <li><a href="index-6.html">Home 6</a></li>
-                                        <li class="home7new"><a href="index-7.html">Home 7</a><span>new</span></li>
-                                    </ul>
-                                </li>
+                                <li><a href="{{ route('client.home') }}">Home</a></li>
                                 <li class="mega_items"><a href="shop.html">shop<i class="fa fa-angle-down"></i></a>
                                     <div class="mega_menu">
                                         <ul class="mega_menu_inner">

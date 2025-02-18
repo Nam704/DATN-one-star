@@ -32,6 +32,7 @@
     @include('client.layouts.footer')
 
     <!-- Scripts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="{{ asset('client/assets/js/vendor/jquery-3.4.1.min.js') }}"></script>
     <script src="{{ asset('client/assets/js/popper.js') }}"></script>
     <script src="{{ asset('client/assets/js/bootstrap.min.js') }}"></script>
@@ -45,10 +46,7 @@
     <script src="{{ asset('client/assets/js/slinky.menu.js') }}"></script>
     <script src="{{ asset('client/assets/js/plugins.js') }}"></script>
     <script src="{{ asset('client/assets/js/main.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ asset('client/assets/js/vendor/jquery-3.4.1.min.js') }}"></script>
     <script src="{{ asset('client/assets/js/cart.js') }}"></script>
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </body>
 </html>
