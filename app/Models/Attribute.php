@@ -18,4 +18,9 @@ class Attribute extends Model
     }
 
 
+
+    public static function findOrCreate($name)
+    {
+        return self::firstOrCreate(['name' => $name]);
+    }
 }

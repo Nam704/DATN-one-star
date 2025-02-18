@@ -47,4 +47,12 @@ class AttributeController extends Controller
             "data" => $attribute
         ], 200);
     }
+    function store(Request $request)
+    {
+        $data = $this->AttributeService->createAttribute($request->all());
+        return response()->json([
+            "status" => "success",
+            "data" => $data
+        ], 200);
+    }
 }

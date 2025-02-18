@@ -48,12 +48,7 @@ class ImportController extends Controller
         // $this->user = auth()->user();
         $this->middleware('role:admin')->only('accept', 'reject');
     }
-    function listAudit()
-    {
-        $audits = $this->ProductAuditService->getAllAudits();
 
-        return view('admin.import.listAudit', compact('audits'));
-    }
     public function importExcel(Request $request)
     {
 
@@ -179,7 +174,11 @@ class ImportController extends Controller
             throw $th;
         }
     }
-
+    public function updatePrice($id)
+    {
+        $this->ImportService->updatePrice($id);
+        return redirect()->back()->with('success', 'Cập nhật giá thành công!');
+    }
     function reject(Request $request, $id)
     {
         try {

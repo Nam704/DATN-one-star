@@ -19,7 +19,14 @@ class Attribute_value extends Model
     }
     public function productVariants()
     {
-        return $this->belongsToMany(Product_variant::class, 'product_variant_attributes', 'id_attribute_value', 'id_product_variant')
-            ->withTimestamps();
+        return $this->belongsToMany(Product_variant::class, 'product_variant_attributes', 'id_attribute_value', 'id_product_variant');
+    }
+    public static function findOrCreate($attributeName, $value)
+    {
+        $attribute = Attribute::firstOrCreate(['name' => $attributeName]);
+        return self::firstOrCreate([
+            'id_attribute' => $attribute->id,
+            'value' => $value
+        ]);
     }
 }

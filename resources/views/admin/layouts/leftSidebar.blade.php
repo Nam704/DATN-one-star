@@ -80,7 +80,7 @@
                 <div class="collapse" id="sidebarLayouts">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{-- route('admin.products.listProduct') --}}">List active</a>
+                            <a href="{{ route('admin.products.list') }}">List</a>
                         </li>
                         <li>
                             <a href="{{ route('admin.products.create') }}">Create</a>
@@ -133,13 +133,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
                     class="side-nav-link">
                     <i class="ri-pencil-ruler-2-line"></i>
-                    <span> Icons </span>
+                    <span> Audit </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarIcons">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="icons-remixicons.html">Remix Icons</a>
+                            <a href="{{ route('admin.product_audits.list') }}">List</a>
                         </li>
 
                     </ul>

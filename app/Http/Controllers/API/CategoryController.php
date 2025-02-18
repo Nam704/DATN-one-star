@@ -16,7 +16,7 @@ class CategoryController extends Controller
     }
     public function store(Request $request)
     {
-        Log::info($request->all());
+        // Log::info($request->all());
         $data = $this->CategoryService->createCategory($request->all());
         // Log::info($data);
         return response()->json([

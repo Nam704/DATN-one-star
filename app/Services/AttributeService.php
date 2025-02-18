@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Attribute;
+use Illuminate\Support\Facades\Validator;
 
 class AttributeService
 {
@@ -30,7 +31,15 @@ class AttributeService
 
     public function createAttribute($data)
     {
-        return Attribute::create($data);
+        try {
+            $validatedData = Validator::make($data, [
+                'name' => 'required|string|max:255|unique:attributes,name',
+            ])->validated();
+            $attribute = Attribute::create($validatedData);
+            return $attribute;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public function updateAttribute($id, $data)

@@ -6,10 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Product_audit;
 use App\Models\Product_variant;
 use App\Models\User;
+use App\Services\ProductAuditService;
 use Illuminate\Http\Request;
 
 class ProductAuditController extends Controller
 {
+    protected $ProductAuditService;
+    public function __construct(ProductAuditService $ProductAuditService)
+    {
+        $this->ProductAuditService = $ProductAuditService;
+    }
+    function list()
+    {
+        $audits = $this->ProductAuditService->getAuditApproved();
+        // $audits = $this->ProductAuditService->getAuditPending();
+
+
+        return view('admin.product_audits.list', compact('audits'));
+    }
     public function index()
     {
         $audits = Product_audit::with(['user', 'productVariant'])->get();

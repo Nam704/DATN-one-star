@@ -3,7 +3,7 @@ $(document).ready(function () {
     initializeBrandHandlers();
     initializeProductImageHandler();
     initializeAlbumImageHandler();
-    initializeAttributeHandlers();
+    updateAlbumPreview();
 });
 
 function initializeCategoryHandlers() {
@@ -26,46 +26,7 @@ function initializeAlbumImageHandler() {
     $("#addAlbumImage").on("click", openAlbumImageSelector);
     $("#albumImages").on("change", handleAlbumImageSelection);
 }
-/** attribute Handes */
-function initializeAttributeHandlers() {
-    $("#add-new-attribute").on("click", showAddAttributeSection);
-    $("#cancel_add_attribute").on("click", hideAddAttributeSection);
-    $("#confirm_add_attribute").on("click", addNewAttribute);
-}
-function showAddAttributeSection() {
-    $("#add-attribute-section").show();
-}
-function hideAddAttributeSection() {
-    $("#add-attribute-section").hide();
-}
-function updateAttributeList(data) {
-    $("#attributeSelect").append(
-        $("<option>").val(data.id).text(data.name).prop("selected", true)
-    );
-}
-function addNewAttribute() {
-    let newAttribute = $("#new_attribute_name").val();
-    if (!newAttribute) {
-        alert("Vui lòng nhập tên thương hiệu mới!");
-        return;
-    }
 
-    $.ajax({
-        type: "POST",
-        url: "http://127.0.0.1:8000/api/admin/attributes/add",
-        data: { name: newAttribute },
-        dataType: "json",
-        success: function (response) {
-            if (response.status === "success") {
-                alert("Thêm thương hiệu thành công!");
-                hideAddAttributeSection();
-                updateAttributeList(response.data);
-            } else {
-                alert("Thêm thương hiệu thất bại!");
-            }
-        },
-    });
-}
 /** --- Category Handlers --- **/
 
 function showAddCategorySection() {
@@ -194,15 +155,14 @@ function displayProductImagePreview(imageSrc) {
                     style="z-index: 10;">X</button>
         </div>
     `);
-
-    $(".remove-image").on("click", function () {
-        $("#imageContainer").remove();
-        $("#productImage").val("");
-    });
 }
+// Xử lý sự kiện khi nhấn nút "X" để xóa ảnh
+$(document).on("click", ".remove-image", function () {
+    $("#imageContainer").remove();
+    $("#productImage").val("");
+});
 
 /** --- Album Image Handlers --- **/
-
 let selectedImages = [];
 
 function openAlbumImageSelector() {
@@ -213,51 +173,69 @@ function handleAlbumImageSelection() {
     const files = $("#albumImages")[0].files;
 
     for (let i = 0; i < files.length; i++) {
-        if (selectedImages.length >= 4) {
+        if (selectedImages.length + productAlbums.length >= 4) {
             alert("Bạn chỉ được chọn tối đa 4 ảnh.");
             break;
         }
-
         selectedImages.push(files[i]);
     }
-
     updateAlbumPreview();
 }
 
 function updateAlbumPreview() {
     const albumPreview = $("#albumPreview");
-    albumPreview.html("");
+    albumPreview.html(""); // Xóa nội dung cũ
 
-    selectedImages.forEach((image, index) => {
+    let totalImages = 0;
+
+    // Hiển thị album từ dữ liệu có sẵn (server)
+    productAlbums.slice(0, 4).forEach((album, index) => {
+        if (totalImages < 4) {
+            const imageSrc = `http://127.0.0.1:8000/storage/${album.image_path}`;
+            albumPreview.append(
+                createAlbumImagePreviewElement(imageSrc, index, false)
+            );
+            totalImages++;
+        }
+    });
+
+    // Hiển thị ảnh mới được chọn nếu chưa đủ 4 ảnh
+    selectedImages.slice(0, 4 - totalImages).forEach((image, index) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             albumPreview.append(
-                createAlbumImagePreviewElement(e.target.result, index)
+                createAlbumImagePreviewElement(e.target.result, index, true)
             );
         };
         reader.readAsDataURL(image);
+        totalImages++;
     });
 }
 
-function createAlbumImagePreviewElement(imageSrc, index) {
+function createAlbumImagePreviewElement(imageSrc, index, isNew) {
     const colDiv = $("<div>", { class: "col-3" });
 
     colDiv.html(`
         <div class="position-relative">
             <img src="${imageSrc}" class="img-fluid rounded shadow" alt="Album Image">
-            <button type="button" class="btn btn-danger btn-sm remove-image-btn w-100" data-index="${index}">X</button>
+            <button type="button" class="btn btn-danger btn-sm remove-image-btn w-100" data-index="${index}" data-new="${isNew}">X</button>
         </div>
     `);
 
     colDiv.find(".remove-image-btn").on("click", function () {
-        removeAlbumImage(index);
+        const isNewImage = $(this).data("new");
+        removeAlbumImage(index, isNewImage);
     });
 
     return colDiv;
 }
 
-function removeAlbumImage(index) {
-    selectedImages.splice(index, 1);
+function removeAlbumImage(index, isNew) {
+    if (isNew) {
+        selectedImages.splice(index, 1);
+    } else {
+        productAlbums.splice(index, 1);
+    }
     updateAlbumPreview();
 }
 

@@ -59,6 +59,7 @@ class Product_audit extends Model
                 'users.name as user_name',
                 'product_audits.action_type',
                 'product_audits.status',
+                'product_audits.id_import',
                 DB::raw('SUM(product_audits.quantity) as total_quantity')
             )
             ->where('product_audits.status', 'approved')
@@ -68,7 +69,8 @@ class Product_audit extends Model
                 'users.id',
                 'users.name',
                 'product_audits.action_type',
-                'product_audits.status'
+                'product_audits.status',
+                'product_audits.id_import'
             );
     }
     public function scopeWithProductAndUserSummarPending($query)

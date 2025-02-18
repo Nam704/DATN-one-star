@@ -88,10 +88,28 @@
 
 
                                                     <div class="col-4">
-                                                        <button type="button" id="add-attribute-btn"
+                                                        <button type="button" id="add-new-attribute"
                                                             class="btn btn-primary w-100">
                                                             Thêm mới
                                                         </button>
+
+                                                    </div>
+                                                    <div class="col-11">
+                                                        <div id="add-attribute-section" class="mt-2"
+                                                            style="display: none ;">
+                                                            <input type="text" class="form-control mb-2"
+                                                                id="new_attribute_name" name="new_attribute_name"
+                                                                placeholder="Tên hãng mới">
+
+                                                            <div class="d-flex justify-content-between col-12">
+                                                                <button type="button" id="confirm_add_attribute"
+                                                                    class="btn btn-primary mb-2 col-6">Xác
+                                                                    nhận thêm</button>
+                                                                <button type="button" id="cancel_add_attribute"
+                                                                    class="btn btn-danger mb-2 col-5">Hủy
+                                                                    thêm</button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div id="new-attribute-row-container">
