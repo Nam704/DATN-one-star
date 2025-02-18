@@ -80,11 +80,16 @@
                 <div class="collapse" id="sidebarLayouts">
                     <ul class="side-nav-second-level">
                         <li>
+<<<<<<< HEAD
                             <a href="{{ route('admin.products.list') }}">List</a>
                         </li>
                         <li>
                             <a href="{{ route('admin.products.create') }}">Create</a>
+=======
+                            <a href="layouts-horizontal.html" target="_blank">List active</a>
+>>>>>>> 41311ec196c676571d9d1b179eb17a190b2f9c31
                         </li>
+
                     </ul>
                 </div>
             </li>
@@ -139,7 +144,11 @@
                 <div class="collapse" id="sidebarIcons">
                     <ul class="side-nav-second-level">
                         <li>
+<<<<<<< HEAD
                             <a href="{{ route('admin.product_audits.list') }}">List</a>
+=======
+                            <a href="icons-remixicons.html">Remix Icons</a>
+>>>>>>> 41311ec196c676571d9d1b179eb17a190b2f9c31
                         </li>
 
                     </ul>

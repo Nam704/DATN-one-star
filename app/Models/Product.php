@@ -18,8 +18,11 @@ class Product extends Model
         'id_brand',
         'id_category',
         'description',
+        'product_type',
         'image_primary',
         'status',
+        'price',
+        'price_sale',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -30,7 +33,11 @@ class Product extends Model
         return $this->belongsTo(Category::class, 'id_category');
     }
 
-
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_product');
+    }
+    
     public function Brand()
     {
         return $this->belongsTo(Brand::class, 'id_brand');

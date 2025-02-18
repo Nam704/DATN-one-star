@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
     public function up(): void
     {
         Schema::create('addresses', function (Blueprint $table) {
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->foreign('id_ward')->references('id')->on('wards')->onDelete('cascade');
         });
     }
+
 
     public function down(): void
     {

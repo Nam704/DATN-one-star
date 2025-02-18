@@ -21,7 +21,11 @@ class Register
     public $data;
     public function __construct($data)
     {
+<<<<<<< HEAD
         // Log::info($data);
+=======
+        Log::info($data);
+>>>>>>> 41311ec196c676571d9d1b179eb17a190b2f9c31
         $this->data = $data;
     }
 

@@ -18,7 +18,11 @@ use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
-
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\CartController;
+use App\Http\Controllers\Web\CartItemController;
+use App\Http\Controllers\Web\AttributeValueController;
+use App\Http\Controllers\Web\VoucherController;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -210,5 +214,23 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+        Route::controller(HomeController::class)->group(function () {
+            Route::get('/', 'index')->name('home');
+        });
+        Route::controller(CartItemController::class)->group(function () {
+            // Route::get('/cart', 'index')->name('cart');
+            Route::put('/cart/update/{id}', 'updateQuantity')->name('cart.update');
+            Route::delete('/cart/remove/{id}', 'removeItem')->name('cart.remove');
+            Route::post('/cart/update-all', 'updateAll')->name('cart.updateAll');
+            
+        });
+        Route::controller(CartController::class)->group(function () {
+            Route::get('/cart', 'index')->name('cart');
+            Route::post('/cart/update-all', 'updateAll')->name('cart.updateAll');
+            Route::post('/apply-voucher', 'applyVoucher')->name('apply-voucher');
+        });
+        Route::controller(SearchController::class)->group(function () {
+            Route::get('/search', [SearchController::class, 'search'])->name('search');
+        });
     }
 );

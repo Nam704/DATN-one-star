@@ -90,4 +90,16 @@ class ProductVariantController extends Controller
         // dd($productVariants);
         return view('admin.product_variant.list', compact('productVariants', 'product'));
     }
+
+    // Client methods
+    public function index()
+    {
+        $cart = Cart::with(['items.productVariant'])->first();
+        if (!$cart) {
+            $cart = new Cart();
+        }
+        return view('client.layouts.cart', compact('cart'));
+    }
+
+    
 }

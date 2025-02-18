@@ -75,6 +75,13 @@
 
     <!-- Thêm JS của Select2 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<<<<<<< HEAD
+=======
+
+    
+
+    
+>>>>>>> 41311ec196c676571d9d1b179eb17a190b2f9c31
 </body>
 
 <!-- Mirrored from themes.getappui.com/techzaa/velonic/layouts/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 10 Mar 2024 13:03:30 GMT -->
