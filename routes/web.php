@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\OrderController;
+use App\Http\Controllers\Web\PaymentController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
@@ -227,6 +228,10 @@ Route::prefix('client')->name('client.')->group(
             Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
             Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
             Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+        });
+        //cổng thanh toán
+        Route::controller(PaymentController::class)->group(function () {
+            Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
         });
     }
 );

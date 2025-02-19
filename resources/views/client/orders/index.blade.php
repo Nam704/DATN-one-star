@@ -117,6 +117,10 @@
                                                 @else
                                                     <p>Đơn hàng này không thể hủy.</p>
                                                 @endif
+                                                <form action="{{ url('client/vnpay_payment')}}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" name="redirect" class="btn btn-primary" >Thanh Toán bằng VNPay</button>
+                                                </form>
                                             </div>
 
                                         </div>
