@@ -23,6 +23,8 @@ use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CartItemController;
 use App\Http\Controllers\Web\AttributeValueController;
 use App\Http\Controllers\Web\VoucherController;
+use App\Http\Controllers\Web\SearchController;
+use App\Http\Controllers\TestFunctionController;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -214,11 +216,14 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
-        Route::controller(HomeController::class)->group(function () {
+        Route::controller(TestFunctionController::class)->group(function () {
             Route::get('/', 'index')->name('home');
+            // Route::get('/', function(){
+            //     return ('point0');
+            // });
+
         });
         Route::controller(CartItemController::class)->group(function () {
-            // Route::get('/cart', 'index')->name('cart');
             Route::put('/cart/update/{id}', 'updateQuantity')->name('cart.update');
             Route::delete('/cart/remove/{id}', 'removeItem')->name('cart.remove');
             Route::post('/cart/update-all', 'updateAll')->name('cart.updateAll');

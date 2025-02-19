@@ -186,7 +186,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-
+        Laravel\Telescope\TelescopeServiceProvider::class,
         /*
          * Package Service Providers...
          */

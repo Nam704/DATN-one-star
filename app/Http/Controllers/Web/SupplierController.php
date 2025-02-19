@@ -2,11 +2,6 @@
 
 namespace App\Http\Controllers\Web;
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 41311ec196c676571d9d1b179eb17a190b2f9c31
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierRequest;
 use App\Models\Address;

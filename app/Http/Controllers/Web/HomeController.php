@@ -12,6 +12,7 @@ class HomeController extends Controller
 {
     public function index()
     {
+        dd('point1');
         // Lấy sản phẩm mới (mới nhất, status active)
         $newProducts = Product::with(['variants' => function($query) {
             $query->where('status', 'active')
