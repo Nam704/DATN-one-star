@@ -206,7 +206,6 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
-
         Route::prefix('products')->name('product.')->group(function () {
             Route::get('checkout/', [ProductController::class, 'checkoutProduct'])->name('checkout');
 
