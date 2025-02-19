@@ -9,12 +9,14 @@
                         <div class="dashboard_tab_button">
                             <ul role="tablist" class="nav flex-column dashboard-list" id="nav-tab">
                                 <li>
-                                    <a href="#dashboard" data-toggle="tab" class="nav-link {{ !isset($status) ? 'active' : '' }}">
+                                    <a href="#dashboard" data-toggle="tab"
+                                        class="nav-link {{ !isset($status) ? 'active' : '' }}">
                                         Dashboard
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#orders" data-toggle="tab" class="nav-link {{ isset($status) ? 'active' : '' }}">
+                                    <a href="#orders" data-toggle="tab"
+                                        class="nav-link {{ isset($status) ? 'active' : '' }}">
                                         Orders
                                     </a>
                                 </li>
@@ -56,59 +58,70 @@
                                         class="btn btn-default {{ $status == 'cancelled' ? 'active' : '' }}">Cancelled</a>
                                 </div>
                                 <div class="table-responsive">
-                                    @foreach($orders as $order)
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <strong>Đơn hàng #{{ $order->id }}</strong> | SĐT: {{ $order->phone_number }} | Tổng tiền: {{ number_format($order->total_amount, 2) }}<br>
-                                            Trạng thái: {{ $order->orderStatus->name }}
-                                        </div>
-                                        <div class="card-body">
-                                            <h5>Sản phẩm:</h5>
-                                            @foreach($order->orderDetails as $detail)
-                                                <div class="row mb-3">
-                                                    <!-- Cột hình ảnh -->
-                                                    <div class="col-md-3">
-                                                        @if($detail->productVariant && $detail->productVariant->images && $detail->productVariant->images->count() > 0)
-                                                            <img src="{{ $detail->productVariant->images->first()->url }}" alt="{{ $detail->product_name }}" class="img-fluid">
-                                                        @else
-                                                            <p>Không có hình ảnh</p>
-                                                        @endif
+                                    @php
+                                        $displayedVariants = [];
+                                    @endphp
+                                    @foreach ($orders as $order)
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <strong>Đơn hàng #{{ $order->id }}</strong> | SĐT:
+                                                {{ $order->phone_number }} | Tổng tiền:
+                                                {{ number_format($order->total_amount, 2) }}<br>
+                                                Trạng thái: {{ $order->orderStatus->name }}
+                                            </div>
+                                            <div class="card-body">
+                                                <h5>Sản phẩm:</h5>
+                                                @foreach ($order->orderDetails as $detail)
+                                                    <div class="row mb-3">
+                                                        <!-- Cột hình ảnh -->
+                                                        <div class="col-md-3">
+                                                            @php
+                                                                $firstImage = $detail->productVariant->images->first();
+                                                            @endphp
+                                                            @if ($firstImage)
+                                                                <img src="{{ asset('storage/' . $firstImage->url) }}"
+                                                                    alt="{{ $detail->product_name }}" class="img-fluid">
+                                                            @else
+                                                                <p>Không có hình ảnh</p>
+                                                            @endif
+                                                        </div>
+                                                        <!-- Cột thông tin sản phẩm -->
+                                                        <div class="col-md-9">
+                                                            <p>
+                                                                Tên sản phẩm: {{ $detail->product_name }}<br>
+                                                                Đơn giá: {{ number_format($detail->unit_price, 2) }}<br>
+                                                                Số lượng: {{ $detail->quantity }}<br>
+                                                                Thành tiền: {{ number_format($detail->total_price, 2) }}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <!-- Cột thông tin sản phẩm -->
-                                                    <div class="col-md-9">
-                                                        <p>
-                                                            Tên sản phẩm: {{ $detail->product_name }}<br>
-                                                            Đơn giá: {{ number_format($detail->unit_price, 2) }}<br>
-                                                            Số lượng: {{ $detail->quantity }}<br>
-                                                            Thành tiền: {{ number_format($detail->total_price, 2) }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                @if(!$loop->last)
-                                                    <hr>
+                                                    @if (!$loop->last)
+                                                        <hr>
+                                                    @endif
+                                                @endforeach
+                                                <!-- Các hành động tùy theo trạng thái đơn hàng -->
+                                                @if ($order->orderStatus->name === 'pending')
+                                                    <form action="{{ route('client.orders.cancel', $order->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
+                                                    </form>
+                                                @elseif($order->orderStatus->name === 'cancelled')
+                                                    <form action="{{ route('client.orders.reorder', $order->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Bạn có muốn mua lại đơn hàng này?');">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-primary">Mua lại</button>
+                                                    </form>
+                                                @else
+                                                    <p>Đơn hàng này không thể hủy.</p>
                                                 @endif
-                                            @endforeach
+                                            </div>
 
-                                            <!-- Các hành động tùy theo trạng thái đơn hàng -->
-                                            {{-- @if($order->orderStatus->name === 'pending')
-                                                <form action="{{ route('client.orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
-                                                </form>
-                                            @elseif($order->orderStatus->name === 'cancelled')
-                                                <form action="{{ route('client.orders.reorder', $order->id) }}" method="POST" onsubmit="return confirm('Bạn có muốn mua lại đơn hàng này?');">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-primary">Mua lại</button>
-                                                </form>
-                                            @else
-                                                <p>Đơn hàng này không thể hủy.</p>
-                                            @endif --}}
                                         </div>
-                                    </div>
-                                @endforeach
-
+                                    @endforeach
                                 </div>
-
                             </div>
 
                             <!-- Các tab khác giữ nguyên... -->
@@ -205,7 +218,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div> <!-- End Main Content Area -->
                 </div>

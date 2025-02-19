@@ -40,6 +40,39 @@ class OrderController extends Controller
 
         return view('client.orders.partials.order_details', compact('order'));
     }
+    public function cancel($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        // Kiểm tra nếu đơn hàng đang ở trạng thái 'pending'
+        if ($order->orderStatus->name === 'pending') {
+            // Cập nhật trạng thái thành 'cancelled'
+            $order->id_order_status = Order_status::where('name', 'cancelled')->first()->id;
+            $order->save();
+
+            return redirect()->back()->with('success', 'Đơn hàng đã được hủy thành công.');
+        }
+
+        return redirect()->back()->with('error', 'Đơn hàng này không thể hủy.');
+    }
+
+    public function reorder($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        // Nếu đơn hàng đang ở trạng thái 'cancelled'
+        if ($order->orderStatus->name === 'cancelled') {
+            // Cập nhật trạng thái đơn hàng trở lại 'pending'
+            $order->id_order_status = Order_status::where('name', 'pending')->first()->id;
+            $order->save();
+
+            return redirect()->back()->with('success', 'Đơn hàng đã được kích hoạt lại thành công.');
+        }
+
+        return redirect()->back()->with('error', 'Không thể mua lại đơn hàng này.');
+    }
+
+
 
 
 }
