@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
-use DB;
+
 use File;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\File as HttpFile;
+use Illuminate\Support\Facades\DB;
 
 class AddressSeeder extends Seeder
 {
@@ -16,7 +18,7 @@ class AddressSeeder extends Seeder
     public function run()
     {
 
-        $json = File::get("database/datas/sorted.json");
+        $json = HttpFile::get("database/datas/sorted.json");
         $array = json_decode($json, true);
 
         // Province
