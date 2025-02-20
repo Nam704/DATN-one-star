@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
+use App\Http\Controllers\Web\CheckoutController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
 
@@ -210,5 +211,17 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+
+        Route::prefix('products')->name('product.')->group(function () {
+            Route::get('checkout/', [ProductController::class, 'checkoutProduct'])->name('checkout');
+
+            Route::get('detail/{id}', [ProductController::class, 'productDetail'])->name('detail');
+
+            Route::post('/add-to-cart', [ProductController::class, 'addCart'])->name('add-to-cart');
+
+
+            Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+            Route::post('/checkout', [CheckoutController::class, 'store'])->name('store');
+        });
     }
 );

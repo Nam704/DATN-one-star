@@ -16,6 +16,9 @@ class Product_variant extends Model
         'quantity',
         'price',
     ];
+
+    protected $table = 'product_variants';
+
     public function import_details()
     {
         return $this->hasMany(Import_detail::class, 'id_product_variant', 'id');
@@ -49,5 +52,14 @@ class Product_variant extends Model
     public function attributeValues()
     {
         return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value');
+    }
+    public function attributes()
+    {
+        return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
+    }
+
+    public function productVariantAttributes()
+    {
+        return $this->hasMany(Product_variant_attribute::class, 'id_product_variant');
     }
 }

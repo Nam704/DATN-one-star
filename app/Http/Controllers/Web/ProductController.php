@@ -10,6 +10,9 @@ use App\Models\Product;
 use App\Models\Product_variant;
 use App\Services\ProductService;
 use App\Imports\CreateProductImport;
+use App\Models\Image;
+use App\Models\Product_albums;
+use App\Models\Product_variant_attribute;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -156,5 +159,46 @@ class ProductController extends Controller
             'message' => 'Product updated successfully',
             'product' => $product
         ]);
+    }
+
+    public function productDetail($id)
+    {
+        $product = Product::with(['brand', 'category'])->findOrFail($id);
+        $variants = Product_variant::where('id_product', $id)->get();
+
+        foreach ($variants as $variant) {
+            $variant->attributes = Product_variant_attribute::where('id_product_variant', $variant->id)
+                ->with('attributeValue.attribute')
+                ->get();
+
+            $variant->images = Image::where('id_product_variant', $variant->id)->get();
+        }
+        $albums = Product_albums::where('id_product', $id)->get();
+
+
+        $relatedProducts = Product::where('id', '!=', $id)
+            ->where(function ($query) use ($product) {
+                $query->where('id_brand', $product->id_brand) // Lấy sản phẩm cùng brand
+                    ->orWhere('id_category', $product->id_category); // Hoặc cùng danh mục
+            })
+            ->limit(4) // Giới hạn số lượng sản phẩm liên quan
+            ->get();
+
+
+
+        return view('client.productDetail', compact('product', 'variants', 'albums', 'relatedProducts'));
+
+    }
+
+    public function addCart(Request $request)
+    {
+
+        var_dump($request->all());
+
+    }
+
+    public function checkoutProduct()
+    {
+        return view('client.checkout');
     }
 }
