@@ -1,5 +1,5 @@
 
- <div class="breadcrumbs_area">
+<div class="breadcrumbs_area">
     <div class="container">
         <div class="row">
             <div class="col-12">
@@ -36,27 +36,28 @@
                                 <tbody>
                                     @if($cart && $cart->items->count() > 0)
                                         @foreach($cart->items as $item)
-                                            <tr>
-                                                <td class="product_thumb">
-                                                    <img src="{{ Storage::url($item->productVariant->product->image_primary) }}" alt="">
-                                                </td>            
-                                                <td class="product_name">{{ $item->productVariant->product->name }}</td>
-                                                <td class="product-price">{{ number_format($item->price, 2) }}</td>
-                                                <td class="product_quantity">
-                                                    <div class="quantity-wrapper d-flex align-items-center">
-                                                        <button type="button" class="btn btn-sm btn-decrease">-</button>
-                                                        <input type="number" min="1" max="100" value="{{ $item->quantity }}" 
-                                                            data-item-id="{{ $item->id }}" class="quantity-input" readonly>
-                                                        <button type="button" class="btn btn-sm btn-increase">+</button>
-                                                    </div>
-                                                </td>
-                                                <td class="product_total">{{ number_format($item->price * $item->quantity, 2) }}</td>
-                                                <td class="product_remove">
-                                                    <button type="button" class="btn remove-item" data-id="{{ $item->id }}">
-                                                        <i class="fa fa-trash-o"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td class="product_thumb">
+                                                <img src="{{ Storage::url($item->productVariant->product->image_primary) }}" alt="">
+                                            </td>            
+                                            <td class="product_name">{{ $item->productVariant->product->name }}</td>
+                                            <td class="product-price">{{ number_format($item->price, 2) }}đ</td>
+                                            <td class="product_quantity">
+                                                <div class="quantity-wrapper d-flex align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-decrease">-</button>
+                                                    <input type="number" min="1" max="100" value="{{ $item->quantity }}" 
+                                                        data-item-id="{{ $item->id }}" class="quantity-input" readonly>
+                                                    <button type="button" class="btn btn-sm btn-increase">+</button>
+                                                </div>
+                                            </td>
+                                            <td class="product_total">{{ number_format($item->price * $item->quantity, 2) }}đ</td>
+                                            <td class="product_remove">
+                                                <button type="button" class="btn remove-item" data-id="{{ $item->id }}">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        
                                         @endforeach
                                     @else
                                         <tr>
@@ -66,9 +67,7 @@
                                 </tbody>
                             </table>
                         </div>
-                    <div class="cart_submit">
-                        <button type="button" id="update-cart" class="btn">update cart</button>
-                    </div>
+
                     </div>
                     
                 </div>
@@ -140,8 +139,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#apply-coupon').click(function(e) {
-        // existing code
+    // Add error handling for AJAX requests
+    $(document).ajaxError(function(event, xhr, settings) {
+        console.log('Ajax Error:', xhr.responseText);
     });
 });
 </script>

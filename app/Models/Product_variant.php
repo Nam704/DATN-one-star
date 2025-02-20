@@ -53,20 +53,6 @@ class Product_variant extends Model
         return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value');
     }
 
-    // Scope lấy danh sách theo id sản phẩm
-    // public static function scopeList($query, $idProduct)
-    // {
-    //     return $query->with('product')
-    //                  ->where('id_product', '=', $idProduct)
-    //                  ->latest('product_variants.id');
-    // }
-
-    // Scope lấy tổng sản phẩm active theo id sản phẩm
-    // public static function scopeTotal($query, $id)
-    // {
-    //     return $query->where('status', 'active')->where('id_product', $id);
-    // }
-
     // Scope lấy các sản phẩm giảm giá
     public function scopeOnSale($query)
     {
@@ -90,33 +76,16 @@ class Product_variant extends Model
         return $this->price_sale > 0 && $this->price > $this->price_sale;
     }
 
-    // Quan hệ với model Product
-    // public function product()
-    // {
-    //     return $this->belongsTo(Product::class, 'id_product');
-    // }
-
-    // Quan hệ với model Image
-    // public function images()
-    // {
-    //     return $this->hasMany(Image::class, 'id_product_variant');
-    // }
-
-    // Các quan hệ khác
-    // public function import_details()
-    // {
-    //     return $this->hasMany(Import_detail::class, 'id_product_variant', 'id');
-    // }
-
-    // public function productAudits()
-    // {
-    //     return $this->hasMany(Product_audit::class, 'id_product_variant');
-    // }
-
     public function cartItems()
     {
         return $this->hasMany(CartItem::class, 'id_product_variant');
     }
+    public function getCurrentPrice()
+{
+    $priceConfig = new PriceConfiguration();
+    return $priceConfig->getPrice($this->id);
+}
+
 
 }
 

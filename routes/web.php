@@ -24,7 +24,6 @@ use App\Http\Controllers\Web\CartItemController;
 use App\Http\Controllers\Web\AttributeValueController;
 use App\Http\Controllers\Web\VoucherController;
 use App\Http\Controllers\Web\SearchController;
-use App\Http\Controllers\TestFunctionController;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -211,31 +210,36 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             });
     }
 );
-Route::prefix('client')->name('client.')->group(
-    function () {
-        Route::prefix('users')->name('user.')->group(
-            function () { }
-        );
-        Route::controller(TestFunctionController::class)->group(function () {
-            Route::get('/', 'index')->name('home');
-            // Route::get('/', function(){
-            //     return ('point0');
-            // });
+Route::prefix('client')->name('client.')->group(function () {
+    Route::controller(HomeController::class)->group(function () {
+        Route::get('/', 'index')->name('home');
+    });
 
-        });
-        Route::controller(CartItemController::class)->group(function () {
-            Route::put('/cart/update/{id}', 'updateQuantity')->name('cart.update');
-            Route::delete('/cart/remove/{id}', 'removeItem')->name('cart.remove');
-            Route::post('/cart/update-all', 'updateAll')->name('cart.updateAll');
-            
-        });
-        Route::controller(CartController::class)->group(function () {
-            Route::get('/cart', 'index')->name('cart');
-            Route::post('/cart/update-all', 'updateAll')->name('cart.updateAll');
-            Route::post('/apply-voucher', 'applyVoucher')->name('apply-voucher');
-        });
-        Route::controller(SearchController::class)->group(function () {
-            Route::get('/search', [SearchController::class, 'search'])->name('search');
-        });
-    }
-);
+    // Routes cho Cart
+    Route::controller(CartController::class)->group(function () {
+        Route::get('/cart', 'index')->name('cart');
+        Route::get('/cart/get-totals', 'getTotals')->name('cart.getTotals');
+        Route::post('/apply-voucher', 'applyVoucher')->name('apply-voucher');
+    });
+
+    // Routes cho CartItems
+    Route::controller(CartItemController::class)->group(function () {
+        Route::put('/cart/update/{id}', 'updateQuantity')->name('cart.update');
+        Route::delete('/cart/remove/{id}', 'removeItem')->name('cart.remove');
+    });
+
+    // Routes cho PriceConfiguration
+    Route::controller(PriceConfigurationController::class)->group(function () {
+        Route::get('/cart/get-price-configuration/{productVariantId}', 'getPriceConfiguration')->name('cart.getPriceConfiguration');
+    });
+
+    // Routes cho ImportDetail
+    Route::controller(ImportDetailController::class)->group(function () {
+        Route::get('/cart/get-import-detail/{productVariantId}', 'getImportDetail')->name('cart.getImportDetail');
+    });
+
+    // Route cho Search
+    Route::controller(SearchController::class)->group(function () {
+        Route::get('/search', [SearchController::class, 'search'])->name('search');
+    });
+});

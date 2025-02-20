@@ -19,30 +19,30 @@ $(document).ready(function() {
     function updateQuantity(input, newValue) {
         const itemId = input.data('item-id');
         const row = input.closest('tr');
-        
+
         $.ajax({
-            url: `/client/cart/update/${itemId}`,  // Updated URL path
+            url: `/client/cart/update/${itemId}`,
             method: 'PUT',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            data: {
-                quantity: newValue
-            },
+            data: { quantity: newValue },
             success: function(response) {
                 input.val(newValue);
                 row.find('.product_total').text(response.total.toLocaleString() + 'đ');
+                updateCartTotals();
+                updateMiniCartTotals();
             }
         });
     }
-    
-    
 
-    // Remove item handler
+    // Remove item handler with mini cart sync
     $('.remove-item').click(function() {
         const button = $(this);
         const itemId = button.data('id');
-        const row = button.closest('tr');
+        const cartRow = button.closest('tr') || button.closest('.cart_item');
+        const miniCartItem = $(`.mini_cart .cart_item[data-id="${itemId}"]`);
+        const mainCartRow = $(`.cart_page tr:has(button[data-id="${itemId}"])`);
     
         if(confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
             $.ajax({
@@ -51,77 +51,72 @@ $(document).ready(function() {
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                success: function() {
-                    row.remove();
+                success: function(response) {
+                    if(response.success) {
+                        // Remove from both locations
+                        mainCartRow.fadeOut(400, function() { $(this).remove(); });
+                        miniCartItem.fadeOut(400, function() { $(this).remove(); });
+                        
+                        // Update cart count and totals
+                        $('.cart_quantity').text(response.itemCount);
+                        updateCartTotals();
+                        
+                        // Check empty states
+                        if($('.cart_page tbody tr').length === 0) {
+                            $('.cart_page tbody').append('<tr><td colspan="6" class="text-center">Your cart is empty</td></tr>');
+                        }
+                        if($('.mini_cart .cart_item').length === 0) {
+                            $('.mini_cart').append('<p class="text-center">Giỏ hàng trống</p>');
+                        }
+                    }
                 }
             });
         }
     });
     
-
-    // Update cart button handler
-    // In cart.js
-$('#update-cart').click(function() {
-    console.log('Update cart button clicked');
-    let cartItems = [];
-    $('.quantity-input').each(function() {
-        const row = $(this).closest('tr');
-        const itemId = $(this).data('item-id');
-        const quantity = parseInt($(this).val());
-        const price = parseInt(row.find('.product_price').text().replace(/[^0-9]/g, ''));
-        
-        cartItems.push({
-            id: itemId,
-            quantity: quantity,
-            price: price
-        });
-        console.log('Cart item:', {id: itemId, quantity: quantity, price: price});
-    });
-
-    $.ajax({
-        url: '/cart/update-all', // Thay bằng URL chính xác
-        type: 'POST',
-        data: {
-            quantity: newQuantity,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            // Cập nhật tổng tiền cho từng sản phẩm
-            row.find('.product_total').text(response.total.toLocaleString() + 'đ');
     
-            // Cập nhật tổng tiền giỏ hàng
-            $('.cart_subtotal .price').text(response.cartTotal.toLocaleString() + 'đ');
-            $('.final_total .price').text(response.cartTotal.toLocaleString() + 'đ');
-        },
-        error: function() {
-            alert('Có lỗi xảy ra khi cập nhật số lượng!');
-        }
-    });    
-});
 
+    // Update cart totals
+    function updateCartTotals() {
+        $.ajax({
+            url: '/client/cart/get-totals',
+            method: 'GET',
+            success: function(response) {
+                $('.cart_subtotal .price').text(response.total.toLocaleString() + 'đ');
+                $('.final_total .price').text(response.total.toLocaleString() + 'đ');
+            }
+        });
+    }
 
-    // Voucher application handler
+    // Update mini cart totals
+    function updateMiniCartTotals() {
+        $.ajax({
+            url: '/client/cart/get-totals',
+            method: 'GET',
+            success: function(response) {
+                $('.mini_cart_table .cart_total .price').text(response.total.toLocaleString() + 'đ');
+            }
+        });
+    }
+
+    // Voucher handler
     $('#apply-coupon').click(function(e) {
         e.preventDefault();
         let code = $('input[name="voucher_code"]').val();
         
         $.ajax({
             type: 'POST',
-            url: '/voucher/check',
+            url: '/client/apply-voucher',
             data: {
                 _token: $('meta[name="csrf-token"]').attr('content'),
                 voucher_code: code
             },
             success: function(response) {
                 if(response.success) {
-                    let subtotal = parseInt($('.cart_subtotal .price').text().replace(/[^0-9]/g, ''));
-                    let discount = response.discount;
-                    let total = subtotal - discount;
-                    
-                    $('.cart_subtotal .price').text(subtotal.toLocaleString() + 'đ');
-                    $('.discount_amount').text(discount.toLocaleString() + 'đ');
-                    $('.final_total .price').text(total.toLocaleString() + 'đ');
-                    
+                    $('.cart_subtotal .price').text(response.subtotal.toLocaleString() + 'đ');
+                    $('.discount_amount').text(response.discount.toLocaleString() + 'đ');
+                    $('.final_total .price').text(response.total.toLocaleString() + 'đ');
+                    updateMiniCartTotals();
                     toastr.success(response.message);
                 } else {
                     toastr.error(response.message);

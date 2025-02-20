@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
 class CartController extends Controller
 {
     public function index()
@@ -18,27 +19,44 @@ class CartController extends Controller
     }
 
     public function addToCart(Request $request)
-    {
-        $productVariantId = $request->id_product_variant;
-        $quantity = $request->quantity ?? 1;
+{
+    $productVariantId = $request->id_product_variant;
+    $quantity = $request->quantity ?? 1;
+    
+    // Lấy giỏ hàng của người dùng
+    $cart = Cart::firstOrCreate(['id_user' => Auth::id()]);
 
-        $cart = Cart::firstOrCreate(['id_user' => 1]); // Temporary using user_id 1
+    // Lấy thông tin biến thể sản phẩm
+    $productVariant = ProductVariant::findOrFail($productVariantId);
 
-        $productVariant = ProductVariant::findOrFail($productVariantId);
-
-        $cartItem = CartItem::updateOrCreate(
-            [
-                'id_cart' => $cart->id,
-                'id_product_variant' => $productVariantId,
-            ],
-            [
-                'quantity' => \DB::raw('quantity + ' . $quantity),
-                'price' => $productVariant->price
-            ]
-        );
-
-        return redirect()->route('client.cart')->with('success', 'Product added to cart successfully');
+    // Lấy thông tin cấu hình giá
+    $priceConfig = PriceConfiguration::where('product_variant_id', $productVariantId)->first();
+    
+    // Xử lý giá từ cấu hình
+    if ($priceConfig && $priceConfig->use_price_from == 'import') {
+        // Lấy giá từ bảng import_details
+        $importDetail = ImportDetail::where('id_product_variant', $productVariantId)->orderBy('created_at', 'desc')->first();
+        $price = $importDetail ? $importDetail->price_per_unit : $productVariant->price;
+    } else {
+        // Lấy giá từ bảng product_variants
+        $price = $productVariant->price;
     }
+
+    // Cập nhật hoặc thêm sản phẩm vào giỏ hàng
+    $cartItem = CartItem::updateOrCreate(
+        [
+            'id_cart' => $cart->id,
+            'id_product_variant' => $productVariantId,
+        ],
+        [
+            'quantity' => \DB::raw('quantity + ' . $quantity), // Cộng dồn số lượng nếu có
+            'price' => $price // Lưu giá đã tính
+        ]
+    );
+
+    return redirect()->route('client.cart')->with('success', 'Product added to cart successfully');
+}
+
 
     public function removeFromCart($id)
     {
@@ -51,11 +69,29 @@ class CartController extends Controller
     public function updateQuantity(Request $request, $id)
 {
     $cartItem = CartItem::findOrFail($id);
-    $cartItem->quantity = $request->quantity;
+    $newQuantity = $request->quantity;
+
+    // Lấy biến thể sản phẩm từ cartItem
+    $productVariant = $cartItem->productVariant;
+
+    // Lấy cấu hình giá của biến thể sản phẩm
+    $priceConfig = PriceConfiguration::where('product_variant_id', $productVariant->id)->first();
+
+    // Xử lý giá theo cấu hình
+    if ($priceConfig && $priceConfig->use_price_from == 'import') {
+        $importDetail = ImportDetail::where('id_product_variant', $productVariant->id)->first();
+        $price = $importDetail ? $importDetail->price_per_unit : $productVariant->price;
+    } else {
+        $price = $productVariant->price;
+    }
+
+    // Cập nhật số lượng và giá của sản phẩm
+    $cartItem->quantity = $newQuantity;
+    $cartItem->price = $price;
     $cartItem->save();
 
-    // Lấy giỏ hàng và tổng tiền sau khi cập nhật
-    $cart = Cart::with('items')->first(); // Bạn có thể cần lấy giỏ hàng của người dùng hiện tại
+    // Cập nhật tổng tiền giỏ hàng
+    $cart = Cart::with('items')->first();
     $cartTotal = $cart->getTotal();
 
     return response()->json([
@@ -64,6 +100,10 @@ class CartController extends Controller
         'cartTotal' => $cartTotal
     ]);
 }
+
+
+
+
 
     
 // CartController.php
@@ -96,19 +136,60 @@ public function applyVoucher(Request $request)
 }
 public function updateAll(Request $request)
 {
-    foreach($request->items as $item) {
-        CartItem::where('id', $item['id'])->update([
-            'quantity' => $item['quantity']
+    try {
+        foreach($request->items as $item) {
+            CartItem::where('id', $item['id'])->update([
+                'quantity' => $item['quantity']
+            ]);
+        }
+
+        $cart = Cart::with('items')->first();
+        $total = $cart->getTotal();
+
+        return response()->json([
+            'success' => true,
+            'total' => $total
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+public function getTotals()
+{
+    $cart = Cart::with('items')->first();
+    
+    return response()->json([
+        'subtotal' => $cart ? $cart->getSubtotal() : 0,
+        'total' => $cart ? $cart->getTotal() : 0
+    ]);
+}
+
+
+public function removeItem($id)
+{
+    $cartItem = CartItem::find($id);
+    if ($cartItem) {
+        // Xóa sản phẩm khỏi giỏ hàng
+        $cartItem->delete();
+
+        // Lấy lại tổng tiền giỏ hàng sau khi xóa sản phẩm
+        $cart = Cart::with('items')->first();
+        $subtotal = $cart ? $cart->getSubtotal() : 0;
+        $total = $cart ? $cart->getTotal() : 0;
+
+        return response()->json([
+            'success' => true,
+            'subtotal' => number_format($subtotal) . 'đ',
+            'total' => number_format($total) . 'đ'
         ]);
     }
 
-    $cart = Cart::with('items')->first();
-    $subtotal = $cart->getSubtotal();
-    $total = $cart->getTotal();
-
-    return response()->json([
-        'subtotal' => $subtotal,
-        'total' => $total
-    ]);
+    return response()->json(['success' => false]);
 }
+
 }

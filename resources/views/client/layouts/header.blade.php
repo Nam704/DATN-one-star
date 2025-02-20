@@ -111,7 +111,7 @@
                 <a href="javascript:void(0)"><i class="ion-android-close"></i></a>
             </div>
         </div>
-
+    
         @if ($cart && $cart->items->count() > 0)
             @foreach ($cart->items as $item)
                 <div class="cart_item">
@@ -126,12 +126,13 @@
                         <span class="price_cart">{{ number_format($item->price) }}đ</span>
                     </div>
                     <div class="cart_remove">
-                        <a href="#" class="remove-item" data-id="{{ $item->id }}"><i
-                                class="ion-android-close"></i></a>
+                        <a href="#" class="remove-item" data-id="{{ $item->id }}">
+                            <i class="ion-android-close"></i>
+                        </a>
                     </div>
                 </div>
             @endforeach
-
+    
             <div class="mini_cart_table">
                 <div class="cart_total">
                     <span>Tổng tiền:</span>
@@ -141,7 +142,7 @@
         @else
             <p class="text-center">Giỏ hàng trống</p>
         @endif
-
+    
         <div class="mini_cart_footer">
             <div class="cart_button">
                 <a href="{{ route('client.cart') }}">Xem giỏ hàng</a>
@@ -151,6 +152,8 @@
             </div>
         </div>
     </div>
+    
+    
 
 
     <!--mini cart end-->
@@ -208,7 +211,7 @@
                                         </ul>
                                         <div class="banner_static_menu">
                                             <a href="shop.html">
-                                                <img src="{{ asset('/public/client/assets/img/bg/banner1.jpg') }}"
+                                                <img src="{{ asset('client/assets/img/bg/banner1.jpg') }}"
                                                     alt="banner">
                                             </a>
                                         </div>
