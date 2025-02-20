@@ -53,19 +53,15 @@ class ShopController extends Controller
         // Lấy các tham số lọc từ request
         $categories = $request->input('categories', []);
         $brands = $request->input('brands', []);
-        $minPrice = $request->input('min_price', 0);
-        $maxPrice = $request->input('max_price', 50000000);
-
-        // Xử lý giá tối đa mặc định (nếu không có input, giá mặc định là 50.000.000)
-        $maxPriceDefault = 50000000;
-        $maxPrice = (int)str_replace('.', '', $request->input('max_price', $maxPriceDefault));
+        $minPrice = (float) $request->input('min_price', 0);
+        $maxPrice = (float) $request->input('max_price', 50000000);
+        $search = $request->input('search', ''); // Nếu bạn cần lọc theo tên sản phẩm
 
         // Khởi tạo truy vấn sản phẩm
         $productsQuery = Product::where('status', 'active');
 
         // Lọc theo danh mục (input là mảng)
         if ($request->has('categories')) {
-            $categories = $request->input('categories');
             if (is_string($categories)) {
                 $categories = explode(',', $categories);
             }
@@ -74,19 +70,16 @@ class ShopController extends Controller
 
         // Lọc theo thương hiệu (input là mảng)
         if ($request->has('brands')) {
-            $brands = $request->input('brands');
             if (is_string($brands)) {
                 $brands = explode(',', $brands);
             }
             $productsQuery->whereIn('id_brand', $brands);
         }
 
-        // Lọc theo khoảng giá
-        if ($request->has('min_price') && $request->has('max_price')) {
-            $minPrice = (float)$request->input('min_price', 0);
-            $maxPriceInput = (float)$request->input('max_price', $maxPrice);
-            $productsQuery->whereHas('variants.importDetails', function ($query) use ($minPrice, $maxPriceInput) {
-                $query->whereBetween('expected_price', [$minPrice, $maxPriceInput]);
+        // Lọc theo khoảng giá nếu có thay đổi so với giá mặc định
+        if ($minPrice != 0 || $maxPrice != 50000000) {
+            $productsQuery->whereHas('variants.importDetails', function ($query) use ($minPrice, $maxPrice) {
+                $query->whereBetween('expected_price', [$minPrice, $maxPrice]);
             });
         }
 
@@ -98,7 +91,7 @@ class ShopController extends Controller
         // Lấy sản phẩm với phân trang (12 sản phẩm/trang)
         $products = $productsQuery->with(['variants.importDetails'])->paginate(12);
 
-        // Render các view con thành HTML
+        // Render view con thành HTML
         $productsHtml = view('client.shops.product-list', compact('products'))->render();
         $paginationHtml = view('client.shops.pagination', compact('products'))->render();
 
@@ -107,5 +100,6 @@ class ShopController extends Controller
             'pagination' => $paginationHtml,
         ]);
     }
+
 
 }
