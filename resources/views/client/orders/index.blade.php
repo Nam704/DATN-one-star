@@ -75,15 +75,13 @@
                                                     <div class="row mb-3">
                                                         <!-- Cột hình ảnh -->
                                                         <div class="col-md-3">
-                                                            @php
-                                                                $firstImage = $detail->productVariant->images->first();
-                                                            @endphp
-                                                            @if ($firstImage)
-                                                                <img src="{{ asset('storage/' . $firstImage->url) }}"
+                                                            @if ($detail->productVariant->images)
+                                                                <img src="{{ asset('storage/' . $detail->productVariant->images->url) }}"
                                                                     alt="{{ $detail->product_name }}" class="img-fluid">
                                                             @else
                                                                 <p>Không có hình ảnh</p>
                                                             @endif
+
                                                         </div>
                                                         <!-- Cột thông tin sản phẩm -->
                                                         <div class="col-md-9">
@@ -117,9 +115,10 @@
                                                 @else
                                                     <p>Đơn hàng này không thể hủy.</p>
                                                 @endif
-                                                <form action="{{ url('client/vnpay_payment')}}" method="POST">
+                                                <form action="{{ url('client/vnpay_payment') }}" method="POST">
                                                     @csrf
-                                                    <button type="submit" name="redirect" class="btn btn-primary" >Thanh Toán bằng VNPay</button>
+                                                    <button type="submit" name="redirect" class="btn btn-primary">Thanh
+                                                        Toán bằng VNPay</button>
                                                 </form>
                                             </div>
 
