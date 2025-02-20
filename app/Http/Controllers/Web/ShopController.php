@@ -14,7 +14,10 @@ class ShopController extends Controller
     public function shop(Request $request)
     {
         // Fetch categories and brands
-        $categories = Category::whereNull('id_parent')->with('children')->get();
+        $categories = Category::where(function ($query) {
+            $query->whereNull('id_parent')
+                ->orWhere('id_parent', 0);
+        })->with('children')->get();
         $brands = Brand::where('status', 'active')->get();
 
         // Determine the maximum price
