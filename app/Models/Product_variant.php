@@ -39,7 +39,7 @@ class Product_variant extends Model
 
     public function images()
     {
-        return $this->hasMany(Image::class, 'id_product_variant');
+        return $this->hasOne(Image::class, 'id_product_variant');
     }
 
     public function productAudits()
