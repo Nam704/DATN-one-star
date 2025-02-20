@@ -232,6 +232,8 @@ Route::prefix('client')->name('client.')->group(
         //cổng thanh toán
         Route::controller(PaymentController::class)->group(function () {
             Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
-        });
+        Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
+    });
+
     }
 );

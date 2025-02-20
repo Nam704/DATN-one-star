@@ -1,5 +1,17 @@
 @extends('client.layouts.layout')
 @section('content')
+@if(session('success'))
+<div class="alert alert-success">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger">
+    {{ session('error') }}
+</div>
+@endif
+
     <div class="row">
         <!-- Sidebar: Bộ lọc -->
         <div class="col-lg-3 col-md-12">
@@ -60,6 +72,41 @@
         </div>
         <!-- Nội dung sản phẩm -->
         <div class="col-lg-9 col-md-12">
+            {{-- product-list.blade.php --}}
+            <div class="shop_banner">
+                <img src="assets/img/bg/banner8.jpg" alt="">
+            </div>
+            <div class="shop_title">
+                <h1>shop</h1>
+            </div>
+            <div class="shop_toolbar_wrapper">
+                <div class="shop_toolbar_btn">
+                    <button data-role="grid_3" type="button" class="active btn-grid-3" data-toggle="tooltip"
+                        title="3"></button>
+                    <button data-role="grid_4" type="button" class="btn-grid-4" data-toggle="tooltip"
+                        title="4"></button>
+                    <button data-role="grid_list" type="button" class="btn-list" data-toggle="tooltip"
+                        title="List"></button>
+                </div>
+                <div class="niceselect_option">
+                    <form class="select_option" action="#">
+                        <select name="orderby" id="short">
+                            <option selected value="1">Sort by average rating</option>
+                            <option value="2">Sort by popularity</option>
+                            <option value="3">Sort by newness</option>
+                            <option value="4">Sort by price: low to high</option>
+                            <option value="5">Sort by price: high to low</option>
+                            <option value="6">Product Name: A→Z</option>
+                            <option value="7">Product Name: Z→A</option>
+                        </select>
+                    </form>
+                </div>
+
+
+                <div class="page_amount">
+                    <p>Showing 1–9 of 21 results</p>
+                </div>
+            </div>
             <div class="row shop_wrapper" id="product-list">
                 @include('client.shops.product-list')
             </div>
@@ -67,6 +114,7 @@
             <div class="shop_toolbar t_bottom" id="pagination">
                 @include('client.shops.pagination')
             </div>
+
         </div>
     </div>
 @endsection

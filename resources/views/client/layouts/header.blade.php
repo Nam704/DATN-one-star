@@ -1,4 +1,16 @@
 <header class="header_area">
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
     <!--header top start-->
     <div class="header_top">
         <div class="container">
