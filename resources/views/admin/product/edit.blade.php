@@ -265,7 +265,7 @@
                                 @if ($product->image_primary)
                                 <div class="position-relative d-inline-block" id="imageContainer"
                                     style="max-width: 200px;">
-                                    <img src="{{ Storage::url($product->image_primary) }}" alt="Ảnh sản phẩm"
+                                    <img src="{{ asset($product->image_primary) }}" alt="Ảnh sản phẩm"
                                         class="img-fluid rounded" style="width: 100%; height: auto;" />
                                     <button type="button"
                                         class="btn btn-danger btn-sm position-absolute top-0 end-0 remove-image"

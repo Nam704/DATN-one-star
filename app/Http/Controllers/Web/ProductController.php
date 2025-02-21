@@ -82,6 +82,7 @@ class ProductController extends Controller
 
         return back()->with('success', 'Sản phẩm đã được nhập thành công!');
     }
+
     function exportCreateExcel()
     {
         return  $this->ProductService->exportProducts();

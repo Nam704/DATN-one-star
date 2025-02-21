@@ -18,7 +18,7 @@ use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
-
+use App\Http\Controllers\Web\ExcelController;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -31,6 +31,7 @@ Route::get('/users', function () {
 Route::get('/detail-product', function () {
     return view('admin.product.detailBase');
 });
+Route::get('excel/read', [ExcelController::class, 'index']);
 
 
 
@@ -69,6 +70,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
     function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
+        });
+        Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
+            Route::post('create-product', 'createByExcel')->name('createProduct');
         });
         Route::prefix('export')->name('export.')->controller(TemplateExportController::class)->group(
             function () {

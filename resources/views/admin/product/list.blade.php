@@ -10,7 +10,7 @@
                     <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Add new
                         product</a>
 
-                    <form class="form-control mt-2" action="{{ route('admin.products.importProduct') }}" method="POST"
+                    <form class="form-control mt-2" action="{{ route('admin.excels.createProduct') }}" method="POST"
                         enctype="multipart/form-data">
                         @csrf
                         <div class="row container">
@@ -18,10 +18,10 @@
                                 <label>Chọn file Excel:</label>
                                 <input type="file" class=" form-control" name="excel_file" required>
                             </div>
-                            <div class="col-3">
+                            {{-- <div class="col-3">
                                 <label>Chọn ảnh sản phẩm:</label>
                                 <input type="file" class="form-control" name="product_images[]" multiple required>
-                            </div>
+                            </div> --}}
                             <div class="col-3 align-content-end">
 
                                 <button type="submit" class="btn btn-info">Nhập sản phẩm</button>
@@ -63,7 +63,7 @@
                             <tr>
 
                                 <td>{{ $product->name }}</td>
-                                <td><img src="{{Storage::url($product->image_primary) }}" alt="err" height="60px"></td>
+                                <td><img src="{{asset($product->image_primary) }}" alt="err" height="60px"></td>
                                 <td>{{ $product->brand->name }}</td>
                                 <td>{{$product->category->name }}</td>
                                 <td>{{ $product->total_quantity }}</td>

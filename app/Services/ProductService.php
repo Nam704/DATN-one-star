@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exports\ProductExport;
+use App\Imports\CreateProductByExcel;
 use App\Imports\CreateProductImport;
 use App\Models\Product;
 use App\Models\Product_variant;
@@ -21,6 +22,7 @@ class ProductService
     protected $CreateProductImport;
     protected $ProductAuditService;
     protected $NotificationService;
+    protected $CreateProductByExcel;
     protected $user;
     public function __construct(
         AttributeService $AttributeService,
@@ -28,8 +30,11 @@ class ProductService
         CategoryService $CategoryService,
         CreateProductImport $CreateProductImport,
         ProductAuditService $ProductAudit,
-        NotificationService $NotificationService
+        NotificationService $NotificationService,
+        CreateProductByExcel $CreateProductByExcel
+
     ) {
+        $this->CreateProductByExcel = $CreateProductByExcel;
         $this->AttributeService = $AttributeService;
         $this->BrandService = $BrandService;
         $this->CategoryService = $CategoryService;
@@ -37,6 +42,11 @@ class ProductService
         $this->ProductAuditService = $ProductAudit;
         $this->NotificationService = $NotificationService;
         $this->product = new Product();
+    }
+    public function createByExcel($file)
+    {
+        $this->CreateProductByExcel->index($file);
+        return true;
     }
     public function updatePrice($variantId, $price)
     {

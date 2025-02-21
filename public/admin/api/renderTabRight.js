@@ -191,7 +191,7 @@ function updateAlbumPreview() {
     // Hiển thị album từ dữ liệu có sẵn (server)
     productAlbums.slice(0, 4).forEach((album, index) => {
         if (totalImages < 4) {
-            const imageSrc = `http://127.0.0.1:8000/storage/${album.image_path}`;
+            const imageSrc = `http://127.0.0.1:8000${album.image_path}`;
             albumPreview.append(
                 createAlbumImagePreviewElement(imageSrc, index, false)
             );

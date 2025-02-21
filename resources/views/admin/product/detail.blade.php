@@ -40,16 +40,15 @@
                     <div class="product-details-tab">
                         <div id="img-1" class="zoomWrapper single-zoom">
                             <a href="#">
-                                <img id="zoom1" src="{{ asset('storage/' . $product->image_primary) }}"
-                                    data-zoom-image="{{ asset('storage/' . $product->image_primary) }}"
-                                    alt="{{ $product->name }}">
+                                <img id="zoom1" src="{{ asset( $product->image_primary) }}"
+                                    data-zoom-image="{{ asset( $product->image_primary) }}" alt="{{ $product->name }}">
                             </a>
                         </div>
                         <div class="product-album d-flex justify-content-start">
                             @foreach($product->product_albums as $album)
                             <a href="#" class="elevatezoom-gallery" data-update=""
-                                data-image="{{ asset('storage/' . $album->image_path) }}">
-                                <img src="{{ asset('storage/' . $album->image_path) }}" alt="Gallery">
+                                data-image="{{ asset( $album->image_path) }}">
+                                <img src="{{ asset( $album->image_path) }}" alt="Gallery">
                             </a>
                             @endforeach
                         </div>
