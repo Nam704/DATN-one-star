@@ -50,4 +50,8 @@ class Product_variant extends Model
     {
         return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value');
     }
+    public function importDetails()
+    {
+        return $this->hasMany(Import_detail::class, 'id_product_variant');
+    }
 }
