@@ -1,17 +1,5 @@
 @extends('client.layouts.layout')
 @section('content')
-@if(session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
-
-@if(session('error'))
-<div class="alert alert-danger">
-    {{ session('error') }}
-</div>
-@endif
-
     <div class="row">
         <!-- Sidebar: Bộ lọc -->
         <div class="col-lg-3 col-md-12">
@@ -20,14 +8,21 @@
                     <div class="widget_list widget_filter">
                         <h2>Lọc theo giá</h2>
                         <form method="GET" action="{{ route('client.shop') }}">
-                            <!-- Thanh trượt cho khoảng giá -->
-                            <div id="slider-range"></div>
-                            <div class="price-display">
-                                <input type="text" name="min_price" id="min-price" placeholder="Giá tối thiểu"
-                                    value="{{ old('min_price', request('min_price', 0)) }}">
-                                <input type="text" name="max_price" id="max-price" placeholder="Giá tối đa"
-                                    value="{{ old('max_price', request('max_price', 50000000)) }}">
+                            <!-- Chỉ sử dụng input để lọc -->
+                            <div class="mb-3">
+                                <label for="min-price">Giá thấp:</label>
+                                <input type="text" name="min_price" id="min-price"
+                                    class="form-contro border border-dark rounded" placeholder="Giá tối thiểu"
+                                    value="{{ old('min_price', number_format(request('min_price', 0), 0, ',', '.')) }}">
                             </div>
+                            <div class="mb-3">
+                                <label for="max-price">Giá cao:</label>
+                                <input type="text" name="max_price" id="max-price"
+                                    class="form-contro border border-dark rounded" placeholder="Giá tối đa"
+                                    value="{{ old('max_price', number_format(request('max_price', 50000000), 0, ',', '.')) }}">
+                            </div>
+                            <!-- Hiển thị thông báo lỗi ngay dưới bộ lọc giá -->
+                            <div id="price-error" style="color: red; margin-top: 5px;"></div>
                         </form>
                     </div>
                     <div class="widget_list widget_categories" id="filters">
@@ -48,7 +43,6 @@
                                     </ul>
                                 </div>
                             </div>
-
                             <!-- Bộ lọc theo thương hiệu -->
                             <div class="widget_list widget_categories">
                                 <div id="brands">
@@ -101,8 +95,6 @@
                         </select>
                     </form>
                 </div>
-
-
                 <div class="page_amount">
                     <p>Showing 1–9 of 21 results</p>
                 </div>
@@ -118,107 +110,117 @@
         </div>
     </div>
 @endsection
+
 @section('scripts')
-    <script>
-        // Hàm định dạng số: chuyển số nguyên thành chuỗi với dấu chấm phân cách (ví dụ: 50000000 => 50.000.000)
-        function formatNumber(num) {
-            num = parseInt(num) || 0;
-            return num.toLocaleString('vi-VN');
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
 
-        // Hàm gửi dữ liệu lọc sản phẩm qua AJAX
-        function fetchFilteredProducts() {
-            let params = new URLSearchParams();
-
-            // Lấy danh sách category được chọn
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('categories[]', el.value);
-                }
-            });
-            // Lấy danh sách brand được chọn
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('brands[]', el.value);
-                }
-            });
-            // Lấy giá trị khoảng giá từ input, loại bỏ dấu phân cách
-            let minPrice = document.getElementById('min-price').value.replace(/\./g, '');
-            let maxPrice = document.getElementById('max-price').value.replace(/\./g, '');
-            if (minPrice) params.append('min_price', minPrice);
-            if (maxPrice) params.append('max_price', maxPrice);
-
-            // Lấy giá trị sắp xếp nếu có
-            let sortEl = document.getElementById('short');
-            if (sortEl && sortEl.value) {
-                params.append('orderby', sortEl.value);
+<script>
+    // Sử dụng Cleave.js để định dạng số ngay khi nhập với onValueChanged callback
+    var cleaveMin = new Cleave('#min-price', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand',
+        numeralDecimalMark: ',',
+        delimiter: '.',
+        onValueChanged: function(e) {
+            if (e.target.rawValue === '') {
+                e.target.value = '';
             }
+        }
+    });
 
-            fetch('{{ route('client.filter') }}?' + params.toString())
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('product-list').innerHTML = data.products;
-                    document.getElementById('pagination').innerHTML = data.pagination;
-                })
-                .catch(error => console.error('Error:', error));
+    var cleaveMax = new Cleave('#max-price', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand',
+        numeralDecimalMark: ',',
+        delimiter: '.',
+        onValueChanged: function(e) {
+            if (e.target.rawValue === '') {
+                e.target.value = '';
+            }
+        }
+    });
+
+    // Hàm kiểm tra và hiển thị thông báo lỗi nếu giá nhập không hợp lệ
+    function validatePrices() {
+        // Lấy giá trị chưa được định dạng (dạng số nguyên)
+        let minRaw = $('#min-price').val().replace(/\./g, '').replace(/,/g, '');
+        let maxRaw = $('#max-price').val().replace(/\./g, '').replace(/,/g, '');
+        let minPrice = minRaw === '' ? null : parseInt(minRaw);
+        let maxPrice = maxRaw === '' ? null : parseInt(maxRaw);
+        let errorMsg = '';
+
+        // Kiểm tra nếu Giá cao vượt quá 50.000.000
+        if (maxPrice !== null && maxPrice > 50000000) {
+            errorMsg = "Giá cao không được vượt quá 50.000.000";
+        }
+        // Kiểm tra nếu Giá thấp vượt quá Giá cao
+        else if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+            errorMsg = "Giá thấp không thể vượt quá Giá cao";
         }
 
-        $(document).ready(function() {
-            // Khởi tạo slider với giá trị từ 0 đến 50.000.000
-            $("#slider-range").slider({
-                range: true,
-                min: 0,
-                max: 50000000,
-                step: 100000,
-                values: [0, 50000000],
-                slide: function(event, ui) {
-                    // Cập nhật hiển thị khoảng giá với định dạng số có dấu phân cách
-                    $("#amount").val(formatNumber(ui.values[0]) + " - " + formatNumber(ui.values[1]));
-                    // Cập nhật giá trị cho các input hiển thị (có định dạng)
-                    $("#min-price").val(formatNumber(ui.values[0]));
-                    $("#max-price").val(formatNumber(ui.values[1]));
-                    fetchFilteredProducts();
-                }
-            });
-            // Thiết lập hiển thị ban đầu cho slider và input
-            $("#amount").val(
-                formatNumber($("#slider-range").slider("values", 0)) +
-                " - " +
-                formatNumber($("#slider-range").slider("values", 1))
-            );
-            $("#min-price").val(formatNumber($("#slider-range").slider("values", 0)));
-            $("#max-price").val(formatNumber($("#slider-range").slider("values", 1)));
+        $('#price-error').text(errorMsg);
+        return errorMsg === '';
+    }
 
-            // Khi người dùng nhập tay vào input tối thiểu
-            $('#min-price').on('input', function() {
-                let rawVal = $(this).val().replace(/\./g, '');
-                let numeric = parseInt(rawVal) || 0;
-                $(this).val(formatNumber(numeric));
-                $("#slider-range").slider("values", 0, numeric);
-                fetchFilteredProducts();
-            });
+    // Hàm gửi dữ liệu lọc sản phẩm qua AJAX
+    function fetchFilteredProducts() {
+        if (!validatePrices()) {
+            return;
+        }
+        let params = new URLSearchParams();
 
-            // Khi người dùng nhập tay vào input tối đa
-            $('#max-price').on('input', function() {
-                let rawVal = $(this).val().replace(/\./g, '');
-                let numeric = parseInt(rawVal) || 50000000;
-                $(this).val(formatNumber(numeric));
-                $("#slider-range").slider("values", 1, numeric);
-                fetchFilteredProducts();
-            });
-
-            // Lắng nghe sự thay đổi của checkbox category và brand
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-            // Lắng nghe sự thay đổi của dropdown sắp xếp (nếu có)
-            let sortSelect = document.getElementById('short');
-            if (sortSelect) {
-                sortSelect.addEventListener('change', fetchFilteredProducts);
+        // Lấy danh sách category được chọn
+        document.querySelectorAll('.category-filter').forEach(function(el) {
+            if (el.checked) {
+                params.append('categories[]', el.value);
             }
         });
-    </script>
+        // Lấy danh sách brand được chọn
+        document.querySelectorAll('.brand-filter').forEach(function(el) {
+            if (el.checked) {
+                params.append('brands[]', el.value);
+            }
+        });
+
+        // Lấy giá trị khoảng giá từ input, loại bỏ dấu phân cách
+        let minPrice = $('#min-price').val().replace(/\./g, '').replace(/,/g, '');
+        let maxPrice = $('#max-price').val().replace(/\./g, '').replace(/,/g, '');
+        if (minPrice !== '') params.append('min_price', minPrice);
+        if (maxPrice !== '') params.append('max_price', maxPrice);
+
+        // Lấy giá trị sắp xếp nếu có
+        let sortEl = document.getElementById('short');
+        if (sortEl && sortEl.value) {
+            params.append('orderby', sortEl.value);
+        }
+
+        fetch('{{ route('client.filter') }}?' + params.toString())
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('product-list').innerHTML = data.products;
+                document.getElementById('pagination').innerHTML = data.pagination;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    $(document).ready(function() {
+        // Lắng nghe sự thay đổi của input, checkbox, dropdown
+        $('#min-price, #max-price').on('input', function() {
+            validatePrices();
+            fetchFilteredProducts();
+        });
+
+        document.querySelectorAll('.category-filter').forEach(function(el) {
+            el.addEventListener('change', fetchFilteredProducts);
+        });
+        document.querySelectorAll('.brand-filter').forEach(function(el) {
+            el.addEventListener('change', fetchFilteredProducts);
+        });
+
+        let sortSelect = document.getElementById('short');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', fetchFilteredProducts);
+        }
+    });
+</script>
 @endsection
