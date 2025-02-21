@@ -9,12 +9,10 @@
             </div>
             <div class="product_thumb">
                 <a class="primary_img" href="product-details.html">
-                    <img src="{{ asset('storage/' . $product->image_primary) }}" alt="{{ $product->name }}"
-                        height="100px" width="300px">
+                    <img src="{{ Storage::url($product->image_primary) }}">
                 </a>
                 <a class="secondary_img" href="product-details.html">
-                    <img src="{{ asset('storage/' . $product->image_primary) }}" alt="{{ $product->name }}">
-                </a>
+                    <img src="{{ Storage::url($product->image_primary) }}">                </a>
                 <div class="label_product">
                     <span class="label_sale">-47%</span>
                 </div>
