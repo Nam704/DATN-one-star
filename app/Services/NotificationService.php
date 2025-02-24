@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Events\AdminNotification;
 use App\Events\EmployeeNotification;
-use App\Events\ImportNotificationSent;
+// use App\Events\ImportNotificationSent;
 use App\Events\PrivateNotification;
 use App\Events\PublicNotification;
 use App\Events\UserNotification;
@@ -21,10 +21,10 @@ class NotificationService
     {
         // Constructor logic
     }
-    function sendImport($importData, $user)
-    {
-        broadcast(new ImportNotificationSent($importData, $user))->toOthers();
-    }
+    // function sendImport($importData, $user)
+    // {
+    //     broadcast(new ImportNotificationSent($importData, $user))->toOthers();
+    // }
     public function sendPublic($data)
     {
         $this->createNotification([

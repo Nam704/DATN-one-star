@@ -7,22 +7,21 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
-class ResetPassword
+class CreateByExcel implements ShouldQueue
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public $data;
-    public function __construct($data)
+    protected  $file;
+    public function __construct($file)
     {
-        $this->data = $data;
-        // Log::info("In ResetPassword: ", $this->data);
+        $this->file = $file;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Imports;
+namespace App\Jobs;
 
 use App\Models\Attribute;
 use App\Models\Attribute_value;
@@ -11,26 +11,148 @@ use App\Models\Product_albums;
 use App\Models\Product_variant;
 use App\Models\Product_variant_attribute;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Concerns\ToCollection;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use App\Services\NotificationService;
 use App\Services\ProductAuditService;
-class CreateProductByExcel
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class CreateProductByExcel implements ShouldQueue
 {
-    protected $ProductAuditService;
-    protected $NotificationService;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+
     function __construct(
+        $excel_file,
+        $user_id
+    ) {
+        $this->user_id = $user_id;
+        $this->excel_file = $excel_file;
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(
         ProductAuditService $ProductAuditService,
         NotificationService $NotificationService
-    ) {
-        $this->ProductAuditService = $ProductAuditService;
-        $this->NotificationService = $NotificationService;
+    ): void {
+        $user = User::find($this->userId); // Lấy user từ database
+
+        if (!$user) {
+            return;
+        }
+        $this->createProduct($this->excel_file, $user, $ProductAuditService, $NotificationService);
     }
-    
-    public function createvariant($variantsSheet, $messageErrors)
+    function createProductcreateProduct(
+        $excel_file,
+        $user,
+        NotificationService $NotificationService,
+        ProductAuditService $ProductAuditService
+    ) {
+        try {
+            DB::beginTransaction();
+            $reader = new Xlsx();
+            $spreadsheet = $reader->load($excel_file);
+            $messageErrors = [];
+            $productsSheet = $spreadsheet->getSheetByName('Products');
+
+            $variantsSheet = $spreadsheet->getSheetByName('Variants');
+
+            // Lấy dòng đầu tiên làm header (tên cột)
+            $headerRow = $productsSheet->getRowIterator(1)->current();
+            $header = []; // mảng các tiêu đề
+
+            // Chuyển đổi RowCellIterator thành mảng
+            foreach ($headerRow->getCellIterator() as $cell) {
+                $nameHeader = $cell->getValue();
+                $header[] = Str::of($nameHeader)->trim()->replace('  ', ' ')->toString();
+            }
+
+            // Lặp qua các dòng sản phẩm và in ra theo header
+            foreach ($productsSheet->getRowIterator(2) as $row) {
+                $rowData = [];
+                $rowIndex = $row->getRowIndex();
+                $albums = [];
+                $data = [];
+                // Lấy giá trị cho mỗi cột theo header
+                foreach ($header as $index => $columnName) {
+                    $cellValue = $productsSheet->getCellByColumnAndRow($index + 1, $rowIndex)->getValue();
+                    $rowData[$columnName] = $cellValue;
+                    if ($columnName == 'Name') {
+                        $data['name'] = $cellValue;
+                    }
+                    if (($columnName) == 'Description') {
+                        $data['description'] = $cellValue;
+                    }
+                    if (($columnName) == 'Category') {
+                        $category = Category::firstOrCreate(['name' => $cellValue]);
+                        $data['id_category'] = $category->id;
+                    }
+                    if (($columnName) == 'Brand') {
+                        $brand = Brand::firstOrCreate(['name' => $cellValue]);
+                        $data['id_brand'] = $brand->id;
+                    }
+                    if (($columnName) == 'Main Image') {
+                        $mainImageCoordinate = $this->getImageCoordinates($productsSheet, $rowIndex, 'Main Image');
+                        if ($mainImageCoordinate) {
+                            $imagePath = $this->saveImage($mainImageCoordinate);
+                            $rowData['Main Image'] = $imagePath;
+                            $data['image_primary'] = $imagePath;
+                        }
+                    }
+                    if (strpos($columnName, 'Album Image') !== false) {
+
+                        $albumImageCoordinate = $this->getImageCoordinates($productsSheet, $rowIndex, $columnName);
+                        if ($albumImageCoordinate) {
+                            $imagePath = $this->saveImage($albumImageCoordinate);
+                            $rowData[$columnName] = $imagePath;
+                            // echo '<img src="' . $imagePath . '" alt="Album Image" width="100">';
+                            $albums[] = $imagePath;
+                        }
+                    }
+                    // echo $columnName . ' - ' . $rowData[$columnName] . '<br>';
+                }
+                // dd($rowData);
+                $product = Product::create($data);
+                // echo $product->id . '<br>';
+                // Lưu hình ảnh vào thư mục
+
+                if (!empty($albums)) {
+                    foreach ($albums as $album) {
+
+                        Product_albums::create([
+                            'id_product' => $product->id,
+                            'image_path' => $album
+                        ]);
+                    }
+                }
+            }
+            $this->createvariant($variantsSheet, $messageErrors);
+            DB::commit();
+            $dataNotification = [
+                'title' => 'New Product',
+                'message' => $this->user->name . ' đã tạo sản phẩm mới!',
+                'from_user_id' => $this->user->id,
+                'to_user_id' => null,
+                'type' => 'products',
+                'status' => 'unread',
+                'goto_id' => null,
+
+            ];
+            // dd($dataNotification);
+            $NotificationService->sendAdmin($dataNotification);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+    function createvariant($variantsSheet, $messageErrors)
     {
         try {
             $headerRow = $variantsSheet->getRowIterator(1)->current();
@@ -102,7 +224,7 @@ class CreateProductByExcel
                     'url' => $data['image']
                 ]);
                 $this->ProductAuditService->createAudit([
-                    'id_user' =>auth()->user()->id,
+                    'id_user' => auth()->user()->id,
                     'id_product_variant' => $variant->id,
                     'action_type' => 'create',
                     'status' => 'pending',
@@ -117,112 +239,10 @@ class CreateProductByExcel
                     ]);
                 }
             }
-            $dataNotification = [
-                'title' => 'New Product',
-                'message' => auth()->user()->name . ' đã tạo sản phẩm mới!',
-                'from_user_id' =>auth()->user()->id,
-                'to_user_id' => null,
-                'type' => 'products',
-                'status' => 'unread',
-                'goto_id' => $product->id,
-    
-            ];
-            // dd($dataNotification);
-            $this->NotificationService->sendAdmin($dataNotification);
         } catch (\Throwable $th) {
-            DB::rollBack();
             throw $th;
         }
     }
-
-    public function index($excel_file)
-    {
-        try {
-            DB::beginTransaction();
-            $reader = new Xlsx();
-            $spreadsheet = $reader->load($excel_file);
-            $messageErrors = [];
-            $productsSheet = $spreadsheet->getSheetByName('Products');
-
-            $variantsSheet = $spreadsheet->getSheetByName('Variants');
-
-            // Lấy dòng đầu tiên làm header (tên cột)
-            $headerRow = $productsSheet->getRowIterator(1)->current();
-            $header = []; // mảng các tiêu đề
-
-            // Chuyển đổi RowCellIterator thành mảng
-            foreach ($headerRow->getCellIterator() as $cell) {
-                $nameHeader = $cell->getValue();
-                $header[] = Str::of($nameHeader)->trim()->replace('  ', ' ')->toString();
-            }
-
-            // Lặp qua các dòng sản phẩm và in ra theo header
-            foreach ($productsSheet->getRowIterator(2) as $row) {
-                $rowData = [];
-                $rowIndex = $row->getRowIndex();
-                $albums = [];
-                $data = [];
-                // Lấy giá trị cho mỗi cột theo header
-                foreach ($header as $index => $columnName) {
-                    $cellValue = $productsSheet->getCellByColumnAndRow($index + 1, $rowIndex)->getValue();
-                    $rowData[$columnName] = $cellValue;
-                    if ($columnName == 'Name') {
-                        $data['name'] = $cellValue;
-                    }
-                    if (($columnName) == 'Description') {
-                        $data['description'] = $cellValue;
-                    }
-                    if (($columnName) == 'Category') {
-                        $category = Category::firstOrCreate(['name' => $cellValue]);
-                        $data['id_category'] = $category->id;
-                    }
-                    if (($columnName) == 'Brand') {
-                        $brand = Brand::firstOrCreate(['name' => $cellValue]);
-                        $data['id_brand'] = $brand->id;
-                    }
-                    if (($columnName) == 'Main Image') {
-                        $mainImageCoordinate = $this->getImageCoordinates($productsSheet, $rowIndex, 'Main Image');
-                        if ($mainImageCoordinate) {
-                            $imagePath = $this->saveImage($mainImageCoordinate);
-                            $rowData['Main Image'] = $imagePath;
-                            $data['image_primary'] = $imagePath;
-                        }
-                    }
-                    if (strpos($columnName, 'Album Image') !== false) {
-
-                        $albumImageCoordinate = $this->getImageCoordinates($productsSheet, $rowIndex, $columnName);
-                        if ($albumImageCoordinate) {
-                            $imagePath = $this->saveImage($albumImageCoordinate);
-                            $rowData[$columnName] = $imagePath;
-                            // echo '<img src="' . $imagePath . '" alt="Album Image" width="100">';
-                            $albums[] = $imagePath;
-                        }
-                    }
-                    // echo $columnName . ' - ' . $rowData[$columnName] . '<br>';
-                }
-                // dd($rowData);
-                $product = Product::create($data);
-                // echo $product->id . '<br>';
-                // Lưu hình ảnh vào thư mục
-                if (!empty($albums)) {
-                    foreach ($albums as $album) {
-
-                        Product_albums::create([
-                            'id_product' => $product->id,
-                            'image_path' => $album
-                        ]);
-                    }
-                }
-            }
-            $this->createvariant($variantsSheet, $messageErrors);
-            DB::commit();
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
-    }
-
-    // Hàm để lấy tọa độ của hình ảnh trong cột 'Main Image'
     private function getImageCoordinates($sheet, $rowIndex, $columnName)
     {
         $headerRow = $sheet->getRowIterator(1)->current();
@@ -247,7 +267,6 @@ class CreateProductByExcel
         return null;
     }
 
-    // Hàm để lưu hình ảnh vào thư mục public
     // Hàm để lưu hình ảnh vào thư mục public
     private function saveImage($imagePath)
     {
