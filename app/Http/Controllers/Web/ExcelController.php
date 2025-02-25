@@ -19,8 +19,8 @@ class ExcelController extends Controller
     {
         $request->validate(["excel_file" => "required|mimes:xlsx,xls"]);
         $excelFile = $request->file('excel_file');
-        $this->ProductService->createByExcel($excelFile);
-        // CreateProductByExcel::dispatch($excelFile);
+        $path = $excelFile->store('excels');
+        CreateProductByExcel::dispatch($path, auth()->user()->id);
         return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được nhập thành công!');
     }
 }

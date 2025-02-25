@@ -9,13 +9,15 @@ use Illuminate\Validation\ValidationException;
 
 class CategoryService
 {
-    public function __construct()
+    protected $category;
+    public function __construct(Category $category)
     {
-        // Constructor logic
+        $this->category = $category;
     }
     public function getCategories()
     {
-        return Category::all();
+        // Lấy tất cả các categories và danh mục con
+        return $this->category->with('children', 'products')->get();
     }
     public function getCategoryById($id)
     {

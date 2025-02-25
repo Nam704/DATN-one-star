@@ -207,14 +207,29 @@ class ProductService
     /**
      * Xử lý upload ảnh sản phẩm
      */
-    private function uploadImage($image, $folder = 'products')
+    // public function uploadImage($image, $folder = 'products')
+    // {
+    //     if (!$image) {
+    //         return null;
+    //     }
+
+    //     // Lưu ảnh vào thư mục được chỉ định
+    //     return $image->store($folder, 'public');
+    // }
+    public function uploadImage($image, $folder = 'products')
     {
         if (!$image) {
             return null;
         }
 
-        // Lưu ảnh vào thư mục được chỉ định
-        return $image->store($folder, 'public');
+        // Tạo tên tệp dựa trên thời gian và hash của tên gốc
+        $filename = time() . '_' . md5($image->getClientOriginalName()) . '.' . $image->getClientOriginalExtension();
+
+        // Lưu ảnh vào thư mục được chỉ định với tên tệp đã tạo
+        $image->storeAs($folder, $filename, 'public');
+
+        // Trả về đường dẫn hình ảnh
+        return '/storage/' . $folder . '/' . $filename;
     }
 
     /**

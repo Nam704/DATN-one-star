@@ -114,7 +114,7 @@ class NotificationService
         }
 
         // Gửi thông báo qua broadcasting
-        broadcast(new AdminNotification($notification))->toOthers();
+        broadcast(new AdminNotification($notification));
     }
 
 

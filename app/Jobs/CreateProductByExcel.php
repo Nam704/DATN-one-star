@@ -10,26 +10,33 @@ use App\Models\Product;
 use App\Models\Product_albums;
 use App\Models\Product_variant;
 use App\Models\Product_variant_attribute;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use App\Services\NotificationService;
 use App\Services\ProductAuditService;
+use App\Services\ProductService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CreateProductByExcel implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-
+    protected $excel_file;
+    protected $user_id;
+    protected $ProductService;
     function __construct(
+
         $excel_file,
         $user_id
+
     ) {
         $this->user_id = $user_id;
         $this->excel_file = $excel_file;
@@ -38,23 +45,23 @@ class CreateProductByExcel implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(
-        ProductAuditService $ProductAuditService,
-        NotificationService $NotificationService
-    ): void {
-        $user = User::find($this->userId); // Lấy user từ database
-
+    public function handle(ProductAuditService $ProductAuditService, NotificationService $NotificationService): void
+    {
+        $user = \App\Models\User::find($this->user_id);
         if (!$user) {
+            \Log::error("Không tìm thấy người dùng với ID: {$this->user_id}");
             return;
         }
-        $this->createProduct($this->excel_file, $user, $ProductAuditService, $NotificationService);
+        $fullPath = storage_path("app/{$this->excel_file}");
+        if (!file_exists($fullPath)) {
+            \Log::error("File không tồn tại: {$fullPath}");
+            return;
+        }
+        $excel_file = $fullPath;
+        $this->createProduct($excel_file, $user, $ProductAuditService, $NotificationService);
     }
-    function createProductcreateProduct(
-        $excel_file,
-        $user,
-        NotificationService $NotificationService,
-        ProductAuditService $ProductAuditService
-    ) {
+    function createProduct($excel_file, $user, $ProductAuditService, $NotificationService)
+    {
         try {
             DB::beginTransaction();
             $reader = new Xlsx();
@@ -110,7 +117,7 @@ class CreateProductByExcel implements ShouldQueue
 
                         $albumImageCoordinate = $this->getImageCoordinates($productsSheet, $rowIndex, $columnName);
                         if ($albumImageCoordinate) {
-                            $imagePath = $this->saveImage($albumImageCoordinate);
+                            $imagePath = $this->saveImage($albumImageCoordinate, 'gallery/');
                             $rowData[$columnName] = $imagePath;
                             // echo '<img src="' . $imagePath . '" alt="Album Image" width="100">';
                             $albums[] = $imagePath;
@@ -133,12 +140,12 @@ class CreateProductByExcel implements ShouldQueue
                     }
                 }
             }
-            $this->createvariant($variantsSheet, $messageErrors);
+            $this->createvariant($variantsSheet, $messageErrors, $user, $ProductAuditService);
             DB::commit();
             $dataNotification = [
                 'title' => 'New Product',
-                'message' => $this->user->name . ' đã tạo sản phẩm mới!',
-                'from_user_id' => $this->user->id,
+                'message' => $user->name . ' đã tạo sản phẩm mới!',
+                'from_user_id' => $user->id,
                 'to_user_id' => null,
                 'type' => 'products',
                 'status' => 'unread',
@@ -149,10 +156,11 @@ class CreateProductByExcel implements ShouldQueue
             $NotificationService->sendAdmin($dataNotification);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
+            Log::error('Error: ' . $th->getMessage());
         }
     }
-    function createvariant($variantsSheet, $messageErrors)
+    function createvariant($variantsSheet, $messageErrors, $user, $ProductAuditService)
     {
         try {
             $headerRow = $variantsSheet->getRowIterator(1)->current();
@@ -192,7 +200,7 @@ class CreateProductByExcel implements ShouldQueue
                     if ($columnName == 'Image') {
                         $albumImageCoordinate = $this->getImageCoordinates($variantsSheet, $rowIndex, $columnName);
                         if ($albumImageCoordinate) {
-                            $imagePath = $this->saveImage($albumImageCoordinate);
+                            $imagePath = $this->saveImage($albumImageCoordinate, 'variants/');
                             $data['image'] = $imagePath;
                         } else {
                             $messageErrors[] = "Image not found for Variant SKU: $cellValue";
@@ -223,12 +231,12 @@ class CreateProductByExcel implements ShouldQueue
                 $variant->images()->create([
                     'url' => $data['image']
                 ]);
-                $this->ProductAuditService->createAudit([
-                    'id_user' => auth()->user()->id,
+                $ProductAuditService->createAudit([
+                    'id_user' => $user->id,
                     'id_product_variant' => $variant->id,
                     'action_type' => 'create',
                     'status' => 'pending',
-                    'reason' => "" //$this->user->name . " import" . " at: " . $today,
+                    'reason' => ""
                 ]);
 
                 // Gắn thuộc tính vào sản phẩm
@@ -268,7 +276,7 @@ class CreateProductByExcel implements ShouldQueue
     }
 
     // Hàm để lưu hình ảnh vào thư mục public
-    private function saveImage($imagePath)
+    private function saveImage($imagePath, $folder = null)
     {
         // Lấy thời gian hiện tại và tạo tên tệp duy nhất
         $timestamp = Carbon::now()->timestamp; // Hoặc dùng Carbon::now()->format('Y_m_d_His') để có dạng khác
@@ -278,7 +286,7 @@ class CreateProductByExcel implements ShouldQueue
         $newFileName = $timestamp . '_' . uniqid() . '.' . $extension;
 
         // Đặt đường dẫn lưu ảnh
-        $img_url = "/storage/products/" . $newFileName;
+        $img_url = "/storage/products/" . $folder . $newFileName;
         $img_path = public_path($img_url);
 
         // Đọc nội dung của ảnh và lưu vào thư mục
