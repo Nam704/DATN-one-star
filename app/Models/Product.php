@@ -73,25 +73,55 @@ class Product extends Model
     {
         return $this->hasMany(Product_albums::class, 'id_product');
     }
-    public static function getProductWithDetails($id)
+    public  function getProductWithDetails()
     {
-        return self::with([
+        return $this->load([
             'variants' => function ($query) {
                 $query->select('id', 'id_product', 'sku', 'status', 'quantity', 'price')
                     ->with([
                         'images' => function ($query) {
                             $query->select('id', 'id_product_variant', 'url');
                         },
-                        'attributeValues' => function ($query) {
-                            $query->select('attribute_values.id', 'attribute_values.value')
-                                ->join('attributes', 'attribute_values.id_attribute', '=', 'attributes.id')
-                                ->addSelect('attributes.name as name', 'attributes.id as attribute_id',);
-                        }
+                        'attributeValues'
                     ]);
             },
             'category:id,name',
             'brand:id,name',
             'product_albums:id,id_product,image_path',
-        ])->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status',);
+        ])->append('attributes')->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status');
+    }
+    public function getPriceRange()
+    {
+        return $this->variants()
+            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+            ->first();
+    }
+    public function getAttributesAttribute()
+    {
+        $attributes = [];
+
+        // Kiểm tra nếu product có variants
+        if (!$this->relationLoaded('variants')) {
+            return $attributes;
+        }
+
+        // Duyệt qua tất cả các variants để lấy attributes
+        foreach ($this->variants as $variant) {
+            if (!$variant->relationLoaded('attributeValues')) {
+                continue;
+            }
+
+            foreach ($variant->attributeValues as $attr) {
+                $attributes[$attr->attribute_name]['name'] = $attr->attribute_name;
+                $attributes[$attr->attribute_name]['values'][] = $attr->value;
+            }
+        }
+
+        // Loại bỏ các giá trị trùng lặp
+        foreach ($attributes as &$attr) {
+            $attr['values'] = array_unique($attr['values']);
+        }
+
+        return array_values($attributes);
     }
 }

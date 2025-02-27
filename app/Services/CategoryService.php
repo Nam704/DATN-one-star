@@ -17,7 +17,18 @@ class CategoryService
     public function getCategories()
     {
         // Lấy tất cả các categories và danh mục con
-        return $this->category->with('children', 'products')->get();
+        $categories = $this->category->with('children', 'products')->get();
+        foreach ($categories as $category) {
+            $prices = $category->getPriceRange();
+            $category->min_price = $prices->min_price;
+            $category->max_price = $prices->max_price;
+            foreach ($category->products as $product) {
+                $prices = $product->getPriceRange();
+                $product->min_price = $prices->min_price;
+                $product->max_price = $prices->max_price;
+            }
+        }
+        return $categories;
     }
     public function getCategoryById($id)
     {

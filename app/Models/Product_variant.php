@@ -46,10 +46,32 @@ class Product_variant extends Model
     {
         return $this->hasMany(Product_audit::class, 'id_product_variant');
     }
+    // public function attributeValues()
+    // {
+    //     return $this->belongsToMany(
+    //         Attribute_value::class,
+    //         'product_variant_attributes',
+    //         'id_product_variant',
+    //         'id_attribute_value'
+    //     );
+    // }
     public function attributeValues()
     {
-        return $this->belongsToMany(Attribute_value::class, 'product_variant_attributes', 'id_product_variant', 'id_attribute_value');
+        return $this->belongsToMany(
+            Attribute_value::class,
+            'product_variant_attributes',
+            'id_product_variant',
+            'id_attribute_value'
+        )->join('attributes', 'attribute_values.id_attribute', '=', 'attributes.id')
+            ->select(
+                'attribute_values.id',
+                'attribute_values.value',
+                'attributes.name as attribute_name',
+                'attributes.id as attribute_id'
+            );
     }
+
+
     public function importDetails()
     {
         return $this->hasMany(Import_detail::class, 'id_product_variant');

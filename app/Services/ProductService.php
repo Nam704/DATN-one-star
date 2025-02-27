@@ -260,7 +260,34 @@ class ProductService
         $productVariant->save();
         return $productVariant;
     }
+    public function productDetail($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->getProductWithDetails();
+        // $product->formatted_variants  = $product->variants->map(function ($variant) {
+        //     return [
+        //         'id' => $variant->id,
+        //         'sku' => $variant->sku,
+        //         'price' => $variant->price,
+        //         'quantity' => $variant->quantity,
+        //         'image' => optional($variant->images)->url,
+        //         'values' => $variant->attributeValues->map(function ($attr) {
+        //             return [
+        //                 'value_id' => $attr->id,
+        //                 'attribute_id' => $attr->attribute_id,
+        //                 'name' => $attr->attribute_name,
+        //                 'value' => $attr->value,
 
+        //             ];
+        //         })
+        //     ];
+        // });
+        $prices = $product->getPriceRange();
+        $product->min_price = $prices->min_price;
+        $product->max_price = $prices->max_price;
+        // $product->append('attributes');
+        return $product;
+    }
     public function updateProduct(Request $request, $id)
     {
         try {

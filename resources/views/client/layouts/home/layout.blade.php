@@ -7,11 +7,12 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Autima - Car Accessories Shop HTML Template </title>
+    <title>@yield('title', 'OneStar Shop')</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    {{--
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico"> --}}
 
     <!-- CSS 
     ========================= -->
@@ -29,57 +30,13 @@
 
 
     <!--slider area start-->
-
-    @include('client.layouts.home.left-sidebar')
+    @yield('left-sidebar')
+    {{-- @include('client.layouts.home.left-sidebar') --}}
     <!--slider area end-->
 
     <!--shipping area start-->
-    <section class="shipping_area mb-50">
-        <div class="container">
-            <div class=" row">
-                <div class="col-12">
-                    <div class="shipping_inner">
-                        <div class="single_shipping">
-                            <div class="shipping_icone">
-                                <img src="assets/img/about/shipping1.png" alt="">
-                            </div>
-                            <div class="shipping_content">
-                                <h2>Free Shipping</h2>
-                                <p>Free shipping on all US order</p>
-                            </div>
-                        </div>
-                        <div class="single_shipping">
-                            <div class="shipping_icone">
-                                <img src="assets/img/about/shipping2.png" alt="">
-                            </div>
-                            <div class="shipping_content">
-                                <h2>Support 24/7</h2>
-                                <p>Contact us 24 hours a day</p>
-                            </div>
-                        </div>
-                        <div class="single_shipping">
-                            <div class="shipping_icone">
-                                <img src="assets/img/about/shipping3.png" alt="">
-                            </div>
-                            <div class="shipping_content">
-                                <h2>100% Money Back</h2>
-                                <p>You have 30 days to Return</p>
-                            </div>
-                        </div>
-                        <div class="single_shipping">
-                            <div class="shipping_icone">
-                                <img src="assets/img/about/shipping4.png" alt="">
-                            </div>
-                            <div class="shipping_content">
-                                <h2>Payment Secure</h2>
-                                <p>We ensure secure payment</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @yield('shipping-area')
+    {{-- @include('client.layouts.home.shipping-area') --}}
     <!--shipping area end-->
 
     <!--product area start-->

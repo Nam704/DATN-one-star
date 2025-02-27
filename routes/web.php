@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Web\ExcelController;
 
 Route::get('/', function () {
@@ -207,6 +209,12 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+        Route::prefix('products')->name('products.')->group(
+            function () {
+                Route::get('detail/{id}', [ClientProductController::class, 'detail'])->name('detail');
+            }
+        );
+
         Route::get('/index', [HomeController::class, 'index'])->name('home');
         Route::controller(ShopController::class)->group(function () {
             Route::get('shop', 'shop')->name('shop');

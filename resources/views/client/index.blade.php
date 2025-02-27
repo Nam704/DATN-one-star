@@ -1,4 +1,11 @@
 @extends('client.layouts.home.layout')
+@section('title', 'Trang chủ')
+@section('left-sidebar')
+@include('client.layouts.home.left-sidebar')
+@endsection
+@section('shipping-area')
+@include('client.layouts.home.shipping-area')
+@endsection
 @section('content')
 <section class="product_area mb-50">
     <div class="container">
@@ -8,13 +15,15 @@
                     <h2><span> <strong>Our</strong>Products</span></h2>
                     <ul class="product_tab_button nav" role="tablist" id="nav-tab">
 
-                        @foreach ($categories as $item)
+                        @foreach ($categories as $index=> $item)
                         @if ($item->id_parent == 0)
                         <li>
-                            <a class="active" data-toggle="tab" href="#brake" role="tab"
-                                aria-controls="{{  $item->name }}" aria-selected="true">{{ $item->name }}</a>
+                            <a class="{{ $index == 0 ? 'active' : '' }}" data-toggle="tab" href="#{{ $item->name }}"
+                                role="tab" aria-controls="{{ $item->name }}"
+                                aria-selected="{{ $index == 0 ? 'true' : 'false' }}">
+                                {{ $item->name }}
+                            </a>
                         </li>
-
                         @endif
                         @endforeach
 
@@ -25,18 +34,22 @@
         </div>
 
         <div class="tab-content">
-            @foreach ($categories as $item)
+            @foreach ($categories as $index=> $item)
             @if ($item->id_parent == 0)
-            <div class="tab-pane fade show active" id="{{ $item->name }}" role="tabpanel">
+            @php
+            $class = ($index == 0) ? "show active" : "";
+            @endphp
+            <div class="tab-pane fade {{ $class }}" id="{{ $item->name }}" role="tabpanel">
                 <div class="product_carousel product_column5 owl-carousel">
                     @foreach ($item->products as $product)
                     <div class="single_product">
                         <div class="product_name">
-                            <h3><a href="product-details.html">{{ $product->name }}</a></h3>
+                            <h3><a href="{{ route('client.products.detail',$product->id) }}">{{ $product->name }}</a>
+                            </h3>
                             <p class="manufacture_product"><a href="#">Accessories</a></p>
                         </div>
                         <div class="product_thumb">
-                            <a class="primary_img" href="product-details.html"><img
+                            <a class="primary_img" href="{{ route('client.products.detail',$product->id) }}"><img
                                     src="{{ asset($product->image_primary) }}" alt=""></a>
 
                             <div class="label_product">
@@ -67,11 +80,12 @@
                             </div>
                             <div class="product_footer d-flex align-items-center">
                                 <div class="price_box">
-                                    <span class="regular_price">$180.00</span>
+                                    <span class="regular_price"> {{ $product->min_price }}</span>
+
                                 </div>
-                                <div class="add_to_cart">
+                                {{-- <div class="add_to_cart">
                                     <a href="cart.html" title="add to cart"><span class="lnr lnr-cart"></span></a>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>

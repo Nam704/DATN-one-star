@@ -3,17 +3,21 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Services\CategoryService;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     protected $categoryService;
-    function __construct(CategoryService $categoryService)
+    protected $productService;
+
+    function __construct(CategoryService $categoryService, ProductService $productService)
     {
         $this->categoryService = $categoryService;
+        $this->productService = $productService;
     }
-
     function index()
     {
         $categories = $this->categoryService->getCategories();
