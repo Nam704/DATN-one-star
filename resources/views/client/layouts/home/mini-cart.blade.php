@@ -9,7 +9,7 @@
     </div>
     <div class="cart_item">
         <div class="cart_img">
-            <a href="#"><img src="assets/img/s-product/product.jpg" alt=""></a>
+            <a href="#"><img src=" {{ asset('client/assets/img/s-product/product.jpg') }}" alt=""></a>
         </div>
         <div class="cart_info">
             <a href="#">JBL Flip 3 Splasroof Portable Bluetooth 2</a>
@@ -24,7 +24,7 @@
     </div>
     <div class="cart_item">
         <div class="cart_img">
-            <a href="#"><img src="assets/img/s-product/product2.jpg" alt=""></a>
+            <a href="#"><img src=" {{ asset('client/assets/img/s-product/product2.jpg') }}" alt=""></a>
         </div>
         <div class="cart_info">
             <a href="#">Koss Porta Pro On Ear Headphones </a>

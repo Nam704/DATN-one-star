@@ -18,21 +18,44 @@
                     <div class="col-lg-6 col-md-6">
                         <div class="top_right text-end">
                             <ul>
-                                <li class="top_links"><a href="#"><i class="ion-android-person"></i> My Account<i
-                                            class="ion-ios-arrow-down"></i></a>
+                                <i class="ion-android-person"></i>
+                                @if (Auth::check())
+
+                                <li class="top_links"><a href="#">
+                                        {{ auth()->user()->name }}
+
+
+                                        <i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_links">
                                         <li><a href="checkout.html">Checkout </a></li>
                                         <li><a href="my-account.html">My Account </a></li>
                                         <li><a href="cart.html">Shopping Cart</a></li>
                                         <li><a href="wishlist.html">Wishlist</a></li>
+                                        <li><a href="{{ route('auth.logout') }}">Logout</a></li>
+
                                     </ul>
                                 </li>
-                                <li class="language"><a href="#"><img src="assets/img/logo/language.png" alt="">en-gb<i
+                                @else
+                                <li class="top_links"><a href="#">
+                                        My Account
+                                        <i class="ion-ios-arrow-down"></i></a>
+                                    <ul class="dropdown_links">
+
+                                        <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
+
+                                    </ul>
+                                </li>
+                                @endif
+
+                                <li class="language"><a href="#"><img
+                                            src=" {{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i
                                             class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_language">
-                                        <li><a href="#"><img src="assets/img/logo/language.png" alt=""> English</a>
+                                        <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                                    alt=""> English</a>
                                         </li>
-                                        <li><a href="#"><img src="assets/img/logo/language2.png" alt=""> Germany</a>
+                                        <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language2.png') }}"
+                                                    alt=""> Germany</a>
                                         </li>
                                     </ul>
                                 </li>
@@ -60,7 +83,7 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-6">
                     <div class="logo">
-                        <a href="index.html"><img src="assets/img/logo/logo.png" alt=""></a>
+                        <a href="index.html"><img src=" {{ asset('client/assets/img/logo/logo.png') }}" alt=""></a>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-6">
@@ -151,11 +174,14 @@
                                     <li><a href="wishlist.html">Wishlist</a></li>
                                 </ul>
                             </li>
-                            <li class="language"><a href="#"><img src="assets/img/logo/language.png" alt="">en-gb<i
+                            <li class="language"><a href="#"><img
+                                        src=" {{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i
                                         class="ion-ios-arrow-down"></i></a>
                                 <ul class="dropdown_language">
-                                    <li><a href="#"><img src="assets/img/logo/language.png" alt=""> English</a></li>
-                                    <li><a href="#"><img src="assets/img/logo/language2.png" alt=""> Germany</a>
+                                    <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                                alt=""> English</a></li>
+                                    <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language2.png') }}"
+                                                alt=""> Germany</a>
                                     </li>
                                 </ul>
                             </li>

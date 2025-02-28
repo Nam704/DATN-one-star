@@ -50,7 +50,7 @@ class GoogleController extends Controller
                     'google_id' => $googleId,
                     'profile_image' => $profile_image,
                     'password' => Hash::make('1234'),
-                    'id_role' => 1
+                    'id_role' => 3
                 ]);
                 Auth::login($newUser);
                 // Mail::to($email)->send(new RegisterMail($newUser));

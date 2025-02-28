@@ -24,3 +24,4 @@
 <script src="{{ asset('client/assets/js/plugins.js') }}"></script>
 <!-- Main JS -->
 <script src="{{ asset('client/assets/js/main.js') }}"></script>
+@yield('scripts')
