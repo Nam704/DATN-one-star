@@ -88,13 +88,19 @@ class Product extends Model
             'category:id,name',
             'brand:id,name',
             'product_albums:id,id_product,image_path',
-        ])->append('attributes')->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status');
+
+        ])->append('attributes')
+            ->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status');
     }
     public function getPriceRange()
     {
         return $this->variants()
             ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
             ->first();
+    }
+    function quantity()
+    {
+        return $this->variants()->sum('quantity');
     }
     public function getAttributesAttribute()
     {
@@ -113,13 +119,16 @@ class Product extends Model
 
             foreach ($variant->attributeValues as $attr) {
                 $attributes[$attr->attribute_name]['name'] = $attr->attribute_name;
-                $attributes[$attr->attribute_name]['values'][] = $attr->value;
+                $attributes[$attr->attribute_name]['id'] = $attr->attribute_id;
+                $attributes[$attr->attribute_name]['values'][$variant->id][$attr->id] = $attr->value;
             }
         }
 
         // Loại bỏ các giá trị trùng lặp
         foreach ($attributes as &$attr) {
-            $attr['values'] = array_unique($attr['values']);
+            foreach ($attr['values'] as $variant_id => &$values) {
+                $values = array_unique($values);
+            }
         }
 
         return array_values($attributes);

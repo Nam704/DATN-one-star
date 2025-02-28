@@ -75,36 +75,36 @@
                             <div class="variants_size">
                                 <div class="row">
                                     @foreach ($product->attributes as $attribute)
+                                    @php
+                                    $uniqueValues = [];
+                                    @endphp
                                     <h2>{{ $attribute["name"] }}</h2>
-                                    <select class="select_option">
-                                        @foreach ($attribute["values"] as $index=> $value)
-                                        <option value="{{ $value }}">{{ $value }}</option>
+                                    <select class="value-select form-control"
+                                        name="attribute[{{ $attribute['name'] }}]">
+                                        <option value="">Chọn</option>
+                                        @foreach ($attribute["values"] as $variant_id => $values)
+                                        @foreach ($values as $value_id => $value)
+                                        @if (!in_array($value, $uniqueValues))
+                                        <option value="{{ $value_id }}" data-variant-id={{ $variant_id }}>{{ $value }}
+                                        </option>
+                                        @endif
 
+                                        @php
+                                        $uniqueValues[]=$value;
+                                        @endphp
                                         @endforeach
-
-
+                                        @endforeach
                                     </select>
                                     @endforeach
                                 </div>
 
                             </div>
-                            {{-- <h3>Available Options</h3>
 
-                            @foreach ($product->attributes as $attribute)
-                            <label>{{ $attribute["name"] }}</label>
-                            <ul>
-
-                                @foreach ($attribute["values"] as $index=> $value)
-                                <li class="color{{ $index+1 }}"><a href="#"></a></li>
-                                <li class=""><a href="#">{{ $value }}</a></li>
-
-                                @endforeach
-                            </ul>
-                            @endforeach --}}
                         </div>
                         <div class="product_variant quantity">
                             <label>quantity</label>
-                            <input min="1" max="100" value="1" type="number">
+                            <input min="1" max="1" value="1" type="number" class="quantity">
+                            <span>Stock: <a href="#" class="stock">{{ $product->quantity }}</a></span>
                             <button class="button" type="submit">add to cart</button>
 
                         </div>
@@ -141,4 +141,63 @@
     </div>
 </div>
 {{-- @include('client.detail.product-info') --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var product = @json($product);  
+     console.log(product);
+  
+    function updatePrice() {
+        
+        var selectedAttributes = {};
+var selects = document.querySelectorAll('.value-select');
+
+selects.forEach(function(select) {
+    var attributeName = select.previousElementSibling.textContent.trim(); // Lấy tên thuộc tính
+    var selectedValue = select.value;
+    
+    if (selectedValue) {
+        // Lấy giá trị thực tế thay vì ID
+        var valueText = select.options[select.selectedIndex].text;
+        selectedAttributes[attributeName] = valueText;
+        console.log(selectedAttributes); // In ra đối tượng
+    }
+});
+
+      
+var variant = product.variants.find(function(variant) {
+    return variant.attribute_values.every(function(attribute) {
+        return selectedAttributes[attribute.attribute_name] === attribute.value;
+    });
+});
+var quantityInput = document.querySelector('.quantity');
+
+       
+        if (variant) {
+            document.querySelector('.current_price').textContent = variant.price + " VND";
+            document.querySelector('.stock').textContent = variant.quantity;
+            
+            quantityInput.max = variant.quantity;
+            quantityInput.min = 1;
+
+            // console.log(variant.price);
+        } else {
+            // console.log("Không tìm thấy phiên bản phù hợp.");
+            document.querySelector('.current_price').textContent = product.min_price + " - " + product.max_price + " VND";  // Giá mặc định
+            document.querySelector('.stock').textContent = product.quantity;
+           
+            quantityInput.max = product.quantity;
+            quantityInput.min = 1;
+        }
+    }
+
+   
+    document.querySelectorAll('.value-select').forEach(function(select) {
+        select.addEventListener('change', updatePrice);
+    });
+});
+
+
+
+</script>
+
 @endsection

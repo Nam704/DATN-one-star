@@ -285,7 +285,7 @@ class ProductService
         $prices = $product->getPriceRange();
         $product->min_price = $prices->min_price;
         $product->max_price = $prices->max_price;
-        // $product->append('attributes');
+        $product->quantity = $product->quantity();
         return $product;
     }
     public function updateProduct(Request $request, $id)
