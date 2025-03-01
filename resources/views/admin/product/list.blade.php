@@ -78,6 +78,9 @@
                                         class="btn btn-secondary btn-danger delete-product">Lock</button>
                                     <a href="{{ route('admin.products.detail',$product->id) }}"><button
                                             class="btn btn-info">Detail</button></a>
+
+                                            <a href="{{ route('admin.products.stas',$product->id) }}"><button
+                                                class="btn btn-primary">stas</button></a>
                                 </td>
                             </tr>
                             @endforeach

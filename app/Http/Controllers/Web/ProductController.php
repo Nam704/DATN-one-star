@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Order_detail;
 use App\Models\Product;
 use App\Models\Product_variant;
 use App\Services\ProductService;
@@ -55,6 +56,162 @@ class ProductController extends Controller
                 'product' => $product
             ]);
     }
+
+
+    // public function stas($id)
+    // {
+    //     $product = Product::getProductWithDetails($id)->findOrFail($id);
+
+    //     $product->variants = $product->variants->map(function ($variant) {
+    //         return [
+    //             'id' => $variant->id,
+    //             'sku' => $variant->sku,
+    //             'price' => $variant->price,
+    //             'quantity' => $variant->quantity,
+    //             'image' => optional($variant->images)->url,
+    //             'values' => $variant->attributeValues->map(function ($attr) {
+    //                 return [
+    //                     'value_id' => $attr->id,
+    //                     'attribute_id' => $attr->attribute_id,
+    //                     'name' => $attr->name,
+    //                     'value' => $attr->value,
+
+    //                 ];
+    //             })
+    //         ];
+    //     });
+
+    //     // return $product;
+    //     return view('admin.product.stas')
+    //         ->with([
+    //             'product' => $product
+    //         ]);
+    // }
+
+
+
+
+
+    public function stas($id)
+    {
+        // Lấy thông tin sản phẩm với các biến thể
+        $product = Product::getProductWithDetails($id)->findOrFail($id);
+
+        // Map các biến thể sản phẩm
+        $product->variants = $product->variants->map(function ($variant) {
+            return [
+                'id' => $variant->id,
+                'sku' => $variant->sku,
+                'price' => $variant->price,
+                'quantity' => $variant->quantity,
+                'image' => optional($variant->images)->url,
+                'values' => $variant->attributeValues->map(function ($attr) {
+                    return [
+                        'value_id' => $attr->id,
+                        'attribute_id' => $attr->attribute_id,
+                        'name' => $attr->name,
+                        'value' => $attr->value,
+                    ];
+                })
+            ];
+        });
+
+        // Lấy thông tin đơn hàng liên quan đến sản phẩm
+        $orderDetails = Order_detail::whereIn('id_product_variant', $product->variants->pluck('id'))
+            ->with(['order', 'order.orderStatus'])
+            ->get();
+
+        // Thống kê trạng thái đơn hàng
+        $orderStatusStats = $orderDetails->groupBy('order.id_order_status')
+            ->map(function ($orders, $statusId) {
+                return [
+                    'status_id' => $statusId,
+                    'status_name' => $orders->first()->order->orderStatus->name,
+                    'total_orders' => $orders->count(),
+                    'total_amount' => $orders->sum('total_price')
+                ];
+            });
+
+        // Thống kê biến thể sản phẩm
+        $variantStats = $orderDetails->groupBy('id_product_variant')
+            ->map(function ($orders, $variantId) {
+                return [
+                    'variant_id' => $variantId,
+                    'total_orders' => $orders->count(),
+                    'total_quantity' => $orders->sum('quantity'),
+                    'total_amount' => $orders->sum('total_price')
+                ];
+            });
+
+        return view('admin.product.stas')
+            ->with([
+                'product' => $product,
+                'orderStatusStats' => $orderStatusStats,
+                'variantStats' => $variantStats
+            ]);
+    }
+
+
+    // public function variantDetails($productId, $variantId)
+    // {
+    //     // Lấy thông tin sản phẩm
+    //     $product = Product::findOrFail($productId);
+
+    //     // Lấy thông tin biến thể
+    //     $variant = Product_variant::findOrFail($variantId);
+
+    //     // Lấy danh sách đơn hàng liên quan đến biến thể này
+    //     $orderDetails = Order_detail::where('id_product_variant', $variantId)
+    //         ->with(['order.user']) // Sử dụng mối quan hệ order.user
+    //         ->get();
+
+    //     // Nhóm danh sách người dùng đã đặt hàng
+    //     $users = $orderDetails->map(function ($orderDetail) {
+    //         return $orderDetail->order->user;
+    //     })->unique();
+
+    //     return view('admin.product.productVariantDetail')
+    //         ->with([
+    //             'product' => $product,
+    //             'variant' => $variant,
+    //             'users' => $users
+    //         ]);
+    // }
+
+
+
+
+    public function variantDetails($productId, $variantId)
+{
+    // Lấy thông tin sản phẩm
+    $product = Product::findOrFail($productId);
+
+    // Lấy thông tin biến thể
+    $variant = Product_variant::findOrFail($variantId);
+
+    // Lấy danh sách đơn hàng liên quan đến biến thể này
+    $orderDetails = Order_detail::where('id_product_variant', $variantId)
+        ->with(['order.user', 'order.orderStatus']) // Sử dụng mối quan hệ order.user và order.orderStatus
+        ->get();
+
+    // Nhóm danh sách người dùng đã đặt hàng và thêm thông tin địa chỉ
+    $users = $orderDetails->map(function ($orderDetail) {
+        return [
+            'user' => $orderDetail->order->user,
+            'order_status' => $orderDetail->order->orderStatus->name, // Lấy trạng thái đơn hàng
+            'order_id' => $orderDetail->order->id, // Lấy ID đơn hàng
+            'address' => $orderDetail->order->address, // Lấy địa chỉ từ đơn hàng
+        ];
+    })->unique('user.id'); // Loại bỏ trùng lặp người dùng
+
+    return view('admin.product.productVariantDetail')
+        ->with([
+            'product' => $product,
+            'variant' => $variant,
+            'users' => $users
+        ]);
+}
+
     public function list()
     {
 
@@ -84,7 +241,7 @@ class ProductController extends Controller
     }
     function exportCreateExcel()
     {
-        return  $this->ProductService->exportProducts();
+        return $this->ProductService->exportProducts();
     }
     public function create()
     {
