@@ -1,8 +1,6 @@
 import "./bootstrap";
-console.log("hello vite");
 
 const userId = currentUserId; // Lấy ID người dùng hiện tại từ session hoặc truyền từ backend
-console.log("User ID:", userId);
 
 // Hàm hiển thị thông báo
 
@@ -31,6 +29,11 @@ function updateNotificationList(data, type) {
             if (notification.type == "imports") {
                 link =
                     "http://127.0.0.1:8000/admin/imports/detail/" +
+                    notification.goto_id;
+            }
+            if (notification.type == "products") {
+                link =
+                    "http://127.0.0.1:8000/admin/products/detail/" +
                     notification.goto_id;
             }
             item.href = link;

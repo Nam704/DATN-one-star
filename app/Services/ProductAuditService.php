@@ -13,9 +13,13 @@ class ProductAuditService
     }
 
 
-    public function getAllAudits()
+    public function getAuditApproved()
     {
         return Product_audit::WithProductAndUserSummary()->paginate(100);
+    }
+    public function getAuditPending()
+    {
+        return Product_audit::WithProductAndUserSummarPending()->paginate(100);
     }
     public function getAuditsByUser(int $userId)
     {

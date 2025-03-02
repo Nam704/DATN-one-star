@@ -7,112 +7,155 @@ use App\Http\Requests\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Product_variant;
+use App\Services\ProductService;
+use App\Imports\CreateProductImport;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
-    public function listProduct()
+    protected $ProductService;
+
+
+    public function __construct(ProductService $ProductService)
     {
-        $products = Product::with(['brand', 'category'])->get();;
-        return view('admin.product.index')->with([
-            'products' => $products
+        $this->ProductService = $ProductService;
+    }
+    public function detail($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->getProductWithDetails();
+        $product->variants = $product->variants->map(function ($variant) {
+            return [
+                'id' => $variant->id,
+                'sku' => $variant->sku,
+                'price' => $variant->price,
+                'quantity' => $variant->quantity,
+                'image' => optional($variant->images)->url,
+                'values' => $variant->attributeValues->map(function ($attr) {
+                    return [
+                        'value_id' => $attr->id,
+                        'attribute_id' => $attr->attribute_id,
+                        'name' => $attr->name,
+                        'value' => $attr->value,
+
+                    ];
+                })
+            ];
+        });
+
+        // return $product;
+        return view('admin.product.detail')
+            ->with([
+                'product' => $product
+            ]);
+    }
+    public function list()
+    {
+
+        $products = $this->ProductService->list();
+        return view('admin.product.list', compact('products'));
+    }
+    public function import(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls',
+            'product_images' => 'required|array',
+            'product_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Lưu ảnh vào storage
+        $uploadedImages = [];
+        foreach ($request->file('product_images') as $file) {
+            $path = $file->store('products', 'public');
+            $uploadedImages[$file->getClientOriginalName()] = $path;
+        }
+        $this->ProductService->createProductByExcel($request->excel_file, $uploadedImages);
+        // dd($uploadedImages);
+        // Nhập dữ liệu từ file Excel
+        // Excel::import(new CreateProductImport($uploadedImages), $request->file('excel_file'));
+
+        return back()->with('success', 'Sản phẩm đã được nhập thành công!');
     }
 
-    public function addProduct()
+    function exportCreateExcel()
     {
-        $categories = Category::all();
-        $brands = Brand::all();
+        return  $this->ProductService->exportProducts();
+    }
+    public function create()
+    {
+        $prepareData = $this->ProductService->prepareData();
+        $categories = $prepareData['categories'];
+        $brands = $prepareData['brands'];
+        $attributes = $prepareData['attributes'];
         return view('admin.product.add')->with(
             [
                 'categories' => $categories,
-                'brands' => $brands
+                'brands' => $brands,
+                'attributes' => $attributes
             ]
         );
     }
-
-
-    public function addPostProduct(ProductRequest $request)
+    public function store(Request $request)
     {
-        if ($request->hasFile('image_primary')) {
-            $profile = $request->file('image_primary')->store('uploads/products', 'public');
-        } else {
-            $profile = null;
-        }
-
-        Product::query()->create([
-            'name' => $request->name,
-            'id_brand' => $request->id_brand,
-            'id_category' => $request->id_category,
-            'description' => $request->description,
-            'image_primary' => $profile,
-            'status' => $request->status,
-        ]);
-
-        return redirect()->route('admin.products.listProduct')->with('success', 'Thêm sản phẩm thành công');
-    }
-
-
-    public function editProduct($id)
-    {
-        $brands = Brand::all();
-        $categories = Category::all();
-        $products = Product::findOrFail($id);
-
-        return view('admin.product.edit')->with([
-            'brands' => $brands,
-            'categories' => $categories,
-            'product' => $products
+        $productData = $this->ProductService->createProduct($request);
+        return response()->json([
+            'success' => true,
+            'message' => 'Product created successfully',
+            'product' => $productData
         ]);
     }
-
-    public function editPutProduct(Request $request, $id)
+    public function edit($id)
     {
+        // $product = Product::with(['variants.images'])->findOrFail($id);
+        $product = Product::getProductWithDetails($id)->findOrFail($id);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'id_brand' => 'required|exists:brands,id',
-            'id_category' => 'required|exists:categories,id',
-            'description' => 'nullable|string',
-            'image_primary' => 'nullable|image|mimes:jpg,jpeg,png,webp',
-            'status' => 'required|in:active,inactive',
-        ]);
+        $product->variants = $product->variants->map(function ($variant) {
+            return [
+                'id' => $variant->id,
+                'sku' => $variant->sku,
+                'price' => $variant->price,
+                'quantity' => $variant->quantity,
+                'image' => optional($variant->images)->url,
+                'values' => $variant->attributeValues->map(function ($attr) {
+                    return [
+                        'value_id' => $attr->id,
+                        'attribute_id' => $attr->attribute_id,
+                        'name' => $attr->name,
+                        'value' => $attr->value,
 
-        $product = Product::findOrFail($id);
-        $product->fill($request->except('image_primary'));
+                    ];
+                })
+            ];
+        });
+        $prepareData = $this->ProductService->prepareData();
+        $categories = $prepareData['categories'];
+        $brands = $prepareData['brands'];
+        $attributes = $prepareData['attributes'];
 
-        $imagePath = null;
-        if ($request->hasFile('image_primary')) {
-            if ($product->image_primary && Storage::disk('public')->exists($product->image_primary)) {
-                Storage::disk('public')->delete($product->image_primary);
-            }
-            $imagePath = $request->file('image_primary')->store('uploads/products', 'public');
-        } else {
-            $imagePath = $product->image_primary; // Giữ lại hình ảnh hiện tại nếu không có hình ảnh mới
-        }
-
-        $product->update([
-            'name' => $request->name,
-            'id_brand' => $request->id_brand,
-            'id_category' => $request->id_category,
-            'description' => $request->description,
-            'image_primary' => $imagePath,
-            'status' => $request->status
-
-        ]);
-
-
-        return redirect()->route('admin.products.listProduct')->with('success', 'Sản phẩm đã được cập nhật.');
+        return
+            view('admin.product.edit')->with([
+                'product' => $product,
+                'categories' => $categories,
+                'brands' => $brands,
+                'attributes' => $attributes
+            ]);
     }
 
-    public function deleteProduct($id)
+    public function update(Request $request, $id)
     {
-        $products = Product::findOrFail($id);
-        if ($products->image_primary && Storage::disk('public')->exists($products->image_primary)) {
-            Storage::disk('public')->delete($products->image_primary);
-        }
-        $products->delete();
-        return redirect()->route('admin.products.listProduct')->with('success', 'Xóa thành công');
+
+        $product = $this->ProductService->updateProduct($request, $id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+            'product' => $product
+        ]);
     }
 }

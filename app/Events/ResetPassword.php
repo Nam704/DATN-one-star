@@ -22,7 +22,7 @@ class ResetPassword
     public function __construct($data)
     {
         $this->data = $data;
-        Log::info("In ResetPassword: ", $this->data);
+        // Log::info("In ResetPassword: ", $this->data);
     }
 
     /**

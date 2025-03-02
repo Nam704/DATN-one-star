@@ -28,6 +28,35 @@ class ImportService
 
         // Constructor logic
     }
+    public function updatePrice($id)
+    {
+        try {
+            $this->user = auth()->user();
+            $import = Import::findOrFail($id);
+            if ($import->status == 'approved') {
+                DB::beginTransaction();
+                // Cộng stock cho từng chi tiết nhập hàng
+                $importDetails = Import_detail::where('id_import', $import->id)->get();
+                foreach ($importDetails as $detail) {
+
+                    $this->productService->updatePrice($detail->id_product_variant, $detail->expected_price);
+                    $this->productAuditService->createAudit([
+                        'id_user' => $this->user->id,
+                        'id_product_variant' => $detail->id_product_variant,
+                        'action_type' => 'update price',
+                        'status' => 'approved',
+                        'reason' => "" //$this->user->name . " import" . " at: " . $today,
+                    ]);
+                }
+
+                DB::commit();
+                return $import;
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
     public function importByExcel($file)
     {
         $data = Excel::toArray([], $file);
@@ -70,7 +99,7 @@ class ImportService
                     'reason' => ""
                 ];
                 $this->productAuditService->createAudit($dataAudit);
-                $this->productService->updateStock($variant['product_variant_id'], $variant['quantity'], true);
+                // $this->productService->updateStock($variant['product_variant_id'], $variant['quantity'], true);
             }
 
             DB::commit();
@@ -120,7 +149,7 @@ class ImportService
                     'reason' => ""
                 ];
                 $this->productAuditService->createAudit($dataAudit);
-                $this->productService->updateStock($variant['product_variant_id'], $variant['quantity'], true);
+                // $this->productService->updateStock($variant['product_variant_id'], $variant['quantity'], true);
             }
             foreach ($oldDetails as $oldDetail) {
                 $this->productService->updateStock($oldDetail->id_product_variant, $oldDetail->quantity, false);

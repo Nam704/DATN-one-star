@@ -80,9 +80,11 @@
                 <div class="collapse" id="sidebarLayouts">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="layouts-horizontal.html" target="_blank">List active</a>
+                            <a href="{{ route('admin.products.list') }}">List</a>
                         </li>
-
+                        <li>
+                            <a href="{{ route('admin.products.create') }}">Create</a>
+                        </li>
                     </ul>
                 </div>
             </li>
@@ -131,13 +133,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
                     class="side-nav-link">
                     <i class="ri-pencil-ruler-2-line"></i>
-                    <span> Icons </span>
+                    <span> Audit </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarIcons">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="icons-remixicons.html">Remix Icons</a>
+                            <a href="{{ route('admin.product_audits.list') }}">List</a>
                         </li>
 
                     </ul>
@@ -148,13 +150,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false" aria-controls="sidebarCharts"
                     class="side-nav-link">
                     <i class="ri-donut-chart-fill"></i>
-                    <span> Charts </span>
+                    <span> Brand </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarCharts">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="charts-apex.html">Apex Charts</a>
+                            <a href="{{ route('admin.brands.index') }}">List</a>
                         </li>
 
                     </ul>
@@ -165,13 +167,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarForms" aria-expanded="false" aria-controls="sidebarForms"
                     class="side-nav-link">
                     <i class="ri-survey-line"></i>
-                    <span> Forms </span>
+                    <span> Category </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarForms">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="form-elements.html">Basic Elements</a>
+                            <a href="{{ route('admin.categories.listCategory')}}">List</a>
                         </li>
 
                     </ul>
@@ -182,13 +184,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false" aria-controls="sidebarTables"
                     class="side-nav-link">
                     <i class="ri-table-line"></i>
-                    <span> Tables </span>
+                    <span> Attribute </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarTables">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="tables-basic.html">Basic Tables</a>
+                            <a href="{{ route('admin.attributes.index') }}">List</a>
                         </li>
 
                     </ul>

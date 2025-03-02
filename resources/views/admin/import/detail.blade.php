@@ -39,6 +39,9 @@
         <div class="card">
             <div class="card-header">
                 <a href="{{route('admin.imports.listApproved')}}" class="btn btn-sm btn-primary">Back to list</a>
+                @if ($import->status == 'approved')
+                <a href="{{ route('admin.imports.updatePrice',$import->id) }}" class="btn btn-info">Cập nhật giá</a>
+                @endif
             </div>
             <div class="card-body">
                 <div class="row">

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -16,20 +18,29 @@ use App\Http\Controllers\Web\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\AttributeController;
+use App\Http\Controllers\Web\OrderController;
+use App\Http\Controllers\Web\PaymentController;
+use App\Http\Controllers\Web\SearchController;
+use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
 
-use App\Http\Controllers\AttributeValueController;
-use App\Http\Controllers\ProductVariantAttributeController;
+use App\Http\Controllers\Client\ProductController as ClientProductController;
+use App\Http\Controllers\Web\ExcelController;
+
 
 Route::get('/', function () {
     return view('admin.index');
 });
 
 
-Route::get('/users', function () {
-    return view('admin.user.demoDataTable');
+// Route::get('/client/index', function () {
+//     return view('client.index');
+// });
+Route::get('/detail-product', function () {
+    return view('admin.product.detailBase');
 });
+Route::get('excel/read', [ExcelController::class, 'index']);
 
 
 
@@ -64,36 +75,29 @@ Route::prefix('auth/')->name('auth.')->group(
 
 
 Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
-
     function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+        Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
+            Route::post('create-product', 'createByExcel')->name('createProduct');
+        });
         Route::prefix('export')->name('export.')->controller(TemplateExportController::class)->group(
             function () {
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
-
-                // Route::get('product', [ProductController::class, 'exportProduct'])->name('product');
-                // Route::get('supplier', [SupplierController::class, 'exportSupplier'])->name('supplier');
-                // Route::get('user', [UserContronler::class, 'exportUser'])->name('user');
-                // Route::get('import', [ImportController::class, 'exportImport'])->name('import');
-        
             }
         );
 
 
-
-        Route::group([
-            'prefix' => 'categories',
-            'as' => 'categories.'
-        ], function () {
-            Route::get('list-category', [CategoryController::class, 'listCategory'])->name('listCategory');
-            Route::get('add-category', [CategoryController::class, 'addCategory'])->name('addCategory');
-            Route::post('add-category', [CategoryController::class, 'addPostCategory'])->name('addPostCategory');
-            Route::get('edit-category/{id}', [CategoryController::class, 'editCategory'])->name('editCategory');
-            Route::put('edit-category/{id}', [CategoryController::class, 'editPutCategory'])->name('editPutCategory');
-            Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');
+        Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
+            Route::get('list-category', 'listCategory')->name('listCategory');
+            Route::get('add-category', 'addCategory')->name('addCategory');
+            Route::post('add-category', 'addPostCategory')->name('addPostCategory');
+            Route::get('edit-category/{id}', 'editCategory')->name('editCategory');
+            Route::put('edit-category/{id}', 'editPutCategory')->name('editPutCategory');
+            Route::delete('delete-category/{id}', 'deleteCategory')->name('deleteCategory');
         });
+
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
@@ -120,29 +124,18 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('/{id}/restore', 'restore')->name('restore');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
-        Route::group([
-            'prefix' => 'products',
-            'as' => 'products.'
-        ], function () {
-            Route::get('list-product', [ProductController::class, 'listProduct'])->name('listProduct');
-            Route::get('add-product', [ProductController::class, 'addProduct'])->name('addProduct');
-            Route::post('add-product', [ProductController::class, 'addPostProduct'])->name('addPostProduct');
-            Route::get('edit-product/{id}', [ProductController::class, 'editProduct'])->name('editProduct');
-            Route::put('edit-product/{id}', [ProductController::class, 'editPutProduct'])->name('editPutProduct');
-            Route::delete('delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('deleteProduct');
+
+        Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
+            Route::get('/create', 'create')->name('create'); // Hiển thị form thêm sản phẩm
+            Route::post('/store', 'store')->name('store');
+            Route::get('/', 'list')->name('list');
+            Route::get('/edit/{id}', 'edit')->name('edit');
+            Route::post('/update/{id}', 'update')->name('update');
+            Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
+            Route::post('import-product', 'import')->name('importProduct');
+            Route::get('detail/{id}', 'detail')->name('detail');
         });
 
-        Route::group([
-            'prefix' => 'productvariant',
-            'as' => 'productvariant.'
-        ], function () {
-            Route::get('list-productvariant', [ProductVariantController::class, 'listProductVariant'])->name('listProductVariant');
-            Route::get('add-productvariant', [ProductVariantController::class, 'addProductVariant'])->name('addProductVariant');
-            Route::post('add-productvariant', [ProductVariantController::class, 'addPostProductVariant'])->name('addPostProductVariant');
-            Route::get('edit-productvariant/{id}', [ProductVariantController::class, 'editProductVariant'])->name('editProductVariant');
-            Route::put('edit-productvariant/{id}', [ProductVariantController::class, 'editPutProductVariant'])->name('editPutProductVariant');
-            Route::delete('delete-productvariant/{id}', [ProductVariantController::class, 'deleteProductVariant'])->name('deleteProductVariant');
-        });
 
 
         Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
@@ -226,8 +219,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::post('edit/{id}', 'edit')->name('edit');
                 Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
                 Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');
-                ;
-                Route::get('list-audit', 'listAudit')->name('listAudit');
+
+                Route::get('update-price/{id}', 'updatePrice')->name('updatePrice');
+
             }
         );
 
@@ -240,15 +234,17 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('destroy/{id}', 'destroy')->name('destroy');
             Route::get('show/{id}', 'show')->name('show');
         });
-        Route::prefix('product_audits')->name('product_audits.')->controller(ProductAuditController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('store', 'store')->name('store');
-            Route::get('edit/{id}', 'edit')->name('edit');
-            Route::put('update/{id}', 'update')->name('update');
-            Route::get('destroy/{id}', 'destroy')->name('destroy');
-            Route::get('show/{id}', 'show')->name('show');
-        });
+        Route::prefix('product_audits')->name('product_audits.')
+            ->controller(ProductAuditController::class)->group(function () {
+                Route::get('list', 'list')->name('list');
+                Route::get('/', 'index')->name('index');
+                Route::get('create', 'create')->name('create');
+                Route::post('store', 'store')->name('store');
+                Route::get('edit/{id}', 'edit')->name('edit');
+                Route::put('update/{id}', 'update')->name('update');
+                Route::get('destroy/{id}', 'destroy')->name('destroy');
+                Route::get('show/{id}', 'show')->name('show');
+            });
     }
 );
 Route::prefix('client')->name('client.')->group(
@@ -256,6 +252,31 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+        Route::prefix('products')->name('products.')->group(
+            function () {
+                Route::get('detail/{id}', [ClientProductController::class, 'detail'])->name('detail');
+            }
+        );
+
+        Route::get('/index', [HomeController::class, 'index'])->name('home');
+        Route::controller(ShopController::class)->group(function () {
+            Route::get('shop', 'shop')->name('shop');
+            Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');
+        });
+        Route::controller(SearchController::class)->group(function () {
+            Route::get('/search', [SearchController::class, 'search'])->name('search');
+        });
+        Route::controller(OrderController::class)->group(function () {
+            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
+            Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+            Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+        });
+        //cổng thanh toán
+        Route::controller(PaymentController::class)->group(function () {
+            Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
+            Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
+        });
     }
 );
 

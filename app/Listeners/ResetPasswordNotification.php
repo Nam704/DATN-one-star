@@ -28,7 +28,7 @@ class ResetPasswordNotification implements ShouldQueue
 
         $user = $event->data["user"];
         $password_reset_token_plaintext = $event->data["token"];
-        Log::info("In ResetPasswordNotification: " . $user->email . " " . $password_reset_token_plaintext);
+        // Log::info("In ResetPasswordNotification: " . $user->email . " " . $password_reset_token_plaintext);
         Mail::to($user->email)->send(new ForgotPasswordMail($user, $password_reset_token_plaintext));
 
 
