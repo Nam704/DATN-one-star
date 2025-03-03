@@ -106,4 +106,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class, 'to_user_id');
     }
+    public function cart()
+    {
+        return $this->hasOne(Cart::class, 'id_user');
+    }
 }

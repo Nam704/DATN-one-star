@@ -1,6 +1,7 @@
 <!doctype html>
 <html class="no-js" lang="en">
-
+<meta name="user-data" content='@json(Auth::user())'>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <!-- Mirrored from htmldemo.net/autima/autima/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 18 Dec 2024 14:55:36 GMT -->
 
@@ -50,6 +51,13 @@
     <!--news letter popup start-->
 
 
+
+
+
+    <script>
+        var userMeta = document.querySelector('meta[name="user-data"]').getAttribute('content');
+        var user = userMeta ? JSON.parse(userMeta) : null;
+    </script>
 
 
     <!-- JS

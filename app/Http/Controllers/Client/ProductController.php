@@ -17,6 +17,7 @@ class ProductController extends Controller
     {
         $product = $this->productService->productDetail($id);
         // return $product;
+
         return view('client.detail.index', compact('product'));
     }
 }
