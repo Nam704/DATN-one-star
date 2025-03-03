@@ -90,12 +90,12 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
-            Route::get('list-category', 'listCategory')->name('listCategory');
-            Route::get('add-category', 'addCategory')->name('addCategory');
-            Route::post('add-category', 'addPostCategory')->name('addPostCategory');
-            Route::get('edit-category/{id}', 'editCategory')->name('editCategory');
-            Route::put('edit-category/{id}', 'editPutCategory')->name('editPutCategory');
-            Route::delete('delete-category/{id}', 'deleteCategory')->name('deleteCategory');
+            Route::get('list-category',  'listCategory')->name('listCategory');
+            Route::get('add-category',  'addCategory')->name('addCategory');
+            Route::post('add-category',  'addPostCategory')->name('addPostCategory');
+            Route::get('edit-category/{id}',  'editCategory')->name('editCategory');
+            Route::put('edit-category/{id}',  'editPutCategory')->name('editPutCategory');
+            Route::delete('delete-category/{id}',  'deleteCategory')->name('deleteCategory');
         });
 
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
@@ -126,11 +126,11 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         });
 
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
-            Route::get('/create', 'create')->name('create'); // Hiển thị form thêm sản phẩm
-            Route::post('/store', 'store')->name('store');
-            Route::get('/', 'list')->name('list');
-            Route::get('/edit/{id}', 'edit')->name('edit');
-            Route::post('/update/{id}', 'update')->name('update');
+            Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
+            Route::post('/store',  'store')->name('store');
+            Route::get('/',  'list')->name('list');
+            Route::get('/edit/{id}',  'edit')->name('edit');
+            Route::post('/update/{id}',  'update')->name('update');
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
             Route::post('import-product', 'import')->name('importProduct');
             Route::get('detail/{id}', 'detail')->name('detail');
@@ -166,41 +166,28 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         );
 
         // attribute_values ( Bảng giá trị thuộc tính)
-        Route::prefix('attribute_values')->controller(AttributeValueController::class)->name('attribute_values.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-        });
+        // Route::prefix('attribute_values')->controller(AttributeValueController::class)->name('attribute_values.')->group(function () {
+        //     Route::get('/', 'index')->name('index');
+        //     Route::get('/create', 'create')->name('create');
+        //     Route::post('/', 'store')->name('store');
+        //     Route::get('/{id}/edit', 'edit')->name('edit');
+        //     Route::put('/{id}', 'update')->name('update');
+        //     Route::delete('/{id}', 'destroy')->name('destroy');
+        //     Route::get('/trash', 'trash')->name('trash');
+        //     Route::post('/{id}/restore', 'restore')->name('restore');
+        // });
 
-        // attribute_values ( Bảng cặp giá trị thuộc tính)
-        Route::prefix('product_variant_attributes')->controller(ProductVariantAttributeController::class)->name('product_variant_attributes.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-        });
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // // attribute_values ( Bảng cặp giá trị thuộc tính)
+        // Route::prefix('product_variant_attributes')->controller(ProductVariantAttributeController::class)->name('product_variant_attributes.')->group(function () {
+        //     Route::get('/', 'index')->name('index');
+        //     Route::get('/create', 'create')->name('create');
+        //     Route::post('/', 'store')->name('store');
+        //     Route::get('/{id}/edit', 'edit')->name('edit');
+        //     Route::put('/{id}', 'update')->name('update');
+        //     Route::delete('/{id}', 'destroy')->name('destroy');
+        //     Route::get('/trash', 'trash')->name('trash');
+        //     Route::post('/{id}/restore', 'restore')->name('restore');
+        // });
 
 
         Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
