@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    console.log(user);
     // Lắng nghe sự kiện thay đổi của các select (cập nhật giá trị khi thay đổi biến thể)
     document.querySelectorAll(".value-select").forEach(function (select) {
         select.addEventListener("change", function () {
@@ -14,33 +15,37 @@ $(document).ready(function () {
 
             // Tìm và lấy biến thể đã chọn
             var variant = getSelectedVariant();
+            var csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute("content");
 
             if (variant) {
                 var quantity =
                     document.querySelector(".quantity-to-cart").value; // Lấy số lượng sản phẩm người dùng chọn
                 // alert(variant.id + quantity);
                 // Gửi yêu cầu ajax để thêm vào giỏ hàng
-                // $.ajax({
-                //     url: "/add-to-cart", // URL API xử lý yêu cầu
-                //     method: "POST",
-                //     data: {
-                //         _token: "{{ csrf_token() }}", // Thêm CSRF token để bảo mật
-                //         variant_id: variant.id, // ID của biến thể
-                //         quantity: quantity, // Số lượng
-                //     },
-                //     success: function (response) {
-                //         // Xử lý khi thêm vào giỏ hàng thành công
-                //         console.log(response);
-                //         alert("Product added to cart successfully!");
-                //     },
-                //     error: function (xhr, status, error) {
-                //         // Xử lý khi có lỗi
-                //         console.error(error);
-                //         alert(
-                //             "There was an error adding the product to the cart."
-                //         );
-                //     },
-                // });
+                $.ajax({
+                    url: "http://127.0.0.1:8000/api/client/carts/add", // URL API xử lý yêu cầu
+                    method: "POST",
+                    data: {
+                        _token: csrfToken, // Thêm CSRF token để bảo mật
+                        id: user.id,
+                        id_variant: variant.id, // ID của biến thể
+                        quantity: quantity, // Số lượng
+                    },
+                    success: function (response) {
+                        // Xử lý khi thêm vào giỏ hàng thành công
+                        console.log(response);
+                        alert("Product added to cart successfully!");
+                    },
+                    error: function (xhr, status, error) {
+                        // Xử lý khi có lỗi
+                        console.error(error);
+                        alert(
+                            "There was an error adding the product to the cart."
+                        );
+                    },
+                });
             } else {
                 alert("Please select a valid product variant.");
             }

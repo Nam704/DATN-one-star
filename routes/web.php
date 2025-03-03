@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Web\AuthController;
@@ -234,5 +235,16 @@ Route::prefix('client')->name('client.')->group(
             Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
             Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
         });
+        Route::prefix('carts')->controller(CartControllerSession::class)->name('carts.')->group(
+            function () {
+                Route::get('/get',  'getCart');
+                Route::post('/add',  'addToCart');
+                Route::post('/update',  'updateCart');
+                Route::post('/remove',  'removeFromCart');
+                Route::post('/clear',  'clearCart');
+                Route::post('/save-to-db',  'saveSessionCartToDatabase');
+                Route::get('view-cart', 'viewCart')->name('viewCart');
+            }
+        );
     }
 );
