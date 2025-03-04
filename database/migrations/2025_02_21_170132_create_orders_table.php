@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
             $table->string('phone_number');
-            $table->text('address');
-            $table->decimal('total_amount', 10, 2);
+            $table->string('email')->nullable();
+            $table->foreignId('id_address')->constrained('addresses')->onDelete('cascade');
+            $table->decimal('total', 15, 2);
             $table->foreignId('id_order_status')->constrained('order_statuses');
             $table->foreignId('id_voucher')->nullable()->constrained('vouchers');
             $table->timestamps();
