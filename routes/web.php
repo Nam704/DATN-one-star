@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Client\CartControllerSession;
+use App\Http\Controllers\Client\CheckoutController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Web\AuthController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Web\TemplateExportController;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Web\ExcelController;
+use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -207,8 +209,10 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 );
 Route::prefix('client')->name('client.')->group(
     function () {
-        Route::prefix('users')->name('user.')->group(
-            function () { }
+        Route::prefix('users')->controller(ClientAuthController::class)->name('user.')->group(
+            function () {
+                Route::get('/my-account', 'myAccount')->name('myAccount');
+            }
         );
         Route::prefix('products')->name('products.')->group(
             function () {
@@ -244,6 +248,13 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/clear',  'clearCart');
                 Route::post('/save-to-db',  'saveSessionCartToDatabase');
                 Route::get('view-cart', 'viewCart')->name('viewCart');
+            }
+        );
+        Route::prefix('checkout')->controller(CheckoutController::class)->name('checkout.')->group(
+            function () {
+                Route::post('/', 'create')->name('create');
+                Route::get('/show', 'index')->name('index');
+                Route::post('/store', 'store')->name('store');
             }
         );
     }

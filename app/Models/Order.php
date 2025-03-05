@@ -10,11 +10,14 @@ class Order extends Model
     use HasFactory;
     protected $fillable = [
         'id_user',
+        'name',
         'phone_number',
-        'address',
-        'total_amount',
+        'email',
+        'id_address',
+        'total',
         'id_order_status',
         'id_voucher'
+
     ];
 
     // Quan hệ với bảng trạng thái đơn hàng

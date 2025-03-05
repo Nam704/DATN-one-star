@@ -28,7 +28,7 @@
                                         <i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_links">
                                         <li><a href="checkout.html">Checkout </a></li>
-                                        <li><a href="my-account.html">My Account </a></li>
+                                        <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
                                         <li><a href="cart.html">Shopping Cart</a></li>
                                         <li><a href="wishlist.html">Wishlist</a></li>
                                         <li><a href="{{ route('auth.logout') }}">Logout</a></li>
