@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -33,10 +34,41 @@ class User extends Authenticatable
     {
         return $this->morphMany(Address::class, 'addressable');
     }
-    // public function address()
-    // {
-    //     return $this->morphOne(Address::class, 'addressable');
-    // }
+    public function address()
+    {
+        // Đây là phương thức quan hệ, phải trả về mối quan hệ Eloquent
+        return $this->morphOne(Address::class, 'addressable')
+            ->where('is_default', true); // Lọc địa chỉ mặc định
+    }
+
+    public function getFullAddress()
+    {
+        // Lấy địa chỉ mặc định
+        $address = $this->address; // Sử dụng phương thức address để lấy quan hệ
+
+        if ($address) {
+            // Thực hiện join bên ngoài để lấy thông tin đầy đủ
+            return DB::table('addresses as a')
+                ->join('wards as w', 'a.id_ward', '=', 'w.id')
+                ->join('districts as d', 'w.district_id', '=', 'd.id')
+                ->join('provinces as p', 'd.province_id', '=', 'p.id')
+                ->where('a.id', '=', $address->id) // Lọc theo địa chỉ đã lấy
+                ->select(
+                    'a.address_detail',
+                    'w.name as ward_name',
+                    'w.id as ward_id',
+                    'd.name as district_name',
+                    'p.name as province_name',
+                    'd.id as district_id',
+                    'p.id as province_id'
+                )
+                ->first(); // Chỉ lấy 1 kết quả
+        }
+
+        return null; // Nếu không có địa chỉ mặc định
+    }
+
+
     public function scopeList($query, $name = null)
     {
         $baseQuery = $query

@@ -52,6 +52,9 @@ class Address extends Model
             ->where('a.addressable_id', $modelId)
             ->select(
                 'a.address_detail',
+                'a.id',
+                'a.is_default',
+                'a.id_ward',
                 'w.name as ward_name',
                 'd.name as district_name',
                 'p.name as province_name',

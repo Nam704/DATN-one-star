@@ -256,6 +256,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/', 'create')->name('create');
                 Route::get('/show', 'index')->name('index');
                 Route::post('/store', 'store')->name('store');
+                Route::post('/payment', 'payment')->name('payment');
             }
         );
     }

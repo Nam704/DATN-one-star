@@ -29,7 +29,7 @@
                                     <ul class="dropdown_links">
                                         <li><a href="checkout.html">Checkout </a></li>
                                         <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
-                                        <li><a href="cart.html">Shopping Cart</a></li>
+                                        <li><a href="{{ route('client.carts.viewCart') }}">Shopping Cart</a></li>
                                         <li><a href="wishlist.html">Wishlist</a></li>
                                         <li><a href="{{ route('auth.logout') }}">Logout</a></li>
 
@@ -83,7 +83,8 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-6">
                     <div class="logo">
-                        <a href="index.html"><img src=" {{ asset('client/assets/img/logo/logo.png') }}" alt=""></a>
+                        <a href="{{ route('client.home') }}"><img src=" {{ asset('client/assets/img/logo/logo.png') }}"
+                                alt=""></a>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-6">
