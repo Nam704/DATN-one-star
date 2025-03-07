@@ -147,8 +147,6 @@
 
 @endsection
 @section('scripts')
-{{-- <script src="{{ asset('client/api/detail-product.js') }}"></script> --}}
-{{-- <script src="{{ asset('client/api/demo.js') }}"></script> --}}
-{{-- <script src="{{ asset('client/api/demoCartSession.js') }}"></script> --}}
-<script src="{{ asset('client/api/demoDetail.js') }}"></script>
+
+<script src="{{ asset('client/api/productDetail.js') }}"></script>
 @endsection

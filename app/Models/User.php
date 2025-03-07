@@ -31,8 +31,12 @@ class User extends Authenticatable
     ];
     public function addresses()
     {
-        return $this->morphMany(Address::class, 'addressable'); // Định nghĩa quan hệ với Address
+        return $this->morphMany(Address::class, 'addressable');
     }
+    // public function address()
+    // {
+    //     return $this->morphOne(Address::class, 'addressable');
+    // }
     public function scopeList($query, $name = null)
     {
         $baseQuery = $query

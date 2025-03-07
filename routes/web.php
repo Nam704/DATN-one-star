@@ -212,6 +212,7 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('users')->controller(ClientAuthController::class)->name('user.')->group(
             function () {
                 Route::get('/my-account', 'myAccount')->name('myAccount');
+                Route::post('create-address', 'createAddress')->name('addAddress');
             }
         );
         Route::prefix('products')->name('products.')->group(

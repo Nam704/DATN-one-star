@@ -57,6 +57,19 @@
                             <div class="col-12 mb-20">
                                 <label>Street address <span>*</span></label>
                                 <div class="row mb-2">
+                                    <div class="col-12">
+                                        @if (count($addresses)<=0) <p>Chưa có địa chỉ</p>
+                                            @else
+                                            @foreach ($addresses as $address)
+                                            <p>{{ $address->address_detail.", "
+                                                .$address->ward_name.", "
+                                                . $address->district_name.", "
+                                                .$address->province_name
+                                                }}</p>
+                                            @endforeach
+                                            @endif
+
+                                    </div>
                                     <div class="col-md-4">
                                         <select name="province" class="form-select" id="province">
                                             <option value="" {{ old('province') ? 'selected' : '' }}>
@@ -91,8 +104,24 @@
 
 
                                 </div>
-                                <div class="col-12 mt-2">
-                                    <input class="form-control" placeholder="House number and street name" type="text">
+                                <div class="col-12 mt-2 row">
+                                    <div class="col-12 row">
+                                        <div class="col-10">
+                                            <input id="address_detail" class="form-control"
+                                                placeholder="House number and street name" type="text">
+                                        </div>
+                                        <div class="col-2">
+                                            <select name="" id="is_default" class=" form-control ">
+                                                <option value="0" selected>Phụ</option>
+                                                <option value="1">Mặc định</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <div class="col-12">
+                                    <button class="btn btn-primary" id="save_address">Save</button>
                                 </div>
 
                             </div>
@@ -105,14 +134,13 @@
                                         <form action="#">
                                             <div class="row row-cols-sm-2 row-cols-1">
                                                 <div class="mb-2">
-                                                    <label class="form-label" for="FullName">Full
-                                                        Name</label>
-                                                    <input type="text" name="name" value="{{ $user->name }}"
+                                                    <label class="form-label" for="FullName">Full Name</label>
+                                                    <input type="text" name="name" value="{{ $user->name ?? '' }}"
                                                         id="FullName" class="form-control">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label" for="Email">Email</label>
-                                                    <input type="email" value="{{ $user->email }}" name="email"
+                                                    <input type="email" value="{{ $user->email ?? "" }}" name="email"
                                                         id="Email" class="form-control">
                                                 </div>
                                                 <div class="mb-3">
@@ -123,9 +151,8 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label" for="phone">Phone</label>
-                                                    <input type="text" value="{{ $user->phone ? $user->phone : "" }}"
-                                                        name="phone" id="phone" placeholder="Enter your phone"
-                                                        class="form-control">
+                                                    <input type="text" value="{{ $user->phone ??  "" }}" name="phone"
+                                                        id="phone" placeholder="Enter your phone" class="form-control">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label" for="new_password"> New Password</label>
@@ -155,4 +182,5 @@
 @endsection
 @section('scripts')
 @vite('resources/js/address.js')
+<script src="{{ asset('client/api/accountDetails.js') }}"></script>
 @endsection

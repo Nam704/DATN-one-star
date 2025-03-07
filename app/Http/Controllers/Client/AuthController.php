@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -16,7 +17,20 @@ class AuthController extends Controller
     }
     public function myAccount()
     {
-        $user = $this->userService->myAccount();
-        return view('client.user.index', compact('user'));
+
+        $data = [];
+        $user = $this->userService->details();
+        $addresses = $this->userService->getAddress($user);
+        $data['user'] = $user;
+        $data['addresses'] = $addresses;
+        // return $data;
+        return view('client.user.index', compact('user', 'addresses'));
+    }
+    public function createAddress(Request $request)
+    {
+        $user = auth()->user();
+        // Log::info($request->all());
+        $address = $this->userService->createUserAddress($request, $user->id);
+        return response()->json(['message' => 'Address created successfully', 'address' => $address]);
     }
 }

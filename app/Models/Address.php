@@ -40,4 +40,46 @@ class Address extends Model
             ->select('a.address_detail', 'w.name as ward_name', 'd.name as district_name', 'p.name as province_name', 'd.id as district_id', 'p.id as province_id')
             ->get();
     }
+    public function getAddresses($model, $modelId)
+    {
+
+
+        return DB::table('addresses as a')
+            ->join('wards as w', 'a.id_ward', '=', 'w.id')
+            ->join('districts as d', 'w.district_id', '=', 'd.id')
+            ->join('provinces as p', 'd.province_id', '=', 'p.id')
+            ->where('a.addressable_type', $model->getMorphClass())
+            ->where('a.addressable_id', $modelId)
+            ->select(
+                'a.address_detail',
+                'w.name as ward_name',
+                'd.name as district_name',
+                'p.name as province_name',
+                'd.id as district_id',
+                'p.id as province_id'
+            )
+            ->get();
+    }
+
+    public function getAddress($model, $modelId, $addressId)
+    {
+
+
+        return DB::table('addresses as a')
+            ->join('wards as w', 'a.id_ward', '=', 'w.id')
+            ->join('districts as d', 'w.district_id', '=', 'd.id')
+            ->join('provinces as p', 'd.province_id', '=', 'p.id')
+            ->where('a.id', '=', $addressId)
+            ->where('a.addressable_type', $model->getMorphClass())
+            ->where('a.addressable_id', $modelId)
+            ->select(
+                'a.address_detail',
+                'w.name as ward_name',
+                'd.name as district_name',
+                'p.name as province_name',
+                'd.id as district_id',
+                'p.id as province_id'
+            )
+            ->first();
+    }
 }
