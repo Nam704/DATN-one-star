@@ -31,6 +31,7 @@ use App\Http\Controllers\Web\ExcelController;
 use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
+use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -265,6 +266,11 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('orders')->controller(ClientOrderController::class)->name('orders.')->group(
             function () {
                 Route::post('/store', 'store')->name('store');
+            }
+        );
+        Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(
+            function () {
+                Route::get('/', 'handleVnpayReturn')->name('handleVnpayReturn');
             }
         );
     }

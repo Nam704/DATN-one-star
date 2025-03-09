@@ -7,12 +7,12 @@ class PaymentService
     public function vnpay_payment($order)
     {
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://127.0.0.1:8000/client/checkout/show";
+        $vnp_Returnurl = "http://127.0.0.1:8000/client/payment";
         $vnp_TmnCode = "ASFZEFO2"; //Mã website tại VNPAY
         $vnp_HashSecret = "1P0E4T01EMVDNJ0EIY4955QEHXK1IH27"; //Chuỗi bí mật
 
         // $vnp_TxnRef = $_POST['order_id'];//Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
-        $vnp_TxnRef = time() . "" . $order->id;
+        $vnp_TxnRef = $order->code;
         $vnp_OrderInfo = "Thanh Toán Đơn Hàng";
         $vnp_OrderType = "OneStar";
         $vnp_Amount = $order->total * 100;

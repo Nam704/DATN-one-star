@@ -147,4 +147,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(Cart::class, 'id_user');
     }
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'id_user');
+    }
 }

@@ -28,6 +28,7 @@ class OrderController extends Controller
         ];
         $data['order']['payment_method'] = $request->input('payment_method');
         $dataFormatted = [
+
             "id_user" => $data["order"]["id_user"] ?? null,
             "user_name" => $data["user"]["name"] ?? null,
             "phone_number" => $data["user"]["phone"] ?? null,

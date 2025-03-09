@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('txn_ref')->unique();
-            $table->integer('amount');
+            $table->decimal('amount', 15, 2);
             $table->string('status');
             $table->timestamps();
         });

@@ -21,10 +21,9 @@ class AuthController extends Controller
         $data = [];
         $user = $this->userService->details();
         $addresses = $this->userService->getAddress($user);
-        $data['user'] = $user;
-        $data['addresses'] = $addresses;
+        $orders = $user->orders;
         // return $data;
-        return view('client.user.index', compact('user', 'addresses'));
+        return view('client.user.index', compact('user', 'addresses', 'orders'));
     }
     public function createAddress(Request $request)
     {
