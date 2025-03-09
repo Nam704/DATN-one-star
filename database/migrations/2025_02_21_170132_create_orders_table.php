@@ -16,9 +16,16 @@ return new class extends Migration
             $table->foreignId('id_user')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('user_name');
             $table->string('phone_number');
-            $table->string('email')->nullable();
-            $table->foreignId('id_address')->constrained('addresses')->onDelete('cascade');
+            $table->string('email');
+            $table->foreignId('id_address')->nullable()->constrained('addresses')->onDelete('cascade');
+            $table->string('address_detail')->nullable();
+            $table->string('note')->nullable();
+            $table->decimal('subtotal', 15, 2);
+            $table->decimal('shipping', 10, 2)->nullable();
             $table->decimal('total', 15, 2);
+            $table->string('payment_method');
+            $table->string('payment_status');
+            $table->foreignId('id_ward')->nullable()->constrained('wards')->onDelete('cascade');
             $table->foreignId('id_order_status')->constrained('order_statuses');
             $table->foreignId('id_voucher')->nullable()->constrained('vouchers');
             $table->timestamps();

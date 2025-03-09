@@ -33,4 +33,14 @@ class AuthController extends Controller
         $address = $this->userService->createUserAddress($request, $user->id);
         return response()->json(['message' => 'Address created successfully', 'address' => $address]);
     }
+    public function update(Request $request)
+    {
+        $response = $this->userService->updateUser($request);
+
+        if ($response->status() === 422) {
+            return response()->json($response->original, 422);
+        }
+
+        return response()->json(['message' => 'User updated successfully']);
+    }
 }

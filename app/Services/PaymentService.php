@@ -4,20 +4,18 @@ namespace App\Services;
 
 class PaymentService
 {
-    public function vnpay_payment()
+    public function vnpay_payment($order)
     {
-
-
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://127.0.0.1:8000/client/checkout/show";
         $vnp_TmnCode = "ASFZEFO2"; //Mã website tại VNPAY
-        $vnp_HashSecret = "YI57RHVVXZMM7K9O9COO0OJ1M0UMV7D6"; //Chuỗi bí mật
+        $vnp_HashSecret = "1P0E4T01EMVDNJ0EIY4955QEHXK1IH27"; //Chuỗi bí mật
 
         // $vnp_TxnRef = $_POST['order_id'];//Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
-        $vnp_TxnRef = time() . "";
+        $vnp_TxnRef = time() . "" . $order->id;
         $vnp_OrderInfo = "Thanh Toán Đơn Hàng";
         $vnp_OrderType = "OneStar";
-        $vnp_Amount = 100000 * 100;
+        $vnp_Amount = $order->total * 100;
         $vnp_Locale = "VN";
         $vnp_BankCode = "NCB";
         $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
@@ -70,13 +68,27 @@ class PaymentService
             'message' => 'success',
             'data' => $vnp_Url
         );
+        // if (isset($_POST['redirect'])) {
+        //     header('Location: ' . $vnp_Url);
+        //     die();
+        // } else {
+        //     echo json_encode($returnData);
+        // }
+        // dùng echo để xuất dữ liệu ngay lập tức ra HTTP response
         if (isset($_POST['redirect'])) {
-            header('Location: ' . $vnp_Url);
-            die();
+            echo json_encode([
+                'code' => '00',
+                'message' => 'success',
+                'redirect_url' => $vnp_Url
+            ]);
+            exit;
         } else {
-            echo json_encode($returnData);
+            echo json_encode([
+                'code' => '00',
+                'message' => 'success',
+                'data' => $vnp_Url
+            ]);
+            exit;
         }
-        // vui lòng tham khảo thêm tại code demo
-
     }
 }

@@ -30,6 +30,8 @@ use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Web\ExcelController;
 use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
+
 Route::get('/', function () {
     return view('admin.index');
 });
@@ -213,6 +215,7 @@ Route::prefix('client')->name('client.')->group(
             function () {
                 Route::get('/my-account', 'myAccount')->name('myAccount');
                 Route::post('create-address', 'createAddress')->name('addAddress');
+                Route::post('update', 'update')->name('update');
             }
         );
         Route::prefix('products')->name('products.')->group(
@@ -257,6 +260,11 @@ Route::prefix('client')->name('client.')->group(
                 Route::get('/show', 'index')->name('index');
                 Route::post('/store', 'store')->name('store');
                 Route::post('/payment', 'payment')->name('payment');
+            }
+        );
+        Route::prefix('orders')->controller(ClientOrderController::class)->name('orders.')->group(
+            function () {
+                Route::post('/store', 'store')->name('store');
             }
         );
     }

@@ -16,18 +16,13 @@ class CheckoutController extends Controller
     }
     public function payment(Request $request)
     {
-        $this->paymentService->vnpay_payment();
+        // $this->paymentService->vnpay_payment();
     }
     public function index()
     {
         $data = session('dataCheckout');
-        // $user = User::find((int) $data["user"]["id"]);
         $user = $data["user"];
-        // $data["address"] = $user->getfullAddress();
         $address = $user->getfullAddress();
-
-        // return response()->json($address);
-        // session()->forget('dataCheckout');
         return view('client.checkout.index', compact('data', 'address'));
     }
     public function create(Request $request)
@@ -53,18 +48,5 @@ class CheckoutController extends Controller
             'link' => $link,
 
         ]);
-    }
-    public function store(Request $request)
-    {
-        // $data = $request->input('data');
-        // $cart = isset($data['cart']) ? $data['cart'] : [];
-        // $details = isset($data['details']) ? $data['details'] : [];
-        // $id_user = isset($cart['id_user']) ? $cart['id_user'] : [];
-        // $user = User::find($id_user);
-
-        // return response()->json([
-        //     'message' => 'success',
-
-        // ]);
     }
 }

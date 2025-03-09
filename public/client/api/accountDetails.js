@@ -3,7 +3,7 @@ $(document).ready(function () {
     var csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
-    // processAddress();
+
     $("#save_address").click(function (e) {
         e.preventDefault();
         var is_default = $("#is_default").val();
@@ -27,11 +27,60 @@ $(document).ready(function () {
             },
         });
     });
+    updateUser(csrfToken);
 });
-function processAddress() {
-    $("#ward").change(function (e) {
-        e.preventDefault();
-        var ward = $("#ward").val();
-        console.log("ward", ward);
+function updateUser(csrfToken) {
+    $(".form-details").submit(function (event) {
+        event.preventDefault(); // Ngăn chặn reload trang khi submit form
+
+        // Lấy giá trị từ các input
+        var id = $("#user_id").val();
+        var fullName = $("#FullName").val();
+        var email = $("#Email").val();
+        var oldPassword = $("input[name='old_password']").val();
+        var phone = $("#phone").val();
+        var newPassword = $("#new_password").val();
+        var new_password_confirmation = $("#new_password_confirmation").val();
+
+        // Đưa các giá trị vào object để xử lý
+        var formData = {
+            id: id,
+            name: fullName,
+            email: email,
+            old_password: oldPassword,
+            phone: phone,
+            new_password: newPassword,
+            new_password_confirmation: new_password_confirmation,
+        };
+
+        // console.log(formData);
+
+        // Gửi dữ liệu bằng AJAX (nếu cần)
+        $.ajax({
+            url: "http://127.0.0.1:8000/client/users/update", // Thay thế bằng URL xử lý form
+            type: "POST",
+            data: {
+                id: id,
+                name: fullName,
+                email: email,
+                old_password: oldPassword,
+                phone: phone,
+                new_password: newPassword,
+                new_password_confirmation: new_password_confirmation,
+                _token: csrfToken,
+            },
+
+            success: function (response) {
+                // alert("Dữ liệu đã được gửi thành công!");
+                console.log(response);
+                alert(response.message);
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                console.log(xhr.responseJSON.message);
+
+                // alert(xhr.responseJSON.message);
+            },
+        });
     });
 }

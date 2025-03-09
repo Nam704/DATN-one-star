@@ -18,16 +18,16 @@
                                 </div>
                                 <div class="col-lg-6 mb-20">
                                     <label>Phone<span>*</span></label>
-                                    <input type="text" value="{{ $data['user']->phone ?? '' }}">
+                                    <input id="phone" type="text" value="{{ $data['user']->phone ?? '' }}">
 
                                 </div>
                                 <div class="col-lg-6 mb-20">
                                     <label> Email Address <span>*</span></label>
-                                    <input type="text" value="{{ $data['user']->email }}">
+                                    <input id="email" type="text" value="{{ $data['user']->email }}">
 
                                 </div>
 
-                                <div class="col-12 mb-20">
+                                <div class="col-12 mb-20" id="address" data-address="{{ $address->id ?? '' }}">
                                     <label>Street address <span>*</span></label>
                                     <div class="row mb-2">
                                         <div class="col-md-4">
@@ -68,7 +68,7 @@
 
                                     </div>
                                     <input placeholder="House number and street name" type="text"
-                                        value="{{ $address->address_detail }}">
+                                        value="{{ $address->address_detail }}" id="address_detail">
                                 </div>
 
                                 {{-- @include('client.checkout.different-address') --}}
@@ -145,29 +145,31 @@
                                 </div>
                             </div> --}}
                                 <div class="panel-default">
-                                    <input id="payment_defult" name="check_method" type="radio"
-                                        data-target="createp_account" />
-                                    <label for="payment_defult" data-bs-toggle="collapse" href="#collapsedefult"
-                                        aria-controls="collapsedefult">PayPal <img
-                                            src="{{ asset('client/assets/img/icon/papyel.png') }}" alt=""></label>
+                                    <div class="payment_cod">
+                                        <input type="radio" id="cod" name="payment" />
+                                        <label for="cod">COD
+                                            <img src="">
+                                        </label>
+                                    </div>
+                                    <div class="payment_vnpay">
+                                        <input id="vnpay" type="radio" name="payment" />
 
-                                    <div id="collapsedefult" class="collapse one" data-parent="#accordion">
-                                        <div class="card-body1">
-                                            <p>Pay via PayPal; you can pay with your credit card if you don’t have a PayPal
-                                                account.</p>
-                                        </div>
+                                        <label for="vnpay">PayPal
+                                            <img src="{{ asset('client/assets/img/icon/papyel.png') }}">
+                                        </label>
+
+                                    </div>
+
+                                    <div class="order_button">
+                                        <button type="submit" id="process">Proceed to PayPal</button>
                                     </div>
                                 </div>
-                                <div class="order_button">
-                                    <button type="submit">Proceed to PayPal</button>
-                                </div>
-                            </div>
                         </form>
                         {{-- demo payment --}}
-                        <form action="{{ route('client.checkout.payment') }}" method="POST">
+                        {{-- <form action="{{ route('client.checkout.payment') }}" method="POST">
                             @csrf
                             <button type="submit" name="redirect">VNPAY</button>
-                        </form>
+                        </form> --}}
                     </div>
                 </div>
             </div>
@@ -177,4 +179,5 @@
 @endsection
 @section('scripts')
     @vite('resources/js/address.js')
+    <script src="{{ asset('client/api/checkout.js') }}"></script>
 @endsection

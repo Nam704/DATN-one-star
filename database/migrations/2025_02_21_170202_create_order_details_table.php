@@ -18,8 +18,6 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);
             $table->decimal('total', 10, 2);
-            $table->foreignId('id_user')->constrained('users')->onDelete('cascade')->nullable();
-
             $table->timestamps();
         });
     }

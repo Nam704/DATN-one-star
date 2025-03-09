@@ -44,21 +44,43 @@ class UserService
 
     //     return $user;
     // }
-    public function updateUser(Request  $request, $id)
+    public function updateUser($request)
     {
+
+        $id = $request->input('id');
         $user = $this->user->find($id);
         if (!$user) {
             return null;
         }
+
+        // Validate dữ liệu đầu vào
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'profile_image' => 'nullable|string|max:255',
-
+            'phone' => 'required|string|max:20|unique:users,phone,' . $id,
+            'email' => 'nullable|email|max:255|unique:users,email,' . $id,
+            'old_password' => 'nullable|string|required_with:new_password', // Bắt buộc nhập nếu có new_password
+            'new_password' => 'nullable|string|min:8|max:15|confirmed',
         ]);
-        $user->update($validated);
 
-        return $user;
+        // Kiểm tra mật khẩu cũ nếu có đổi mật khẩu mới
+        if ($request->filled('new_password')) {
+            if (!Hash::check($request->old_password, $user->password)) {
+                return response()->json(['errors' => ['old_password' => ['Old password is incorrect.']]], 422);
+            }
+            $user->password = Hash::make($request->new_password);
+        }
+
+        // Cập nhật thông tin user
+        $user->update([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'email' => $validated['email'] ?? $user->email,
+        ]);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user
+        ], 200);
     }
     public function createUserAddress($request, $userId)
     {

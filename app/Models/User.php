@@ -54,6 +54,7 @@ class User extends Authenticatable
                 ->join('provinces as p', 'd.province_id', '=', 'p.id')
                 ->where('a.id', '=', $address->id) // Lọc theo địa chỉ đã lấy
                 ->select(
+                    'a.id',
                     'a.address_detail',
                     'w.name as ward_name',
                     'w.id as ward_id',
