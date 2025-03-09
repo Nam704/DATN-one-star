@@ -15,7 +15,7 @@
     {{--
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico"> --}}
 
-    <!-- CSS 
+    <!-- CSS
     ========================= -->
     @include('client.layouts.css')
 
@@ -27,8 +27,6 @@
     <!--header area start-->
     @include('client.layouts.home.header')
     <!--header area end-->
-
-
 
     <!--slider area start-->
     @yield('left-sidebar')
@@ -50,24 +48,17 @@
 
     <!--news letter popup start-->
 
-
-
-
-
     <script>
         var userMeta = document.querySelector('meta[name="user-data"]').getAttribute('content');
         var user = userMeta ? JSON.parse(userMeta) : null;
     </script>
 
-
     <!-- JS
 ============================================ -->
     @include('client.layouts.home.js')
-
-
+    @vite('resources/js/client.js')
 
 </body>
-
 
 <!-- Mirrored from htmldemo.net/autima/autima/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 18 Dec 2024 14:56:09 GMT -->
 

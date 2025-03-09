@@ -12,6 +12,7 @@ export default defineConfig({
                 "resources/js/admin.js",
                 "resources/js/employee.js",
                 "resources/js/user.js",
+                "resources/js/client.js",
             ],
             refresh: true,
         }),
