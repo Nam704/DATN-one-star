@@ -13,9 +13,11 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\NotificationController;
+
 use App\Http\Controllers\Api\ProductImageDescriptionController;
 use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\CartController;
+
 use Illuminate\Support\Facades\Route;
 
 
@@ -43,15 +45,7 @@ Route::prefix('admin')->group(
                 Route::post('add', 'store');
             }
         );
-        Route::prefix('product-images-description')
-            ->controller(ProductImageDescriptionController::class)
-            ->group(
-                function () {
-                    Route::post('/upload', 'uploadImage'); // Upload ảnh
-                    Route::delete('/{id}', 'deleteImage'); // Xóa ảnh
-                    Route::post('/update-description',  'updateDescription'); // Cập nhật nội dung mô tả
-                }
-            );
+
         Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(
             function () {
                 Route::get('/unread/{userId}', 'getUnreadCount');
