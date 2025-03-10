@@ -12,15 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vouchers', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('code')->unique();
-            $table->text('description')->nullable();
-            $table->decimal('discount_amount', 10, 2);
-            $table->integer('quantity');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
-            $table->decimal('min_amount', 10, 2);
+            $table->bigIncrements('id');
+            $table->string('name', 250);
+            $table->string('code', 250);
+            $table->string('description', 250)->nullable();
+            $table->decimal('discount_amount', 12, 2);
+            $table->bigInteger('quantity');
+            $table->timestamp('start_date');
+            $table->timestamp('end_date');
+            $table->bigInteger('min_amount');
+            $table->decimal('maximum_value', 12, 2);
+            $table->string('discount_type', 250);
             $table->timestamps();
         });
     }

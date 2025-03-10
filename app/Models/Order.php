@@ -11,10 +11,11 @@ class Order extends Model
     protected $fillable = [
         'id_user',
         'phone_number',
-        'address',
+        'id_address',
         'total_amount',
         'id_order_status',
-        'id_voucher'
+        'id_voucher',
+        'email'
     ];
 
     // Quan hệ với bảng trạng thái đơn hàng
@@ -33,6 +34,14 @@ class Order extends Model
     public function voucher()
     {
         return $this->belongsTo(Voucher::class, 'id_voucher');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+    public function address()
+    {
+        return $this->belongsTo(Address::class, 'id_address');
     }
 
     public function getComputedTotalAttribute()

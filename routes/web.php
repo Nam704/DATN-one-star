@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AdminOrderController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -85,7 +86,14 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
             }
         );
+        Route::prefix('orders')->controller(AdminOrderController::class)->name('orders.')->group(
+            function () {
 
+                Route::get('/', 'index')->name('index');
+
+                Route::post('/updateStatus', [AdminOrderController::class, 'updateStatus'])->name('updateStatus');
+            }
+        );
 
 
         Route::group([
@@ -232,5 +240,7 @@ Route::prefix('client')->name('client.')->group(
             Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
             Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
         });
+
     }
+
 );

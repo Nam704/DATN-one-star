@@ -12,14 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
-            $table->string('phone_number');
-            $table->text('address');
-            $table->decimal('total_amount', 10, 2);
-            $table->foreignId('id_order_status')->constrained('order_statuses');
-            $table->foreignId('id_voucher')->nullable()->constrained('vouchers');
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('id_user')->nullable(); 
+            $table->string('phone_number', 20);
+            $table->unsignedBigInteger('id_address');
+            $table->decimal('total_amount', 12, 2);
+            $table->unsignedBigInteger('id_order_status');
+            $table->unsignedBigInteger('id_voucher');
+            $table->string('email', 250)->nullable();
             $table->timestamps();
+
+            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_address')->references('id')->on('addresses');
+            $table->foreign('id_order_status')->references('id')->on('order_statuses');
+            $table->foreign('id_voucher')->references('id')->on('vouchers');
         });
     }
 

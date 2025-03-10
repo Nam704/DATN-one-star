@@ -26,3 +26,7 @@ Broadcast::channel('employee', function ($user) {
         return true;
     }
 });
+Broadcast::channel('orders', function ($user) {
+    // Chỉ cho phép quản trị viên lắng nghe kênh này
+    return $user && $user->isAdmin(); // Thay bằng logic kiểm tra quyền của bạn
+});

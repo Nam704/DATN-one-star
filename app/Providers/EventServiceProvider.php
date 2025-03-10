@@ -29,6 +29,8 @@ class EventServiceProvider extends ServiceProvider
 
             ResetPasswordNotification::class
         ],
+
+
     ];
 
     /**

@@ -1,6 +1,5 @@
 <?php
 
-namespace App\Exports;
 
 namespace App\Exports;
 

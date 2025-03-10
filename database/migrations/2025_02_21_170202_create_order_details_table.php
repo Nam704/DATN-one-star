@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_details', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('id_order')->constrained('orders')->onDelete('cascade');
-            $table->foreignId('id_product_variant')->constrained('product_variants')->onDelete('cascade');
+         Schema::create('order_details', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('id_order'); // khóa ngoại đến bảng orders
+            $table->unsignedBigInteger('id_product_variant'); // khóa ngoại đến bảng product_variants
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);
-            $table->decimal('total_price', 10, 2);
-            $table->string('product_name');
-            $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
-            $table->string('name_variant');
+            $table->decimal('total_price', 12, 2);
+            $table->unsignedBigInteger('id_user');
             $table->timestamps();
+
+            $table->foreign('id_order')->references('id')->on('orders');
+            $table->foreign('id_product_variant')->references('id')->on('product_variants');
+            $table->foreign('id_user')->references('id')->on('users');
         });
     }
 
