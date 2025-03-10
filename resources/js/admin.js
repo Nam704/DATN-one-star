@@ -80,6 +80,7 @@ window.Echo.private("admin").listen("AdminNotification", (event) => {
         position: "right", // Vị trí: bên phải
         backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
         stopOnFocus: true, // Dừng khi hover vào popup
+        close: true, // Tự động đóng sau khi hiển thị
     }).showToast();
 
     // Cập nhật giao diện thông báo

@@ -20,10 +20,16 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Events\UserLogin;
 use App\Models\Password_reset_token;
+use App\Services\CartService;
 use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
+    protected $cartService;
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
     public function getFormLogin()
     {
         return view('admin.auth.login');
@@ -56,7 +62,7 @@ class AuthController extends Controller
                     return redirect()->route('admin.dashboard'); // Admin dashboard
                 } elseif ($user->isUser()) {
                     // return "go to user dashboard";
-                    return redirect()->route('admin.dashboard'); // Admin dashboard
+                    return redirect()->route('client.home'); // Admin dashboard
 
                     // return redirect()->route('user.dashboard'); // User dashboard
                 } elseif ($user->isEmployee()) {
@@ -101,7 +107,7 @@ class AuthController extends Controller
         Register::dispatch($user);
 
         Auth::login($user);
-
+        $this->cartService->store($user->id);
         return redirect()->route('auth.login')->with('success', 'Registration successful! Please login.');
     }
     function  getFormForgotPassword()

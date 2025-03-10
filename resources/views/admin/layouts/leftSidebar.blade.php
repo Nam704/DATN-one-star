@@ -150,13 +150,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false" aria-controls="sidebarCharts"
                     class="side-nav-link">
                     <i class="ri-donut-chart-fill"></i>
-                    <span> Charts </span>
+                    <span> Brand </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarCharts">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="charts-apex.html">Apex Charts</a>
+                            <a href="{{ route('admin.brands.index') }}">List</a>
                         </li>
 
                     </ul>
@@ -167,13 +167,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarForms" aria-expanded="false" aria-controls="sidebarForms"
                     class="side-nav-link">
                     <i class="ri-survey-line"></i>
-                    <span> Forms </span>
+                    <span> Category </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarForms">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="form-elements.html">Basic Elements</a>
+                            <a href="{{ route('admin.categories.listCategory')}}">List</a>
                         </li>
 
                     </ul>
@@ -184,13 +184,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false" aria-controls="sidebarTables"
                     class="side-nav-link">
                     <i class="ri-table-line"></i>
-                    <span> Tables </span>
+                    <span> Attribute </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarTables">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="tables-basic.html">Basic Tables</a>
+                            <a href="{{ route('admin.attributes.index') }}">List</a>
                         </li>
 
                     </ul>

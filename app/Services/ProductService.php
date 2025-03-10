@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exports\ProductExport;
+use App\Imports\CreateProductByExcel;
 use App\Imports\CreateProductImport;
 use App\Models\Product;
 use App\Models\Product_variant;
@@ -21,6 +22,7 @@ class ProductService
     protected $CreateProductImport;
     protected $ProductAuditService;
     protected $NotificationService;
+    protected $CreateProductByExcel;
     protected $user;
     public function __construct(
         AttributeService $AttributeService,
@@ -28,8 +30,11 @@ class ProductService
         CategoryService $CategoryService,
         CreateProductImport $CreateProductImport,
         ProductAuditService $ProductAudit,
-        NotificationService $NotificationService
+        NotificationService $NotificationService,
+        CreateProductByExcel $CreateProductByExcel
+
     ) {
+        $this->CreateProductByExcel = $CreateProductByExcel;
         $this->AttributeService = $AttributeService;
         $this->BrandService = $BrandService;
         $this->CategoryService = $CategoryService;
@@ -37,6 +42,11 @@ class ProductService
         $this->ProductAuditService = $ProductAudit;
         $this->NotificationService = $NotificationService;
         $this->product = new Product();
+    }
+    public function createByExcel($file)
+    {
+        $this->CreateProductByExcel->index($file);
+        return true;
     }
     public function updatePrice($variantId, $price)
     {
@@ -197,14 +207,29 @@ class ProductService
     /**
      * Xử lý upload ảnh sản phẩm
      */
-    private function uploadImage($image, $folder = 'products')
+    // public function uploadImage($image, $folder = 'products')
+    // {
+    //     if (!$image) {
+    //         return null;
+    //     }
+
+    //     // Lưu ảnh vào thư mục được chỉ định
+    //     return $image->store($folder, 'public');
+    // }
+    public function uploadImage($image, $folder = 'products')
     {
         if (!$image) {
             return null;
         }
 
-        // Lưu ảnh vào thư mục được chỉ định
-        return $image->store($folder, 'public');
+        // Tạo tên tệp dựa trên thời gian và hash của tên gốc
+        $filename = time() . '_' . md5($image->getClientOriginalName()) . '.' . $image->getClientOriginalExtension();
+
+        // Lưu ảnh vào thư mục được chỉ định với tên tệp đã tạo
+        $image->storeAs($folder, $filename, 'public');
+
+        // Trả về đường dẫn hình ảnh
+        return '/storage/' . $folder . '/' . $filename;
     }
 
     /**
@@ -235,7 +260,34 @@ class ProductService
         $productVariant->save();
         return $productVariant;
     }
+    public function productDetail($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->getProductWithDetails();
+        // $product->formatted_variants  = $product->variants->map(function ($variant) {
+        //     return [
+        //         'id' => $variant->id,
+        //         'sku' => $variant->sku,
+        //         'price' => $variant->price,
+        //         'quantity' => $variant->quantity,
+        //         'image' => optional($variant->images)->url,
+        //         'values' => $variant->attributeValues->map(function ($attr) {
+        //             return [
+        //                 'value_id' => $attr->id,
+        //                 'attribute_id' => $attr->attribute_id,
+        //                 'name' => $attr->attribute_name,
+        //                 'value' => $attr->value,
 
+        //             ];
+        //         })
+        //     ];
+        // });
+        $prices = $product->getPriceRange();
+        $product->min_price = $prices->min_price;
+        $product->max_price = $prices->max_price;
+        $product->quantity = $product->quantity();
+        return $product;
+    }
     public function updateProduct(Request $request, $id)
     {
         try {

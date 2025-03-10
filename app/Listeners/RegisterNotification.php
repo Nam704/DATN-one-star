@@ -25,7 +25,7 @@ class RegisterNotification implements ShouldQueue
     public function handle(Register $event): void
     {
         $this->user = $event->data;
-        Log::info("message sent: " . $this->user->email);
+        // Log::info("message sent: " . $this->user->email);
 
         Mail::to($this->user->email)->send(new RegisterMail($this->user));
     }

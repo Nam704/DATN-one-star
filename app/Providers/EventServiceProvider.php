@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
-
+use App\Events\CreateByExcel;
 use App\Events\Register;
 use App\Events\ResetPassword;
+use App\Listeners\CreateProductNotification;
 use App\Listeners\RegisterNotification;
 use App\Listeners\ResetPasswordNotification;
 use Illuminate\Auth\Events\Registered;
@@ -29,6 +30,9 @@ class EventServiceProvider extends ServiceProvider
 
             ResetPasswordNotification::class
         ],
+        CreateByExcel::class => [
+            CreateProductNotification::class
+        ]
     ];
 
     /**

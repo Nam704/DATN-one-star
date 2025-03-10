@@ -9,7 +9,7 @@
                     <h4 class="header-title">Fixed Header</h4>
 
 
-                    <a href="{{ route('admin.productvariant.addProductVariant') }}" type="button" class="btn btn-sm btn-primary">
+                    <a href="{{ route('admin.categories.addCategory') }}" type="button" class="btn btn-sm btn-primary">
                         Add new
                         category</a>
 
@@ -40,7 +40,9 @@
                                     <a href="{{route('admin.categories.editCategory',$category->id)}}">
                                         <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
                                     </a> |
-                                    <form action="{{route('admin.categories.deleteCategory',$category->id)}}" class="d-inline" method="POST" onclick="return confirm('Ban co muon xoa khong')">
+                                    <form action="{{route('admin.categories.deleteCategory',$category->id)}}"
+                                        class="d-inline" method="POST"
+                                        onclick="return confirm('Ban co muon xoa khong')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-secondary btn-danger ">Xóa</button>

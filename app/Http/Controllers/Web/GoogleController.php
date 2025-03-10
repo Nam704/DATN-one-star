@@ -6,6 +6,7 @@ use App\Events\Register;
 use App\Http\Controllers\Controller;
 use App\Mail\RegisterMail;
 use App\Models\User;
+use App\Services\CartService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,11 @@ use Illuminate\Support\Str;
 
 class GoogleController extends Controller
 {
+    protected $cartService;
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
     public function redirectToGoogle()
     {
 
@@ -50,9 +56,10 @@ class GoogleController extends Controller
                     'google_id' => $googleId,
                     'profile_image' => $profile_image,
                     'password' => Hash::make('1234'),
-                    'id_role' => 1
+                    'id_role' => 3
                 ]);
                 Auth::login($newUser);
+                $this->cartService->store($newUser->id);
                 // Mail::to($email)->send(new RegisterMail($newUser));
                 Register::dispatch($newUser);
                 return redirect()->intended('/');

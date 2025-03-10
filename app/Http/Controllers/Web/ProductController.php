@@ -28,8 +28,8 @@ class ProductController extends Controller
     }
     public function detail($id)
     {
-        $product = Product::getProductWithDetails($id)->findOrFail($id);
-
+        $product = Product::findOrFail($id);
+        $product->getProductWithDetails();
         $product->variants = $product->variants->map(function ($variant) {
             return [
                 'id' => $variant->id,
@@ -82,6 +82,7 @@ class ProductController extends Controller
 
         return back()->with('success', 'Sản phẩm đã được nhập thành công!');
     }
+
     function exportCreateExcel()
     {
         return  $this->ProductService->exportProducts();

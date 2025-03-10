@@ -14,6 +14,10 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\NotificationController;
 
+use App\Http\Controllers\Api\ProductImageDescriptionController;
+use App\Http\Controllers\Client\CartControllerSession;
+use App\Http\Controllers\Client\CartController;
+
 use Illuminate\Support\Facades\Route;
 
 
@@ -83,5 +87,11 @@ Route::prefix('client')->group(
         Route::prefix('users')->name('user.')->group(
             function () { }
         );
+        // Route::prefix('carts')->controller(CartController::class)->name('carts.')->group(
+        //     function () {
+        //         Route::post('add', 'addToCart');
+        //     }
+        // );
+
     }
 );

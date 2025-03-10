@@ -9,13 +9,26 @@ use Illuminate\Validation\ValidationException;
 
 class CategoryService
 {
-    public function __construct()
+    protected $category;
+    public function __construct(Category $category)
     {
-        // Constructor logic
+        $this->category = $category;
     }
     public function getCategories()
     {
-        return Category::all();
+        // Lấy tất cả các categories và danh mục con
+        $categories = $this->category->with('children', 'products')->get();
+        foreach ($categories as $category) {
+            $prices = $category->getPriceRange();
+            $category->min_price = $prices->min_price;
+            $category->max_price = $prices->max_price;
+            foreach ($category->products as $product) {
+                $prices = $product->getPriceRange();
+                $product->min_price = $prices->min_price;
+                $product->max_price = $prices->max_price;
+            }
+        }
+        return $categories;
     }
     public function getCategoryById($id)
     {
