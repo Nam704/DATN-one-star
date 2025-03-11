@@ -32,6 +32,8 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\web\VoucherController;
+use App\Models\Voucher;
 
 Route::get('/', function () {
     return view('admin.index');
@@ -78,7 +80,7 @@ Route::prefix('auth/')->name('auth.')->group(
 
 
 
-Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
+Route::prefix('admin')->name('admin.')->group(
     function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
@@ -207,6 +209,15 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::put('update/{id}', 'update')->name('update');
                 Route::get('destroy/{id}', 'destroy')->name('destroy');
                 Route::get('show/{id}', 'show')->name('show');
+            });
+        
+            Route::prefix('vouchers')->name('vouchers.')->controller(VoucherController::class)->group(function () {
+                Route::get('list',  'listVoucher')->name('listVoucher');
+                Route::get('add',  'addVoucher')->name('addVoucher');
+                Route::post('add',  'addPostVoucher')->name('addPostVoucher');
+                Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
+                Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
+                Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
             });
     }
 );
