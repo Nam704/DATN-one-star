@@ -210,15 +210,15 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('destroy/{id}', 'destroy')->name('destroy');
                 Route::get('show/{id}', 'show')->name('show');
             });
-        
-            Route::prefix('vouchers')->name('vouchers.')->controller(VoucherController::class)->group(function () {
-                Route::get('list',  'listVoucher')->name('listVoucher');
-                Route::get('add',  'addVoucher')->name('addVoucher');
-                Route::post('add',  'addPostVoucher')->name('addPostVoucher');
-                Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
-                Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
-                Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
-            });
+
+        Route::prefix('vouchers')->name('vouchers.')->controller(VoucherController::class)->group(function () {
+            Route::get('list',  'listVoucher')->name('listVoucher');
+            Route::get('add',  'addVoucher')->name('addVoucher');
+            Route::post('add',  'addPostVoucher')->name('addPostVoucher');
+            Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
+            Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
+            Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
+        });
     }
 );
 Route::prefix('client')->name('client.')->group(
@@ -277,6 +277,7 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('orders')->controller(ClientOrderController::class)->name('orders.')->group(
             function () {
                 Route::post('/store', 'store')->name('store');
+                Route::get('/detail/{id}', 'detail')->name('detail');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(

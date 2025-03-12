@@ -53,4 +53,34 @@ class Order extends Model
             return $detail->quantity * $detail->unit_price;
         });
     }
+    public function details()
+    {
+        return $this->load([
+            "orderDetails" => function ($query) {
+                $query->select("id", "id_order", "id_variant", "quantity", "unit_price", "total")
+                    ->with([
+                        "productVariant" => function ($query) {
+                            $query->select('id', 'sku', 'id_product')
+                                ->with([
+                                    "product" => function ($query) {
+                                        $query->select('id', 'name', 'image_primary')
+                                            ->with([
+                                                "Category" => function ($query) {
+                                                    $query->select('id', 'name');
+                                                },
+                                                "Brand" => function ($query) {
+                                                    $query->select('id', 'name');
+                                                }
+                                            ]);
+                                    },
+                                    "images" => function ($query) {
+                                        $query->select('id', 'id_product_variant', 'url');
+                                    },
+
+                                ]);
+                        }
+                    ]);
+            }
+        ]);
+    }
 }

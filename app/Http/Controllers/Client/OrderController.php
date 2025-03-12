@@ -16,6 +16,11 @@ class OrderController extends Controller
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
     }
+    public function detail($id)
+    {
+        $order = $this->orderService->getOrderDetail($id);
+        return $order;
+    }
     public function store(Request $request)
     {
         $dataSession = session('dataCheckout');
@@ -59,15 +64,10 @@ class OrderController extends Controller
         $order = $this->orderService->store($dataFormatted);
         if ($order) {
             if ($order->payment_method == 'vnpay' || $order->payment_status == 'pending') {
-                // return response()->json('run payment');
-
                 return $payment = $this->paymentService->vnpay_payment($order);
             } else {
                 // return redirect()->route('client.orders.index');
             }
         }
-
-        // return response()->json($order->with('orderDetails')->get());
-        // return redirect()->route('client.orders.index');
     }
 }

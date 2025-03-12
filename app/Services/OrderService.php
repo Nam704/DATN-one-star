@@ -15,6 +15,15 @@ class OrderService
         $this->order = $order;
         // Constructor logic
     }
+    public function getOrderDetail($id)
+    {
+
+        $order = $this->order->find($id);
+        if (!$order) {
+            return null;
+        }
+        return $order->details();
+    }
     function store($data)
     {
 
@@ -52,4 +61,6 @@ class OrderService
             return $order;
         });
     }
+    public function listOrder($request)
+    { }
 }

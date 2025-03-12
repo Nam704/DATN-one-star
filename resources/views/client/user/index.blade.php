@@ -40,7 +40,8 @@
                                                     <td>{{ $order->created_at }}</td>
                                                     <td><span class="success">{{ $order->orderStatus->name }}</span></td>
                                                     <td>{{ $order->total }} </td>
-                                                    <td><a href="cart.html" class="view">view</a></td>
+                                                    <td><a href="{{ route('client.orders.detail', $order->id) }}"
+                                                            class="view">view</a></td>
                                                 </tr>
                                             @endforeach
 
