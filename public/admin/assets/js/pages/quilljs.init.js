@@ -1,3 +1,4 @@
+document.querySelectorAll(".ql-toolbar").forEach(toolbar => toolbar.remove());
 // Khởi tạo Quill editor
 var quill = new Quill("#snow-editor", {
     theme: "snow",
@@ -28,3 +29,9 @@ var quill = new Quill("#snow-editor", {
     },
 });
 // Lấy nội dung Quill
+
+// Cập nhật nội dung từ Quill vào input hidden trước khi gửi form
+quill.on("text-change", function () {
+    document.querySelector("#content").value = quill.root.innerHTML;
+    console.log("Nội dung cập nhật:", document.querySelector("#content").value);
+});

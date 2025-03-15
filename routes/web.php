@@ -3,6 +3,8 @@
 use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
+use App\Http\Controllers\Client\MyAccountController;
+use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -24,6 +26,8 @@ use App\Http\Controllers\Web\PaymentController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\TemplateExportController;
+use App\Http\Controllers\Web\BlogController as AppBlogController;
+use App\Http\Controllers\Web\ContactController;
 use Illuminate\Support\Facades\Mail;
 
 use App\Http\Controllers\Client\ProductController as ClientProductController;
@@ -126,6 +130,21 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
+        // Blogs
+        Route::prefix('blogs')->controller(AppBlogController::class)->name('blogs.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
             Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
             Route::post('/store',  'store')->name('store');
@@ -165,30 +184,6 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
-
-        // attribute_values ( Bảng giá trị thuộc tính)
-        // Route::prefix('attribute_values')->controller(AttributeValueController::class)->name('attribute_values.')->group(function () {
-        //     Route::get('/', 'index')->name('index');
-        //     Route::get('/create', 'create')->name('create');
-        //     Route::post('/', 'store')->name('store');
-        //     Route::get('/{id}/edit', 'edit')->name('edit');
-        //     Route::put('/{id}', 'update')->name('update');
-        //     Route::delete('/{id}', 'destroy')->name('destroy');
-        //     Route::get('/trash', 'trash')->name('trash');
-        //     Route::post('/{id}/restore', 'restore')->name('restore');
-        // });
-
-        // // attribute_values ( Bảng cặp giá trị thuộc tính)
-        // Route::prefix('product_variant_attributes')->controller(ProductVariantAttributeController::class)->name('product_variant_attributes.')->group(function () {
-        //     Route::get('/', 'index')->name('index');
-        //     Route::get('/create', 'create')->name('create');
-        //     Route::post('/', 'store')->name('store');
-        //     Route::get('/{id}/edit', 'edit')->name('edit');
-        //     Route::put('/{id}', 'update')->name('update');
-        //     Route::delete('/{id}', 'destroy')->name('destroy');
-        //     Route::get('/trash', 'trash')->name('trash');
-        //     Route::post('/{id}/restore', 'restore')->name('restore');
-        // });
 
 
         Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
@@ -276,6 +271,18 @@ Route::prefix('client')->name('client.')->group(
                 Route::get('view-cart', 'viewCart')->name('viewCart');
             }
         );
+
+        Route::prefix('my-account')->controller(MyAccountController::class)->name('my-account.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::put('/{id}', 'update')->name('update'); // sua thong tin
+        });
+        Route::prefix('blog')->controller(BlogController::class)->name('blog.')->group(function () {
+            Route::get('/index', [BlogController::class, 'index'])->name('index');
+            Route::get('show/{id}', 'show')->name('show');
+        });
+        Route::prefix('contact')->controller(ContactController::class)->name('contact.')->group(function () {
+            Route::get('/', 'index')->name('index');
+        });
     }
 );
 

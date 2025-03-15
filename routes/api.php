@@ -4,6 +4,8 @@
 use App\Http\Controllers\Api\AttributeController;
 
 use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\CategoryBlogController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\ImportDetailController;
 use App\Http\Controllers\Api\ProductController;
@@ -43,6 +45,21 @@ Route::prefix('admin')->group(
                 Route::post('add', 'store');
             }
         );
+
+        Route::prefix('categoryBlog')->controller(CategoryBlogController::class)->group(
+            function () {
+                Route::post('add', 'store');
+                Route::get('list', 'list');
+            }
+        );
+
+        Route::prefix('tags')->controller(TagController::class)->group(
+            function () {
+                Route::post('add', 'store');
+                Route::get('list', 'list');
+            }
+        );
+
         Route::prefix('product-images-description')
             ->controller(ProductImageDescriptionController::class)
             ->group(
