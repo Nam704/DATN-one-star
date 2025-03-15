@@ -64,14 +64,6 @@
                     <input type="number" name="user_limit" class="form-control" placeholder="Nhập số lần..." value="{{  $voucher->user_limit }}">
                     @error('user_limit') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
-                <!-- Tổng số lần voucher đã được sử dụng -->
-                <div class="mb-3">
-                    <label for="total_usage" class="form-label">Tổng số lần đã dùng</label>
-                    <input type="number" name="total_usage" class="form-control" placeholder="Nhập tổng số lần đã sử dụng..." value="{{ $voucher->total_usage }}">
-                    @error('total_usage')
-                    <div class="text-danger">{{ $message }}</div>
-                    @enderror
-                </div>
                 <!-- Thời gian bắt đầu -->
                 <div class="mb-3">
                     <label for="start_date" class="form-label">Thời gian bắt đầu</label>
