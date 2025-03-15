@@ -106,12 +106,47 @@
                     @error('status') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
 
-                <!-- Áp dụng cho -->
-                <div class="mb-3">
-                    <label for="applies_to" class="form-label">Áp dụng cho</label>
-                    <input type="text" name="applies_to" class="form-control" placeholder="Nhập danh mục hoặc sản phẩm..." value="{{  $voucher->applies_to}}">
-                    @error('applies_to') <div class="text-danger">{{ $message }}</div> @enderror
+                <!-- Phần Áp dụng -->
+        <div class="mb-3">
+            <label class="form-label">Áp dụng</label>
+            <div class="row">
+                <!-- Cột chọn Danh mục -->
+                <div class="col-md-6">
+                    <label for="applies_to_category" class="form-label">Danh mục</label>
+                    <select name="applies_to[]" id="applies_to_category" class="form-control select2" multiple>
+                        @foreach($categories as $category)
+                            @php
+                                // Lấy giá trị đã chọn: dùng old nếu có, ngược lại dùng voucher->applies_to (đã là mảng)
+                                $selectedValues = old('applies_to', $voucher->applies_to);
+                            @endphp
+                            <option value="category_{{ $category->id }}"
+                                {{ is_array($selectedValues) && in_array("category_{$category->id}", $selectedValues) ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+
+                <!-- Cột chọn Sản phẩm -->
+                <div class="col-md-6">
+                    <label for="applies_to_product" class="form-label">Sản phẩm</label>
+                    <select name="applies_to[]" id="applies_to_product" class="form-control select2" multiple>
+                        @foreach($products as $product)
+                            @php
+                                $selectedValues = old('applies_to', $voucher->applies_to);
+                            @endphp
+                            <option value="product_{{ $product->id }}"
+                                {{ is_array($selectedValues) && in_array("product_{$product->id}", $selectedValues) ? 'selected' : '' }}>
+                                {{ $product->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @error('applies_to')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
 
                 <!-- Nút Xác nhận và Quay lại -->
                 <div class="d-flex">
