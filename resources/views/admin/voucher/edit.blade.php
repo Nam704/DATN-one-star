@@ -108,7 +108,7 @@
 
                 <!-- Phần Áp dụng -->
         <div class="mb-3">
-            <label class="form-label">Áp dụng</label>
+            <label class="form-label">Áp dụng cho</label>
             <div class="row">
                 <!-- Cột chọn Danh mục -->
                 <div class="col-md-6">

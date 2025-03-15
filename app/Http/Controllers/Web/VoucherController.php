@@ -103,14 +103,14 @@ class VoucherController extends Controller
                 // Chỉ kiểm tra khi loại giảm giá là phần trăm
                 if ($request->type === 'percentage' && $value > 0) {
                     // Kiểm tra nếu có min_amount thì mới thực hiện phép tính
-                    if (!empty($request->min_amount) && $value > ($request->discount_amount * $request->min_amount / 100)) {
-                        $fail('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng mức giảm giá phần trăm.');
+                    if (!empty($request->min_amount) && $value < ($request->discount_amount * $request->min_amount / 100)) {
+                        $fail('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng mức giảm giá phần trăm.');
                     }
                 } 
             }
             ],
             'status' => 'required|in:active,inactive',
-            'applies_to'   => 'required|array',
+            'applies_to'   => 'nullable|array',
             'applies_to.*' => 'string', // Mỗi phần tử của mảng là chuỗi
         ]);
         
@@ -187,14 +187,14 @@ $validatedData['applies_to'] = json_encode($validatedData['applies_to']);
             // Chỉ kiểm tra khi loại giảm giá là phần trăm
             if ($request->type === 'percentage' && $value > 0) {
                 // Kiểm tra nếu có min_amount thì mới thực hiện phép tính
-                if (!empty($request->min_amount) && $value > ($request->discount_amount * $request->min_amount / 100)) {
-                    $fail('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng mức giảm giá phần trăm.');
+                if (!empty($request->min_amount) && $value < ($request->discount_amount * $request->min_amount / 100)) {
+                    $fail('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng mức giảm giá phần trăm.');
                 }
             } 
         }
         ],
         'status' => 'required|in:active,inactive',
-        'applies_to'       => 'required|array',
+        'applies_to'       => 'nullable|array',
         'applies_to.*'     => 'string',
     ]);
 
