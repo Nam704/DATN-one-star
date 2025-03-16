@@ -75,8 +75,8 @@ class VoucherController extends Controller
               }
           ],
             'type' => 'required|in:percentage,fixed',
-            'quantity' => 'required|integer|min:1',
-            'user_limit' => 'required|integer|min:1',
+            'quantity'   => 'required|integer|min:1|max:1000',
+            'user_limit' => 'required|integer|min:1|lte:quantity|max:10',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'min_amount' => [
@@ -159,8 +159,8 @@ $validatedData['applies_to'] = json_encode($validatedData['applies_to']);
           }
       ],
         'type' => 'required|in:percentage,fixed',
-        'quantity' => 'required|integer|min:1',
-        'user_limit' => 'required|integer|min:1',
+        'quantity'   => 'required|integer|min:1|max:1000',
+        'user_limit' => 'required|integer|min:1|lte:quantity|max:10',
         'start_date' => 'required|date',
         'end_date' => 'required|date|after_or_equal:start_date',
         'min_amount' => [
