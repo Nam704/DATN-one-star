@@ -29,8 +29,10 @@
                             <thead>
                                 <tr>
                                     <th>STT</th>
+                                    <th>Danh mục</th>
                                     <th>Hình ảnh</th>
                                     <th>Tiêu đề</th>
+                                    <th>Ngày đăng tải</th>
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -40,8 +42,10 @@
                                 @foreach ($blogs as $key => $value)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
+                                        <td>{{ $value->category->name }}</td>
                                         <td><img src="{{ asset($value->thumbnail) }}" alt="err" height="60px"></td>
                                         <td>{{ $value->title }}</td>
+                                        <td>{{ $value->created_at->format('d/m/Y') }}</td>
                                         <td>
                                             <span
                                                 class="badge bg-{{ $value->status === 'published' ? 'success' : ($value->status === 'draft' ? 'warning' : 'danger') }}">
@@ -53,13 +57,16 @@
                                             <div class="btn-group">
                                                 <a href="{{ route('admin.blogs.show', $value->id) }}">
                                                     <button type="button"
-                                                        class="btn btn-secondary btn-sm btn-warning me-1"><i class="mdi mdi-eye"></i></button>
+                                                        class="btn btn-secondary btn-sm btn-warning me-1"><i
+                                                            class="mdi mdi-eye"></i></button>
                                                 </a>
-                                                <a href="{{route('admin.blogs.edit', $value->id)}}"><button class="btn btn-sm btn-success me-1"><i
+                                                <a href="{{ route('admin.blogs.edit', $value->id) }}"><button
+                                                        class="btn btn-sm btn-success me-1"><i
                                                             class="mdi mdi-comment-edit-outline"></i></button></a>
-                                                <a href=""><button class="btn btn-sm btn-danger"><i
-                                                            class="mdi mdi-trash-can"></i></button></a>
-
+                                                <button class="btn btn-sm btn-danger delete-btn"
+                                                    data-id="{{ $value->id }}">
+                                                    <i class="mdi mdi-trash-can"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -68,8 +75,10 @@
                             <tfoot>
                                 <tr>
                                     <th>STT</th>
+                                    <th>Danh mục</th>
                                     <th>Hình ảnh</th>
                                     <th>Tiêu đề</th>
+                                    <th>Ngày đăng tải</th>
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -88,5 +97,7 @@
 
 @push('scripts')
     <x-admin.data-table-scripts />
-    {{-- <script src="{{ asset('admin/api/attributes.js') }}"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('admin/api/blog.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 @endpush

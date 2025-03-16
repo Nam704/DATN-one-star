@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Blog extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'blogs';
+
+    protected $dates = ['deleted_at'];
     protected $fillable = [
         'category_id', 'title', 'slug', 'content', 'thumbnail', 'status', 'published_at'
     ];
@@ -28,5 +32,14 @@ class Blog extends Model
     public function comments()
     {
         return $this->hasMany(CommentBlog::class, 'blog_id');
+    }
+
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value;
+
+        if ($value === 'published' && empty($this->attributes['published_at'])) {
+            $this->attributes['published_at'] = Carbon::now();
+        }
     }
 }

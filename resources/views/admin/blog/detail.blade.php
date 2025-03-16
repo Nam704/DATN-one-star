@@ -20,7 +20,7 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="header-title">{{ $blog->title }}</h4>
+                        <h4 class="header-title" style="margin-bottom: 15px">{{ $blog->title }}</h4>
                         <p class="text-muted mb-0">
                             <i class="mdi mdi-calendar-month-outline me-1"></i>{{ $blog->published_at }}
                             <i class="mdi mdi-face-man me-1" style="margin-left: 10px"></i>Admin
@@ -28,9 +28,12 @@
                                 style="margin-left: 10px"></i>{{ $blog->category->name }}
                         </p>
                         <br>
-                        <img src="{{ asset($blog->thumbnail) }}" alt="img" height="500px" width="500px">
+                        <img src="{{ asset($blog->thumbnail) }}" alt="img" height="500px" width="500px" style="margin-bottom: 30px; object-fit: cover;">
                         <br>
                         <span>{!! $blog->content !!}</span>
+                        <Span>Tag : 
+                            {{$tags->pluck('name')->implode(', ')}}
+                        </Span>
                     </div>
 
                 </div>

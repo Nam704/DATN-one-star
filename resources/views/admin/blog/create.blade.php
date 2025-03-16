@@ -91,7 +91,7 @@
                                 <div class="form-group">
                                     <label class="font-weight-bold">Chọn thẻ tag:</label>
 
-                                    <select name="name" id="tag-select" class="select2 form-control select2-multiple"
+                                    <select name="name[]" id="tag-select" class="select2 form-control select2-multiple"
                                         data-toggle="select2" multiple="multiple" data-placeholder="Choose ...">
                                         @foreach ($tags as $tag)
                                             <option value="{{ $tag->id }}">{{ $tag->name }}</option>
@@ -154,10 +154,7 @@
 @endsection
 @push('styles')
     <!-- Quill css -->
-
-
     <link href="{{ asset('admin/assets/vendor/quill/quill.core.css') }}" rel="stylesheet" type="text/css" />
-
 
     <link href="{{ asset('admin/assets/vendor/quill/quill.snow.css') }}" rel="stylesheet" type="text/css" />
 @endpush

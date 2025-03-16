@@ -6,12 +6,12 @@
             <div class="col-12">
                 <div class="page-title-box">
                     <div class="page-title-right">
-                        <a href="{{ route('admin.attributes.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.blogs.index') }}" class="btn btn-dark">
                             <i class="ri-arrow-left-line align-middle me-1"></i>
-                            Back to Attributes
+                            Back
                         </a>
                     </div>
-                    <h4 class="page-title">Trash Attributes</h4>
+                    <h4 class="page-title">Trash Blogs</h4>
                 </div>
             </div>
         </div>
@@ -20,44 +20,46 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table id="fixed-header-database" class="table table-striped dt-responsive nowrap table-striped w-100">
-                            <thead class="table-light">
+                        <table id="fixed-header-database"
+                            class="table table-striped dt-responsive nowrap table-striped w-100">
+                            <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Deleted At</th>
-                                    <th>Actions</th>
+                                    <th>STT</th>
+                                    <th>Danh mục</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Ngày xóa</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($trashedAttributes as $attribute)
+                                @foreach ($trashedBlogs as $key => $value)
                                     <tr>
-                                        <td>{{ $attribute->id }}</td>
-                                        <td>{{ $attribute->name }}</td>
-                                        <td>{{ $attribute->description }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ $attribute->status === 'active' ? 'success' : 'danger' }}">
-                                                {{ ucfirst($attribute->status) }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $attribute->deleted_at->format('d/m/Y H:i:s') }}</td>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $value->category->name }}</td>
+                                        <td>{{ $value->title }}</td>
+                                        <td><img src="{{ asset($value->thumbnail) }}" alt="err" height="60px"></td>
+                                        <td>{{ $value->deleted_at->format('d/m/Y') }}</td>
                                         <td>
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-sm btn-success restore-attribute"
-                                                    data-id="{{ $attribute->id }}">
-                                                    <i class="ri-refresh-line"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-danger force-delete-attribute"
-                                                    data-id="{{ $attribute->id }}">
-                                                    <i class="ri-delete-bin-2-line"></i>
+                                                <button type="button" class="btn btn-sm btn-success restore-value"
+                                                    data-id="{{ $value->id }}">
+                                                    <i class="ri-refresh-line me-1"></i> Khôi phục
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Danh mục</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -67,12 +69,12 @@
 @endsection
 
 @push('styles')
-<x-admin.data-table-styles />
+    <x-admin.data-table-styles />
 @endpush
 
 @push('scripts')
-<x-admin.data-table-scripts />
-<script src="{{ asset('admin/api/trashAttributes.js') }}"></script>
+    <x-admin.data-table-scripts />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('admin/api/blog.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 @endpush
-
-

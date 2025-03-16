@@ -16,7 +16,7 @@ class BlogService
     protected $NotificationService;
     protected $user;
 
-    public function __construct(NotificationService $NotificationService,)
+    public function __construct(NotificationService $NotificationService, )
     {
         $this->NotificationService = $NotificationService;
     }
@@ -35,6 +35,7 @@ class BlogService
             'tags' => $request->input('name', []), // Lấy danh sách tag (nếu có)
             'thumbnail' => $request->file('thumbnail'),
             'status' => $request->input('status', 'published'),
+            'published_at' => $request->input('status') === 'published' ? now() : null, // Lưu ngày giờ nếu là published
         ];
 
         // Nếu có ảnh bài viết, tải lên và lấy đường dẫn
@@ -109,4 +110,66 @@ class BlogService
         // Trả về đường dẫn hình ảnh
         return '/storage/' . $folder . '/' . $filename;
     }
+
+    public function updateBlog(Request $request, $id)
+    {
+        try {
+            $this->user = auth()->user();
+            DB::beginTransaction();
+
+            // Tìm bài viết cần cập nhật
+            $blog = Blog::findOrFail($id);
+
+            // Xử lý dữ liệu bài viết
+            $formattedData = $this->processBlogData($request);
+
+            // Lấy đường dẫn ảnh cũ từ request
+            $thumbnail = $request->input('old_thumbnail', $blog->thumbnail);
+
+            // Nếu có ảnh mới, upload và thay thế ảnh cũ
+            if ($request->hasFile('thumbnail')) {
+                // Xóa ảnh cũ nếu tồn tại
+                if ($blog->thumbnail) {
+                    Storage::delete(str_replace('/storage/', 'public/', $blog->thumbnail));
+                }
+                // Upload ảnh mới
+                $thumbnail = $this->uploadImage($request->file('thumbnail'), 'blogs/thumbnails');
+            }
+
+            // Cập nhật thông tin bài viết
+            $blog->update([
+                'title' => $formattedData['title'],
+                'slug' => $formattedData['slug'],
+                'content' => $formattedData['content'],
+                'category_id' => $formattedData['category_id'],
+                'thumbnail' => $thumbnail,
+                'status' => $formattedData['status'],
+            ]);
+
+            // Cập nhật tags
+            if (!empty($formattedData['tags'])) {
+                $blog->tags()->sync($formattedData['tags']);
+            }
+
+            DB::commit();
+
+            // Gửi thông báo cập nhật bài viết
+            $dataNotification = [
+                'title' => 'Blog Updated',
+                'message' => $this->user->name . ' đã cập nhật bài viết!',
+                'from_user_id' => $this->user->id,
+                'to_user_id' => null,
+                'type' => 'blogs',
+                'status' => 'unread',
+                'goto_id' => $blog->id,
+            ];
+            $this->NotificationService->sendAdmin($dataNotification);
+
+            return $blog;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
 }

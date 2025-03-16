@@ -22018,7 +22018,7 @@ span.flatpickr-weekday {
 .select2-container .select2-selection--multiple .select2-selection__choice {
     background-color: var(--tz-primary);
     border: none;
-    color: #fff;
+    color: #212529;
     border-radius: 3px;
     padding: 0 7px 0 0;
     margin-top: 6px

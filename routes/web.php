@@ -138,11 +138,11 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('/{id}/show', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
-            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
-            Route::get('/trash', 'trash')->name('trash');
+
+            Route::delete('/{id}', 'destroy')->name('destroy'); 
+            Route::get('/trash', 'trash')->name('trash'); 
+            Route::post('/{id}/restore', 'restore')->name('restore'); 
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
@@ -204,7 +204,6 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');
 
                 Route::get('update-price/{id}', 'updatePrice')->name('updatePrice');
-
             }
         );
 
@@ -233,7 +232,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 Route::prefix('client')->name('client.')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
-            function () { }
+            function () {}
         );
         Route::prefix('products')->name('products.')->group(
             function () {
@@ -285,5 +284,3 @@ Route::prefix('client')->name('client.')->group(
         });
     }
 );
-
-

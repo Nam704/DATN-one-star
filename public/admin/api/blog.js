@@ -177,18 +177,14 @@ function handleAjaxError(xhr) {
 function prepareBlogData() {
     let formData = new FormData(document.querySelector("#blog-form"));
 
-    // Lấy nội dung blog từ trình soạn thảo Quill hoặc textarea
     let quillContent = document.querySelector("#content").value;
     formData.append("content", quillContent.trim() || "Nội dung chưa cập nhật");
 
-
-    // Thêm các thông tin cơ bản
     formData.append("title", formData.get("title").trim() || "");
     formData.append("slug", formData.get("slug").trim() || "");
     formData.append("category_id", formData.get("category_id"));
     formData.append("status", formData.get("status"));
 
-    // Nếu có ảnh thumbnail, thêm vào FormData
     let thumbnailInput = document.querySelector("input[name='thumbnail']");
     if (thumbnailInput.files.length > 0) {
         formData.append("thumbnail", thumbnailInput.files[0]);
@@ -204,6 +200,92 @@ function prepareBlogData() {
     console.log("FormData gửi đi:", formData);
     return formData;
 }
+
+
+$(document).ready(function () {
+    $(".delete-btn").click(function () {
+        let blogId = $(this).data("id");
+
+        Swal.fire({
+            title: "Bạn có chắc chắn muốn xóa?",
+            text: "Hành động này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Xóa ngay!",
+            cancelButtonText: "Hủy"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/admin/blogs/${blogId}`,
+                    type: "DELETE",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire("Đã xóa!", response.message, "success");
+                            $(`button[data-id="${blogId}"]`).closest("tr").remove();
+                        } else {
+                            Swal.fire("Lỗi!", response.message, "error");
+                        }
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+                        Swal.fire("Lỗi!", "Không thể xóa bài viết.", "error");
+                    }
+                });
+            }
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.restore-value').forEach(button => {
+        button.addEventListener('click', function () {
+            let blogId = this.getAttribute('data-id');
+
+            Swal.fire({
+                title: "Khôi phục bài viết?",
+                text: "Bài viết sẽ được khôi phục lại danh sách chính!",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Khôi phục",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/blogs/${blogId}/restore`, { 
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            "Content-Type": "application/json"
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire("Thành công!", data.message, "success");
+                                document.querySelector(`button[data-id="${blogId}"]`).closest("tr").remove();
+                            } else {
+                                Swal.fire("Lỗi!", data.message, "error");
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi:', error);
+                            Swal.fire("Lỗi!", "Có lỗi xảy ra khi khôi phục.", "error");
+                        });
+                }
+            });
+        });
+    });
+});
+
+
+
+
 
 
 
