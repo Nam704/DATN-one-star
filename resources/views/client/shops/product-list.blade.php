@@ -1,7 +1,11 @@
 
 @foreach ($products as $product)
-
-    <div class="col-lg-4 col-md-4 col-12 ">
+@php
+$price = $product->variants->isNotEmpty() && $product->variants->first()->importDetails->isNotEmpty()
+    ? $product->variants->first()->importDetails->first()->expected_price
+    : 0;
+@endphp
+    <div class="col-lg-4 col-md-4 col-12 pro" data-price="{{ $price }}">
         <div class="single_product">
             <div class="product_name grid_name">
                 <h3><a href="product-details.html">{{ $product->name }}</a></h3>
@@ -42,11 +46,11 @@
                         <div class="price_box">
                             <span class="current_price">
                                 @if ($product->variants->isNotEmpty() && $product->variants->first()->importDetails->isNotEmpty())
-                                    <span class="current_price">
+                                    <span>
                                         {{ number_format($product->variants->first()->importDetails->first()->expected_price, 0, ',', '.') }}đ
                                     </span>
                                 @else
-                                    <span class="current_price">Giá chưa cập nhật</span>
+                                    <span>Giá chưa cập nhật</span>
                                 @endif
                             </span>
                         </div>

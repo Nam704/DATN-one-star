@@ -82,19 +82,20 @@
                     <button data-role="grid_list" type="button" class="btn-list" data-toggle="tooltip"
                         title="List"></button>
                 </div>
-                <div class="niceselect_option">
-                    <form class="select_option" action="#">
-                        <select name="orderby" id="short">
-                            <option selected value="1">Sort by average rating</option>
-                            <option value="2">Sort by popularity</option>
-                            <option value="3">Sort by newness</option>
-                            <option value="4">Sort by price: low to high</option>
-                            <option value="5">Sort by price: high to low</option>
-                            <option value="6">Product Name: A→Z</option>
-                            <option value="7">Product Name: Z→A</option>
+                <div class="niceselect_option2">
+                    <div class="mb-3">
+                        <label for="orderby" class="form-label">Sắp xếp theo</label>
+                        <select name="orderby" id="orderby" class="form-select">
+                            <option value="default">Mặc định</option>
+                            <option value="price_asc">Giá: thấp đến cao</option>
+                            <option value="price_desc">Giá: cao đến thấp</option>
+                            <option value="name_asc">Tên: A → Z</option>
+                            <option value="name_desc">Tên: Z → A</option>
                         </select>
-                    </form>
+                    </div>
                 </div>
+
+
                 <div class="page_amount">
                     <p>Showing 1–9 of 21 results</p>
                 </div>
@@ -189,7 +190,7 @@
         if (maxPrice !== '') params.append('max_price', maxPrice);
 
         // Lấy giá trị sắp xếp nếu có
-        let sortEl = document.getElementById('short');
+        let sortEl = document.getElementById('orderby');
         if (sortEl && sortEl.value) {
             params.append('orderby', sortEl.value);
         }
@@ -222,5 +223,26 @@
             sortSelect.addEventListener('change', fetchFilteredProducts);
         }
     });
+    document.getElementById('orderby').addEventListener('change', fetchFilteredProducts);
+
 </script>
 @endsection
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const orderBySelect = document.getElementById("orderby");
+        const productList = document.getElementById("product-list");
+
+        orderBySelect.addEventListener("change", function () {
+            let products = Array.from(document.querySelectorAll(".pro"));
+
+            if (this.value === "price_asc") {
+                products.sort((a, b) => a.getAttribute("data-price") - b.getAttribute("data-price"));
+            } else if (this.value === "price_desc") {
+                products.sort((a, b) => b.getAttribute("data-price") - a.getAttribute("data-price"));
+            }
+
+            productList.innerHTML = "";
+            products.forEach(product => productList.appendChild(product));
+        });
+    });
+</script>
