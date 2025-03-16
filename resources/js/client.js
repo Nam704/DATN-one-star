@@ -10,6 +10,21 @@ $(document).ready(function () {
         var id = $(this).data("id");
         removeFromCart(id, csrfToken);
     });
+    // Lắng nghe sự kiện trên kênh private
+    window.Echo.private(`notifications.${user.id}`).listen(
+        "OrderNotification",
+        (event) => {
+            Toastify({
+                text: `New notification: ${event.message}`,
+                duration: 3000, // Hiển thị trong 3 giây
+                gravity: "top", // Vị trí: trên cùng
+                position: "right", // Vị trí: bên phải
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true, // Dừng khi hover vào popup
+                close: true, // Tự động đóng sau khi hiển thị
+            }).showToast();
+        }
+    );
 });
 function removeFromCart(id_variant, token) {
     $.ajax({

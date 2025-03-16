@@ -35,18 +35,17 @@
                 </a>
             </li>
 
-
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false" aria-controls="sidebarPages"
                     class="side-nav-link">
                     <i class="ri-pages-line"></i>
-                    <span> Oders </span>
+                    <span>Order </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarPages">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="pages-starter.html">List</a>
+                            <a href="{{ route('admin.orders.list') }}">List</a>
                         </li>
 
                     </ul>
@@ -147,8 +146,8 @@
             </li>
 
             <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false" aria-controls="sidebarCharts"
-                    class="side-nav-link">
+                <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false"
+                    aria-controls="sidebarCharts" class="side-nav-link">
                     <i class="ri-donut-chart-fill"></i>
                     <span> Brand </span>
                     <span class="menu-arrow"></span>
@@ -173,7 +172,7 @@
                 <div class="collapse" id="sidebarForms">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{ route('admin.categories.listCategory')}}">List</a>
+                            <a href="{{ route('admin.categories.listCategory') }}">List</a>
                         </li>
 
                     </ul>
@@ -181,8 +180,8 @@
             </li>
 
             <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false" aria-controls="sidebarTables"
-                    class="side-nav-link">
+                <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false"
+                    aria-controls="sidebarTables" class="side-nav-link">
                     <i class="ri-table-line"></i>
                     <span> Attribute </span>
                     <span class="menu-arrow"></span>
@@ -277,7 +276,6 @@
                     </ul>
                 </div>
             </li>
-
 
         </ul>
         <!--- End Sidemenu -->

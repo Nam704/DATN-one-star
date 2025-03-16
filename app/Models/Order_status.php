@@ -14,4 +14,8 @@ class Order_status extends Model
     {
         return $this->hasMany(Order::class, 'id_order_status');
     }
+    public function nextStatus()
+    {
+        return $this->belongsTo(Order_status::class, 'next_status_id');
+    }
 }

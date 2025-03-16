@@ -28,7 +28,14 @@ class Order extends Model
         "id_voucher",
 
     ];
-
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+    public function address()
+    {
+        return $this->belongsTo(Address::class, 'id_address');
+    }
     // Quan hệ với bảng trạng thái đơn hàng
     public function orderStatus()
     {
@@ -63,7 +70,7 @@ class Order extends Model
                             $query->select('id', 'sku', 'id_product')
                                 ->with([
                                     "product" => function ($query) {
-                                        $query->select('id', 'name', 'image_primary')
+                                        $query->select('id', 'name', 'image_primary', 'id_brand', 'id_category')
                                             ->with([
                                                 "Category" => function ($query) {
                                                     $query->select('id', 'name');
@@ -76,6 +83,7 @@ class Order extends Model
                                     "images" => function ($query) {
                                         $query->select('id', 'id_product_variant', 'url');
                                     },
+                                    "attributeValues"
 
                                 ]);
                         }

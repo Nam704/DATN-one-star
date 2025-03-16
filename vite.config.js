@@ -13,6 +13,8 @@ export default defineConfig({
                 "resources/js/employee.js",
                 "resources/js/user.js",
                 "resources/js/client.js",
+                "resources/js/order.js",
+                "resources/js/clientDetail.js",
             ],
             refresh: true,
         }),

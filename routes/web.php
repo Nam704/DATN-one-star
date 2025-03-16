@@ -82,6 +82,12 @@ Route::prefix('auth/')->name('auth.')->group(
 
 Route::prefix('admin')->name('admin.')->group(
     function () {
+        Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
+            Route::get('list', 'list')->name('list');
+            Route::post('update-list', 'update');
+            Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus');
+            Route::get('detail/{id}', 'detail')->name('detail');
+        });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
@@ -278,6 +284,7 @@ Route::prefix('client')->name('client.')->group(
             function () {
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detail')->name('detail');
+                Route::get('/check-order', 'check')->name('check');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(

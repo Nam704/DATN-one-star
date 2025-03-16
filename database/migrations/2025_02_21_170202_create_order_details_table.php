@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('id_variant')->constrained('product_variants')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);
-            $table->decimal('total', 10, 2);
+            $table->decimal('total', 15, 2);
             $table->timestamps();
         });
     }

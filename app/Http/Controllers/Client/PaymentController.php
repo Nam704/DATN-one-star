@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Transaction;
+use App\Services\NotificationService;
 
 class PaymentController extends Controller
 {
+    protected $orderService;
+    function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
     public function handleVnpayReturn(Request $request)
     {
         $orderId = substr($request->get('vnp_TxnRef'), 10); // Cắt bỏ timestamp, lấy ID đơn hàng
@@ -23,8 +30,19 @@ class PaymentController extends Controller
         if ($request->get('vnp_ResponseCode') == '00') {
             $order->update([
                 'payment_status' => 'paid',
-                'status' => 'processing' // Cập nhật trạng thái đơn hàng
+                // 'status' => 'processing' 
             ]);
+            $dataNotification = [
+                'title' => 'Update Order Paid',
+                'message' => "Update Order Paid, vui lòng kiểm tra và xác nhận!",
+                'from_user_id' => $order->id_user,
+                'to_user_id' => null,
+                'type' => 'orders',
+                'status' => 'unread',
+                'goto_id' => $order->id,
+            ];
+            // dd($dataNotification);
+            $this->notificationService->sendPrivate($dataNotification);
             Transaction::create(
                 [
                     "txn_ref" => $request->get('vnp_TxnRef'),
