@@ -25,6 +25,11 @@ class Voucher extends Model
         'applies_to',
     ];
 
+     // Cast applies_to thành mảng
+    //  protected $casts = [
+    //     'applies_to' => 'array',
+    // ];
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'id_voucher');
