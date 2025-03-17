@@ -91,23 +91,7 @@
                     </ul>
                 </div>
             </li>
-            {{-- blogs --}}
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
-                    aria-controls="sidebarPagesAuth" class="side-nav-link">
-                    <i class="mdi mdi-post"></i>
-                    <span> Blogs </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarPagesAuth">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.blogs.index') }}">Danh sách bài viết</a>
-                        </li>
-
-                    </ul>
-                </div>
-            </li>
+            
 
             <li class="side-nav-title">Components</li>
 
@@ -149,6 +133,42 @@
                     </ul>
                 </div>
             </li>
+
+            {{-- blogs --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false"
+                    aria-controls="sidebarThirdLevel" class="side-nav-link">
+                    <i class="mdi mdi-post"></i>
+                    <span> Blogs </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarThirdLevel">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.blogs.index') }}">Danh sách bài viết</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
+            {{-- contact --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
+                    aria-controls="sidebarPagesAuth" class="side-nav-link">
+                    <i class="mdi mdi-card-account-mail"></i>
+                    <span> Contacts </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPagesAuth">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.contacts.index') }}">Danh sách liên hệ</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
                     class="side-nav-link">

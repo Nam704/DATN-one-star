@@ -10,7 +10,7 @@
                     <div class="breadcrumb_content">
                         <ul>
                             <li><a href="index.html">Trang chủ</a></li>
-                            <li>Contact Us</li>
+                            <li>Liên hệ</li>
                         </ul>
                     </div>
                 </div>
@@ -25,41 +25,56 @@
             <div class="row">
                 <div class="col-lg-6 col-md-12">
                     <div class="contact_message content">
-                        <h3>contact us</h3>
-                        <p>Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum. Mirum est
-                            notare quam littera gothica, quam nunc putamus parum claram anteposuerit litterarum formas
-                            human. qui sequitur mutationem consuetudium lectorum. Mirum est notare quam</p>
+                        <h3>Liên hệ với chúng tôi</h3>
+                        <p>Chúng tôi ở đây để giúp đỡ và trả lời bất kỳ câu hỏi nào bạn có thể có. Hãy cho chúng tôi biết về
+                            vấn đề của bạn để chúng tôi có thể giúp bạn nhanh hơn. Chúng tôi mong muốn được lắng nghe từ
+                            bạn.</p>
                         <ul>
-                            <li><i class="fa fa-fax"></i> Address : No 40 Baria Sreet 133/2 NewYork City</li>
-                            <li><i class="fa fa-phone"></i> <a href="#">Infor@roadthemes.com</a></li>
-                            <li><i class="fa fa-envelope-o"></i><a href="tel:0(1234)567890">0 (1234) 567 890</a> </li>
+                            <li><i class="fa fa-fax"></i> Địa chỉ : FPT Polytechnic, đường Trịnh Văn Bô, Phương Canh, Nam Từ
+                                Liêm, Hà Nội</li>
+                            <li><i class="fa fa-envelope-o"></i> <a href="#">Onestar@gmail.com</a></li>
+                            <li><i class="fa fa-phone"></i><a href="tel:0(1234)567890">0397183920</a> </li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-12">
                     <div class="contact_message form">
-                        <h3>Tell us your project</h3>
-                        <form id="contact-form" method="POST" action="https://htmldemo.net/autima/autima/assets/mail.php">
+                        <h3>Gửi đến chúng tôi</h3>
+                        @if (session('message'))
+                            <div class="alert alert-primary" role="alert">
+                                {{ session('message') }}
+                            </div>
+                        @endif
+                        @if (session('message_error'))
+                            <div class="alert alert-danger" role="alert">
+                                {{ session('message_error') }}
+                            </div>
+                        @endif
+                        <form action="{{ route('client.contact.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
                             <p>
-                                <label> Your Name (required)</label>
+                                <label> Tên của bạn </label>
                                 <input name="name" placeholder="Name *" type="text">
+                                @error('name')
+                                <p class="text-danger">{{ $message }}</p>
+                            @enderror
                             </p>
                             <p>
-                                <label> Your Email (required)</label>
+                                <label> Email</label>
                                 <input name="email" placeholder="Email *" type="email">
-                            </p>
-                            <p>
-                                <label> Subject</label>
-                                <input name="subject" placeholder="Subject *" type="text">
+                                @error('email')
+                                <p class="text-danger">{{ $message }}</p>
+                            @enderror
                             </p>
                             <div class="contact_textarea">
-                                <label> Your Message</label>
+                                <label> Nội dung</label>
                                 <textarea placeholder="Message *" name="message" class="form-control2"></textarea>
+                                @error('message')
+                                    <p class="text-danger">{{ $message }}</p>
+                                @enderror
                             </div>
-                            <button type="submit"> Send</button>
-                            <p class="form-messege"></p>
+                            <button type="submit"> Gửi</button>
                         </form>
-
                     </div>
                 </div>
             </div>
