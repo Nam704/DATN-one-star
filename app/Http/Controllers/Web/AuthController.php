@@ -101,7 +101,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'id_role' => 3 // Regular user role
+            'id_role' => 2 // Regular user role
         ]);
 
         Register::dispatch($user);

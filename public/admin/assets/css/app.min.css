@@ -4439,7 +4439,11 @@ fieldset:disabled .btn {
 }
 
 .dropdown-menu {
+<<<<<<< HEAD
+    --tz-dropdown-zindex: 1000;
+=======
     --tz-dropdown-zindex: 1050;
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
     --tz-dropdown-min-width: 10rem;
     --tz-dropdown-padding-x: 0;
     --tz-dropdown-padding-y: 0.25rem;
@@ -17342,6 +17346,8 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     z-index: 1060
 }
 
+<<<<<<< HEAD
+=======
 #notification_simplebar {
     position: relative;
     max-height: 300px;
@@ -17350,6 +17356,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     /* Kích hoạt cuộn dọc */
 }
 
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
 .notification-list {
     margin-left: 0
 }
@@ -17368,9 +17375,13 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 }
 
 .notification-list .notify-item {
+<<<<<<< HEAD
+    padding: 10px 20px
+=======
 
     padding: 10px 20px;
     transition: all 0.3s ease-in-out;
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
 }
 
 .notification-list .notify-item.unread-noti {
@@ -17433,6 +17444,8 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     display: block
 }
 
+<<<<<<< HEAD
+=======
 /* message-list start*/
 .message-list {
     margin-left: 0
@@ -17517,6 +17530,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 
 /* message-list end*/
 
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
 .profile-dropdown {
     min-width: 170px
 }
@@ -21946,18 +21960,18 @@ span.flatpickr-weekday {
 }
 
 .select2-container--default .select2-results__option--selected {
-    background-color: var(--tz-tertiary-bg)
+    background-color: #02a8b5
 }
 
 .select2-container--default .select2-search--dropdown {
     padding: 10px;
-    background-color: var(--tz-secondary-bg)
+    background-color: #02a8b5
 }
 
 .select2-container--default .select2-search--dropdown .select2-search__field {
     outline: 0;
     border: 1px solid var(--tz-border-color);
-    background-color: var(--tz-secondary-bg);
+    background-color: #02a8b5;
     color: var(--tz-body-color);
     border-radius: .25rem
 }
@@ -21967,13 +21981,13 @@ span.flatpickr-weekday {
 }
 
 .select2-container--default .select2-results__option[aria-selected=true] {
-    background-color: var(--tz-secondary-bg);
+    background-color: #02a8b5;
     color: var(--tz-tertiary-color)
 }
 
 .select2-container--default .select2-results__option[aria-selected=true]:hover {
-    background-color: var(--tz-primary);
-    color: #fff
+    background-color: #02a8b5;
+    color: #000
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
@@ -22004,7 +22018,7 @@ span.flatpickr-weekday {
 .select2-container .select2-selection--multiple .select2-selection__choice {
     background-color: var(--tz-primary);
     border: none;
-    color: #fff;
+    color: #212529;
     border-radius: 3px;
     padding: 0 7px 0 0;
     margin-top: 6px
@@ -23158,4 +23172,51 @@ span.flatpickr-weekday {
     padding: .5rem .75rem
 }
 
+<<<<<<< HEAD
 /*# sourceMappingURL=app.min.css.map */
+
+.bootstrap-tagsinput {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    padding: 4px 7px 4px;
+    width: 100%;
+    background-color: #fff;
+    border-color: #ccc
+}
+
+.bootstrap-tagsinput input {
+    color: #666f7b
+}
+
+.bootstrap-tagsinput input::-webkit-input-placeholder {
+    color: #666f7b
+}
+
+.bootstrap-tagsinput input::-moz-placeholder {
+    color: #666f7b
+}
+
+.bootstrap-tagsinput input:-ms-input-placeholder {
+    color: #666f7b
+}
+
+.bootstrap-tagsinput input::-ms-input-placeholder {
+    color: #666f7b
+}
+
+.bootstrap-tagsinput input::placeholder {
+    color: #666f7b
+}
+
+.bootstrap-tagsinput .label-info {
+    background-color: #3bc0c3;
+    display: inline-block;
+    font-size: 11px;
+    margin: 3px 1px;
+    padding: 0 5px;
+    border-radius: 3px;
+    font-weight: 600
+}
+=======
+/*# sourceMappingURL=app.min.css.map */
+>>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899

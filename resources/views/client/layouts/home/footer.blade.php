@@ -5,7 +5,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="widgets_container contact_us">
                         <div class="footer_logo">
-                            <a href="#"><img src=" {{ asset('client/assets/img/logo/logo.png') }}" alt=""></a>
+                            <a href="{{ route('client.home') }}"><img src="{{ asset('client/assets/img/logo/logo-2.png')}}" style="width: 300px; margin-left: 20px;" alt="logo"></a>
                         </div>
                         <div class="footer_contact">
                             <p>We are a team of designers and developers that

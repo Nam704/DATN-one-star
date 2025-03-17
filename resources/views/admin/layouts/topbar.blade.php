@@ -136,22 +136,23 @@
 
                     <!-- All -->
                     @if (auth()->user())
-                    <a href="{{ route('auth.getProfileAdmin', ['id' => auth()->user()->id]) }}"
-                        class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
-                        View All
-                    </a>
+                        <a href="{{ route('auth.getProfileAdmin', ['id' => auth()->user()->id]) }}"
+                            class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
+                            View All
+                        </a>
                     @endif
 
                 </div>
             </li>
 
             <li class="dropdown message-list">
-                <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
-                    aria-haspopup="false" aria-expanded="false">
+                <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#"
+                    role="button" aria-haspopup="false" aria-expanded="false">
                     <i class="ri-mail-line fs-22"></i>
                     <span id="message_badge" class="noti-icon-badge badge text-bg-success">5</span>
                 </a>
-                <div id="message_list" class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg py-0">
+                <div id="message_list"
+                    class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg py-0">
                     <div class="p-2 border-top-0 border-start-0 border-end-0 border-dashed border">
                         <div class="row align-items-center">
                             <div class="col">
@@ -191,28 +192,31 @@
             </li>
 
             <li class="dropdown">
-                <a class="nav-link dropdown-toggle arrow-none nav-user" data-bs-toggle="dropdown" href="#" role="button"
-                    aria-haspopup="false" aria-expanded="false">
+                <a class="nav-link dropdown-toggle arrow-none nav-user" data-bs-toggle="dropdown" href="#"
+                    role="button" aria-haspopup="false" aria-expanded="false">
                     <span class="account-user-avatar">
 
 
                         {{-- <img src="{{ asset('admin/assets/images/users/avatar-1.jpg') }}" alt="user-image"
                             width="32" class="rounded-circle"> --}}
-                        @if(Auth::check())
-                        <img src="{{ Auth::user()->profile_image 
-                                ? asset('storage/' . Auth::user()->profile_image) 
-                                : asset('storage/avatars/default-avatar.png') }}" alt="Profile Image" width="32"
-                            class="rounded-circle">
+                        @if (Auth::check())
+                            <img src="{{ Auth::user()->profile_image
+                                ? asset('storage/avatars/' . Auth::user()->profile_image)
+                                : asset('storage/avatars/default-avatar.png') }}"
+                                alt="Profile Image" width="32" class="rounded-circle">
                         @endif
+
 
                     </span>
                     <span class="d-lg-block d-none">
-                        <h5 class="my-0 fw-normal">@if(Auth::check())
-                            {{ Auth::user()->name }}
+                        <h5 class="my-0 fw-normal d-flex align-items-center gap-1">
+                            @if (Auth::check())
+                                <span class="text-overflow m-0 me-1" style="font-size:.9rem">{{ Auth::user()->name }}
+                                </span>
                             @else
-                            Guest
+                                <span class="text-overflow m-0 me-1" style="font-size:.9rem">Guest</span>
                             @endif
-                            <i class="ri-arrow-down-s-line d-none d-sm-inline-block align-middle"></i>
+                            <i class="ri-arrow-down-s-line d-sm-inline-block align-middle"></i>
                         </h5>
 
                     </span>
@@ -230,11 +234,11 @@
                     </a>
 
                     <!-- item-->
-                    {{-- <a href="pages-profile.html" class="dropdown-item">
-                        <i class="ri-settings-4-line fs-18 align-middle me-1"></i>
-                        <span>Settings</span>
+                    <a href="{{ route('client.home') }}" class="dropdown-item">
+                        <i class="mdi mdi-web fs-18 align-middle me-1"></i>
+                        <span>Website</span>
                     </a>
-
+                    {{--
                     <!-- item-->
                     <a href="pages-faq.html" class="dropdown-item">
                         <i class="ri-customer-service-2-line fs-18 align-middle me-1"></i>
