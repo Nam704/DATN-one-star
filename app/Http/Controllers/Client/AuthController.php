@@ -21,7 +21,7 @@ class AuthController extends Controller
         $data = [];
         $user = $this->userService->details();
         $addresses = $this->userService->getAddress($user);
-        $orders = $user->orders;
+        $orders = $user->orders()->orderBy("id", "DESC")->paginate(10);
         // return $data;
         return view('client.user.index', compact('user', 'addresses', 'orders'));
     }

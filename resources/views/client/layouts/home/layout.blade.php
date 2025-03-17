@@ -51,6 +51,10 @@
     <script>
         var userMeta = document.querySelector('meta[name="user-data"]').getAttribute('content');
         var user = userMeta ? JSON.parse(userMeta) : null;
+
+        var csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
     </script>
 
     <!-- JS
