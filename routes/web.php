@@ -146,6 +146,8 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
             Route::post('import-product', 'import')->name('importProduct');
             Route::get('detail/{id}', 'detail')->name('detail');
+            Route::get('stas/{id}', 'stas')->name('stas');
+            Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail');
         });
 
 
