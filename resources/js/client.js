@@ -3,7 +3,9 @@ import "./bootstrap";
 
 $(document).ready(function () {
     console.log("Client script loaded");
-
+    var csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
     getCart();
     $(document).on("click", ".delete_item", function (event) {
         event.preventDefault();

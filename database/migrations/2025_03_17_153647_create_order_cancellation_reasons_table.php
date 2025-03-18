@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->string('name', 100)->unique()->change();
+        Schema::create('order_cancellation_reasons', function (Blueprint $table) {
+            $table->id();
+            $table->string('reason');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('order_cancellation_reasons');
     }
 };

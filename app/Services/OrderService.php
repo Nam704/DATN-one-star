@@ -24,6 +24,25 @@ class OrderService
         $this->notificationService = $notificationService;
         // Constructor logic
     }
+    public function cancelOrder(Request $request, $orderId)
+    {
+        // $order = Order::findOrFail($orderId);
+
+        // if ($order->status == 'canceled' || $order->status == 'completed') {
+        //     return response()->json(['message' => 'Không thể hủy đơn hàng này'], 400);
+        // }
+
+        // $reason = OrderCancellationReason::findOrFail($request->reason_id);
+
+        // $order->update(['status' => 'canceled']);
+
+        // OrderCancellation::create([
+        //     'order_id' => $order->id,
+        //     'reason_id' => $reason->id,
+        // ]);
+
+        // return response()->json(['message' => 'Đơn hàng đã được hủy thành công', 'reason' => $reason->reason]);
+    }
     function listStatus()
     {
         return $this->orderStatus->all();
