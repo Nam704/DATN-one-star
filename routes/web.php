@@ -32,6 +32,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\web\VoucherController;
 use App\Models\Voucher;
 
@@ -91,6 +92,11 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+
+        Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
+            Route::get('product-statistic','productStatistics')->name('productStatistics');
+        });
+
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
             Route::post('create-product', 'createByExcel')->name('createProduct');
         });

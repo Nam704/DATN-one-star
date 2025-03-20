@@ -200,13 +200,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarMaps" aria-expanded="false" aria-controls="sidebarMaps"
                     class="side-nav-link">
                     <i class="ri-map-pin-line"></i>
-                    <span> Maps </span>
+                    <span>Statistics </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarMaps">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="maps-google.html">Google Maps</a>
+                            <a href="{{route('admin.statistics.productStatistics')}}">Thống kê sản phẩm</a>
                         </li>
 
                     </ul>

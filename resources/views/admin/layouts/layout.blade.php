@@ -59,7 +59,7 @@
 
     @stack('scripts')
     <script>
-        const currentUserId = {{ auth()->id() }};
+        const currentUserId = "{{ auth()->id() }}";
     </script>
     @vite('resources/js/app.js')
     @vite('resources/js/public.js')
