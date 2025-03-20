@@ -24,6 +24,15 @@ class OrderController extends Controller
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
     }
+    public function cancel(Request $request)
+    {
+        // $order = $this->orderService->cancell($request);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đã hủy đơn hàng',
+
+        ]);
+    }
     function  check()
     {
         $data = [
@@ -40,8 +49,9 @@ class OrderController extends Controller
     public function detail($id)
     {
         $order = $this->orderService->getOrderDetail($id);
+        $listReason = $this->orderService->listReason();
         // return $order;
-        return view('client.orders.detail', compact('order'));
+        return view('client.orders.detail', compact('order', 'listReason'));
         // dd($order);
     }
     public function store(Request $request)

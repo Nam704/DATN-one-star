@@ -15,6 +15,7 @@ export default defineConfig({
                 "resources/js/client.js",
                 "resources/js/order.js",
                 "resources/js/clientDetail.js",
+                "resources/js/orderClientDetail.js",
             ],
             refresh: true,
         }),

@@ -250,17 +250,17 @@ Route::prefix('client')->name('client.')->group(
         Route::controller(SearchController::class)->group(function () {
             Route::get('/search', [SearchController::class, 'search'])->name('search');
         });
-        Route::controller(OrderController::class)->group(function () {
-            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-            Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
-            Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-            Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
-        });
-        //cổng thanh toán
-        Route::controller(PaymentController::class)->group(function () {
-            Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
-            Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
-        });
+        // Route::controller(OrderController::class)->group(function () {
+        //     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        //     Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
+        //     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        //     Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+        // });
+        // //cổng thanh toán
+        // Route::controller(PaymentController::class)->group(function () {
+        //     Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
+        //     Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
+        // });
         Route::prefix('carts')->controller(CartControllerSession::class)->name('carts.')->group(
             function () {
                 Route::get('/get',  'getCart');
@@ -285,6 +285,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detail')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
+                Route::post('/cancel', 'cancel')->name('cancel');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(

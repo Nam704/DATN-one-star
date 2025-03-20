@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class OrderCancellationReason extends Model
 {
     use HasFactory;
+    protected $table = 'order_cancellation_reasons';
     protected $fillable = ['reason'];
     public function orderCancellations()
     {

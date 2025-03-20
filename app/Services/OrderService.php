@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Order_status;
+use App\Models\OrderCancellationReason;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -12,34 +13,41 @@ class OrderService
     protected $orderStatus;
     protected $paymentService;
     protected $notificationService;
+    protected $orderCancellationReason;
     public function __construct(
         Order $order,
         PaymentService $paymentService,
         Order_status $orderStatus,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        OrderCancellationReason $orderCancellationReason
     ) {
+        $this->orderCancellationReason = $orderCancellationReason;
         $this->orderStatus = $orderStatus;
         $this->paymentService = $paymentService;
         $this->order = $order;
         $this->notificationService = $notificationService;
         // Constructor logic
     }
+    function listReason()
+    {
+        return $this->orderCancellationReason->query()->select('id', 'reason')->orderBy('id', 'DESC')->get();
+    }
     public function cancelOrder(Request $request, $orderId)
     {
-        // $order = Order::findOrFail($orderId);
+        $order = Order::findOrFail($orderId);
 
-        // if ($order->status == 'canceled' || $order->status == 'completed') {
-        //     return response()->json(['message' => 'Không thể hủy đơn hàng này'], 400);
-        // }
+        if ($order->status == 'canceled' || $order->status == 'completed') {
+            return null;
+        }
 
-        // $reason = OrderCancellationReason::findOrFail($request->reason_id);
+        $reason = OrderCancellationReason::findOrFail($request->reason_id);
 
-        // $order->update(['status' => 'canceled']);
+        $order->update(['status' => 'canceled']);
 
-        // OrderCancellation::create([
-        //     'order_id' => $order->id,
-        //     'reason_id' => $reason->id,
-        // ]);
+        OrderCancellation::create([
+            'order_id' => $order->id,
+            'reason_id' => $reason->id,
+        ]);
 
         // return response()->json(['message' => 'Đơn hàng đã được hủy thành công', 'reason' => $reason->reason]);
     }
