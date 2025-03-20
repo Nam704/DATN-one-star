@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
 use App\Http\Controllers\Web\SupplierController;
+use App\Http\Controllers\Web\ThongKe;
 use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Web\ImageController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Web\ThongKeController;
 use App\Http\Controllers\web\VoucherController;
 use App\Models\Voucher;
 
@@ -99,7 +101,11 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
             }
         );
+        Route::prefix('thongke')->name('thongke.')->controller(ThongKeController::class)->group(function () {
+                Route::get('/statistics', 'statistics')->name('statistics');
+                Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
 
+            });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
             Route::get('list-category',  'listCategory')->name('listCategory');
