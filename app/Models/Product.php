@@ -92,7 +92,26 @@ class Product extends Model
 
         ])->append('attributes')
             ->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status');
-    }
+    }   
+
+//     public static function getProductWithDetails($id)
+// {
+//     return self::where('id', $id)->with([
+//         'variants' => function ($query) {
+//             $query->select('id', 'id_product', 'sku', 'status', 'quantity', 'price')
+//                 ->with([
+//                     'images' => function ($query) {
+//                         $query->select('id', 'id_product_variant', 'url');
+//                     },
+//                     'attributeValues'
+//                 ]);
+//         },
+//         'category:id,name',
+//         'brand:id,name',
+//         'product_albums:id,id_product,image_path',
+//     ])->first()->append('attributes');
+// }
+
     public function getPriceRange()
     {
         return $this->variants()
@@ -159,6 +178,9 @@ class Product extends Model
         return DB::table('products')
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant') 
+            // ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+            // ->where('products.status', '=', 'active')
+            // ->where('orders.id_order_status', '=', 4) //đặt hàng thành công
             ->select(
                 'products.id',
                 'products.name',
@@ -168,7 +190,7 @@ class Product extends Model
             ->where('products.status', '=', 'active')
             ->groupBy('products.id', 'products.name', 'products.image_primary')
             ->orderBy('total_sold', 'asc')
-            ->limit(10)
+            ->limit(8)
             ->get();
     }
 

@@ -114,7 +114,9 @@ class ProductController extends Controller
     public function edit($id)
     {
         // $product = Product::with(['variants.images'])->findOrFail($id);
-        $product = Product::getProductWithDetails($id)->findOrFail($id);
+        // $product = Product::getProductWithDetails($id)->findOrFail($id);
+        $product = Product::findOrFail($id);
+        $product->getProductWithDetails();
 
         $product->variants = $product->variants->map(function ($variant) {
             return [
@@ -163,7 +165,9 @@ class ProductController extends Controller
     public function stas($id)
     {
         // Lấy thông tin sản phẩm với các biến thể
-        $product = Product::getProductWithDetails($id)->findOrFail($id);
+        // $product = Product::getProductWithDetails($id)->findOrFail($id);
+        $product = Product::findOrFail($id);
+        $product->getProductWithDetails();
 
         // Map các biến thể sản phẩm
         $product->variants = $product->variants->map(function ($variant) {
@@ -201,7 +205,7 @@ class ProductController extends Controller
             });
 
         // Thống kê biến thể sản phẩm
-        $variantStats = $orderDetails->groupBy('id_product_variant')
+        $variantStats = $orderDetails->groupBy('id_variant')
             ->map(function ($orders, $variantId) {
                 return [
                     'variant_id' => $variantId,

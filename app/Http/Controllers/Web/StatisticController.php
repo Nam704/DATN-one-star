@@ -42,18 +42,18 @@ class StatisticController extends Controller
             $top_view_products = $this->product->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
             $top_comment_products = [
                 [
-                    'name' => 'Product 1',
-                    'image_primary' => 'product1.jpg',
+                    'name' => 'Iphone 14',
+                    'image_primary' => '/storage/products/1742179523_67d78cc366b50.png',
                     'total_comments' => 100,
                 ],
                 [
-                    'name' => 'Product 2',
-                    'image_primary' => 'product2.jpg',
+                    'name' => 'Google Pixel 7 Pro',
+                    'image_primary' => '/storage/products/1742179523_67d78cc37b4e1.png',
                     'total_comments' => 80,
                 ],
                 [
-                    'name' => 'Product 3',
-                    'image_primary' => 'product3.jpg',
+                    'name' => 'Samsung Galaxy A34 5G',
+                    'image_primary' => '/storage/products/1742179523_67d78cc383c82.png',
                     'total_comments' => 60,
                 ]
             ];
