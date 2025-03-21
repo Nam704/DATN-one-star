@@ -52,45 +52,16 @@
                     </div>
                 </div>
             </div> <!-- end col-->
-
         </div>
+
         <div class="row">
-            <div class="col-xl-6">
+            <div class="col-lg-6">
                 <div class="card">
-                    <div class="card-body">
-                        <h4 class="header-title">Simple Donut Chart</h4>
-                        <div dir="ltr">
-                            <div id="simple-donut" class="apex-charts" data-colors="#3bc0c3,#6c757d,#4489e4,#d03f3f,#edc755"></div>
-                        </div>
-                    </div>
-                    <!-- end card body-->
-                </div>
-                <!-- end card -->
-            </div>
-        </div>
-
-        {{-- <div class="row">
-            <div class="col-lg-8">
-
-            </div> <!-- end col-->
-            <div class="col-lg-4">
-
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1 overflow-hidden">
-                                <h4 class="fs-22 fw-semibold">69.25%</h4>
-                                <p class="text-uppercase fw-medium text-muted text-truncate mb-0"> US Dollar Share</p>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <div id="us-share-chart" class="apex-charts" dir="ltr"></div>
-                            </div>
-                        </div>
-                    </div><!-- end card body -->
+                    <canvas id="orderStatusChart"></canvas>
                 </div> <!-- end card-->
             </div> <!-- end col-->
 
-        </div> --}}
+        </div>
         <!-- end row -->
 
         <div class="row">
@@ -146,4 +117,38 @@
 
 @push('scripts')
     <x-admin.data-table-scripts />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var userId = {{ $user->id }}; // Lấy ID user từ blade template
+            console.log('userId');
+            fetch("{{ route('admin.users.getOrderStatusStats', '') }}/" + userId)
+                .then(response => response.json())
+                .then(data => {
+                    var ctx = document.getElementById("orderStatusChart").getContext("2d");
+
+                    new Chart(ctx, {
+                        type: "pie",
+                        data: {
+                            labels: ["Đã nhận hàng", "Hoàn hàng", "Hủy đơn hàng"],
+                            datasets: [{
+                                data: [data.received_orders, data.returned_orders, data
+                                    .cancelled_orders
+                                ],
+                                backgroundColor: ["#36A2EB", "#FFCE56", "#FF6384"]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: "top"
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error("Lỗi khi lấy dữ liệu:", error));
+        });
+    </script>
 @endpush

@@ -205,9 +205,22 @@ class UserContronler extends Controller
             ->groupBy('id_user')
             ->orderByDesc('total_spent')
             ->take(2)
-            ->with(['user:id,name,email']) 
+            ->with(['user:id,name,email'])
             ->get();
 
         return response()->json($topUsers);
+    }
+
+    public function getOrderStatusStats($id)
+    {
+        $orderStats = Order::where('id_user', $id)
+            ->selectRaw("
+            SUM(CASE WHEN id_order_status = 5 THEN 1 ELSE 0 END) AS received_orders,
+            SUM(CASE WHEN id_order_status = 6 THEN 1 ELSE 0 END) AS returned_orders,
+            SUM(CASE WHEN id_order_status = 7 THEN 1 ELSE 0 END) AS cancelled_orders
+        ")
+            ->first();
+
+        return response()->json($orderStats);
     }
 }

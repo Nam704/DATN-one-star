@@ -61,12 +61,7 @@
                                     tabindex="0">
                                     {{-- Thông tin cá nhân --}}
                                     <div class="profile-desk">
-                                        {{-- <h5 class="text-uppercase fs-17 text-dark">
-                                            {{ $user->name }}
-                                        </h5>
-                                        <p class="text-muted fs-16">
-                                            Đã tham gia : {{ $user->created_at->format('d/m/Y') }}
-                                        </p> --}}
+                                        
 
                                         <h5 class="mt-4 fs-17 text-dark">Thông tin tài khoản</h5>
                                         <table class="table table-condensed mb-0 border-top">

@@ -257,17 +257,20 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <table border="1">
+                            <table id="fixed-header-datatable"
+                                class="table table-striped dt-responsive nowrap table-striped  w-100">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
                                         <th>Tên</th>
                                         <th>Email</th>
                                         <th>Tổng Tiền Chi Tiêu</th>
                                     </tr>
                                 </thead>
-                                <tbody id="topSpendersList"></tbody>
-                            </table>>
+                                <tbody id="topSpendersList">
+
+                                </tbody>
+                            </table>
+
                         </div>
                         <!-- end row-->
                     </div> <!-- end card-body -->
@@ -382,17 +385,16 @@
         });
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             fetch("{{ route('admin.users.topSpenders') }}")
                 .then(response => response.json())
                 .then(users => {
                     let html = "";
                     users.forEach(order => {
                         html += `<tr>
-                            <td>${order.id_user}</td>
                             <td>${order.user?.name || "N/A"}</td>
                             <td>${order.user?.email || "N/A"}</td>
-                            <td>${order.total_spent.toLocaleString()} VND</td>
+                            <td>${order.total_spent.toLocaleString("vi-VN")} VND</td>
                         </tr>`;
                     });
                     document.getElementById("topSpendersList").innerHTML = html;

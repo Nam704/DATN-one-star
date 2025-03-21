@@ -206,6 +206,7 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
             Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
             Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
+            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats');
         });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
