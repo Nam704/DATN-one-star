@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use App\Services\NotificationService;
 use App\Services\OrderService;
@@ -26,7 +27,9 @@ class OrderController extends Controller
     }
     public function cancel(Request $request)
     {
-        // $order = $this->orderService->cancell($request);
+        $order = $this->orderService->cancelOrder($request);
+        event(new OrderNotification($order));
+
         return response()->json([
             'status' => 200,
             'message' => 'Đã hủy đơn hàng',
@@ -80,7 +83,7 @@ class OrderController extends Controller
             "payment_status" => "pending",
             "id_ward" => $data["user"]["ward"] ?? null,
             "total" => $data["order"]["total"] ?? 0,
-            "id_order_status" => 1,
+            "status" => "Awaiting Payment",
             "id_voucher" => null,
         ];
 
@@ -95,7 +98,7 @@ class OrderController extends Controller
         }
         $dataFormatted['order_details'] = $order_details;
         $order = $this->orderService->store($dataFormatted);
-        Log::info($order);
+        // Log::info($order);
         if ($order) {
             if ($order->payment_method == 'vnpay') {
                 return $payment = $this->paymentService->vnpay_payment($order);

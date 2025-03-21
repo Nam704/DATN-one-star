@@ -5,7 +5,8 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="widgets_container contact_us">
                         <div class="footer_logo">
-                            <a href="#"><img src=" {{ asset('client/assets/img/logo/logo.png') }}" alt=""></a>
+                            <a href="#"><img src=" {{ asset('client/assets/img/logo/logo.png') }}"
+                                    alt=""></a>
                         </div>
                         <div class="footer_contact">
                             <p>We are a team of designers and developers that
@@ -76,7 +77,8 @@
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <div class="footer_payment text-right">
-                        <a href="#"><img src=" {{ asset('client/assets/img/icon/payment.png') }}" alt=""></a>
+                        <a href="#"><img src=" {{ asset('client/assets/img/icon/payment.png') }}"
+                                alt=""></a>
                     </div>
                 </div>
             </div>
@@ -208,11 +210,8 @@
 </div> --}}
 <!-- modal area end-->
 
-
-
-
 <!--news letter popup start-->
-<div class="newletter-popup">
+{{-- <div class="newletter-popup">
     <div id="boxes" class="newletter-container">
         <div id="dialog" class="window">
             <div id="popup2">
@@ -247,4 +246,4 @@
 
     </div>
     <!-- /.box -->
-</div>
+</div> --}}

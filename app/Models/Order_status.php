@@ -9,7 +9,7 @@ class Order_status extends Model
 {
     use HasFactory;
     protected $fillable = ['name'];
-
+    protected $table = 'order_statuses';
     public function orders()
     {
         return $this->hasMany(Order::class, 'id_order_status');

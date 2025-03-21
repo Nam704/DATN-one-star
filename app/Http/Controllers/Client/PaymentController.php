@@ -32,6 +32,10 @@ class PaymentController extends Controller
                 'payment_status' => 'paid',
                 // 'status' => 'processing' 
             ]);
+            $currentStatus = $order->orderStatus;
+            $nextStatus = $currentStatus->nextStatus;
+            $order->id_order_status = $nextStatus->id;
+            $order->save();
             $dataNotification = [
                 'title' => 'Update Order Paid',
                 'message' => "Update Order Paid, vui lòng kiểm tra và xác nhận!",
@@ -52,6 +56,7 @@ class PaymentController extends Controller
                 ]
 
             );
+
             return redirect()->route('client.user.myAccount')->with('success', 'Thanh toán thành công!');
             // return 'Thanh toán thành công!';
         } else {

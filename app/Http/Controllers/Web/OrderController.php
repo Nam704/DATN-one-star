@@ -24,7 +24,7 @@ class OrderController extends Controller
     {
         $statuses = $this->orderService->listStatus();
 
-        $orders = $this->orderService->getOrdersByStatus(1);
+        $orders = $this->orderService->getOrdersByStatus('Awaiting Payment');
         return view('admin.order.list', compact('orders', 'statuses'));
     }
     public function update(Request $request)

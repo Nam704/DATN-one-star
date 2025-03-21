@@ -36,32 +36,7 @@
                             </thead>
 
                             <tbody class="order_list">
-                                @foreach ($orders as $order)
-                                    <tr>
-                                        <td><input type="checkbox" name="selected_order[]" value="{{ $order->id }}"
-                                                class="import-checkbox"></td>
-                                        <td>
-                                            {{ $order->code }}
-                                        </td>
-                                        <td>
-                                            {{ $order->created_at }}
-                                        </td>
-                                        <td>
-                                            {{ $order->total }}
-                                        </td>
-                                        <td>
-                                            {{ $order->payment_method }} : {{ $order->payment_status }}
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('admin.orders.detail', $order->id) }}"
-                                                class="btn  btn-primary">Detail</a>
-                                            <a href="#" data-order-id="{{ $order->id }}"
-                                                class="btn btn-warning accept">Accept</a>
-                                            <a href="{{-- route('admin.orders.destroy',$order->id) --}}" class="btn  btn-danger">Reject</a>
-                                        </td>
 
-                                    </tr>
-                                @endforeach
                             </tbody>
                             <tfoot>
                                 <tr>
