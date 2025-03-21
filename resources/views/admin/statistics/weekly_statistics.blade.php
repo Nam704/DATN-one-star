@@ -1,6 +1,5 @@
-@extends('admin.layouts.layout')
-
-@section('content')
+@extends('admin.statistics.dashboard_statistics')
+@section('statistics-content')
     <div class="container-fluid">
         <!-- Header & Thông tin tuần -->
         <div class="text-center my-4">

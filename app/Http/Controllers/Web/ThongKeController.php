@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class ThongKeController extends Controller
 {
+    public function dashboardStatistics(){
+        return view('admin.statistics.dashboard_statistics');
+    }
     public function statistics(Request $request)
     {
         // Lấy ngày thống kê từ request, nếu không có thì dùng ngày hiện tại
@@ -20,24 +23,22 @@ class ThongKeController extends Controller
             ->whereDate('created_at', $date)
             ->count();
 
-        // Lấy ID của các trạng thái "Paid" và "Delivered"
-        // $paidStatusId = DB::table('order_statuses')
-        //     ->where('name', 'Paid')
-        //     ->value('id');
+        // Lấy ID của các trạng thái cần thiết
         $deliveredStatusId = DB::table('order_statuses')
             ->where('name', 'Delivered')
             ->value('id');
+        $pendingStatusId   = DB::table('order_statuses')
+            ->where('name', 'Pending')
+            ->value('id');
+        $cancelledStatusId = DB::table('order_statuses')
+            ->where('name', 'Cancelled')
+            ->value('id');
 
-        // Tổng doanh thu trong ngày
+        // Tổng doanh thu trong ngày (chỉ tính đơn Delivered)
         $totalRevenue = DB::table('orders')
             ->whereDate('created_at', $date)
-            ->whereIn('id_order_status', [$deliveredStatusId])
+            ->where('id_order_status', $deliveredStatusId)
             ->sum('total');
-
-        // Lấy ID của các trạng thái cần thiết
-        $pendingStatusId   = DB::table('order_statuses')->where('name', 'Pending')->value('id');
-        $deliveredStatusId = DB::table('order_statuses')->where('name', 'Delivered')->value('id');
-        $cancelledStatusId = DB::table('order_statuses')->where('name', 'Cancelled')->value('id');
 
         // Số đơn hàng theo từng trạng thái trong ngày
         $pendingOrders = DB::table('orders')
@@ -66,10 +67,7 @@ class ThongKeController extends Controller
             ->groupBy('order_statuses.name')
             ->get();
 
-
         // Thống kê sản phẩm bán chạy nhất trong ngày
-        // Giả sử bảng order_details có cột: id_order, id_product_variant, quantity
-        // Và bảng product_variants liên kết với products (với cột id_product)
         $productsSales = DB::table('order_details')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
@@ -81,6 +79,15 @@ class ThongKeController extends Controller
             ->limit(10)
             ->get();
 
+        // Top 10 người mua nhiều nhất trong ngày (chỉ tính các đơn Delivered)
+        $topCustomers = DB::table('orders')
+            ->select('id_user', 'user_name', DB::raw('SUM(total) as total_purchase'))
+            ->whereDate('created_at', $date)
+            ->where('id_order_status', $deliveredStatusId)
+            ->groupBy('id_user', 'user_name')
+            ->orderByDesc('total_purchase')
+            ->limit(10)
+            ->get();
 
         return view('admin.statistics.order_statistics', compact(
             'date',
@@ -91,9 +98,11 @@ class ThongKeController extends Controller
             'completedOrders',
             'totalRevenue',
             'statistics',
-            'productsSales'
+            'productsSales',
+            'topCustomers'
         ));
     }
+
     public function weeklyStatistics(Request $request)
     {
         // 1. Xác định khoảng thời gian của tuần
@@ -237,6 +246,287 @@ class ThongKeController extends Controller
             'cancelledOrders',
             'averageOrderValue',
             'dailyStats',
+            'productsSales',
+            'totalSuccessfulOrders',
+            'topCustomers',
+            'customerProductsGrouped'
+        ));
+    }
+
+    public function monthlyStatistics(Request $request)
+    {
+        // 1. Xác định khoảng thời gian của tháng
+        $monthInput = $request->input('month', now()->format('Y-m'));
+        $selectedMonth = Carbon::parse($monthInput . '-01');
+        $startOfMonth = $selectedMonth->copy()->startOfMonth();
+        $endOfMonth   = $selectedMonth->copy()->endOfMonth();
+        $dateRange = [$startOfMonth->toDateTimeString(), $endOfMonth->toDateTimeString()];
+
+        // 2. Lấy ID trạng thái
+        $deliveredStatusId = DB::table('order_statuses')->where('name', 'Delivered')->value('id');
+        $cancelledStatusId = DB::table('order_statuses')->where('name', 'Cancelled')->value('id');
+        $paidStatusId = DB::table('order_statuses')->where('name', 'Paid')->value('id');
+
+        // 3. Tính toán các chỉ số tổng quan
+
+        $totalRevenue = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $deliveredStatusId)
+            ->sum('total');
+
+        $allTotalOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->count();
+
+        // Tính số đơn hàng theo từng trạng thái
+        $paidOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $paidStatusId)
+            ->count();
+
+        $deliveredOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $deliveredStatusId)
+            ->count();
+
+        $cancelledOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $cancelledStatusId)
+            ->count();
+
+        $totalSuccessfulOrders = $deliveredOrders; // Chỉ tính Delivered
+
+        $averageOrderValue = $deliveredOrders > 0 ? $totalRevenue / $deliveredOrders : 0;
+
+        // 4. Dữ liệu cho biểu đồ theo ngày trong tháng
+        $rawDailyStats = DB::table('orders')
+            ->select(
+                DB::raw('DATE(created_at) as order_date'),
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = '.$deliveredStatusId.' THEN 1 ELSE 0 END) as delivered_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = '.$cancelledStatusId.' THEN 1 ELSE 0 END) as cancelled_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = '.$deliveredStatusId.' THEN total ELSE 0 END) as day_revenue')
+            )
+            ->whereBetween('created_at', $dateRange)
+            ->groupBy('order_date')
+            ->orderBy('order_date')
+            ->get()
+            ->keyBy('order_date');
+
+        $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
+        $dailyStats = [];
+        foreach ($period as $date) {
+            $day = $date->toDateString();
+            if ($rawDailyStats->has($day)) {
+                $dailyStats[] = [
+                    'order_date'       => $day,
+                    'total_orders'     => $rawDailyStats[$day]->total_orders,
+                    'delivered_orders' => $rawDailyStats[$day]->delivered_orders,
+                    'cancelled_orders' => $rawDailyStats[$day]->cancelled_orders,
+                    'day_revenue'      => $rawDailyStats[$day]->day_revenue,
+                ];
+            } else {
+                $dailyStats[] = [
+                    'order_date'       => $day,
+                    'total_orders'     => 0,
+                    'delivered_orders' => 0,
+                    'cancelled_orders' => 0,
+                    'day_revenue'      => 0,
+                ];
+            }
+        }
+
+        // 5. Top 10 sản phẩm bán chạy
+        $productsSales = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->groupBy('products.name')
+            ->orderByDesc('total_sold')
+            ->limit(50)
+            ->get();
+
+        // 6. Top 20 người mua nhiều nhất (chi tiết theo Delivered)
+        $topCustomers = DB::table('orders')
+            ->select('id_user', 'user_name',
+                DB::raw('SUM(total) as total_purchase'))
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $deliveredStatusId)
+            ->groupBy('id_user', 'user_name')
+            ->orderByDesc('total_purchase')
+            ->limit(50)
+            ->get();
+
+        $customerProducts = DB::table('orders')
+            ->join('order_details', 'orders.id', '=', 'order_details.id_order')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as quantity'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', 'products.name')
+            ->get();
+        $customerProductsGrouped = $customerProducts->groupBy('id_user');
+
+        return view('admin.statistics.monthly_statistics', compact(
+            'selectedMonth',
+            'startOfMonth',
+            'endOfMonth',
+            'allTotalOrders',
+            'totalRevenue',
+            'paidOrders',
+            'deliveredOrders',
+            'cancelledOrders',
+            'averageOrderValue',
+            'dailyStats',
+            'productsSales',
+            'totalSuccessfulOrders',
+            'topCustomers',
+            'customerProductsGrouped'
+        ));
+    }
+
+
+
+
+    public function yearlyStatistics(Request $request)
+    {
+        // 1. Xác định năm cần thống kê (mặc định là năm hiện tại)
+        $yearInput = $request->input('year', now()->format('Y'));
+        $selectedYear = $yearInput; // ví dụ "2025"
+        $startOfYear = Carbon::parse($selectedYear . '-01-01')->startOfDay();
+        $endOfYear   = Carbon::parse($selectedYear . '-12-31')->endOfDay();
+        $dateRange = [$startOfYear->toDateTimeString(), $endOfYear->toDateTimeString()];
+
+        // 2. Lấy ID các trạng thái cần thiết
+        $deliveredStatusId = DB::table('order_statuses')->where('name', 'Delivered')->value('id');
+        $cancelledStatusId = DB::table('order_statuses')->where('name', 'Cancelled')->value('id');
+
+        // 3. Tính toán các chỉ số tổng quan
+        // Tổng doanh thu (chỉ tính đơn Delivered)
+        $totalRevenue = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $deliveredStatusId)
+            ->sum('total');
+
+        // Tổng số đơn hàng (tất cả) – tuy nhiên, nếu thống kê theo đơn thành công, bạn có thể chỉ lấy Delivered
+        $allTotalOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->count();
+
+        // Số đơn Delivered và Cancelled
+        $deliveredOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $deliveredStatusId)
+            ->count();
+
+        $cancelledOrders = DB::table('orders')
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $cancelledStatusId)
+            ->count();
+
+        // Tổng số đơn thành công (chỉ Delivered)
+        $totalSuccessfulOrders = $deliveredOrders;
+
+        // Giá trị trung bình mỗi đơn (AOV) dựa trên đơn Delivered
+        $averageOrderValue = $deliveredOrders > 0 ? $totalRevenue / $deliveredOrders : 0;
+
+        // 4. Dữ liệu cho biểu đồ theo tháng trong năm
+        $rawMonthlyStats = DB::table('orders')
+            ->select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as month_revenue')
+            )
+            ->whereBetween('created_at', $dateRange)
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy(DB::raw('MONTH(created_at)'))
+            ->get()
+            ->keyBy('month');
+
+        $monthlyStats = [];
+        for ($m = 1; $m <= 12; $m++) {
+            if ($rawMonthlyStats->has($m)) {
+                $monthlyStats[$m] = [
+                    'month'           => $m,
+                    'total_orders'    => $rawMonthlyStats[$m]->total_orders,
+                    'delivered_orders'=> $rawMonthlyStats[$m]->delivered_orders,
+                    'cancelled_orders'=> $rawMonthlyStats[$m]->cancelled_orders,
+                    'month_revenue'   => $rawMonthlyStats[$m]->month_revenue,
+                ];
+            } else {
+                $monthlyStats[$m] = [
+                    'month'           => $m,
+                    'total_orders'    => 0,
+                    'delivered_orders'=> 0,
+                    'cancelled_orders'=> 0,
+                    'month_revenue'   => 0,
+                ];
+            }
+        }
+
+        // Tính % tăng giảm doanh thu so với tháng trước
+        $monthlyStatsWithComparison = [];
+        $prevRevenue = null;
+        foreach ($monthlyStats as $m => $data) {
+            if (is_null($prevRevenue) || $prevRevenue == 0) {
+                $data['pct_change'] = null;
+            } else {
+                $data['pct_change'] = (($data['month_revenue'] - $prevRevenue) / $prevRevenue) * 100;
+            }
+            $prevRevenue = $data['month_revenue'];
+            $monthlyStatsWithComparison[] = $data;
+        }
+
+        // 5. Top 10 sản phẩm bán chạy trong năm (chỉ tính đơn Delivered)
+        $productsSales = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_sold')
+            ->limit(10)
+            ->get();
+
+        // 6. Top 20 người mua nhiều nhất trong năm (chỉ tính đơn Delivered)
+        $topCustomers = DB::table('orders')
+            ->select('id_user', 'user_name', DB::raw('SUM(total) as total_purchase'))
+            ->whereBetween('created_at', $dateRange)
+            ->where('id_order_status', $deliveredStatusId)
+            ->groupBy('id_user', 'user_name')
+            ->orderByDesc('total_purchase')
+            ->limit(20)
+            ->get();
+
+        // 7. Chi tiết sản phẩm mỗi khách hàng đã mua (chỉ tính các đơn Delivered)
+        $customerProducts = DB::table('orders')
+            ->join('order_details', 'orders.id', '=', 'order_details.id_order')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as quantity'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', 'products.name')
+            ->get();
+        $customerProductsGrouped = $customerProducts->groupBy('id_user');
+
+        return view('admin.statistics.yearly_statistics', compact(
+            'selectedYear',
+            'startOfYear',
+            'endOfYear',
+            'allTotalOrders',
+            'totalRevenue',
+            'deliveredOrders',
+            'cancelledOrders',
+            'averageOrderValue',
+            'monthlyStatsWithComparison',
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',

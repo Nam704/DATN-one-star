@@ -1,6 +1,5 @@
-@extends('admin.layouts.layout')
-
-@section('content')
+@extends('admin.statistics.dashboard_statistics')
+@section('statistics-content')
     <div class="text-center m-4">
         <h1>Thống Kê Đơn Hàng</h1>
     </div>
@@ -149,23 +148,65 @@
 
                     <div id="yearly-sales-collapse" class="collapse pt-3 show">
                         @if ($productsSales->isNotEmpty())
-                        <ul class="list-group">
-                            @foreach ($productsSales as $product)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ $product->product_name }}
-                                    <span
-                                        class="badge bg-primary rounded-pill">{{ number_format($product->total_sold) }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p>Không có dữ liệu bán hàng cho ngày này.</p>
-                    @endif
+                            <ul class="list-group">
+                                @foreach ($productsSales as $product)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ $product->product_name }}
+                                        <span
+                                            class="badge bg-primary rounded-pill">{{ number_format($product->total_sold) }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p>Không có dữ liệu bán hàng cho ngày này.</p>
+                        @endif
                     </div>
 
                 </div> <!-- end card-body-->
             </div> <!-- end card-->
         </div> <!-- end col-->
+
+
+        <div class="col-lg-6">
+            <!-- Bảng Top 10 Người Mua Nhiều Nhất Trong Ngày -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-widgets">
+                        <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
+                        <a data-bs-toggle="collapse" href="#top-customers-collapse" role="button" aria-expanded="false"
+                            aria-controls="top-customers-collapse">
+                            <i class="ri-subtract-line"></i></a>
+                        <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
+                    </div>
+                    <h5 class="header-title mb-0">TOP 10 Người Mua Nhiều Nhất Trong Ngày</h5>
+                    <div id="top-customers-collapse" class="collapse pt-3 show">
+                        @if ($topCustomers->isNotEmpty())
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Khách Hàng</th>
+                                        <th>Tổng Giá Trị Mua</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($topCustomers as $index => $customer)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $customer->user_name ?? 'Khách vãng lai' }}</td>
+                                            <td>${{ number_format($customer->total_purchase, 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="text-center text-muted">Không có dữ liệu người mua cho ngày này.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Nạp ApexCharts -->
@@ -186,7 +227,7 @@
             },
             plotOptions: {
                 bar: {
-                    columnWidth: '60%'
+                    columnWidth: '50%'
                 }
             },
             stroke: {
