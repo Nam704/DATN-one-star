@@ -42,7 +42,7 @@ class ProductController extends Controller
                     return [
                         'value_id' => $attr->id,
                         'attribute_id' => $attr->attribute_id,
-                        'name' => $attr->name,
+                        'name' => $attr->attribute_name,
                         'value' => $attr->value,
 
                     ];
@@ -171,6 +171,7 @@ class ProductController extends Controller
 
         // Map các biến thể sản phẩm
         $product->variants = $product->variants->map(function ($variant) {
+            // dd($variant->attributeValues);
             return [
                 'id' => $variant->id,
                 'sku' => $variant->sku,
@@ -181,7 +182,7 @@ class ProductController extends Controller
                     return [
                         'value_id' => $attr->id,
                         'attribute_id' => $attr->attribute_id,
-                        'name' => $attr->name,
+                        'name' => $attr->attribute_name,
                         'value' => $attr->value,
                     ];
                 })
@@ -200,7 +201,7 @@ class ProductController extends Controller
                     'status_id' => $statusId,
                     'status_name' => $orders->first()->order->orderStatus->name,
                     'total_orders' => $orders->count(),
-                    'total_amount' => $orders->sum('total_price')
+                    'total_amount' => $orders->sum('total')
                 ];
             });
 
@@ -211,7 +212,7 @@ class ProductController extends Controller
                     'variant_id' => $variantId,
                     'total_orders' => $orders->count(),
                     'total_quantity' => $orders->sum('quantity'),
-                    'total_amount' => $orders->sum('total_price')
+                    'total_amount' => $orders->sum('total')
                 ];
             });
 
@@ -254,35 +255,36 @@ class ProductController extends Controller
 
 
     public function variantDetails($productId, $variantId)
-{
-    // Lấy thông tin sản phẩm
-    $product = Product::findOrFail($productId);
+    {
+        // Lấy thông tin sản phẩm
+        $product = Product::findOrFail($productId);
 
-    // Lấy thông tin biến thể
-    $variant = Product_variant::findOrFail($variantId);
+        // Lấy thông tin biến thể
+        $variant = Product_variant::findOrFail($variantId);
 
-    // Lấy danh sách đơn hàng liên quan đến biến thể này
-    $orderDetails = Order_detail::where('id_variant', $variantId)
-        ->with(['order.user', 'order.orderStatus']) // Sử dụng mối quan hệ order.user và order.orderStatus
-        ->get();
+        // Lấy danh sách đơn hàng liên quan đến biến thể này
+        $orderDetails = Order_detail::where('id_variant', $variantId)
+            ->with(['order.user', 'order.orderStatus']) // Sử dụng mối quan hệ order.user và order.orderStatus
+            ->get();
 
-    // Nhóm danh sách người dùng đã đặt hàng và thêm thông tin địa chỉ
-    $users = $orderDetails->map(function ($orderDetail) {
-        return [
-            'user' => $orderDetail->order->user,
-            'order_status' => $orderDetail->order->orderStatus->name, // Lấy trạng thái đơn hàng
-            'order_id' => $orderDetail->order->id, // Lấy ID đơn hàng
-            'address' => $orderDetail->order->address, // Lấy địa chỉ từ đơn hàng
-        ];
-    })->unique('user.id'); // Loại bỏ trùng lặp người dùng
-
-    return view('admin.product.productVariantDetail')
-        ->with([
-            'product' => $product,
-            'variant' => $variant,
-            'users' => $users
-        ]);
-}
+        // Nhóm danh sách người dùng đã đặt hàng và thêm thông tin địa chỉ
+        $users = $orderDetails->map(function ($orderDetail) {
+            return [
+                'user' => $orderDetail->order->user,
+                'order_status' => $orderDetail->order->orderStatus->name, // Lấy trạng thái đơn hàng
+                'order_id' => $orderDetail->order->id, // Lấy ID đơn hàng
+                'address' => $orderDetail->order->address, // Lấy địa chỉ từ đơn hàng
+            ];
+        })->unique('user.id'); // Loại bỏ trùng lặp người dùng
+        // dd($users);
+        return view('admin.product.productVariantDetail')
+            ->with([
+                'product' => $product,
+                'variant' => $variant,
+                'users' => $users
+            ]);
+    }
+    
 
 
 
