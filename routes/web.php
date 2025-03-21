@@ -153,9 +153,9 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
 
-            Route::delete('/{id}', 'destroy')->name('destroy'); 
-            Route::get('/trash', 'trash')->name('trash'); 
-            Route::post('/{id}/restore', 'restore')->name('restore'); 
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
         });
 
@@ -168,9 +168,9 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
 
-            Route::delete('/{id}', 'destroy')->name('destroy'); 
-            Route::get('/trash', 'trash')->name('trash'); 
-            Route::post('/{id}/restore', 'restore')->name('restore'); 
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
         });
 
@@ -186,12 +186,27 @@ Route::prefix('admin')->name('admin.')->group(
         });
 
 
+        // Users
+        Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
 
-        Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
-            function () {
-                Route::get('/', 'listAdmin')->name('list');
-            }
-        );
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+
+            // Biểu đồ thống kê
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user');
+            Route::get('/charts', 'charts')->name('charts');
+            Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
+            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
+            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
+        });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
             function () {
@@ -213,7 +228,6 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
-
 
         Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
             function () {
@@ -347,6 +361,5 @@ Route::prefix('client')->name('client.')->group(
             Route::get('/index', [ContactController::class, 'index'])->name('index');
             Route::post('/', 'store')->name('store');
         });
-
     }
 );

@@ -145,7 +145,7 @@
                     <button type="submit" class="btn btn-warning mr-2" onclick="setStatus('draft')">Bản nháp</button>
                     <button type="submit" class="btn btn-success mr-2" onclick="setStatus('published')">Thêm bài viết</button>
                 </div>
-                
+
 
             </form>
         </div>

@@ -22,8 +22,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             AddressSeeder::class,
-            OrderStatusSeeder::class,
-            OrderCancellationReasonSeeder::class
+            // OrderStatusSeeder::class,
+            // OrderCancellationReasonSeeder::class
         ]);
     }
 }

@@ -65,7 +65,7 @@
                 <div class="collapse" id="sidebarPagesAuth">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{ route('admin.users.list') }}">List active</a>
+                            <a href="{{ route('admin.users.index') }}">List active</a>
                         </li>
 
                     </ul>

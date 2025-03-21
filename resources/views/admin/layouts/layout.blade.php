@@ -57,17 +57,7 @@
 
     <!-- Plugins Js -->
     <script src="{{ asset('admin/assets/libs/bootstrap-tagsinput/bootstrap-tagsinput.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/switchery/switchery.min.js') }}"></script>
 
-    <script src="{{ asset('admin/assets/libs/select2/select2.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/jquery-mask-plugin/jquery.mask.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/moment/moment.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/bootstrap-timepicker/bootstrap-timepicker.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/bootstrap-colorpicker/bootstrap-colorpicker.min.js') }}"></script>
-    <script src="{{ asset('admin/assets/libs/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
-
-    @stack('scripts')
     {{-- demo Simplebar --}}
     <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
 
@@ -85,8 +75,6 @@
     <!-- App js -->
     <script src="{{ asset('admin/assets/js/app.min.js') }}"></script>
 
-    <!-- Init js-->
-    <script src="{{ asset('admin/assets/js/pages/form-advanced.init.js') }}"></script>
 
 
     <!-- Thêm JS của Select2 -->
