@@ -13,7 +13,6 @@ use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
 use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\Web\SupplierController;
-use App\Http\Controllers\Web\ThongKe;
 use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Web\ImageController;
@@ -34,7 +33,6 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-use App\Http\Controllers\Web\ThongKeController;
 use App\Http\Controllers\web\VoucherController;
 use App\Models\Voucher;
 
