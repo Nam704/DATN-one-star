@@ -8,14 +8,14 @@
             Từ ngày: <strong>{{ $startOfMonth->format('d/m/Y') }}</strong> đến <strong>{{ $endOfMonth->format('d/m/Y') }}</strong>
         </p>
         <p>
-            Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 2) }}</strong>
+            Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
         </p>
     </div>
 
     <!-- Form chọn tháng -->
     <div class="row mb-4">
         <div class="col-md-8">
-            <form action="{{ route('admin.thongke.monthlyStatistics') }}" method="GET" class="row g-3 align-items-end">
+            <form action="{{ route('admin.statistics.monthlyStatistics') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-6">
                     <label for="month" class="form-label">Chọn Tháng (YYYY-MM):</label>
                     <input type="month" id="month" name="month" class="form-control" value="{{ $selectedMonth->format('Y-m') }}">

@@ -1,17 +1,14 @@
 @extends('admin.statistics.dashboard_statistics')
 @section('statistics-content')
     <div class="text-center m-4">
-        <h1>Thống Kê Đơn Hàng</h1>
+        <h1>Thống Kê Đơn Hàng Theo Ngày</h1>
     </div>
     <!-- Row hiển thị 4 card thống kê tổng -->
     <div class="row">
         <!-- Card: Tổng Đơn Hàng -->
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-pink">
-                <div class="card-body">
-                    <div class="float-end">
-                        <i class="ri-eye-line widget-icon"></i>
-                    </div>
+        <div class="col-md-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
                     <h6 class="text-uppercase mt-0">Tổng Đơn Hàng</h6>
                     <h2 class="my-2">{{ number_format($totalOrders) }}</h2>
                 </div>
@@ -19,12 +16,9 @@
         </div>
 
         <!-- Card: Tổng Đơn Pending -->
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-info">
-                <div class="card-body">
-                    <div class="float-end">
-                        <i class="ri-shopping-basket-line widget-icon"></i>
-                    </div>
+        <div class="col-md-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
                     <h6 class="text-uppercase mt-0">Tổng Đơn Pending</h6>
                     <h2 class="my-2">{{ number_format($pendingOrders) }}</h2>
                 </div>
@@ -32,12 +26,9 @@
         </div>
 
         <!-- Card: Tổng Đơn Delivered -->
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-primary">
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
                 <div class="card-body">
-                    <div class="float-end">
-                        <i class="ri-group-2-line widget-icon"></i>
-                    </div>
                     <h6 class="text-uppercase mt-0">Tổng Đơn Delivered</h6>
                     <h2 class="my-2">{{ number_format($deliveredOrders) }}</h2>
                 </div>
@@ -45,12 +36,9 @@
         </div>
 
         <!-- Card: Tổng Đơn Cancelled -->
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-purple">
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
                 <div class="card-body">
-                    <div class="float-end">
-                        <i class="ri-wallet-2-line widget-icon"></i>
-                    </div>
                     <h6 class="text-uppercase mt-0">Tổng Đơn Cancelled</h6>
                     <h2 class="my-2">{{ number_format($cancelledOrders) }}</h2>
                 </div>
@@ -81,7 +69,7 @@
                         <div class="row align-items-center mb-4">
                             <!-- Form chọn ngày -->
                             <div class="col-md-8">
-                                <form action="{{ route('admin.thongke.statistics') }}" method="GET"
+                                <form action="{{ route('admin.statistics.dailyStatistics') }}" method="GET"
                                     class="row g-3 align-items-end">
                                     <div class="col-md-6">
                                         <label for="date" class="form-label">Select Date:</label>
@@ -208,7 +196,6 @@
         </div>
 
     </div>
-
     <!-- Nạp ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
@@ -265,7 +252,6 @@
                 }
             }
         };
-
         var chart = new ApexCharts(document.querySelector("#order-status-chart"), options);
         chart.render();
     </script>

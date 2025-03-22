@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\ThongKe;
 use App\Http\Controllers\Web\UserContronler;
@@ -101,8 +102,8 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
             }
         );
-            Route::prefix('thongke')->name('thongke.')->controller(ThongKeController::class)->group(function () {
-                Route::get('/statistics', 'statistics')->name('statistics');
+            Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
+                Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
                 Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
                 Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
                 Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');

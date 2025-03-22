@@ -8,12 +8,13 @@ use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ThongKeController extends Controller
+class StatisticController extends Controller
 {
-    public function dashboardStatistics(){
+    public function dashboardStatistics()
+    {
         return view('admin.statistics.dashboard_statistics');
     }
-    public function statistics(Request $request)
+    public function dailyStatistics(Request $request)
     {
         // Lấy ngày thống kê từ request, nếu không có thì dùng ngày hiện tại
         $date = $request->input('date', now()->toDateString());
@@ -203,6 +204,7 @@ class ThongKeController extends Controller
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
             ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ tính đơn hàng đã giao hàng
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(20)
@@ -211,14 +213,18 @@ class ThongKeController extends Controller
         // 6. Top 20 người mua nhiều nhất trong tuần (tính theo tổng giá trị mua hàng, chỉ Delivered)
         // 6. Top 20 người mua nhiều nhất trong tuần (tính theo tổng giá trị mua hàng và tổng số lượng sản phẩm, chỉ Delivered)
         $topCustomers = DB::table('orders')
-            ->select('id_user', 'user_name',
-                DB::raw('SUM(total) as total_purchase'))
+            ->select(
+                'id_user',
+                'user_name',
+                DB::raw('SUM(total) as total_purchase')
+            )
             ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
+            ->where('id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(20)
             ->get();
+
 
         // Lấy chi tiết các sản phẩm mà mỗi khách hàng mua (dành cho các đơn hàng Delivered)
         $customerProducts = DB::table('orders')
@@ -227,7 +233,7 @@ class ThongKeController extends Controller
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as quantity'))
             ->whereBetween('orders.created_at', $dateRange)
-            ->where('orders.id_order_status', $deliveredStatusId)
+            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('orders.id_user', 'products.name')
             ->get();
 
@@ -303,9 +309,9 @@ class ThongKeController extends Controller
             ->select(
                 DB::raw('DATE(created_at) as order_date'),
                 DB::raw('COUNT(*) as total_orders'),
-                DB::raw('SUM(CASE WHEN id_order_status = '.$deliveredStatusId.' THEN 1 ELSE 0 END) as delivered_orders'),
-                DB::raw('SUM(CASE WHEN id_order_status = '.$cancelledStatusId.' THEN 1 ELSE 0 END) as cancelled_orders'),
-                DB::raw('SUM(CASE WHEN id_order_status = '.$deliveredStatusId.' THEN total ELSE 0 END) as day_revenue')
+                DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as day_revenue')
             )
             ->whereBetween('created_at', $dateRange)
             ->groupBy('order_date')
@@ -343,21 +349,27 @@ class ThongKeController extends Controller
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
             ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(50)
             ->get();
 
+
         // 6. Top 20 người mua nhiều nhất (chi tiết theo Delivered)
         $topCustomers = DB::table('orders')
-            ->select('id_user', 'user_name',
-                DB::raw('SUM(total) as total_purchase'))
+            ->select(
+                'id_user',
+                'user_name',
+                DB::raw('SUM(total) as total_purchase')
+            )
             ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
+            ->where('id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(50)
             ->get();
+
 
         $customerProducts = DB::table('orders')
             ->join('order_details', 'orders.id', '=', 'order_details.id_order')
@@ -365,9 +377,10 @@ class ThongKeController extends Controller
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as quantity'))
             ->whereBetween('orders.created_at', $dateRange)
-            ->where('orders.id_order_status', $deliveredStatusId)
+            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('orders.id_user', 'products.name')
             ->get();
+
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
         return view('admin.statistics.monthly_statistics', compact(
@@ -387,9 +400,6 @@ class ThongKeController extends Controller
             'customerProductsGrouped'
         ));
     }
-
-
-
 
     public function yearlyStatistics(Request $request)
     {
@@ -454,16 +464,16 @@ class ThongKeController extends Controller
                 $monthlyStats[$m] = [
                     'month'           => $m,
                     'total_orders'    => $rawMonthlyStats[$m]->total_orders,
-                    'delivered_orders'=> $rawMonthlyStats[$m]->delivered_orders,
-                    'cancelled_orders'=> $rawMonthlyStats[$m]->cancelled_orders,
+                    'delivered_orders' => $rawMonthlyStats[$m]->delivered_orders,
+                    'cancelled_orders' => $rawMonthlyStats[$m]->cancelled_orders,
                     'month_revenue'   => $rawMonthlyStats[$m]->month_revenue,
                 ];
             } else {
                 $monthlyStats[$m] = [
                     'month'           => $m,
                     'total_orders'    => 0,
-                    'delivered_orders'=> 0,
-                    'cancelled_orders'=> 0,
+                    'delivered_orders' => 0,
+                    'cancelled_orders' => 0,
                     'month_revenue'   => 0,
                 ];
             }

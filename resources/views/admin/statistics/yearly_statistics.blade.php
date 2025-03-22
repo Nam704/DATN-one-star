@@ -9,14 +9,14 @@
             Từ ngày: <strong>{{ $startOfYear->format('d/m/Y') }}</strong> đến <strong>{{ $endOfYear->format('d/m/Y') }}</strong>
         </p>
         <p>
-            Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 2) }}</strong>
+            Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
         </p>
     </div>
 
     <!-- Form chọn năm -->
     <div class="row mb-4">
         <div class="col-md-8">
-            <form action="{{ route('admin.thongke.yearlyStatistics') }}" method="GET" class="row g-3 align-items-end">
+            <form action="{{ route('admin.statistics.yearlyStatistics') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-6">
                     <label for="year" class="form-label">Chọn Năm:</label>
                     <input type="number" id="year" name="year" class="form-control" value="{{ $selectedYear }}" min="2000" max="{{ now()->format('Y') }}">

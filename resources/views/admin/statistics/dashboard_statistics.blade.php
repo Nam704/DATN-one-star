@@ -54,22 +54,22 @@
     <!-- Thanh nav tab tùy chỉnh -->
     <ul class="nav custom-nav-tabs justify-content-center mb-2">
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.thongke.statistics') || (!request()->routeIs('admin.thongke.weeklyStatistics') && !request()->routeIs('admin.thongke.monthlyStatistics') && !request()->routeIs('admin.thongke.yearlyStatistics')) ? 'active' : '' }}" href="{{ route('admin.thongke.statistics') }}">
+            <a class="nav-link {{ request()->routeIs('admin.statistics.dailyStatistics') || (!request()->routeIs('admin.statistics.weeklyStatistics') && !request()->routeIs('admin.statistics.monthlyStatistics') && !request()->routeIs('admin.statistics.yearlyStatistics')) ? 'active' : '' }}" href="{{ route('admin.statistics.dailyStatistics') }}">
                 <i class="ri-calendar-line me-1"></i> Ngày
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.thongke.weeklyStatistics') ? 'active' : '' }}" href="{{ route('admin.thongke.weeklyStatistics') }}">
+            <a class="nav-link {{ request()->routeIs('admin.statistics.weeklyStatistics') ? 'active' : '' }}" href="{{ route('admin.statistics.weeklyStatistics') }}">
                 <i class="ri-calendar-2-line me-1"></i> Tuần
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.thongke.monthlyStatistics') ? 'active' : '' }}" href="{{ route('admin.thongke.monthlyStatistics') }}">
+            <a class="nav-link {{ request()->routeIs('admin.statistics.monthlyStatistics') ? 'active' : '' }}" href="{{ route('admin.statistics.monthlyStatistics') }}">
                 <i class="ri-calendar-todo-line me-1"></i> Tháng
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.thongke.yearlyStatistics') ? 'active' : '' }}" href="{{ route('admin.thongke.yearlyStatistics') }}">
+            <a class="nav-link {{ request()->routeIs('admin.statistics.yearlyStatistics') ? 'active' : '' }}" href="{{ route('admin.statistics.yearlyStatistics') }}">
                 <i class="ri-calendar-event-line me-1"></i> Năm
             </a>
         </li>

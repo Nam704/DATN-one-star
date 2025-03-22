@@ -9,14 +9,14 @@
                 <strong>{{ $endOfWeek->format('d/m/Y') }}</strong>
             </p>
             <p>
-                Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 2) }}</strong>
+                Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
             </p>
         </div>
 
         <!-- Form chọn ngày -->
         <div class="row mb-4">
             <div class="col-md-8">
-                <form action="{{ route('admin.thongke.weeklyStatistics') }}" method="GET" class="row g-3 align-items-end">
+                <form action="{{ route('admin.statistics.weeklyStatistics') }}" method="GET" class="row g-3 align-items-end">
                     <div class="col-md-6">
                         <label for="date" class="form-label">Chọn Ngày (để xác định tuần):</label>
                         <input type="date" id="date" name="date" class="form-control"
