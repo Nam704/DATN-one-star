@@ -14,6 +14,7 @@ use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
@@ -106,7 +107,13 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
             }
         );
-
+            Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
+                Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
+                Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
+                Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
+                Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
+                Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
+            });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
             Route::get('list-category',  'listCategory')->name('listCategory');

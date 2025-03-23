@@ -42,7 +42,7 @@ function updateNotificationList(data, type) {
                 <div class="notify-icon bg-primary-subtle">
                     <i class="mdi mdi-comment-account-outline text-primary"></i>
                 </div>
-                <p class="notify-details">${notification.title} from 
+                <p class="notify-details">${notification.title} from
                 ${notification.from_user_name}
                         <small class="noti-time">${new Date(
                             notification.created_at
