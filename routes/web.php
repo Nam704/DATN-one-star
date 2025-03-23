@@ -39,8 +39,8 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-use App\Http\Controllers\Web\StatisticController;
-use App\Http\Controllers\web\VoucherController;
+
+use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
@@ -102,7 +102,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         });
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
-            Route::get('product-statistic','productStatistics')->name('productStatistics');
+            Route::get('product-statistic', 'productStatistics')->name('productStatistics');
         });
 
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
@@ -113,13 +113,13 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
             }
         );
-            Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
-                Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
-                Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
-                Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
-                Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
-                Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
-            });
+        Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
+            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
+            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
+            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
+            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
+            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
+        });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
             Route::get('list-category',  'listCategory')->name('listCategory');
