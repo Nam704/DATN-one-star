@@ -74,7 +74,7 @@ class Product extends Model
     {
         return $this->hasMany(Product_albums::class, 'id_product');
     }
-    public  function getProductWithDetails()
+    public function getProductWithDetails()
     {
         return $this->load([
             'variants' => function ($query) {
@@ -92,7 +92,26 @@ class Product extends Model
 
         ])->append('attributes')
             ->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status');
-    }
+    }   
+
+//     public static function getProductWithDetails($id)
+// {
+//     return self::where('id', $id)->with([
+//         'variants' => function ($query) {
+//             $query->select('id', 'id_product', 'sku', 'status', 'quantity', 'price')
+//                 ->with([
+//                     'images' => function ($query) {
+//                         $query->select('id', 'id_product_variant', 'url');
+//                     },
+//                     'attributeValues'
+//                 ]);
+//         },
+//         'category:id,name',
+//         'brand:id,name',
+//         'product_albums:id,id_product,image_path',
+//     ])->first()->append('attributes');
+// }
+
     public function getPriceRange()
     {
         return $this->variants()
@@ -134,4 +153,66 @@ class Product extends Model
 
         return array_values($attributes);
     }
+
+    public function top_10_products( )
+    {
+        return DB::table('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')  // Changed column name
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->where('orders.id_order_status', '=', 4)
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('SUM(order_details.quantity) as total_sold')
+            )
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->orderBy('total_sold', 'desc')
+            ->limit(10)
+            ->get();
+    }
+
+    public function least_sold_products()
+    {
+        return DB::table('products')
+            ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant') 
+            // ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+            // ->where('products.status', '=', 'active')
+            // ->where('orders.id_order_status', '=', 4) //đặt hàng thành công
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('COALESCE(SUM(order_details.quantity), 0) as total_sold')
+            )
+            ->where('products.status', '=', 'active')
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->orderBy('total_sold', 'asc')
+            ->limit(8)
+            ->get();
+    }
+
+    public function low_stock_products()
+    {
+        return DB::table('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('SUM(product_variants.quantity) as total_quantity')
+            )
+            ->where('products.status', '=', 'active')
+            ->where('product_variants.status', '=', 'active')
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->having('total_quantity', '<', 10)
+            ->orderBy('total_quantity', 'asc')
+            ->get();
+    }
+
+
+
+
 }

@@ -39,6 +39,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\web\VoucherController;
 use App\Models\Voucher;
 
@@ -88,7 +89,7 @@ Route::prefix('auth/')->name('auth.')->group(
 
 
 
-Route::prefix('admin')->name('admin.')->group(
+Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
     function () {
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
             Route::get('list', 'list')->name('list');
@@ -99,6 +100,11 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+
+        Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
+            Route::get('product-statistic','productStatistics')->name('productStatistics');
+        });
+
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
             Route::post('create-product', 'createByExcel')->name('createProduct');
         });
@@ -190,6 +196,8 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
             Route::post('import-product', 'import')->name('importProduct');
             Route::get('detail/{id}', 'detail')->name('detail');
+            Route::get('stas/{id}', 'stas')->name('stas');
+            Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail');
         });
 
 
