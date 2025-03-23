@@ -3,7 +3,10 @@
     <!-- Brand Logo Light -->
     <a href="index.html" class="logo logo-light">
         <span class="logo-lg">
-            <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo">
+            {{-- <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo"> --}}
+
+            <img src=" {{ asset('admin/assets/images/logo-3.png') }}" alt="logo"
+                style="width: 190px; height: auto; margin-top: 10px;">
         </span>
         <span class="logo-sm">
             <img src="{{ asset('admin/assets/images/logo-sm.png') }}" alt="small logo">
@@ -39,7 +42,7 @@
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false" aria-controls="sidebarPages"
                     class="side-nav-link">
                     <i class="ri-pages-line"></i>
-                    <span>Order </span>
+                    <span> Orders </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarPages">
@@ -62,7 +65,7 @@
                 <div class="collapse" id="sidebarPagesAuth">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{ route('admin.users.list') }}">List active</a>
+                            <a href="{{ route('admin.users.index') }}">List active</a>
                         </li>
 
                     </ul>
@@ -87,6 +90,7 @@
                     </ul>
                 </div>
             </li>
+            
 
             <li class="side-nav-title">Components</li>
 
@@ -128,6 +132,42 @@
                     </ul>
                 </div>
             </li>
+
+            {{-- blogs --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false"
+                    aria-controls="sidebarThirdLevel" class="side-nav-link">
+                    <i class="mdi mdi-post"></i>
+                    <span> Blogs </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarThirdLevel">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.blogs.index') }}">Danh sách bài viết</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
+            {{-- contact --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
+                    aria-controls="sidebarPagesAuth" class="side-nav-link">
+                    <i class="mdi mdi-card-account-mail"></i>
+                    <span> Contacts </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPagesAuth">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.contacts.index') }}">Danh sách liên hệ</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
                     class="side-nav-link">

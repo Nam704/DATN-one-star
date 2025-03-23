@@ -54,6 +54,10 @@
     <script src="{{ asset('admin/assets/js/vendor.min.js') }}"></script>
     <script src="{{ asset('admin/assets/js/jquery.min.js') }}"></script>
     <script src="{{ asset('admin/assets/js/axios.min.js') }}"></script>
+
+    <!-- Plugins Js -->
+    <script src="{{ asset('admin/assets/libs/bootstrap-tagsinput/bootstrap-tagsinput.min.js') }}"></script>
+
     {{-- demo Simplebar --}}
     <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
 

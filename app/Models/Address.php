@@ -120,4 +120,9 @@ class Address extends Model
             )
             ->first();
     }
+
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'id_ward');
+    }
 }
