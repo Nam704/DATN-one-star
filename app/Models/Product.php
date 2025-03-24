@@ -212,6 +212,81 @@ class Product extends Model
             ->get();
     }
 
+      // sản phẩm bán chạy
+      public function top_sale_products($start_date, $end_date)
+      {
+          if ($start_date && $end_date) {
+              return DB::table('products')
+                  ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+                  ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+                  ->join('orders', 'order_details.id_order', '=', 'orders.id')
+                  ->where('orders.id_order_status', '=', 4)
+                  ->whereBetween('orders.created_at', [$start_date, $end_date])
+                  ->select(
+                      'products.id',
+                      'products.name',
+                      'products.image_primary',
+                      DB::raw('SUM(order_details.quantity) as total_sold')
+                  )
+                  ->groupBy('products.id', 'products.name', 'products.image_primary')
+                  ->orderBy('total_sold', 'desc')
+                  ->limit(10)
+                  ->get();
+          }
+  
+          return DB::table('products')
+              ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+              ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+              ->join('orders', 'order_details.id_order', '=', 'orders.id')
+              ->where('orders.id_order_status', '=', 4)
+              ->select(
+                  'products.id',
+                  'products.name',
+                  'products.image_primary',
+                  DB::raw('SUM(order_details.quantity) as total_sold')
+              )
+              ->groupBy('products.id', 'products.name', 'products.image_primary')
+              ->orderBy('total_sold', 'desc')
+              ->limit(10)
+              ->get();
+      }
+  
+      // sản phẩm đã bán
+
+    public function productSold($start_date, $end_date)
+    {
+        if ($start_date && $end_date) {
+            return DB::table('products')
+                ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+                ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+                ->join('orders', 'order_details.id_order', '=', 'orders.id')
+                ->where('orders.id_order_status', '=', 4)
+                ->whereBetween('orders.created_at', [$start_date, $end_date])
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.image_primary',
+                    DB::raw('SUM(order_details.quantity) as total_sold')
+                )
+                ->groupBy('products.id', 'products.name', 'products.image_primary')
+                ->orderBy('total_sold', 'desc')
+                ->get();
+        }
+        return DB::table('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->where('orders.id_order_status', '=', 4)
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('SUM(order_details.quantity) as total_sold')
+            )
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->orderBy('total_sold', 'desc')
+            ->get();
+    }
 
 
 

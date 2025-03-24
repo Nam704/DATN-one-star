@@ -61,7 +61,8 @@
             </div> <!-- end col-->
 
         </div>
-
+        
+        @include('admin.statistic.components.bieu_do')
 
         <div class="row vudovn">
             <div class="col-xl-6">

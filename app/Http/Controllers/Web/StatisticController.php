@@ -70,4 +70,22 @@ class StatisticController extends Controller
         }
     }
 
+    // api biểu đồ sản phẩm bán chạy nhất
+    public function topSaleProducts(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $top_sale_products = $this->product->top_sale_products($start_date, $end_date);
+        return response()->json($top_sale_products);
+    }
+
+    // tạo api cho biểu đồ sản phẩm đã bán
+    public function productSold(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $top_sale_products = $this->product->productSold($start_date, $end_date);
+        return response()->json($top_sale_products);
+    }
+
 }
