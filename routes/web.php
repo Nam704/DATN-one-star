@@ -246,6 +246,7 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('products')->name('products.')->group(
             function () {
                 Route::get('detail/{id}', [ClientProductController::class, 'detail'])->name('detail');
+                Route::get('related/{id}', [ClientProductController::class, 'related'])->name('related');
             }
         );
 

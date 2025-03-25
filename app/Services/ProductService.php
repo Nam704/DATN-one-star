@@ -385,4 +385,12 @@ class ProductService
             throw $e;
         }
     }
+    public function relatedProducts($product)
+{
+    // Ví dụ: Lấy các sản phẩm cùng danh mục, loại trừ sản phẩm hiện tại
+    return Product::where('id_category', $product->category_id)
+        ->where('id', '!=', $product->id)
+        ->take(4)
+        ->get();
+}
 }
