@@ -3,7 +3,9 @@ import "./bootstrap";
 
 $(document).ready(function () {
     console.log("Client script loaded");
-
+    var csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
     getCart();
     $(document).on("click", ".delete_item", function (event) {
         event.preventDefault();
@@ -49,7 +51,7 @@ function getCart() {
         url: "http://127.0.0.1:8000/client/carts/get",
         method: "GET",
         success: function (response) {
-            console.log("Cart data from getCart:", response);
+            // console.log("Cart data from getCart:", response);
             updateCartUI(response);
         },
         error: function (xhr) {

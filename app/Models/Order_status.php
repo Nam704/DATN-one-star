@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Order_status extends Model
 {
     use HasFactory;
-    protected $fillable = ['name'];
+
+    protected $table = 'order_statuses';
+    protected $fillable = ['id', 'name'];
 
     public function orders()
     {

@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class Product_variant_attribute extends Model
 {
+
     use HasFactory;
     protected $table = "product_variant_attributes";
     protected $fillable = [
@@ -17,13 +20,17 @@ class Product_variant_attribute extends Model
     ];
     // Quan hệ với Variant
     public function variant()
+
     {
         return $this->belongsTo(Product_variant::class, 'id_product_variant');
     }
 
+
     // Quan hệ với AttributeValue
+
     public function attributeValue()
     {
         return $this->belongsTo(Attribute_value::class, 'id_attribute_value');
     }
+
 }

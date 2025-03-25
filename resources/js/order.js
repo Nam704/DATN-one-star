@@ -2,6 +2,7 @@ import Echo from "laravel-echo";
 import "./bootstrap";
 
 $(document).ready(function () {
+    loadOrder();
     $(document).on("click", ".accept", function (e) {
         e.preventDefault(); // Ngừng hành động mặc định của nút
 

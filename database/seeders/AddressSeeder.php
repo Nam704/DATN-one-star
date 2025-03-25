@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
-use DB;
-use File;
+// use DB;
+// use File;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+
 
 class AddressSeeder extends Seeder
 {

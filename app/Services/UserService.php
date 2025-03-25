@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -23,6 +25,7 @@ class UserService
         $addresses = $this->addressService->getFullAddress($user, $user->id);
         return $addresses;
     }
+
     // public function createUser(Request $request)
     // {
     //     $validated = $request->validate([

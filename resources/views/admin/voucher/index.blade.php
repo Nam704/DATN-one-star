@@ -54,7 +54,7 @@
                                     <td>
                                     <span class="badge bg-success">{{$voucher->status}}</span>
                                     </td>
-                                    <td>{{ $voucher->applies_to }}</td>
+                                    <td>{{ $voucher->applies_to_names }}</td>
                                     <td>
                                         <a href="{{ route('admin.vouchers.editVoucher', $voucher->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                         <form action="{{ route('admin.vouchers.deleteVoucher', $voucher->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this voucher?');">

@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Order_status;
+use App\Models\OrderCancellation;
+use App\Models\OrderCancellationReason;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -12,18 +15,71 @@ class OrderService
     protected $orderStatus;
     protected $paymentService;
     protected $notificationService;
+    protected $orderCancellationReason;
     public function __construct(
         Order $order,
         PaymentService $paymentService,
         Order_status $orderStatus,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        OrderCancellationReason $orderCancellationReason
     ) {
+        $this->orderCancellationReason = $orderCancellationReason;
         $this->orderStatus = $orderStatus;
         $this->paymentService = $paymentService;
         $this->order = $order;
         $this->notificationService = $notificationService;
         // Constructor logic
     }
+    function listReason()
+    {
+        return $this->orderCancellationReason->query()->select('id', 'reason')->orderBy('id', 'DESC')->get();
+    }
+    public function cancelOrder($request)
+    {
+        $orderId = $request->input("id_order");
+        $reasonId = $request->input("id_reason");
+
+        $order = Order::findOrFail($orderId);
+
+        // Kiểm tra trạng thái hiện tại có thể hủy không
+        $nonCancellableStatuses = ['Delivered', 'Cancelled', 'Refunded'];
+        if (in_array($order->orderStatus->name, $nonCancellableStatuses)) {
+            throw new \Exception("Đơn hàng không thể hủy ở trạng thái hiện tại.");
+        }
+
+        // Nếu đã yêu cầu hủy rồi thì không cần xử lý tiếp
+        if ($order->orderStatus->name == 'Cancel Requested') {
+            return null;
+        }
+
+        // Kiểm tra lý do hủy có tồn tại không
+        if (!OrderCancellationReason::find($reasonId)) {
+            throw new \Exception("Lý do hủy không hợp lệ.");
+        }
+
+        // Cập nhật trạng thái thành "Cancel Requested"
+        $cancelRequestedId = Order_status::where('name', 'Cancel Requested')->value('id');
+        $order->update(['id_order_status' => $cancelRequestedId]);
+
+        // Ghi nhận lý do hủy
+        OrderCancellation::create([
+            'order_id' => $orderId,
+            'reason_id' => $reasonId,
+        ]);
+        $dataNotification = [
+            'title' => 'Update Order',
+            'message' => "Update Order, vui lòng kiểm tra và xác nhận!",
+            'from_user_id' => $order->id_user,
+            'to_user_id' => null,
+            'type' => 'orders',
+            'status' => 'unread',
+            'goto_id' => $order->id,
+        ];
+        // dd($dataNotification);
+        $this->notificationService->sendPrivate($dataNotification);
+        return $order;
+    }
+
     function listStatus()
     {
         return $this->orderStatus->all();
@@ -57,7 +113,7 @@ class OrderService
                 "payment_method" => $data['payment_method'],
                 "payment_status" => $data['payment_status'],
                 "id_ward" => $data['id_ward'] ?? null,
-                "id_order_status" => $data['id_order_status'],
+                "id_order_status" => $this->orderStatus->where('name', $data['status'])->first()->id,
                 "id_voucher" => $data['id_voucher'] ?? null,
             ];
             $order = $this->order->create($dataOrder);

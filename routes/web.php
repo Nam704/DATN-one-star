@@ -4,6 +4,9 @@ use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\CheckoutController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
+use App\Http\Controllers\Client\MyAccountController;
+use App\Http\Controllers\Client\BlogController;
+use App\Http\Controllers\Client\ContactController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -26,15 +29,20 @@ use App\Http\Controllers\Web\PaymentController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\TemplateExportController;
+use App\Http\Controllers\Web\BlogController as AppBlogController;
+use App\Http\Controllers\Web\ContactController as AppContactController;
 use Illuminate\Support\Facades\Mail;
+
 use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Web\ExcelController;
 use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-use App\Http\Controllers\web\VoucherController;
+
+use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
+
 
 Route::get('/', function () {
     return view('admin.index');
@@ -81,7 +89,7 @@ Route::prefix('auth/')->name('auth.')->group(
 
 
 
-Route::prefix('admin')->name('admin.')->group(
+Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
     function () {
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
             Route::get('list', 'list')->name('list');
@@ -92,6 +100,11 @@ Route::prefix('admin')->name('admin.')->group(
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
         });
+
+        Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
+            Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+        });
+
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
             Route::post('create-product', 'createByExcel')->name('createProduct');
         });
@@ -100,13 +113,13 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
             }
         );
-            Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
-                Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
-                Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
-                Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
-                Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
-                Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
-            });
+        Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
+            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
+            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
+            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
+            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
+            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
+        });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
             Route::get('list-category',  'listCategory')->name('listCategory');
@@ -144,6 +157,36 @@ Route::prefix('admin')->name('admin.')->group(
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
+        // Blogs
+        Route::prefix('blogs')->controller(AppBlogController::class)->name('blogs.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+        });
+
+        // Contact
+        Route::prefix('contacts')->controller(AppContactController::class)->name('contacts.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+        });
+
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
             Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
             Route::post('/store',  'store')->name('store');
@@ -153,15 +196,33 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
             Route::post('import-product', 'import')->name('importProduct');
             Route::get('detail/{id}', 'detail')->name('detail');
+            Route::get('stas/{id}', 'stas')->name('stas');
+            Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail');
         });
 
 
+        // Users
+        Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
 
-        Route::prefix('users')->name('users.')->controller(UserContronler::class)->group(
-            function () {
-                Route::get('/', 'listAdmin')->name('list');
-            }
-        );
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+
+            // Biểu đồ thống kê
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user');
+            Route::get('/charts', 'charts')->name('charts');
+            Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
+            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
+            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
+            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats');
+        });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
             function () {
@@ -183,6 +244,7 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
             }
         );
+
         Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
             function () {
                 Route::get('add', 'getFormAdd')->name('getFormAdd');
@@ -199,6 +261,7 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::post('edit/{id}', 'edit')->name('edit');
                 Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
                 Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');
+
                 Route::get('update-price/{id}', 'updatePrice')->name('updatePrice');
             }
         );
@@ -258,17 +321,7 @@ Route::prefix('client')->name('client.')->group(
         Route::controller(SearchController::class)->group(function () {
             Route::get('/search', [SearchController::class, 'search'])->name('search');
         });
-        Route::controller(OrderController::class)->group(function () {
-            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-            Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
-            Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-            Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
-        });
-        //cổng thanh toán
-        Route::controller(PaymentController::class)->group(function () {
-            Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
-            Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
-        });
+
         Route::prefix('carts')->controller(CartControllerSession::class)->name('carts.')->group(
             function () {
                 Route::get('/get',  'getCart');
@@ -280,6 +333,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::get('view-cart', 'viewCart')->name('viewCart');
             }
         );
+
         Route::prefix('checkout')->controller(CheckoutController::class)->name('checkout.')->group(
             function () {
                 Route::post('/', 'create')->name('create');
@@ -293,6 +347,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detail')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
+                Route::post('/cancel', 'cancel')->name('cancel');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(
@@ -300,5 +355,19 @@ Route::prefix('client')->name('client.')->group(
                 Route::get('/', 'handleVnpayReturn')->name('handleVnpayReturn');
             }
         );
+
+
+        Route::prefix('my-account')->controller(MyAccountController::class)->name('my-account.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::put('/{id}', 'update')->name('update'); // sua thong tin
+        });
+        Route::prefix('blog')->controller(BlogController::class)->name('blog.')->group(function () {
+            Route::get('/index', [BlogController::class, 'index'])->name('index');
+            Route::get('show/{id}', 'show')->name('show');
+        });
+        Route::prefix('contact')->controller(ContactController::class)->name('contact.')->group(function () {
+            Route::get('/index', [ContactController::class, 'index'])->name('index');
+            Route::post('/', 'store')->name('store');
+        });
     }
 );

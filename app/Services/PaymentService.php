@@ -6,6 +6,13 @@ class PaymentService
 {
     public function vnpay_payment($order)
     {
+        $currentStatus = $order->orderStatus;
+        $nextStatus = $currentStatus->nextStatus;
+        $order->id_order_status = $nextStatus->id;
+        $order->save();
+        $order->update([
+            'payment_status' => 'Payment Verification',
+        ]);
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://127.0.0.1:8000/client/payment";
         $vnp_TmnCode = "ASFZEFO2"; //Mã website tại VNPAY

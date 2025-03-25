@@ -77,16 +77,6 @@
                     <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
-
-                <!-- Tổng số lần voucher đã được sử dụng -->
-                <div class="mb-3">
-                    <label for="total_usage" class="form-label">Tổng số lần đã dùng</label>
-                    <input type="number" name="total_usage" class="form-control" placeholder="Nhập tổng số lần đã sử dụng..." value="{{ old('total_usage') }}">
-                    @error('total_usage')
-                    <div class="text-danger">{{ $message }}</div>
-                    @enderror
-                </div>
-
                 <!-- Thời gian bắt đầu -->
                 <div class="mb-3">
                     <label for="start_date" class="form-label">Thời gian bắt đầu</label>
@@ -135,14 +125,40 @@
                     @enderror
                 </div>
 
-                <!-- Áp dụng cho -->
-                <div class="mb-3">
-                    <label for="applies_to" class="form-label">Áp dụng cho</label>
-                    <input type="text" name="applies_to" class="form-control" placeholder="Nhập danh mục hoặc sản phẩm..." value="{{ old('applies_to') }}">
-                    @error('applies_to')
-                    <div class="text-danger">{{ $message }}</div>
-                    @enderror
+           <!-- Phần Áp dụng -->
+        <div class="mb-3">
+            <label class="form-label">Áp dụng cho</label>
+            <div class="row">
+                <!-- Cột chọn Danh mục -->
+                <div class="col-md-6">
+                    <label for="applies_to_category" class="form-label">Danh mục</label>
+                    <select name="applies_to[]" id="applies_to_category" class="form-control select2" multiple>
+                        @foreach($categories as $category)
+                            <option value="category_{{ $category->id }}"
+                                {{ is_array(old('applies_to')) && in_array("category_{$category->id}", old('applies_to')) ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+
+                <!-- Cột chọn Sản phẩm -->
+                <div class="col-md-6">
+                    <label for="applies_to_product" class="form-label">Sản phẩm</label>
+                    <select name="applies_to[]" id="applies_to_product" class="form-control select2" multiple>
+                        @foreach($products as $product)
+                            <option value="product_{{ $product->id }}"
+                                {{ is_array(old('applies_to')) && in_array("product_{$product->id}", old('applies_to')) ? 'selected' : '' }}>
+                                {{ $product->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @error('applies_to')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
 
                 <!-- Nút Xác nhận và Quay lại -->
                 <div class="d-flex">
