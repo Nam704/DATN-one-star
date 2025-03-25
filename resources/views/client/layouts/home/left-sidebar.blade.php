@@ -10,11 +10,14 @@
                         <ul>
                             @foreach ($categories as $item)
                             @if ($item->id_parent == 0)
-                            <li class="menu_item_children categorie_list"><a href="#">{{ $item->name }} ({{
-                                    $item->min_price }}) <i class="fa fa-angle-right"></i></a>
+                            <li class="menu_item_children categorie_list"><a href="{{ route('client.shop', ['categories' => [$item->id]]) }}">
+                                {{ $item->name }} ({{ $item->min_price }}) <i class="fa fa-angle-right"></i>
+                            </a>
                                 <ul class="categories_mega_menu">
                                     @foreach ($item->children as $child)
-                                    <li class="menu_item_children"><a href="#">{{ $child->name }}</a>
+                                    <li class="menu_item_children"><a href="{{ route('client.shop', ['categories' => [$child->id]]) }}">
+                                        {{ $child->name }}
+                                    </a>
 
                                     </li>
                                     @endforeach

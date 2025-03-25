@@ -28,8 +28,17 @@ class ShopController extends Controller
 
         // Apply filters if present
         if ($request->has('categories')) {
-            $productsQuery->whereIn('id_category', $request->input('categories'));
+            $selectedCategories = $request->input('categories');
+
+            // Lấy danh sách các ID của danh mục được chọn và các danh mục con của nó
+            $allCategoryIds = Category::whereIn('id', $selectedCategories)
+                ->orWhereIn('id_parent', $selectedCategories)
+                ->pluck('id')
+                ->toArray();
+
+            $productsQuery->whereIn('id_category', $allCategoryIds);
         }
+
         if ($request->has('brands')) {
             $productsQuery->whereIn('id_brand', $request->input('brands'));
         }
