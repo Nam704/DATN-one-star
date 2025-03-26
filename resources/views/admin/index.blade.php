@@ -1,18 +1,10 @@
 @extends('admin.layouts.layout')
 @section('content')
 <div class="container-fluid">
-
     <!-- start page title -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="javascript: void(0);">Velonic</a></li>
-                        <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboards</a></li>
-                        <li class="breadcrumb-item active">Welcome!</li>
-                    </ol>
-                </div>
                 <h4 class="page-title">Welcome!</h4>
             </div>
         </div>
@@ -21,17 +13,25 @@
 
     <div class="row">
         <div class="col-xxl-3 col-sm-6">
+            <div class="card widget-flat text-bg-primary">
+                <div class="card-body">
+                    <div class="float-end">
+                        <i class="ri-group-2-line widget-icon"></i>
+                    </div>
+                    <h6 class="text-uppercase mt-0" title="Customers">Users</h6>
+                    <h2 class="my-2">{{ number_format($countData['user']) }}</h2>
+                </div>
+            </div>
+        </div> <!-- end col-->
+
+        <div class="col-xxl-3 col-sm-6">
             <div class="card widget-flat text-bg-pink">
                 <div class="card-body">
                     <div class="float-end">
-                        <i class="ri-eye-line widget-icon"></i>
+                        <i class="ri-box-line widget-icon"></i>
                     </div>
-                    <h6 class="text-uppercase mt-0" title="Customers">Daily Visits</h6>
-                    <h2 class="my-2">8,652</h2>
-                    <p class="mb-0">
-                        <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
-                        <span class="text-nowrap">Since last month</span>
-                    </p>
+                    <h6 class="text-uppercase mt-0" title="Customers">Product</h6>
+                    <h2 class="my-2">{{ number_format($countData['product']) }}</h2>
                 </div>
             </div>
         </div> <!-- end col-->
@@ -43,11 +43,7 @@
                         <i class="ri-wallet-2-line widget-icon"></i>
                     </div>
                     <h6 class="text-uppercase mt-0" title="Customers">Revenue</h6>
-                    <h2 class="my-2">$9,254.62</h2>
-                    <p class="mb-0">
-                        <span class="badge bg-white bg-opacity-10 me-1">18.25%</span>
-                        <span class="text-nowrap">Since last month</span>
-                    </p>
+                    <h2 class="my-2">{{ number_format($countData['revenue']) }} đ</h2>
                 </div>
             </div>
         </div> <!-- end col-->
@@ -59,30 +55,22 @@
                         <i class="ri-shopping-basket-line widget-icon"></i>
                     </div>
                     <h6 class="text-uppercase mt-0" title="Customers">Orders</h6>
-                    <h2 class="my-2">753</h2>
-                    <p class="mb-0">
-                        <span class="badge bg-white bg-opacity-25 me-1">-5.75%</span>
-                        <span class="text-nowrap">Since last month</span>
-                    </p>
+                    <h2 class="my-2">{{ number_format($countData['order']) }}</h2>
                 </div>
             </div>
         </div> <!-- end col-->
-
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-primary">
+        <!-- Thống kê trạng thái đơn hàng -->
+        <div class="col-xl-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header">
+                    <h5 class="header-title mb-0">Order Status Statistics</h5>
+                </div>
                 <div class="card-body">
-                    <div class="float-end">
-                        <i class="ri-group-2-line widget-icon"></i>
-                    </div>
-                    <h6 class="text-uppercase mt-0" title="Customers">Users</h6>
-                    <h2 class="my-2">63,154</h2>
-                    <p class="mb-0">
-                        <span class="badge bg-white bg-opacity-10 me-1">8.21%</span>
-                        <span class="text-nowrap">Since last month</span>
-                    </p>
+                    <canvas id="orderStatusChart"></canvas>
                 </div>
             </div>
-        </div> <!-- end col-->
+        </div>
+
     </div>
 
     <div class="row">
@@ -404,4 +392,77 @@
 @endpush
 @push('scripts')
 <x-admin.dashboard-scripts />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctxOrderStatus = document.getElementById('orderStatusChart').getContext('2d');
+    var orderStatusChart = null;
+
+    function loadOrderStatusChart() {
+        $.ajax({
+            url: "{{ route('admin.orderStatus') }}",
+            type: "GET",
+            dataType: "json",
+            success: function(response) {
+                if (orderStatusChart) {
+                    orderStatusChart.destroy();
+                }
+
+                if (!response || response.length === 0) {
+                    ctxOrderStatus.clearRect(0, 0, ctxOrderStatus.canvas.width, ctxOrderStatus.canvas.height);
+                    ctxOrderStatus.font = '16px Arial';
+                    ctxOrderStatus.fillStyle = "gray";
+                    ctxOrderStatus.textAlign = 'center';
+                    ctxOrderStatus.fillText('No Data Available', ctxOrderStatus.canvas.width / 2, ctxOrderStatus.canvas.height / 2);
+                    return;
+                }
+
+                var labels = response.map(o => o.status);
+                var values = response.map(o => o.total);
+                var backgroundColors = labels.map(() =>
+                    `rgba(${Math.floor(Math.random() * 180) + 50}, 
+                          ${Math.floor(Math.random() * 180) + 50}, 
+                          ${Math.floor(Math.random() * 180) + 50}, 0.8)`
+                );
+
+                orderStatusChart = new Chart(ctxOrderStatus, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                display: true
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        var sum = context.dataset.data.reduce((a, b) => Number(a) + Number(b), 0);
+                                        return `${context.label}: ${context.raw} orders (${((context.raw / sum) * 100).toFixed(2)}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching data:", error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        loadOrderStatusChart();
+    });
+</script>
 @endpush

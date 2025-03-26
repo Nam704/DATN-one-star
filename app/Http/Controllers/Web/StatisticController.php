@@ -87,5 +87,28 @@ class StatisticController extends Controller
         $top_sale_products = $this->product->productSold($start_date, $end_date);
         return response()->json($top_sale_products);
     }
+    
+    //tạo api cho biểu đồ danh mục sản phẩm
+     public function categoryStatistics(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+    
+        $query = Category::select('categories.name')
+            ->leftJoin('products', 'categories.id', '=', 'products.id_category')
+            ->whereNull('categories.deleted_at')
+            ->groupBy('categories.id', 'categories.name')
+            ->selectRaw('COUNT(products.id) as total_products');
+    
+        if ($start_date && $end_date) {
+            $query->whereBetween('products.created_at', [$start_date, $end_date]);
+        }
+    
+        $categories = $query->orderBy('total_products', 'desc')->get();
+    
+        return response()->json($categories);
+    }
+    
+
 
 }
