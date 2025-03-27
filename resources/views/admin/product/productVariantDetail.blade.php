@@ -5,6 +5,9 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="header-title">Chi tiết biến thể: {{ $variant->sku }}</h4>
+            </div>
+            <div class="card-body">
+                <h5>Danh sách người dùng đã đặt hàng</h5>
                 <div class="mt-2">
                     <label for="statusFilter">Lọc theo trạng thái đơn hàng:</label>
                     <select id="statusFilter" class="form-control w-25" onchange="filterByStatus()">
@@ -16,10 +19,7 @@
                         @endforeach
                     </select>
                 </div>
-            </div>
-            <div class="card-body">
-                <h5>Danh sách người dùng đã đặt hàng</h5>
-                <table class="table table-bordered">
+             <table id="fixed-header-datatable"  class="table table-striped dt-responsive nowrap table-striped  w-100">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -64,5 +64,13 @@
             }
             window.location.href = url.toString();
         }
+
     </script>
 @endsection
+@push('styles')
+<x-admin.data-table-styles />
+@endpush
+
+@push('scripts')
+<x-admin.data-table-scripts />
+@endpush
