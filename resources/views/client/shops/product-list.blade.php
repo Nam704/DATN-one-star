@@ -10,12 +10,14 @@
                 </h3>
                 <p class="manufacture_product"><a href="#">Accessories</a></p>
             </div>
-            <div class="product_thumb" style="width:200px; height:250px; overflow:hidden; position:relative; padding: 5px; margin: auto; background-color: #fff; box-sizing: border-box;">
+            <div class="product_thumb"
+                style="width:200px; height:250px; overflow:hidden; position:relative; padding: 5px; margin: auto; background-color: #fff; box-sizing: border-box;">
                 <a class="primary_img" href="{{ route('client.products.detail', $product->id) }}">
                     <img src="{{ asset($product->image_primary) }}" alt="{{ $product->name }}"
                         style="width:100%; height:100%; object-fit:contain; transition: opacity 0.3s; display:block;">
                 </a>
-                <a class="secondary_img" href="{{ route('client.products.detail', $product->id) }}" style="position:absolute; top:5px; left:5px;">
+                <a class="secondary_img" href="{{ route('client.products.detail', $product->id) }}"
+                    style="position:absolute; top:5px; left:5px;">
                     <img src="{{ asset($product->image_primary) }}" alt="{{ $product->name }}"
                         style="width:100%; height:100%; object-fit:contain; opacity:0; transition: opacity 0.3s; display:block;">
                 </a>

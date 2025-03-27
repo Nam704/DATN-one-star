@@ -133,3 +133,76 @@
         </div>
     </div>
 </div>
+
+
+<!--product area start-->
+<section class="product_area mb-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section_title">
+                    <h2><span><strong>Related</strong> Products</span></h2>
+                </div>
+                <div class="product_carousel product_column5 owl-carousel">
+                    @if ($relatedProducts->count() > 0)
+                        @foreach ($relatedProducts as $related)
+                            <div class="single_product">
+                                <div class="product_thumb">
+                                    <a class="primary_img" href="{{ route('client.products.detail', $related->id) }}">
+                                        <img src="{{ asset($related->image_primary) }}" alt="{{ $related->name }}">
+                                    </a>
+                                    @if ($related->image_secondary)
+                                        <a class="secondary_img"
+                                            href="{{ route('client.products.detail', $related->id) }}">
+                                            <img src="{{ asset($related->image_secondary) }}"
+                                                alt="{{ $related->name }}">
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="product_content">
+                                    <div class="product_name">
+                                        <h3>
+                                            <a href="{{ route('client.products.detail', $related->id) }}">
+                                                {{ $related->name }}
+                                            </a>
+                                        </h3>
+                                    </div>
+                                    <div class="product_ratings">
+                                        <ul>
+                                            @php
+                                                // Giả sử có hàm đánh giá hoặc trường rating từ 0 đến 5
+                                                $rating = $related->rating ?? 0;
+                                            @endphp
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <li>
+                                                    <a href="#">
+                                                        <i
+                                                            class="ion-ios-star{{ $i <= $rating ? '' : '-outline' }}"></i>
+                                                    </a>
+                                                </li>
+                                            @endfor
+                                        </ul>
+                                    </div>
+                                    <div class="product_footer d-flex align-items-center">
+                                        @php
+                                            $prices = $related->getPriceRange();
+                                        @endphp
+                                        <div class="price_box">
+                                            <span class="current_price">
+                                                ${{ number_format($prices->min_price, 0) }}
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <p>Không có sản phẩm liên quan.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--product area end-->
