@@ -26,7 +26,7 @@
 
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" id="select-all"></th>
+                                    <th><input type="checkbox" class="select-all"></th>
                                     <th>Code</th>
                                     <th>Date</th>
                                     <th>Total</th>
@@ -40,7 +40,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th><input type="checkbox" id="select-all"></th>
+                                    <th><input type="checkbox" class="select-all"></th>
                                     <th>Code</th>
                                     <th>Date</th>
                                     <th>Total</th>

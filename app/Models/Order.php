@@ -28,6 +28,10 @@ class Order extends Model
         "id_voucher",
 
     ];
+    public function orderExpire()
+    {
+        return $this->hasOne(OrderExpire::class, 'id_order', 'id');
+    }
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
@@ -38,6 +42,10 @@ class Order extends Model
     }
     // Quan hệ với bảng trạng thái đơn hàng
     public function orderStatus()
+    {
+        return $this->belongsTo(Order_status::class, 'id_order_status', 'id');
+    }
+    public function status()
     {
         return $this->belongsTo(Order_status::class, 'id_order_status');
     }
@@ -91,6 +99,4 @@ class Order extends Model
             }
         ]);
     }
-
-
 }

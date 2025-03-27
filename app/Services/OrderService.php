@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Jobs\ExpireOrder;
 use App\Models\Order;
 use App\Models\Order_status;
 use App\Models\OrderCancellation;
 use App\Models\OrderCancellationReason;
+use App\Models\OrderExpire;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -13,6 +16,7 @@ class OrderService
 {
     protected $order;
     protected $orderStatus;
+    protected $orderExpire;
     protected $paymentService;
     protected $notificationService;
     protected $orderCancellationReason;
@@ -20,15 +24,24 @@ class OrderService
         Order $order,
         PaymentService $paymentService,
         Order_status $orderStatus,
+        OrderExpire $orderExpire,
         NotificationService $notificationService,
         OrderCancellationReason $orderCancellationReason
     ) {
         $this->orderCancellationReason = $orderCancellationReason;
         $this->orderStatus = $orderStatus;
+        $this->orderExpire = $orderExpire;
         $this->paymentService = $paymentService;
         $this->order = $order;
         $this->notificationService = $notificationService;
         // Constructor logic
+    }
+    function acceptAll($request)
+    {
+        $orderIds = $request->input('ids');
+        foreach ($orderIds as $orderId) {
+            $this->updateOrderStatus($orderId);
+        }
     }
     function listReason()
     {
@@ -127,7 +140,16 @@ class OrderService
                     'total' => $item['total'],
                 ]);
             }
+            $orderExpire = $this->orderExpire->create([
+                'id_order' => $order->id,
+                // 'expires_at' => Carbon::now()->addMinutes(1),
+                'expires_at' => Carbon::now()->addSeconds(3),
 
+            ]);
+
+            // Dispatch the ExpireOrder job
+            // trì hoãn 1 phút sau đó thực thi handle job
+            ExpireOrder::dispatch($orderExpire->id)->delay($orderExpire->expires_at);
             $dataNotification = [
                 'title' => 'New Order',
                 'message' => "New Order, vui lòng kiểm tra và xác nhận!",

@@ -96,6 +96,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('update-list', 'update');
             Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus');
             Route::get('detail/{id}', 'detail')->name('detail');
+            Route::post('accept-all', 'acceptAll')->name('acceptAll');
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');

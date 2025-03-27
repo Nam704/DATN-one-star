@@ -20,6 +20,14 @@ class OrderController extends Controller
 
         return view('admin.order.detail', compact('order'));
     }
+    function acceptAll(Request $request)
+    {
+        $this->orderService->acceptAll($request);
+        return response()->json([
+            'message' => 'Cập nhật trạng thái thành công.',
+
+        ]);
+    }
     public function list(Request $request)
     {
         $statuses = $this->orderService->listStatus();

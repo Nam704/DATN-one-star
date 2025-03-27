@@ -1,6 +1,6 @@
 @foreach ($orders as $order)
     <tr>
-        <td><input type="checkbox" name="selected_order[]" value="{{ $order->id }}" class="import-checkbox"></td>
+        <td><input type="checkbox" name="selected_order[]" value="{{ $order->id }}" class="checkbox-select"></td>
         <td>
             {{ $order->code }}
         </td>
