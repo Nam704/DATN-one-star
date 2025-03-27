@@ -1,10 +1,18 @@
 @extends('admin.layouts.layout')
 @section('content')
     <div class="container-fluid">
+
         <!-- start page title -->
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Velonic</a></li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboards</a></li>
+                            <li class="breadcrumb-item active">Welcome!</li>
+                        </ol>
+                    </div>
                     <h4 class="page-title">Welcome!</h4>
                 </div>
             </div>
@@ -13,25 +21,17 @@
 
         <div class="row">
             <div class="col-xxl-3 col-sm-6">
-                <div class="card widget-flat text-bg-primary">
-                    <div class="card-body">
-                        <div class="float-end">
-                            <i class="ri-group-2-line widget-icon"></i>
-                        </div>
-                        <h6 class="text-uppercase mt-0" title="Customers">Users</h6>
-                        <h2 class="my-2">{{ number_format($countData['user']) }}</h2>
-                    </div>
-                </div>
-            </div> <!-- end col-->
-
-            <div class="col-xxl-3 col-sm-6">
                 <div class="card widget-flat text-bg-pink">
                     <div class="card-body">
                         <div class="float-end">
-                            <i class="ri-box-line widget-icon"></i>
+                            <i class="ri-eye-line widget-icon"></i>
                         </div>
-                        <h6 class="text-uppercase mt-0" title="Customers">Product</h6>
-                        <h2 class="my-2">{{ number_format($countData['product']) }}</h2>
+                        <h6 class="text-uppercase mt-0" title="Customers">Daily Visits</h6>
+                        <h2 class="my-2">8,652</h2>
+                        <p class="mb-0">
+                            <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
+                            <span class="text-nowrap">Since last month</span>
+                        </p>
                     </div>
                 </div>
             </div> <!-- end col-->
@@ -43,7 +43,11 @@
                             <i class="ri-wallet-2-line widget-icon"></i>
                         </div>
                         <h6 class="text-uppercase mt-0" title="Customers">Revenue</h6>
-                        <h2 class="my-2">{{ number_format($countData['revenue']) }} đ</h2>
+                        <h2 class="my-2">$9,254.62</h2>
+                        <p class="mb-0">
+                            <span class="badge bg-white bg-opacity-10 me-1">18.25%</span>
+                            <span class="text-nowrap">Since last month</span>
+                        </p>
                     </div>
                 </div>
             </div> <!-- end col-->
@@ -55,11 +59,30 @@
                             <i class="ri-shopping-basket-line widget-icon"></i>
                         </div>
                         <h6 class="text-uppercase mt-0" title="Customers">Orders</h6>
-                        <h2 class="my-2">{{ number_format($countData['order']) }}</h2>
+                        <h2 class="my-2">753</h2>
+                        <p class="mb-0">
+                            <span class="badge bg-white bg-opacity-25 me-1">-5.75%</span>
+                            <span class="text-nowrap">Since last month</span>
+                        </p>
                     </div>
                 </div>
             </div> <!-- end col-->
 
+            <div class="col-xxl-3 col-sm-6">
+                <div class="card widget-flat text-bg-primary">
+                    <div class="card-body">
+                        <div class="float-end">
+                            <i class="ri-group-2-line widget-icon"></i>
+                        </div>
+                        <h6 class="text-uppercase mt-0" title="Customers">Users</h6>
+                        <h2 class="my-2">63,154</h2>
+                        <p class="mb-0">
+                            <span class="badge bg-white bg-opacity-10 me-1">8.21%</span>
+                            <span class="text-nowrap">Since last month</span>
+                        </p>
+                    </div>
+                </div>
+            </div> <!-- end col-->
         </div>
 
         <div class="row">
@@ -115,8 +138,9 @@
                     <div class="card-body">
                         <div class="card-widgets">
                             <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                            <a data-bs-toggle="collapse" href="#yearly-sales-collapse" role="button" aria-expanded="false"
-                                aria-controls="yearly-sales-collapse"><i class="ri-subtract-line"></i></a>
+                            <a data-bs-toggle="collapse" href="#yearly-sales-collapse" role="button"
+                                aria-expanded="false" aria-controls="yearly-sales-collapse"><i
+                                    class="ri-subtract-line"></i></a>
                             <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
                         </div>
                         <h5 class="header-title mb-0">Yearly Sales Report</h5>
@@ -160,6 +184,7 @@
                     </div><!-- end card body -->
                 </div> <!-- end card-->
             </div> <!-- end col-->
+
         </div>
         <!-- end row -->
 
