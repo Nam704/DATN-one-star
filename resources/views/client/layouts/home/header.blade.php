@@ -88,14 +88,19 @@
                 </div>
                 <div class="col-lg-9 col-md-6">
                     <div class="middel_right">
-                        <div class="search-container">
+                        <div class="search-container mobile-search" style="position: relative;">
                             <form action="#">
                                 <div class="search_box">
-                                    <input placeholder="Search entire store here ..." type="text">
+                                    <input type="text" class="search-input" placeholder="Search entire store here ..."
+                                        autocomplete="off">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>
+                            <div class="search-result"
+                                style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                         </div>
+
+
                         <div class="middel_right_info">
 
                             <div class="header_wishlist">
@@ -206,13 +211,16 @@
                             <li><a href="#"><i class="ion-social-youtube"></i></a></li>
                         </ul>
                     </div>
-                    <div class="search-container">
+                    <div class="search-container mobile-search" style="position: relative;">
                         <form action="#">
                             <div class="search_box">
-                                <input placeholder="Search entire store here ..." type="text">
+                                <input type="text" class="search-input" placeholder="Search entire store here ..."
+                                    autocomplete="off">
                                 <button type="submit"><i class="ion-ios-search-strong"></i></button>
                             </div>
                         </form>
+                        <div class="search-result"
+                            style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                     </div>
                     <div id="menu" class="text-left ">
                         <ul class="offcanvas_main_menu">
@@ -232,3 +240,34 @@
 
 </div>
 <!--Offcanvas menu area end-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+    $('.search-input').on('keyup', function(){
+        var query = $(this).val();
+        // Tìm container chứa ô tìm kiếm hiện hành và phần kết quả tương ứng
+        var searchResultContainer = $(this).closest('.search-container').find('.search-result');
+        if(query != ''){
+            $.ajax({
+                url: "{{ route('client.search') }}",
+                type: "GET",
+                data: { query: query },
+                success: function(data){
+                    searchResultContainer.fadeIn();
+                    searchResultContainer.html(data);
+                }
+            });
+        } else {
+            searchResultContainer.fadeOut();
+            searchResultContainer.html("");
+        }
+    });
+
+    // Ẩn kết quả gợi ý khi click bên ngoài container search
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-container').length) {
+            $('.search-result').fadeOut();
+        }
+    });
+});
+</script>
