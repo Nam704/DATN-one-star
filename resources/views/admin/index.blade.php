@@ -59,17 +59,6 @@
                     </div>
                 </div>
             </div> <!-- end col-->
-            <!-- Thống kê trạng thái đơn hàng -->
-            <div class="col-xl-6">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header">
-                        <h5 class="header-title mb-0">Order Status Statistics</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="orderStatusChart"></canvas>
-                    </div>
-                </div>
-            </div>
 
         </div>
 
