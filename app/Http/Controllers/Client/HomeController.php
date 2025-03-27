@@ -22,6 +22,9 @@ class HomeController extends Controller
     {
         $categories = $this->categoryService->getCategories();
         // return ($categories);
-        return view('client.index', compact('categories'));
+        $userId = auth()->check() ? auth()->id() : null;
+        $recommendedProducts = $this->productService->getRecommendedProducts($userId);
+        // dd($recommendedProducts);
+        return view('client.index', compact('categories', 'recommendedProducts'));
     }
 }

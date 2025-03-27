@@ -102,6 +102,68 @@
             </div>
         </div>
     </section>
+
+
+    <section class="recommended_products_area mb-50">
+        <div class="container">
+            <div class="section_title">
+                <h2><span>Sản phẩm đề xuất</span></h2>
+            </div>
+            <div class="product_carousel product_column5 owl-carousel">
+                @foreach ($recommendedProducts as $product)
+                    <div class="single_product">
+                        <div class="product_thumb">
+                            <a class="primary_img" href="{{ route('client.products.detail', $product->id) }}">
+                                <img src="{{ asset($product->image_primary) }}" alt="{{ $product->name }}">
+                            </a>
+                            @if (isset($product->discount_percentage))
+                                <div class="label_product">
+                                    <span class="label_sale">-{{ $product->discount_percentage }}%</span>
+                                </div>
+                            @endif
+                            <div class="action_links">
+                                <ul>
+                                    <li class="quick_button">
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#modal_box" title="Xem nhanh">
+                                            <span class="lnr lnr-magnifier"></span>
+                                        </a>
+                                    </li>
+                                    <li class="wishlist">
+                                        <a href="#" title="Thêm vào yêu thích">
+                                            <span class="lnr lnr-heart"></span>
+                                        </a>
+                                    </li>
+                                    <li class="compare">
+                                        <a href="#" title="So sánh">
+                                            <span class="lnr lnr-sync"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="product_content">
+                            <div class="product_name">
+                                <h3>
+                                    <a href="{{ route('client.products.detail', $product->id) }}">
+                                        {{ $product->name }}
+                                    </a>
+                                </h3>
+                            </div>
+                            <div class="product_footer d-flex align-items-center">
+                                <div class="price_box">
+                                    <span class="regular_price">
+                                        {{ number_format($product->min_price, 0, ',', '.') }}₫
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+
 @endsection
 @section('scripts')
 

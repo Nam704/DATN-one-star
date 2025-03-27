@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Exports\ProductExport;
 use App\Imports\CreateProductByExcel;
 use App\Imports\CreateProductImport;
+use App\Models\Cart;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Product_variant;
 use Illuminate\Support\Facades\DB;
@@ -386,11 +388,111 @@ class ProductService
         }
     }
     public function relatedProducts($product)
-{
-    // Ví dụ: Lấy các sản phẩm cùng danh mục, loại trừ sản phẩm hiện tại
-    return Product::where('id_category', $product->category_id)
-        ->where('id', '!=', $product->id)
-        ->take(4)
-        ->get();
-}
+    {
+        // Ví dụ: Lấy các sản phẩm cùng danh mục, loại trừ sản phẩm hiện tại
+        return Product::where('id_category', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->take(4)
+            ->get();
+    }
+    public function getRecommendedProducts($userId)
+    {
+        $targetCount = 10;
+        $recommendedProducts = collect();
+
+        if ($userId) {
+            // Lấy đơn hàng và giỏ hàng
+            $orders = Order::where('id_user', $userId)
+                ->with('orderDetails')
+                ->get();
+            $cart = Cart::where('id_user', $userId)
+                ->with('cartItems')
+                ->first();
+
+            // 1. Dữ liệu từ đơn hàng
+            if ($orders->isNotEmpty()) {
+                $variantCounts = [];
+                foreach ($orders as $order) {
+                    foreach ($order->orderDetails as $detail) {
+                        $variantId = $detail->id_product_variant;
+                        $variantCounts[$variantId] = ($variantCounts[$variantId] ?? 0) + $detail->quantity;
+                    }
+                }
+                if (!empty($variantCounts)) {
+                    $maxVariantId = array_search(max($variantCounts), $variantCounts);
+                    $variant = Product_variant::find($maxVariantId);
+                    if ($variant) {
+                        $baseProduct = Product::find($variant->id_product);
+                        if ($baseProduct) {
+                            $categoryId = $baseProduct->id_category;
+                            $priceInfo = $baseProduct->getPriceRange();
+                            $basePrice = $priceInfo->min_price;
+                            $delta = $basePrice * 0.1;
+                            $minPrice = $basePrice - $delta;
+                            $maxPrice = $basePrice + $delta;
+
+                            $orderRecommendations = Product::where('id_category', $categoryId)
+                                ->whereBetween('price', [$minPrice, $maxPrice])
+                                ->get();
+
+                            $recommendedProducts = $recommendedProducts->merge($orderRecommendations);
+                        }
+                    }
+                }
+            }
+
+            // 2. Nếu có dữ liệu từ giỏ hàng, lấy thêm gợi ý bổ sung
+            if ($cart && $cart->cartItems->count() > 0) {
+                $cartItem = $cart->cartItems->first();
+                $variant = Product_variant::find($cartItem->id_product_variant);
+                if ($variant) {
+                    $baseProduct = Product::find($variant->id_product);
+                    if ($baseProduct) {
+                        $categoryId = $baseProduct->id_category;
+                        $priceInfo = $baseProduct->getPriceRange();
+                        $basePrice = $priceInfo->min_price;
+                        $delta = $basePrice * 0.1;
+                        $minPrice = $basePrice - $delta;
+                        $maxPrice = $basePrice + $delta;
+
+                        $cartRecommendations = Product::where('id_category', $categoryId)
+                            ->whereBetween('price', [$minPrice, $maxPrice])
+                            ->get();
+
+                        $recommendedProducts = $recommendedProducts->merge($cartRecommendations);
+                    }
+                }
+            }
+
+            // Loại bỏ các sản phẩm trùng lặp
+            $recommendedProducts = $recommendedProducts->unique('id');
+
+            // Nếu tổng số sản phẩm không đạt targetCount, bổ sung thêm sản phẩm mới nhất
+            if ($recommendedProducts->count() < $targetCount) {
+                $needed = $targetCount - $recommendedProducts->count();
+                $additionalProducts = Product::orderBy('created_at', 'desc')
+                    ->whereNotIn('id', $recommendedProducts->pluck('id'))
+                    ->take($needed)
+                    ->get();
+                $recommendedProducts = $recommendedProducts->merge($additionalProducts);
+            }
+        }
+
+        // Nếu không có đơn hàng và giỏ hàng thì fallback về sản phẩm mới nhất
+        if ($recommendedProducts->isEmpty()) {
+            $recommendedProducts = Product::orderBy('created_at', 'desc')
+                ->take($targetCount)
+                ->get();
+        }
+
+        // Tính lại giá cho từng sản phẩm
+        $recommendedProducts = $recommendedProducts->map(function($product) {
+            $priceInfo = $product->getPriceRange();
+            $product->min_price = $priceInfo->min_price;
+            return $product;
+        });
+
+        return $recommendedProducts;
+    }
+
 }

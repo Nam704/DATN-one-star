@@ -21,12 +21,12 @@ class ShopController extends Controller
         $brands = Brand::where('status', 'active')->get();
 
         // Determine the maximum price
-        $maxPrice = (int)str_replace('.', '', $request->input('max_price', 50000000));
+        $maxPrice = (int) str_replace('.', '', $request->input('max_price', 50000000));
 
         // Initialize the product query
         $productsQuery = Product::where('status', 'active');
 
-        // Apply filters if present
+        // Apply category filters if present
         if ($request->has('categories')) {
             $selectedCategories = $request->input('categories');
 
@@ -39,21 +39,31 @@ class ShopController extends Controller
             $productsQuery->whereIn('id_category', $allCategoryIds);
         }
 
+        // Apply brand filters if present
         if ($request->has('brands')) {
             $productsQuery->whereIn('id_brand', $request->input('brands'));
         }
+
+        // Apply price filter based on expected_price from import_details (nếu cần)
         if ($request->has('min_price') && $request->has('max_price')) {
             $minPrice = (float)$request->input('min_price', 0);
-            $maxPrice = (float)$request->input('max_price', $maxPrice);
-            $productsQuery->whereHas('variants.importDetails', function ($query) use ($minPrice, $maxPrice) {
-                $query->whereBetween('expected_price', [$minPrice, $maxPrice]);
+            $maxPriceInput = (float)$request->input('max_price', $maxPrice);
+            $productsQuery->whereHas('variants.importDetails', function ($query) use ($minPrice, $maxPriceInput) {
+                $query->whereBetween('expected_price', [$minPrice, $maxPriceInput]);
             });
         }
 
-        // Fetch paginated products
+        // Fetch paginated products with relations
         $products = $productsQuery->with(['variants.importDetails'])->paginate(9);
 
-        // Return the view with data
+        // Tính toán giá tối thiểu cho mỗi sản phẩm (chỉ hiển thị min_price)
+        $products->getCollection()->transform(function ($product) {
+            $prices = $product->variants->pluck('price')->toArray();
+            $product->min_price = !empty($prices) ? min($prices) : 0;
+            return $product;
+        });
+
+        // Return view with data
         return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice'));
     }
 
@@ -63,8 +73,8 @@ class ShopController extends Controller
         $orderBy = $request->input('orderby', 'default');
         $categories = $request->input('categories', []);
         $brands = $request->input('brands', []);
-        $minPrice = (float) $request->input('min_price', 0);
-        $maxPrice = (float) $request->input('max_price', 50000000);
+        $minPrice = (float)$request->input('min_price', 0);
+        $maxPrice = (float)$request->input('max_price', 50000000);
         $search = $request->input('search', '');
 
         // Khởi tạo truy vấn sản phẩm
@@ -127,6 +137,13 @@ class ShopController extends Controller
 
         // Lấy sản phẩm với phân trang (ví dụ 9 sản phẩm/trang) và load quan hệ
         $products = $productsQuery->with('variants')->paginate(9);
+
+        // Tính toán giá tối thiểu cho mỗi sản phẩm
+        $products->getCollection()->transform(function ($product) {
+            $prices = $product->variants->pluck('price')->toArray();
+            $product->min_price = !empty($prices) ? min($prices) : 0;
+            return $product;
+        });
 
         // Render view thành HTML
         $productsHtml = view('client.shops.product-list', compact('products'))->render();
