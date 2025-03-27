@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Exports\ProductExport;
 use App\Imports\CreateProductByExcel;
 use App\Imports\CreateProductImport;
-use App\Models\Cart;
-use App\Models\Order;
 use App\Models\Product;
 use App\Models\Product_variant;
 use Illuminate\Support\Facades\DB;

@@ -22,6 +22,6 @@ class HomeController extends Controller
     {
         $categories = $this->categoryService->getCategories();
         // return ($categories);
-        return view('client.index', compact('categories',));
+        return view('client.index', compact('categories'));
     }
 }
