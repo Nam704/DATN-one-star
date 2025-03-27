@@ -105,7 +105,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
             Route::get('product-statistic', 'productStatistics')->name('productStatistics');
-            Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
             Route::get('productSold', 'productSold')->name('productSold');
             Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics');
