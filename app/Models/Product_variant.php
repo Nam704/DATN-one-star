@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product_variant extends Model
@@ -15,6 +16,7 @@ class Product_variant extends Model
         'status',
         'quantity',
         'price',
+
     ];
     public function import_details()
     {
@@ -37,6 +39,15 @@ class Product_variant extends Model
         return $this->belongsTo(Product::class, 'id_product');
     }
 
+    public function attributes()
+    {
+        return $this->belongsToMany(
+            Attribute_value::class,
+            'product_variant_attributes',
+            'id_product_variant',
+            'id_attribute_value'
+        );
+    }
     public function images()
     {
         return $this->hasOne(Image::class, 'id_product_variant');

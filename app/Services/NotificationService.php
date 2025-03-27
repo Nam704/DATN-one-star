@@ -120,14 +120,14 @@ class NotificationService
 
     public function sendPrivate($data)
     {
+        Log::info('sendPrivate');
         // Lọc người dùng có vai trò admin và employee
         $recipients = User::whereHas('role', function ($query) {
             $query->whereIn('name', ['admin', 'employee']);
         })
-            ->where('id', '!=', $data['from_user_id'])
+            // ->where('id', '!=', $data['from_user_id'])
             ->get();
-        // dd($recipients);
-        // Tạo thông báo cho từng người nhận
+
         foreach ($recipients as $recipient) {
             $this->createNotification([
                 'type' => $data['type'],
@@ -136,12 +136,12 @@ class NotificationService
                 'from_user_id' => $data['from_user_id'],
                 'to_user_id' => $recipient->id,
                 'status' => $data['status'],
-                'goto_id' => $data['goto_id'] ?? "",
+                'goto_id' => $data['goto_id'],
             ]);
         }
-
+        Log::info($recipients);
         // Gửi thông báo qua broadcasting
-        broadcast(new PrivateNotification($data))->toOthers();
+        broadcast(new PrivateNotification($data));
     }
 
     public function createNotification(array $data)

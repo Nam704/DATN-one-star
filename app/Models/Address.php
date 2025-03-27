@@ -19,6 +19,34 @@ class Address extends Model
     {
         return $this->morphTo(); // Định nghĩa quan hệ polymorphic
     }
+    public function details($idWard)
+    {
+        // Lấy dữ liệu từ các bảng liên quan
+        $addressDetails = DB::table('addresses as a')
+            ->join('wards as w', 'a.id_ward', '=', 'w.id')
+            ->join('districts as d', 'w.district_id', '=', 'd.id')
+            ->join('provinces as p', 'd.province_id', '=', 'p.id')
+            ->where('a.id_ward', '=', $idWard)
+            ->select(
+                'a.address_detail',
+                'w.name as ward_name',
+                'd.name as district_name',
+                'p.name as province_name'
+            )
+            ->first();
+
+        // Nếu có dữ liệu, kết hợp các trường lại thành một chuỗi địa chỉ hoàn chỉnh
+        if ($addressDetails) {
+            $address = $addressDetails->address_detail . ', ' .
+                $addressDetails->ward_name . ', ' .
+                $addressDetails->district_name . ', ' .
+                $addressDetails->province_name;
+            return $address;  // Trả về chuỗi địa chỉ hoàn chỉnh
+        }
+
+        return 'Địa chỉ không có sẵn';
+    }
+
     public static function getAddressDetailsByWard($idWard)
     {
         return DB::table('addresses as a')
@@ -26,7 +54,14 @@ class Address extends Model
             ->join('districts as d', 'w.district_id', '=', 'd.id')
             ->join('provinces as p', 'd.province_id', '=', 'p.id')
             ->where('a.id_ward', '=', $idWard)
-            ->select('a.address_detail', 'w.name as ward_name', 'd.name as district_name', 'p.name as province_name', 'd.id as district_id', 'p.id as province_id')
+            ->select(
+                'a.address_detail',
+                'w.name as ward_name',
+                'd.name as district_name',
+                'p.name as province_name',
+                'd.id as district_id',
+                'p.id as province_id'
+            )
             ->get();
     }
     public static function getAddressSupplier($idWard, $addressable_id)
@@ -84,5 +119,10 @@ class Address extends Model
                 'p.id as province_id'
             )
             ->first();
+    }
+
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'id_ward');
     }
 }

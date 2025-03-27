@@ -25,7 +25,7 @@
                 <div class="card">
                     <div class="card-body">
                         <table id="fixed-header-database"
-                         class="table table-striped dt-responsive nowrap table-striped w-100">
+                            class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -80,10 +80,10 @@
 @endsection
 
 @push('styles')
-<x-admin.data-table-styles />
+    <x-admin.data-table-styles />
 @endpush
 
 @push('scripts')
-<x-admin.data-table-scripts />
+    <x-admin.data-table-scripts />
     <script src="{{ asset('admin/api/attributes.js') }}"></script>
 @endpush

@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -14,12 +15,10 @@ class OrderNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct()
+    public $order;
+    function __construct(Order $order)
     {
-        //
+        $this->order = $order;
     }
 
     /**
@@ -30,7 +29,15 @@ class OrderNotification implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('notifications.' . $this->order->id_user),
+        ];
+    }
+    public function broadcastWith()
+    {
+        return [
+            'message' => 'New Order Placed',
+            'order' => $this->order,
+            "status" => $this->order->orderStatus->name,
         ];
     }
 }

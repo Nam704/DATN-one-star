@@ -3,7 +3,10 @@
     <!-- Brand Logo Light -->
     <a href="index.html" class="logo logo-light">
         <span class="logo-lg">
-            <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo">
+            {{-- <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo"> --}}
+
+            <img src=" {{ asset('admin/assets/images/logo-3.png') }}" alt="logo"
+                style="width: 190px; height: auto; margin-top: 10px;">
         </span>
         <span class="logo-sm">
             <img src="{{ asset('admin/assets/images/logo-sm.png') }}" alt="small logo">
@@ -35,18 +38,17 @@
                 </a>
             </li>
 
-
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false" aria-controls="sidebarPages"
                     class="side-nav-link">
                     <i class="ri-pages-line"></i>
-                    <span> Oders </span>
+                    <span> Orders </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarPages">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="pages-starter.html">List</a>
+                            <a href="{{ route('admin.orders.list') }}">List</a>
                         </li>
 
                     </ul>
@@ -63,7 +65,7 @@
                 <div class="collapse" id="sidebarPagesAuth">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{ route('admin.users.list') }}">List active</a>
+                            <a href="{{ route('admin.users.index') }}">List active</a>
                         </li>
 
                     </ul>
@@ -88,6 +90,7 @@
                     </ul>
                 </div>
             </li>
+            
 
             <li class="side-nav-title">Components</li>
 
@@ -129,6 +132,42 @@
                     </ul>
                 </div>
             </li>
+
+            {{-- blogs --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false"
+                    aria-controls="sidebarThirdLevel" class="side-nav-link">
+                    <i class="mdi mdi-post"></i>
+                    <span> Blogs </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarThirdLevel">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.blogs.index') }}">Danh sách bài viết</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
+            {{-- contact --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
+                    aria-controls="sidebarPagesAuth" class="side-nav-link">
+                    <i class="mdi mdi-card-account-mail"></i>
+                    <span> Contacts </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPagesAuth">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.contacts.index') }}">Danh sách liên hệ</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
                     class="side-nav-link">
@@ -147,8 +186,8 @@
             </li>
 
             <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false" aria-controls="sidebarCharts"
-                    class="side-nav-link">
+                <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false"
+                    aria-controls="sidebarCharts" class="side-nav-link">
                     <i class="ri-donut-chart-fill"></i>
                     <span> Brand </span>
                     <span class="menu-arrow"></span>
@@ -173,7 +212,7 @@
                 <div class="collapse" id="sidebarForms">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="{{ route('admin.categories.listCategory')}}">List</a>
+                            <a href="{{ route('admin.categories.listCategory') }}">List</a>
                         </li>
 
                     </ul>
@@ -181,8 +220,8 @@
             </li>
 
             <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false" aria-controls="sidebarTables"
-                    class="side-nav-link">
+                <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false"
+                    aria-controls="sidebarTables" class="side-nav-link">
                     <i class="ri-table-line"></i>
                     <span> Attribute </span>
                     <span class="menu-arrow"></span>
@@ -201,13 +240,13 @@
                 <a data-bs-toggle="collapse" href="#sidebarMaps" aria-expanded="false" aria-controls="sidebarMaps"
                     class="side-nav-link">
                     <i class="ri-map-pin-line"></i>
-                    <span> Maps </span>
+                    <span>Statistics </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarMaps">
                     <ul class="side-nav-second-level">
                         <li>
-                            <a href="maps-google.html">Google Maps</a>
+                            <a href="{{route('admin.statistics.productStatistics')}}">Thống kê sản phẩm</a>
                         </li>
 
                     </ul>
@@ -277,7 +316,6 @@
                     </ul>
                 </div>
             </li>
-
 
         </ul>
         <!--- End Sidemenu -->

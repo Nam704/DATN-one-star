@@ -2,24 +2,60 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
 use App\Services\OrderService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
     protected $orderService;
     protected $paymentService;
-    public function __construct(OrderService $orderService, PaymentService $paymentService)
-    {
+    protected $notificationService;
+    public function __construct(
+        OrderService $orderService,
+        PaymentService $paymentService,
+        NotificationService $notificationService
+
+    ) {
+        $this->notificationService = $notificationService;
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
+    }
+    public function cancel(Request $request)
+    {
+        $order = $this->orderService->cancelOrder($request);
+        event(new OrderNotification($order));
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đã hủy đơn hàng',
+
+        ]);
+    }
+    function  check()
+    {
+        $data = [
+            'title' => 'New Order',
+            'message' => "New Order, vui lòng kiểm tra và xác nhận!",
+            'from_user_id' => null,
+            'to_user_id' => null,
+            'type' => 'orders',
+            'status' => 'unread',
+            'goto_id' => null,
+        ];
+        $this->notificationService->sendPrivate($data);
     }
     public function detail($id)
     {
         $order = $this->orderService->getOrderDetail($id);
-        return $order;
+        $listReason = $this->orderService->listReason();
+        // return $order;
+        return view('client.orders.detail', compact('order', 'listReason'));
+        // dd($order);
     }
     public function store(Request $request)
     {
@@ -47,7 +83,7 @@ class OrderController extends Controller
             "payment_status" => "pending",
             "id_ward" => $data["user"]["ward"] ?? null,
             "total" => $data["order"]["total"] ?? 0,
-            "id_order_status" => 1,
+            "status" => "Awaiting Payment",
             "id_voucher" => null,
         ];
 
@@ -62,11 +98,16 @@ class OrderController extends Controller
         }
         $dataFormatted['order_details'] = $order_details;
         $order = $this->orderService->store($dataFormatted);
+        // Log::info($order);
         if ($order) {
-            if ($order->payment_method == 'vnpay' || $order->payment_status == 'pending') {
+            if ($order->payment_method == 'vnpay') {
                 return $payment = $this->paymentService->vnpay_payment($order);
             } else {
-                // return redirect()->route('client.orders.index');
+                $redirect_url = route('client.user.myAccount');
+                return response()->json([
+                    'status' => 'success',
+                    'redirect_url' => $redirect_url,
+                ]);
             }
         }
     }

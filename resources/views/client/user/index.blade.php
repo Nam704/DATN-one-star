@@ -3,6 +3,7 @@
 @section('content')
     <section class="main_content_area">
         <div class="container">
+            {{-- <a href="{{ route('client.orders.check') }}">Check order</a> --}}
             <div class="account_dashboard">
                 <div class="row">
                     <div class="col-sm-12 col-md-3 col-lg-3">
@@ -20,134 +21,9 @@
                         <!-- Tab panes -->
                         <div class="tab-content dashboard_content">
 
-                            <div class="tab-pane fade show active" id="orders">
-                                <h3>Orders</h3>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Order</th>
-                                                <th>Date</th>
-                                                <th>Status</th>
-                                                <th>Total</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($orders as $order)
-                                                <tr>
-                                                    <td>{{ $order->code }}</td>
-                                                    <td>{{ $order->created_at }}</td>
-                                                    <td><span class="success">{{ $order->orderStatus->name }}</span></td>
-                                                    <td>{{ $order->total }} </td>
-                                                    <td><a href="{{ route('client.orders.detail', $order->id) }}"
-                                                            class="view">view</a></td>
-                                                </tr>
-                                            @endforeach
+                            @include('client.user.orders')
 
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane row" id="address">
-                                <div class="col-12 mb-20">
-                                    <label></label>
-                                    <div class="row mb-2">
-                                        <div class="col-12">
-                                            <div class="table-responsive">
-                                                <table class="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Chi tiết</th>
-                                                            <th>Xã</th>
-                                                            <th>Huyện</th>
-                                                            <th>Tỉnh/Thành phố</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($addresses as $address)
-                                                            <tr>
-
-                                                                <td> {{ $address->address_detail }}</td>
-                                                                <td>{{ $address->ward_name }}</td>
-                                                                <td><span
-                                                                        class="success">{{ $address->district_name }}</span>
-                                                                </td>
-                                                                <td>{{ $address->province_name }} </td>
-                                                                <td>
-
-                                                                    @if ($address->is_default == 0)
-                                                                        <a href="#" class="view ">default</a> ||
-                                                                        <a href="">delete</a>
-                                                                    @else
-                                                                        Is default
-                                                                    @endif
-
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                        @if (count($addresses) < 3)
-                                            <div class="address-select row mb-2">
-                                                <div class="col-md-4">
-                                                    <select name="province" class="form-select" id="province">
-                                                        <option value="" {{ old('province') ? 'selected' : '' }}>
-                                                            Chọn tỉnh
-                                                        </option>
-                                                    </select>
-                                                    @error('province')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <select name="district" class="form-select" id="district">
-                                                        <option value="" {{ old('district') ? 'selected' : '' }}>
-                                                            Chọn quận
-                                                        </option>
-                                                    </select>
-                                                    @error('district')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <select name="ward" class="form-select" id="ward">
-                                                        <option value="" {{ old('ward') ? 'selected' : '' }}>Chọn
-                                                            phường
-                                                        </option>
-                                                    </select>
-                                                    @error('ward')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-12 mt-2 row">
-                                                    <div class="col-12 row">
-                                                        <div class="col-10">
-                                                            <input id="address_detail" class="form-control"
-                                                                placeholder="House number and street name" type="text">
-                                                        </div>
-                                                        <div class="col-2">
-                                                            <select name="" id="is_default" class=" form-control ">
-                                                                <option value="0" selected>Phụ</option>
-                                                                <option value="1">Mặc định</option>
-                                                            </select>
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-                                                <div class="col-12">
-                                                    <button class="btn btn-primary" id="save_address">Save</button>
-                                                </div>
-                                        @endif
-                                    </div>
-                                </div>
-
-                            </div>
+                            @include('client.user.address')
                         </div>
                         <div class="tab-pane fade" id="account-details">
                             <h3>Account details </h3>
@@ -175,15 +51,14 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label" for="phone">Phone</label>
-                                                    <input type="text" value="{{ $user->phone ?? '' }}"
-                                                        name="phone" id="phone" placeholder="Enter your phone"
-                                                        class="form-control">
+                                                    <input type="text" value="{{ $user->phone ?? '' }}" name="phone"
+                                                        id="phone" placeholder="Enter your phone" class="form-control">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label" for="new_password"> New
                                                         Password</label>
-                                                    <input type="password" placeholder="8 - 15 Characters"
-                                                        id="new_password" class="form-control" name="new_password">
+                                                    <input type="password" placeholder="8 - 15 Characters" id="new_password"
+                                                        class="form-control" name="new_password">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label"
@@ -210,5 +85,7 @@
 @endsection
 @section('scripts')
     @vite('resources/js/address.js')
-    <script src="{{ asset('client/api/accountDetails.js') }}"></script>
+
+    {{-- <script src="{{ asset('client/api/accountDetails.js') }}"></script> --}}
+    @vite('resources/js/clientDetail.js')
 @endsection
