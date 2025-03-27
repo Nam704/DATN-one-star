@@ -100,10 +100,15 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
+            Route::get('order-status', [DashboardController::class, 'orderStatusStatistics'])->name('orderStatus');
         });
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
             Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+            Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
+            Route::get('productSold', 'productSold')->name('productSold');
+            Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics');
         });
 
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {

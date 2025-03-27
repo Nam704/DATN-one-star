@@ -61,7 +61,8 @@
             </div> <!-- end col-->
 
         </div>
-
+        
+        @include('admin.statistic.components.bieu_do')
 
         <div class="row vudovn">
             <div class="col-xl-6">
@@ -204,6 +205,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Name</th>
+                                            <th>Total product</th>
                                             <th>Total Revenue</th>
                                         </tr>
                                     </thead>
@@ -212,6 +214,7 @@
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>{{ $product->name }}</td>
+                                                <td>{{ $product->total_products }}</td>
                                                 <td>{{ number_format($product->total_revenue) }}</td>
                                             </tr>
                                         @endforeach
