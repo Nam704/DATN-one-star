@@ -27,9 +27,14 @@ class ShopController extends Controller
         $productsQuery = Product::where('status', 'active');
 
         // Apply category filters if present
-        if ($request->has('categories')) {
-            $selectedCategories = $request->input('categories');
+        // Lấy tham số 'categories' và ép thành mảng
+        $selectedCategories = $request->input('categories', []);
+        if (!is_array($selectedCategories)) {
+            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
+            $selectedCategories = explode(',', $selectedCategories);
+        }
 
+        if (!empty($selectedCategories)) {
             // Lấy danh sách các ID của danh mục được chọn và các danh mục con của nó
             $allCategoryIds = Category::whereIn('id', $selectedCategories)
                 ->orWhereIn('id_parent', $selectedCategories)
@@ -39,9 +44,15 @@ class ShopController extends Controller
             $productsQuery->whereIn('id_category', $allCategoryIds);
         }
 
-        // Apply brand filters if present
-        if ($request->has('brands')) {
-            $productsQuery->whereIn('id_brand', $request->input('brands'));
+
+        $selectedBrands = $request->input('brand', $request->input('brands', []));
+        if (!is_array($selectedBrands)) {
+            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
+            $selectedBrands = explode(',', $selectedBrands);
+        }
+
+        if (!empty($selectedBrands)) {
+            $productsQuery->whereIn('id_brand', $selectedBrands);
         }
 
         // Apply price filter based on expected_price from import_details (nếu cần)
@@ -89,11 +100,14 @@ class ShopController extends Controller
         }
 
         // Lọc theo thương hiệu
-        if (!empty($brands)) {
-            if (is_string($brands)) {
-                $brands = explode(',', $brands);
-            }
-            $productsQuery->whereIn('id_brand', $brands);
+        $selectedBrands = $request->input('brand', $request->input('brands', []));
+        if (!is_array($selectedBrands)) {
+            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
+            $selectedBrands = explode(',', $selectedBrands);
+        }
+
+        if (!empty($selectedBrands)) {
+            $productsQuery->whereIn('id_brand', $selectedBrands);
         }
 
         // Lọc theo khoảng giá dựa trên bảng product_variants (trường price)
