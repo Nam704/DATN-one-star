@@ -177,20 +177,19 @@ class Product extends Model
     {
         return DB::table('products')
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
-            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant') 
-            // ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
-            // ->where('products.status', '=', 'active')
-            // ->where('orders.id_order_status', '=', 4) //đặt hàng thành công
+            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
             ->select(
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(order_details.quantity), 0) as total_sold')
+                // Tính tổng số lượng bán của các đơn hàng thành công, nếu không có thì sẽ trả về 0.
+                DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status = 4 THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
             ->groupBy('products.id', 'products.name', 'products.image_primary')
             ->orderBy('total_sold', 'asc')
-            ->limit(8)
+            ->limit(10)
             ->get();
     }
 

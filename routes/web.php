@@ -105,6 +105,15 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
             Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts');
+            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold');
+            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts');
+            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts');
+            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts');
+            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory');
+            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts');
+            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts');
+
 
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
             Route::get('productSold', 'productSold')->name('productSold');
