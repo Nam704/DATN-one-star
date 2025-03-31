@@ -193,6 +193,45 @@ class Product extends Model
             ->get();
     }
 
+    public function top_10_products_today()
+{
+    return DB::table('products')
+        ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+        ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+        ->join('orders', 'order_details.id_order', '=', 'orders.id')
+        ->where('orders.id_order_status', 4) // Đơn hàng đã hoàn thành
+        ->whereDate('orders.created_at', today()) // Chỉ lấy đơn hàng trong ngày hiện tại
+        ->select(
+            'products.id',
+            'products.name',
+            'products.image_primary',
+            DB::raw('SUM(order_details.quantity) as total_sold')
+        )
+        ->groupBy('products.id', 'products.name', 'products.image_primary')
+        ->orderBy('total_sold', 'desc')
+        ->limit(10)
+        ->get();
+}
+public function least_sold_products_today()
+{
+    return DB::table('products')
+        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+        ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+        ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+        ->select(
+            'products.id',
+            'products.name',
+            'products.image_primary',
+            DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status = 4 AND DATE(orders.created_at) = CURDATE() THEN order_details.quantity ELSE 0 END), 0) as total_sold')
+        )
+        ->where('products.status', '=', 'active')
+        ->groupBy('products.id', 'products.name', 'products.image_primary')
+        ->orderBy('total_sold', 'asc')
+        ->limit(10)
+        ->get();
+}
+
+
     public function low_stock_products()
     {
         return DB::table('products')
