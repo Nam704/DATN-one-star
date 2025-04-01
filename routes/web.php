@@ -39,7 +39,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-
+use App\Http\Controllers\Web\ProductDashboardController;
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
@@ -119,6 +119,11 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('productSold', 'productSold')->name('productSold');
             Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics');
         });
+
+        Route::controller(ProductDashboardController::class)->group(function () {
+            Route::get('dashboardProduct', 'dashboardProduct')->name('dashboardProduct');
+        });
+
 
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
             Route::post('create-product', 'createByExcel')->name('createProduct');
