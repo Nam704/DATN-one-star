@@ -73,9 +73,14 @@
     </div>
 
     <!-- Biểu đồ: Số Đơn Hàng & Doanh Thu Theo Tháng Trong Năm -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="position: relative;">
         <div class="card-body">
             <h5 class="header-title mb-3">Biểu Đồ Số Đơn Hàng &amp; Doanh Thu Theo Tháng</h5>
+            <!-- Toolbar download: 2 nút Download PNG & Download Excel -->
+            <div id="chartToolbar" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: #fff; padding: 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+                <button id="downloadPNG" title="Download PNG" class="btn btn-sm btn-light">Download PNG</button>
+                <button id="downloadExcel" title="Download Excel" class="btn btn-sm btn-light">Download Excel</button>
+            </div>
             <div style="position: relative; height: 300px; width: 70%; margin: 0 auto;">
                 <canvas id="yearlyChart"></canvas>
             </div>
@@ -164,20 +169,24 @@
     </div>
 </div>
 
-<!-- Nạp Chart.js từ CDN -->
+<!-- Nạp Chart.js và SheetJS (XLSX) từ CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Lấy dữ liệu thống kê theo tháng từ biến $monthlyStatsWithComparison
-    var monthlyData = {!! json_encode($monthlyStatsWithComparison) !!};
-    var labels = monthlyData.map(function(item) { return 'Tháng ' + item.month; });
-    var totalOrdersData = monthlyData.map(function(item) { return item.total_orders; });
-    var deliveredData = monthlyData.map(function(item) { return item.delivered_orders; });
-    var cancelledData = monthlyData.map(function(item) { return item.cancelled_orders; });
-    var revenueData = monthlyData.map(function(item) { return item.month_revenue; });
-    var pctChangeData = monthlyData.map(function(item) {
+    // Lấy dữ liệu thống kê theo năm từ biến $monthlyStatsWithComparison (đã được render từ Controller)
+    var yearlyDataRaw = {!! json_encode($monthlyStatsWithComparison) !!};
+    // Tạo label dạng "Tháng X"
+    var labels = yearlyDataRaw.map(function(item) { return 'Tháng ' + item.month; });
+    var totalOrdersData = yearlyDataRaw.map(function(item) { return item.total_orders; });
+    var deliveredData = yearlyDataRaw.map(function(item) { return item.delivered_orders; });
+    var cancelledData = yearlyDataRaw.map(function(item) { return item.cancelled_orders; });
+    var revenueData = yearlyDataRaw.map(function(item) { return item.month_revenue; });
+    // Dữ liệu % tăng giảm (nếu có)
+    var pctChangeData = yearlyDataRaw.map(function(item) {
         return item.pct_change !== null ? item.pct_change.toFixed(2) + '%' : 'N/A';
     });
 
+    // Cấu hình biểu đồ Chart.js cho thống kê theo năm
     var ctx = document.getElementById('yearlyChart').getContext('2d');
     var yearlyChart = new Chart(ctx, {
         type: 'bar',
@@ -237,15 +246,68 @@
                 tooltip: {
                     callbacks: {
                         afterLabel: function(context) {
-                            // Hiển thị % tăng giảm doanh thu của tháng (nếu có)
                             var index = context.dataIndex;
-                            var pct = pctChangeData[index];
-                            return 'Tăng/Giảm: ' + pct;
+                            return 'Tăng/Giảm: ' + pctChangeData[index];
                         }
                     }
                 }
             }
         }
+    });
+
+    // Sự kiện tải ảnh PNG của biểu đồ năm
+    document.getElementById('downloadPNG').addEventListener('click', function() {
+        var url = document.getElementById('yearlyChart').toDataURL("image/png");
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'yearly_chart.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    // Sự kiện tải file Excel với dữ liệu thống kê năm
+    document.getElementById('downloadExcel').addEventListener('click', function() {
+        // Chuẩn bị dữ liệu Excel dạng mảng (AOA)
+        var ws_data = [
+            ["Tổng Doanh Thu Năm", "{{ number_format($totalRevenue, 0) }} đ"],
+            [], // Dòng trống phân cách
+            ["Tháng", "Tổng Đơn Hàng", "Đơn Hàng Thành Công", "Đơn Hàng Bị Hủy", "Doanh Thu (Delivered)"]
+        ];
+        // Duyệt qua yearlyDataRaw để thêm dữ liệu từng tháng
+        for (var i = 0; i < yearlyDataRaw.length; i++) {
+            ws_data.push([
+                'Tháng ' + yearlyDataRaw[i].month,
+                yearlyDataRaw[i].total_orders,
+                yearlyDataRaw[i].delivered_orders,
+                yearlyDataRaw[i].cancelled_orders,
+                yearlyDataRaw[i].month_revenue
+            ]);
+        }
+        // Tạo workbook và worksheet
+        var wb = XLSX.utils.book_new();
+        var ws = XLSX.utils.aoa_to_sheet(ws_data);
+        // Đặt chiều rộng cột cơ bản
+        ws['!cols'] = [
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 }
+        ];
+        XLSX.utils.book_append_sheet(wb, ws, "Yearly Data");
+
+        // Xuất workbook thành array buffer
+        var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        var blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'yearly_data.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     });
 </script>
 @endsection
