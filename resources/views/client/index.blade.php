@@ -10,12 +10,12 @@
 
     <section class="product_area mb-50">
         <div class="container">
-            <!-- Phần Our Products -->
             <div class="row">
                 <div class="col-12">
                     <div class="section_title">
-                        <h2><span> <strong>Our</strong> Products</span></h2>
+                        <h2><span> <strong>Our</strong>Products</span></h2>
                         <ul class="product_tab_button nav" role="tablist" id="nav-tab">
+
                             @foreach ($categories as $index => $item)
                                 @if ($item->id_parent == 0)
                                     <li>
@@ -27,6 +27,7 @@
                                     </li>
                                 @endif
                             @endforeach
+
                         </ul>
                     </div>
                 </div>
@@ -43,39 +44,30 @@
                                 @foreach ($item->products as $product)
                                     <div class="single_product">
                                         <div class="product_name">
-                                            <h3>
-                                                <a href="{{ route('client.products.detail', $product->id) }}">
-                                                    {{ $product->name }}
-                                                </a>
+                                            <h3><a
+                                                    href="{{ route('client.products.detail', $product->id) }}">{{ $product->name }}</a>
                                             </h3>
                                             <p class="manufacture_product"><a href="#">Accessories</a></p>
                                         </div>
                                         <div class="product_thumb">
                                             <a class="primary_img"
-                                                href="{{ route('client.products.detail', $product->id) }}">
-                                                <img src="{{ asset($product->image_primary) }}" alt="">
-                                            </a>
+                                                href="{{ route('client.products.detail', $product->id) }}"><img
+                                                    src="{{ asset($product->image_primary) }}" alt=""></a>
+
                                             <div class="label_product">
                                                 <span class="label_sale">-57%</span>
                                             </div>
+
                                             <div class="action_links">
                                                 <ul>
-                                                    <li class="quick_button">
-                                                        <a href="#" data-bs-toggle="modal" data-bs-target="#modal_box"
-                                                            title="quick view">
-                                                            <span class="lnr lnr-magnifier"></span>
-                                                        </a>
+                                                    <li class="quick_button"><a href="#" data-bs-toggle="modal"
+                                                            data-bs-target="#modal_box" title="quick view"> <span
+                                                                class="lnr lnr-magnifier"></span></a></li>
+                                                    <li class="wishlist"><a href="wishlist.html"
+                                                            title="Add to Wishlist"><span class="lnr lnr-heart"></span></a>
                                                     </li>
-                                                    <li class="wishlist">
-                                                        <a href="wishlist.html" title="Add to Wishlist">
-                                                            <span class="lnr lnr-heart"></span>
-                                                        </a>
-                                                    </li>
-                                                    <li class="compare">
-                                                        <a href="compare.html" title="compare">
-                                                            <span class="lnr lnr-sync"></span>
-                                                        </a>
-                                                    </li>
+                                                    <li class="compare"><a href="compare.html" title="compare"><span
+                                                                class="lnr lnr-sync"></span></a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -92,16 +84,23 @@
                                             <div class="product_footer d-flex align-items-center">
                                                 <div class="price_box">
                                                     <span class="regular_price"> {{ $product->min_price }}</span>
+
                                                 </div>
+                                                {{-- <div class="add_to_cart">
+                                    <a href="cart.html" title="add to cart"><span class="lnr lnr-cart"></span></a>
+                                </div> --}}
                                             </div>
                                         </div>
                                     </div>
                                 @endforeach
+
                             </div>
                         </div>
                     @endif
                 @endforeach
+
             </div>
+
 
             <!-- Phần Recommended Products -->
             <div class="row">
@@ -190,7 +189,6 @@
         </div>
     </section>
 @endsection
-
 @section('scripts')
-    <!-- Nếu có script riêng cho owl-carousel hoặc xử lý UI, bạn thêm ở đây -->
+
 @endsection
