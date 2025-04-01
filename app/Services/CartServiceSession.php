@@ -22,6 +22,7 @@ class CartServiceSession
         }
         $cart = Cart::where('id_user', $user->id)->first();
         if (!$cart) {
+
             return Session::get('cart', []);
         }
         foreach ($cart->cartItems as $item) {
@@ -64,7 +65,7 @@ class CartServiceSession
 
 
         session()->put('cart', $cart);
-
+        Log::info('Cart after adding', ['cart' => $cart]);
 
         return ['message' => 'Added to cart successfully', 'cart' => session()->get('cart')];
     }
@@ -76,16 +77,39 @@ class CartServiceSession
      */
     public function updateCart($id_variant, $quantity)
     {
-        $cart = Session::get('cart', []);
-
-        if (isset($cart[$id_variant])) {
-            $cart[$id_variant]['quantity'] = $quantity;
-            Session::put('cart', $cart);
-            return ['message' => 'Cart updated', 'cart' => $cart];
+        $quantity = (int) $quantity;
+        if ($quantity < 1) {
+            return ['error' => 'Số lượng không hợp lệ'];
         }
 
-        return ['error' => 'Product not found in cart'];
+        $cart = Session::get('cart', []);
+        $variant = Product_variant::find($id_variant);
+
+        if (!$variant) {
+            return ['error' => 'Product not found'];
+        }
+
+        // Nếu tồn tại thì cập nhật quantity
+        if (isset($cart[$id_variant])) {
+            $cart[$id_variant]['quantity'] = $quantity;
+        } else {
+            // Nếu chưa có thì tạo mới với cấu trúc đúng
+            $cart[$id_variant] = [
+                'id_variant' => $id_variant,
+                'sku' => $variant->sku,
+                'price' => $variant->price,
+                'quantity' => $quantity,
+                'image' => $variant->images->url ?? '',
+                'name' => $variant->product->name,
+            ];
+        }
+
+        Session::put('cart', $cart);
+        Log::info('Cart updated', ['cart' => $cart]);
+
+        return ['message' => 'Cart updated', 'cart' => $cart];
     }
+
 
     /**
      * Xóa sản phẩm khỏi giỏ hàng

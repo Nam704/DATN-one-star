@@ -8,6 +8,7 @@ use App\Models\Order_status;
 use App\Models\OrderCancellation;
 use App\Models\OrderCancellationReason;
 use App\Models\OrderExpire;
+use App\Models\Product_variant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -112,7 +113,6 @@ class OrderService
         return DB::transaction(function () use ($data) {
             // DB::beginTransaction();
             $dataOrder = [
-
                 "id_user" => $data['id_user'] ?? null,
                 "user_name" => $data['user_name'],
                 "phone_number" => $data['phone_number'],
@@ -124,15 +124,18 @@ class OrderService
                 "shipping" => $data['shipping'],
                 "total" => $data['total'],
                 "payment_method" => $data['payment_method'],
-                "payment_status" => $data['payment_status'],
                 "id_ward" => $data['id_ward'] ?? null,
-                "id_order_status" => $this->orderStatus->where('name', $data['status'])->first()->id,
                 "id_voucher" => $data['id_voucher'] ?? null,
             ];
             $order = $this->order->create($dataOrder);
             $order->update(["code" => time() . "" . $order->id]);
 
             foreach ($data['order_details'] as $item) {
+                $variant = Product_variant::where('id', $item['id_variant'])->lockForUpdate()->first();
+                if ($variant->quantity < $item['quantity']) {
+                    throw new \Exception("Insufficient product quantity");
+                }
+                $variant->decrement('quantity', $item['quantity']); // giảm sl sản phẩm trong kho
                 $order->orderDetails()->create([
                     'id_variant' => $item['id_variant'],
                     'quantity' => $item['quantity'],
@@ -140,27 +143,6 @@ class OrderService
                     'total' => $item['total'],
                 ]);
             }
-            $orderExpire = $this->orderExpire->create([
-                'id_order' => $order->id,
-                // 'expires_at' => Carbon::now()->addMinutes(1),
-                'expires_at' => Carbon::now()->addSeconds(3),
-
-            ]);
-
-            // Dispatch the ExpireOrder job
-            // trì hoãn 1 phút sau đó thực thi handle job
-            ExpireOrder::dispatch($orderExpire->id)->delay($orderExpire->expires_at);
-            $dataNotification = [
-                'title' => 'New Order',
-                'message' => "New Order, vui lòng kiểm tra và xác nhận!",
-                'from_user_id' => $order->id_user,
-                'to_user_id' => null,
-                'type' => 'orders',
-                'status' => 'unread',
-                'goto_id' => $order->id,
-            ];
-            // dd($dataNotification);
-            $this->notificationService->sendPrivate($dataNotification);
             return $order;
         });
     }

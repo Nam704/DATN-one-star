@@ -39,7 +39,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-
+use App\Http\Controllers\Web\ChatController;
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
@@ -85,7 +85,12 @@ Route::prefix('auth/')->name('auth.')->group(
         });
     }
 );
-
+Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/send-message', [ChatController::class, 'sendMessage']);
+    // Route::get('/', 'ChatController@index')->name('index');
+    // Route::post('/send', 'ChatController@sendMessage')->name('send');
+});
 
 
 

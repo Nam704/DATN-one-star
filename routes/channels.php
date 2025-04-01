@@ -9,7 +9,15 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+Broadcast::channel('chat', function (User $user) {
 
+    // Select * from rooms where user_id = $user->id and id = $roomId;
+    // if ($user->canJoinRoom($roomId)) {
+    //     return ['id' => $user->id, 'name' => $user->name];
+    // }
+
+    return ['id' => $user->id, 'name' => $user->name];
+});
 Broadcast::channel('private-notifications', function ($user) {
     if ($user->isAdmin() || $user->isEmployee()) {
         return true;

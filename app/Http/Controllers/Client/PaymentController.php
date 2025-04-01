@@ -32,6 +32,7 @@ class PaymentController extends Controller
                 'payment_status' => 'paid',
                 // 'status' => 'processing' 
             ]);
+            event(new OrderNotification($order));
             $currentStatus = $order->orderStatus;
             $nextStatus = $currentStatus->nextStatus;
             $order->id_order_status = $nextStatus->id;
