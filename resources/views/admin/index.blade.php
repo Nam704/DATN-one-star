@@ -80,7 +80,14 @@
                     </div>
                 </div>
             </div> <!-- end col-->
+
+            <!-- start thống kê sp -->
         </div>
+        <div class="row">
+        @include('admin.statistic.components.topsaleproducttoday')
+        @include('admin.statistic.components.leastsoldproducttoday')
+        @include('admin.statistic.components.topviewproducttoday') 
+        </div>   <!-- end thống kê sp -->
 
         <div class="row">
             <div class="col-lg-8">

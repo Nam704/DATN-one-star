@@ -122,6 +122,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
         Route::controller(ProductDashboardController::class)->group(function () {
             Route::get('dashboardProduct', 'dashboardProduct')->name('dashboardProduct');
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
+            Route::get('topViewProducts', 'topViewProducts')->name('topViewProducts');
+            Route::get('topLeastProducts', 'topLeastProducts')->name('topLeastProducts');
         });
 
 
@@ -312,6 +315,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('add',  'addVoucher')->name('addVoucher');
             Route::post('add',  'addPostVoucher')->name('addPostVoucher');
             Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
+            Route::get('detail/{id}',  'detailVoucher')->name('detailVoucher');
             Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
             Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
         });

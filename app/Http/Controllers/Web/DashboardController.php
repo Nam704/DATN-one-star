@@ -27,10 +27,12 @@ class DashboardController extends Controller
     public function dashboard()
     {
         if (auth()->check()) { 
-               
-        $countData = [
-            "product" => $this->product->whereDate('created_at', Carbon::today())->count(),
-        ];
+            $countData = [
+                "product" => $this->product->count(),
+                "revenue" => $this->order->where('id_order_status', '4')->sum('total'),
+                "order" => $this->order->where('id_order_status', '4')->count(),
+                "user" => $this->user->count()
+            ];
             return view('admin.index', compact(
                 'countData',
             ));
@@ -38,6 +40,22 @@ class DashboardController extends Controller
             return redirect()->route('auth.getFormLogin');
         }
     }
+    public function orderStatusStatistics()
+{
+    $orderStatusStats = Order::selectRaw('id_order_status, COUNT(*) as total')
+        ->groupBy('id_order_status')
+        ->with('orderStatus:id,name') // Ensure you get status names
+        ->get()
+        ->map(function ($order) {
+            return [
+                'status' => $order->orderStatus->name ?? 'Unknown',
+                'total' => $order->total
+            ];
+        });
+
+    return response()->json($orderStatusStats);
+}
+
 
 
 }
