@@ -122,3 +122,9 @@ Route::prefix('client')->group(
 
     }
 );
+// Make sure to use the Client AddressController here
+Route::prefix('address')->controller(\App\Http\Controllers\Client\AddressController::class)->group(function () {
+    Route::get('provinces', 'getProvinces');
+    Route::get('districts/{provinceId}', 'getDistricts');
+    Route::get('wards/{districtId}', 'getWards');
+});

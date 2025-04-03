@@ -309,6 +309,10 @@ Route::prefix('client')->name('client.')->group(
             function () {
                 Route::get('/my-account', 'myAccount')->name('myAccount');
                 Route::post('create-address', 'createAddress')->name('addAddress');
+                Route::post('update-address', 'updateAddress')->name('updateAddress');
+                Route::post('delete-address', 'deleteAddress')->name('deleteAddress');
+                Route::post('set-default-address', 'setDefaultAddress')->name('setDefaultAddress'); // New route
+                Route::get('get-addresses', 'getAddresses')->name('getAddresses');
                 Route::post('update', 'update')->name('update');
             }
         );
