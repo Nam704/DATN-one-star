@@ -17,3 +17,30 @@
 
 <!-- Datatable Demo Aapp js -->
 <script src="{{ asset('admin/assets/js/pages/datatable.init.js') }}"></script>
+
+<!-- Nhúng SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// Kiểm tra và hiển thị thông báo khi có session
+@if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: "{{ session('error') }}", 
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Đóng'
+    });
+@endif
+
+@if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        text: "{{ session('success') }}", 
+        showConfirmButton: false,
+        timer: 2000 
+    });
+@endif
+
+</script>

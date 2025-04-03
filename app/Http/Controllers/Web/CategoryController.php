@@ -107,8 +107,14 @@ class CategoryController extends Controller
 
     public function deleteCategory($id)
     {
-        $categories = Category::findOrFail($id);
-        $categories->delete();
+        $category = Category::findOrFail($id);
+    
+        // Kiểm tra nếu danh mục có sản phẩm
+        if ($category->products()->count() > 0) {
+            return redirect()->route('admin.categories.listCategory')->with('error', 'Không thể xóa danh mục vì vẫn còn sản phẩm.');
+        }
+    
+        $category->delete();
         return redirect()->route('admin.categories.listCategory')->with('success', 'Xóa thành công');
     }
 }
