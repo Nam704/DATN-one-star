@@ -106,7 +106,7 @@
                               ${Math.floor(Math.random() * 180) + 50}, 0.8)`
                     );
                     myChart = new Chart(ctx, {
-                        type: 'pie',
+                        type: 'bar',
                         data: {
                             labels: labels,
                             datasets: [{
@@ -119,12 +119,13 @@
                             }]
                         },
                         options: {
+                            indexAxis: 'y',
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: {
                                     position: 'top',
-                                    display: true
+                                    display: false
                                 },
                                 tooltip: {
                                     callbacks: {

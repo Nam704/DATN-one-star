@@ -63,6 +63,23 @@
         </div>
         
         @include('admin.statistic.components.bieu_do')
+        <form action="{{ route('admin.statistics.productStatistics') }}" method="GET" class="mb-3">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="start_date">Start Date</label>
+            <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfDay()->toDateString()) }}" class="form-control">
+        </div>
+        <div class="col-md-4">
+            <label for="end_date">End Date</label>
+            <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->endOfDay()->toDateString()) }}" class="form-control">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+
         
         <div class="row vudovn">
             <div class="col-xl-6">
@@ -73,52 +90,8 @@
                             <div class="card-widgets">
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
-                            <h5 class="header-title mb-0">Top sale product</h5>
-                            <a href="{{ route('admin.statistics.exportTop10SaleProducts') }}" class="btn btn-primary">
-                                   <i class="ri-file-excel-2-line"></i> Export Excel
-                                </a>
-                        </div>
-                        <div id="yearly-sales-collapse" class="collapse show">
-                            <div class="table-responsive">
-                                <table class="table table-nowrap table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Name</th>
-                                            <th>Image</th>
-                                            <th>Total sold</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($topProduct['top_sale_products'] as $key => $product)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $product->name }}</td>
-                                                <td>
-                                                    <img src="{{ asset( $product->image_primary) }}"
-                                                        alt="{{ $product->name }}" width="50">
-                                                </td>
-                                                <td>{{ number_format($product->total_sold) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- end card-->
-            </div> <!-- end col-->
-        
-            <div class="col-xl-6">
-                <!-- Todo-->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="p-3">
-                            <div class="card-widgets">
-                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                            </div>
                             <h5 class="header-title mb-0">Top Least Sold Products</h5>
-                            <a href="{{ route('admin.statistics.exportLeastSoldProducts') }}" class="btn btn-primary">
+                            <a href="{{ route('admin.statistics.exportLeastSoldProducts',request()->query()) }}" class="btn btn-primary">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                                 </a>
                         </div>
@@ -162,7 +135,7 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Low Stock Products</h5>
-                            <a href="{{ route('admin.statistics.exportLowStockProducts') }}" class="btn btn-primary">
+                            <a href="{{ route('admin.statistics.exportLowStockProducts', request()->query()) }}" class="btn btn-primary">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                             </a>
                         </div>
@@ -206,7 +179,7 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Categories With Revenue</h5>
-                            <a href="{{ route('admin.statistics.exportProductsByCategory') }}" class="btn btn-primary">
+                            <a href="{{ route('admin.statistics.exportProductsByCategory',request()->query() ) }}" class="btn btn-primary">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                             </a>
                         </div>
