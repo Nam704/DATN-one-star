@@ -359,6 +359,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::get('/detail/{id}', 'detail')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
                 Route::post('/cancel', 'cancel')->name('cancel');
+                Route::post('/retry-payment', 'retryPayment')->name('retryPayment');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(

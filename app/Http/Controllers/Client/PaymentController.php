@@ -8,12 +8,17 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Services\NotificationService;
+use App\Services\OrderStatusService;
 
 class PaymentController extends Controller
 {
     protected $orderService;
-    function __construct(NotificationService $notificationService)
-    {
+    protected $orderStatusService;
+    function __construct(
+        NotificationService $notificationService,
+        OrderStatusService $orderStatusService
+    ) {
+        $this->orderStatusService = $orderStatusService;
         $this->notificationService = $notificationService;
     }
     public function handleVnpayReturn(Request $request)
@@ -28,15 +33,9 @@ class PaymentController extends Controller
 
         // Kiểm tra kết quả thanh toán
         if ($request->get('vnp_ResponseCode') == '00') {
-            $order->update([
-                'payment_status' => 'paid',
-                // 'status' => 'processing' 
-            ]);
+
             event(new OrderNotification($order));
-            $currentStatus = $order->orderStatus;
-            $nextStatus = $currentStatus->nextStatus;
-            $order->id_order_status = $nextStatus->id;
-            $order->save();
+            $this->orderStatusService->markVNPAYPaid($order);
             $dataNotification = [
                 'title' => 'Update Order Paid',
                 'message' => "Update Order Paid, vui lòng kiểm tra và xác nhận!",
@@ -61,7 +60,7 @@ class PaymentController extends Controller
             return redirect()->route('client.user.myAccount')->with('success', 'Thanh toán thành công!');
             // return 'Thanh toán thành công!';
         } else {
-            $order->update(['payment_status' => 'failed']);
+            $this->orderStatusService->markVNPAYFailed($order);
             Transaction::create(
                 [
                     "txn_ref" => $request->get('vnp_TxnRef'),

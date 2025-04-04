@@ -5,6 +5,30 @@ import { Toast } from "bootstrap";
 $(document).ready(function () {
     var orderId = $("#order_id").val();
     console.log(orderId);
+    $("#retry_payment").click(function (e) {
+        e.preventDefault();
+        $.ajax({
+            type: "Post",
+            url: "http://127.0.0.1:8000/client/orders/retry-payment",
+            data: {
+                _token: csrfToken,
+                order_id: orderId,
+            },
+            dataType: "json",
+            success: function (response) {
+                console.log(response.data);
+                if (response.message == "success") {
+                    alert("Đã gửi yêu cầu thanh toán lại");
+                    // window.location.href = response.data;
+                }
+                window.location.href = response.data;
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                console.log(xhr.responseText);
+            },
+        });
+    });
     $(".cancel").click(function (e) {
         e.preventDefault();
         showListReason();
@@ -40,6 +64,7 @@ $(document).ready(function () {
             // },
             error: function (xhr, status, error) {
                 console.error(error);
+                console.log(xhr.responseText);
             },
         });
     });

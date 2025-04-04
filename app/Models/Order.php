@@ -47,7 +47,7 @@ class Order extends Model
     }
     public function status()
     {
-        return $this->belongsTo(Order_status::class, 'id_order_status');
+        return $this->belongsTo(Order_status::class, 'id_order_status', 'id');
     }
 
     // Quan hệ với bảng chi tiết đơn hàng

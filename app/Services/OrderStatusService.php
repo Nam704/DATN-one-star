@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ExpireOrder;
 use App\Models\Order;
 use App\Models\Order_status;
 use App\Models\OrderExpire;
@@ -13,9 +14,11 @@ use Illuminate\Validation\ValidationException;
 class OrderStatusService
 {
     protected $orderExpire;
-    public function __construct(OrderExpire $orderExpire)
+    protected $paymentService;
+    public function __construct(OrderExpire $orderExpire, PaymentService $paymentService)
     {
         $this->orderExpire = $orderExpire;
+        $this->paymentService = $paymentService;
     }
     /**
      * Cập nhật trạng thái đơn hàng dựa trên phương thức thanh toán
@@ -53,14 +56,15 @@ class OrderStatusService
         $order->save();
         $orderExpire = $this->orderExpire->create([
             'id_order' => $order->id,
-            // 'expires_at' => Carbon::now()->addMinutes(5),
-            'expires_at' => Carbon::now()->addSeconds(30),
+            'expires_at' => Carbon::now()->addMinutes(1),
+            // 'expires_at' => Carbon::now()->addSeconds(30),
 
         ]);
 
         // Dispatch the ExpireOrder job
         // trì hoãn 1 phút sau đó thực thi handle job
         ExpireOrder::dispatch($orderExpire->id)->delay($orderExpire->expires_at);
+        $this->paymentService->vnpay_payment($order);
     }
 
     public function markVNPAYPaid(Order $order)

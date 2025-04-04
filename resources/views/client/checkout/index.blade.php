@@ -146,15 +146,15 @@
                             </div> --}}
                                 <div class="panel-default">
                                     <div class="payment_cod">
-                                        <input type="radio" id="cod" name="payment" />
-                                        <label for="cod">COD
+                                        <input type="radio" id="COD" name="payment" />
+                                        <label for="COD">COD
                                             <img src="">
                                         </label>
                                     </div>
                                     <div class="payment_vnpay">
-                                        <input id="vnpay" type="radio" name="payment" />
+                                        <input id="VNPAY" type="radio" name="payment" />
 
-                                        <label for="vnpay">PayPal
+                                        <label for="VNPAY">PayPal
                                             <img src="{{ asset('client/assets/img/icon/papyel.png') }}">
                                         </label>
 
