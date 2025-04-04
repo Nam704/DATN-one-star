@@ -39,11 +39,8 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-<<<<<<< HEAD
 use App\Http\Controllers\Web\ChatController;
-=======
 use App\Http\Controllers\Web\ProductDashboardController;
->>>>>>> origin/dashboard
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
