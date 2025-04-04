@@ -151,6 +151,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('edit-category/{id}',  'editCategory')->name('editCategory');
             Route::put('edit-category/{id}',  'editPutCategory')->name('editPutCategory');
             Route::delete('delete-category/{id}',  'deleteCategory')->name('deleteCategory');
+            Route::get('trash',  'trash')->name('trash');
+            Route::post('restore/{id}',  'restoreCategory')->name('restoreCategory');
+            Route::delete('destroy-permanent/{id}', 'destroyPermanent')->name('destroyPermanent');
         });
 
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {

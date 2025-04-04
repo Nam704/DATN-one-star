@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <h4 class="page-title">Welcome!</h4>
+                    <h4 class="page-title">Thống kê sản phẩm</h4>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@
         </div>
         
         @include('admin.statistic.components.bieu_do')
-
+        
         <div class="row vudovn">
             <div class="col-xl-6">
                 <!-- Todo-->

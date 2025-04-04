@@ -69,7 +69,6 @@
                                     <th>Min Amount</th>
                                     <th>Max Discount</th>
                                     <th>Status</th>
-                                    <th>Applies</th>
                                     <th>Actions</th>
                             </tr>
                         </tfoot>
