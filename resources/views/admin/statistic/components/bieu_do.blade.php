@@ -132,7 +132,7 @@
                                             var sum = context.dataset.data.reduce((a, b) => Number(
                                                     a) + Number(b),
                                                 0);
-                                            return `${context.label}: ${context.raw} units (${((context.raw / sum) * 100).toFixed(2)}%)`;
+                                            return `${context.label}: ${context.raw} sản phẩm (${((context.raw / sum) * 100).toFixed(2)}%)`;
                                         }
                                     }
                                 }
@@ -214,7 +214,7 @@
                                             var sum = context.dataset.data.reduce((a, b) => Number(
                                                     a) + Number(b),
                                                 0);
-                                            return `${context.label}: ${context.raw} units (${((context.raw / sum) * 100).toFixed(2)}%)`;
+                                            return `${context.label}: ${context.raw} sản phẩm (${((context.raw / sum) * 100).toFixed(2)}%)`;
                                         }
                                     }
                                 }
