@@ -1,11 +1,20 @@
 $(document).ready(function () {
-    // Khi chọn tỉnh
-    $("#province").click(function (e) {
+    console.log("Address JS initialized");
+
+    // Load provinces on page load
+    loadProvinces();
+
+    // Function to load provinces
+    function loadProvinces() {
         $.ajax({
             type: "GET",
             url: "/api/address/provinces",
             dataType: "json",
             success: function (response) {
+                console.log("Provinces loaded:", response.length);
+                $("#province").html(
+                    '<option value="">Select Province/City</option>'
+                );
                 $.each(response, function (key, value) {
                     $("#province").append(
                         '<option value="' +
@@ -15,19 +24,32 @@ $(document).ready(function () {
                             "</option>"
                     );
                 });
+                // Enable province dropdown
+                $("#province").prop("disabled", false);
+            },
+            error: function (error) {
+                console.error("Error loading provinces:", error);
             },
         });
-    });
-    $("#province").change(function () {
-        var provinceId = $(this).val(); // Lấy ID của tỉnh đã chọn
+    }
 
-        // Reset quận và phường khi tỉnh thay đổi
-        $("#district").html('<option value="">Chọn quận</option>');
-        $("#ward").html('<option value="">Chọn phường</option>');
+    // When selecting a province, load districts
+    $("#province").change(function () {
+        var provinceId = $(this).val();
+
+        // Reset district and ward dropdowns
+        $("#district").html('<option value="">Select District</option>');
+        $("#ward").html('<option value="">Select Ward</option>');
+
+        // Disable ward dropdown until district is selected
+        $("#ward").prop("disabled", true);
 
         if (provinceId) {
+            // Enable district dropdown
+            $("#district").prop("disabled", false);
+
             $.ajax({
-                url: "/api/address/districts/" + provinceId, // API lấy danh sách quận theo tỉnh
+                url: "/api/address/districts/" + provinceId,
                 type: "GET",
                 dataType: "json",
                 success: function (response) {
@@ -41,20 +63,30 @@ $(document).ready(function () {
                         );
                     });
                 },
+                error: function (error) {
+                    console.error("Error loading districts:", error);
+                    $("#district").prop("disabled", true);
+                },
             });
+        } else {
+            // If no province selected, disable district dropdown
+            $("#district").prop("disabled", true);
         }
     });
 
-    // Khi chọn quận
+    // When selecting a district, load wards
     $("#district").change(function () {
-        var districtId = $(this).val(); // Lấy ID của quận đã chọn
+        var districtId = $(this).val();
 
-        // Reset phường khi quận thay đổi
-        $("#ward").html('<option value="">Chọn phường</option>');
+        // Reset ward dropdown
+        $("#ward").html('<option value="">Select Ward</option>');
 
         if (districtId) {
+            // Enable ward dropdown
+            $("#ward").prop("disabled", false);
+
             $.ajax({
-                url: "/api/address/wards/" + districtId, // API lấy danh sách phường theo quận
+                url: "/api/address/wards/" + districtId,
                 type: "GET",
                 dataType: "json",
                 success: function (response) {
@@ -68,7 +100,14 @@ $(document).ready(function () {
                         );
                     });
                 },
+                error: function (error) {
+                    console.error("Error loading wards:", error);
+                    $("#ward").prop("disabled", true);
+                },
             });
+        } else {
+            // If no district selected, disable ward dropdown
+            $("#ward").prop("disabled", true);
         }
     });
 });

@@ -17,6 +17,7 @@ export default defineConfig({
                 "resources/js/clientDetail.js",
                 "resources/js/orderClientDetail.js",
                 "resources/js/chat.js",
+                "resources/js/address.js",
             ],
             refresh: true,
         }),

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Address;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -85,41 +86,105 @@ class UserService
             'user' => $user
         ], 200);
     }
-    public function createUserAddress($request, $userId)
+    public function createUserAddress(Request $request, $userId)
     {
-        $user = $this->user->find($userId);
-        if (!$user) {
-            return null;
+        // If this address is default, unset all other default addresses for this user
+        if ($request->is_default) {
+            Address::where('addressable_id', $userId)
+                ->update(['is_default' => 0]);
         }
 
-        $validated = $request->validate([
-            'address_detail' => 'required|string|max:250',
-            'is_default' => 'required|boolean',
-            'id_ward' => 'required|exists:wards,id',
+        // Create new address with proper validation
+        return Address::create([
+            'addressable_id' => $userId,
+            'addressable_type' => 'App\Models\User',
+            'id_ward' => $request->id_ward,
+            'address_detail' => $request->address_detail,
+            'is_default' => $request->is_default ? 1 : 0
         ]);
-        $addressData = [
-            'address_detail' => $validated['address_detail'],
-            'is_default' => $validated['is_default'],
-            'id_ward' => $validated['id_ward']
-        ];
-        // Tạo mới địa chỉ cho người dùng
-        $address = $this->addressService->storeAddress($user, $user->id, $addressData);
+    }
+
+    public function updateUserAddress(Request $request, $userId)
+    {
+        $address = Address::where('id', $request->id)
+            ->where('addressable_id', $userId)
+            ->first();
+
+        if (!$address) {
+            throw new \Exception('Address not found or does not belong to this user');
+        }
+
+        // If this address is being set as default, unset all other defaults
+        if ($request->is_default) {
+            Address::where('addressable_id', $userId)
+                ->where('id', '!=', $address->id)
+                ->update(['is_default' => 0]);
+        }
+
+        // Update the address
+        $address->id_ward = $request->id_ward;
+        $address->address_detail = $request->address_detail;
+        $address->is_default = $request->is_default ? 1 : 0;
+        $address->save();
 
         return $address;
     }
-    public function updateUserAddress(Request $request, $id)
+
+    public function deleteUserAddress($addressId, $userId)
     {
-        $user = $this->user->find($id);
-        if (!$user) {
-            return null;
+        $address = Address::where('id', $addressId)
+            ->where('addressable_id', $userId)
+            ->first();
+
+        if (!$address) {
+            throw new \Exception('Address not found or does not belong to this user');
         }
-        $validated = $request->validate([
-            'address' => 'required|array',
-            'address.id' => 'required|exists:addresses,id',
-            'address.address_detail' => 'required|string|max:250',
-            'address.is_default' => 'required|boolean',
-            'address.id_ward' => 'required|exists:wards,id',
-        ]);
-        $this->addressService->updateAddress(User::class, $user->id, $validated['address']['id'], $validated['address']);
+
+        $addressCount = Address::where('addressable_id', $userId)->count();
+        if ($address->is_default && $addressCount > 1) {
+            $newDefault = Address::where('addressable_id', $userId)
+                ->where('id', '!=', $addressId)
+                ->first();
+            $newDefault->is_default = 1;
+            $newDefault->save();
+        } elseif ($address->is_default && $addressCount == 1) {
+            throw new \Exception('Cannot delete the only default address');
+        }
+
+        return $address->forceDelete();
+    }
+
+    /**
+     * Get addresses with ward, district, and province relations
+     */
+    public function getAddressesWithRelations($userId)
+    {
+        return Address::with(['ward.district.province'])
+            ->where('addressable_id', $userId)
+            ->get();
+    }
+
+    /**
+     * Set an address as the default address
+     */
+    public function setDefaultUserAddress($addressId, $userId)
+    {
+        $address = Address::where('id', $addressId)
+            ->where('addressable_id', $userId)
+            ->first();
+
+        if (!$address) {
+            throw new \Exception('Address not found or does not belong to this user');
+        }
+
+        // First, unset all default addresses for this user
+        Address::where('addressable_id', $userId)
+            ->update(['is_default' => 0]);
+
+        // Then set this address as default
+        $address->is_default = 1;
+        $address->save();
+
+        return $address;
     }
 }
