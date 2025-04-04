@@ -19,7 +19,7 @@
             </div>
             <div class="card-body">
                 <h5>Danh sách người dùng đã đặt hàng</h5>
-                <table class="table table-bordered">
+                <table id="fixed-header-datatable"  class="table table-striped dt-responsive nowrap table-striped  w-100">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -66,3 +66,10 @@
         }
     </script>
 @endsection
+@push('styles')
+<x-admin.data-table-styles />
+@endpush
+
+@push('scripts')
+<x-admin.data-table-scripts />
+@endpush

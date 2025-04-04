@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\Category;
-
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -55,6 +55,7 @@ class DashboardController extends Controller
 
     return response()->json($orderStatusStats);
 }
+
 
 
 }

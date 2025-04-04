@@ -177,22 +177,101 @@ class Product extends Model
     {
         return DB::table('products')
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
-            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant') 
-            // ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
-            // ->where('products.status', '=', 'active')
-            // ->where('orders.id_order_status', '=', 4) //đặt hàng thành công
+            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
             ->select(
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(order_details.quantity), 0) as total_sold')
+                // Tính tổng số lượng bán của các đơn hàng thành công, nếu không có thì sẽ trả về 0.
+                DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status = 4 THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
             ->groupBy('products.id', 'products.name', 'products.image_primary')
             ->orderBy('total_sold', 'asc')
-            ->limit(8)
+            ->limit(10)
             ->get();
     }
+
+    public function top_sale_products_today($start_date, $end_date)
+    {
+        if ($start_date && $end_date) {
+            return DB::table('products')
+                ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+                ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+                ->join('orders', 'order_details.id_order', '=', 'orders.id')
+                ->where('orders.id_order_status', '=', 4)
+                ->whereBetween('orders.created_at', [$start_date, $end_date])
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.image_primary',
+                    DB::raw('SUM(order_details.quantity) as total_sold')
+                )
+                ->groupBy('products.id', 'products.name', 'products.image_primary')
+                ->orderBy('total_sold', 'desc')
+                ->limit(10)
+                ->get();
+        }
+
+        return DB::table('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->where('orders.id_order_status', '=', 4)
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('SUM(order_details.quantity) as total_sold')
+            )
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->orderBy('total_sold', 'desc')
+            ->limit(10)
+            ->get();
+    }
+    public function least_sold_products_today($start_date = null, $end_date = null)
+    {
+        $query = DB::table('products')
+            ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+               DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status = 4 THEN order_details.quantity ELSE 0 END), 0) as total_sold')
+                
+            )
+            ->where('products.status', 'active')
+            ->where('orders.id_order_status', 4) // Lọc đơn hàng thành công
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->orderBy('total_sold', 'asc')
+            ->limit(8);
+
+        if ($start_date && $end_date) {
+            $query->whereBetween('orders.created_at', [$start_date, $end_date]);
+        }
+
+        return $query->get();
+    }
+
+public function top_view_product($start_date, $end_date)
+    {
+        return DB::table('products')
+            ->where('status', '=', 'active')
+            ->select(
+                'id',
+                'name',
+                'image_primary',
+                'view'
+            )
+            ->orderBy('view', 'desc')
+            ->limit(10)
+            ->get();
+    }
+
+
 
     public function low_stock_products()
     {

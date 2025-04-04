@@ -115,7 +115,7 @@ class VoucherController extends Controller
     ]);
 
     // Chuyển mảng sang JSON
-    $validatedData['applies_to'] = json_encode($validatedData['applies_to']);
+    $validatedData['applies_to'] = json_encode($validatedData['applies_to'] ?? []);
     // Tạo voucher mới
     Voucher::create($validatedData);
 
@@ -200,7 +200,7 @@ class VoucherController extends Controller
 
     // Lấy voucher theo ID
     $voucher = Voucher::findOrFail($id);
-    $validatedData['applies_to'] = json_encode($validatedData['applies_to']);
+    $validatedData['applies_to'] = json_encode($validatedData['applies_to'] ?? []);
     // Cập nhật dữ liệu
     $voucher->update(
       $validatedData
@@ -223,6 +223,19 @@ class VoucherController extends Controller
 
     // Chuyển hướng với thông báo thành công
     return redirect()->route('admin.vouchers.listVoucher')->with('success', 'Cập nhật voucher thành công!');
+  }
+  public function detailVoucher($id)
+  {
+    $vouchers = Voucher::findOrFail($id);
+    $vouchers->applies_to = json_decode($vouchers->applies_to, true);
+
+    $categories = Category::all();
+    $products   = Product::all();
+    return view('admin.voucher.detail')->with([
+      'voucher' => $vouchers,
+      'categories' => $categories,
+      'products' => $products
+    ]);
   }
 
   public function deleteVoucher($id)

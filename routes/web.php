@@ -39,7 +39,11 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+<<<<<<< HEAD
 use App\Http\Controllers\Web\ChatController;
+=======
+use App\Http\Controllers\Web\ProductDashboardController;
+>>>>>>> origin/dashboard
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
@@ -110,11 +114,28 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
             Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts');
+            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold');
+            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts');
+            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts');
+            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts');
+            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory');
+            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts');
+            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts');
+
 
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
             Route::get('productSold', 'productSold')->name('productSold');
             Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics');
         });
+
+        Route::controller(ProductDashboardController::class)->group(function () {
+            Route::get('dashboardProduct', 'dashboardProduct')->name('dashboardProduct');
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
+            Route::get('topViewProducts', 'topViewProducts')->name('topViewProducts');
+            Route::get('topLeastProducts', 'topLeastProducts')->name('topLeastProducts');
+        });
+
 
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
             Route::post('create-product', 'createByExcel')->name('createProduct');
@@ -139,6 +160,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('edit-category/{id}',  'editCategory')->name('editCategory');
             Route::put('edit-category/{id}',  'editPutCategory')->name('editPutCategory');
             Route::delete('delete-category/{id}',  'deleteCategory')->name('deleteCategory');
+            Route::get('trash',  'trash')->name('trash');
+            Route::post('restore/{id}',  'restoreCategory')->name('restoreCategory');
+            Route::delete('destroy-permanent/{id}', 'destroyPermanent')->name('destroyPermanent');
         });
 
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
@@ -303,6 +327,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('add',  'addVoucher')->name('addVoucher');
             Route::post('add',  'addPostVoucher')->name('addPostVoucher');
             Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
+            Route::get('detail/{id}',  'detailVoucher')->name('detailVoucher');
             Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
             Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
         });

@@ -24,14 +24,15 @@
                 <div class="card widget-flat text-bg-pink">
                     <div class="card-body">
                         <div class="float-end">
-                            <i class="ri-eye-line widget-icon"></i>
+                          <i class="ri-box-3-line" style="font-size:60px; color: white;"></i>
                         </div>
                         <h6 class="text-uppercase mt-0" title="Customers">Daily Visits</h6>
-                        <h2 class="my-2">8,652</h2>
-                        <p class="mb-0">
-                            <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
-                            <span class="text-nowrap">Since last month</span>
-                        </p>
+                         <h2 class="my-2">8,652</h2>
+                         <p class="mb-0">
+                             <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
+                             <span class="text-nowrap">Since last month</span>
+                         </p>
+
                     </div>
                 </div>
             </div> <!-- end col-->
@@ -48,7 +49,7 @@
                             <span class="badge bg-white bg-opacity-10 me-1">18.25%</span>
                             <span class="text-nowrap">Since last month</span>
                         </p>
-                    </div>
+                    </div>                       
                 </div>
             </div> <!-- end col-->
 
@@ -83,7 +84,14 @@
                     </div>
                 </div>
             </div> <!-- end col-->
+
+            <!-- start thống kê sp -->
         </div>
+        <div class="row">
+        @include('admin.statistic.components.topsaleproducttoday')
+        @include('admin.statistic.components.leastsoldproducttoday')
+        @include('admin.statistic.components.topviewproducttoday') 
+        </div>   <!-- end thống kê sp -->
 
         <div class="row">
             <div class="col-lg-8">

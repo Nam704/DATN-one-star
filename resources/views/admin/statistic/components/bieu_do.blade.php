@@ -17,6 +17,10 @@
                     <div class="col">
                         <button id="resetBtn" class="btn btn-success">Clear</button>
                     </div>
+                    <div class="col">
+                    <a id="exportLinkTop" href="{{ route('admin.statistics.exportTopSaleProducts') }}" class="btn btn-primary"><i class="ri-file-excel-2-line"></i>Export Excel</a>
+                    </div>
+
                 </div>
                 <div>
                     <canvas id="myChartTopProduct"></canvas>
@@ -43,6 +47,10 @@
                     <div class="col">
                         <button id="resetBtnV2" class="btn btn-success">Clear</button>
                     </div>
+                    <div class="col">
+                    <a id="exportLinkSold" href="{{ route('admin.statistics.exportproductSold') }}" class="btn btn-primary"><i class="ri-file-excel-2-line"></i>Export Excel</a>
+                    </div>
+
                 </div>
                 <div>
                     <canvas id="myChartProductSold"></canvas>
@@ -137,14 +145,14 @@
                 }
             });
         }
-
+// sản phẩm đã bán
         function loadChartDataV2(fromDate = null, toDate = null) {
             var params = {};
             if (fromDate) params.start_date = fromDate;
             if (toDate) params.end_date = toDate;
 
             $.ajax({
-                url: "{{ route('admin.statistics.topSaleProducts') }}",
+                url: "{{ route('admin.statistics.productSold') }}",
                 type: "GET",
                 data: params,
                 dataType: "json",
@@ -230,18 +238,37 @@
             loadChartData();
             loadChartDataV2();
 
+            // $('#filterBtn').on('click', function() { 
+            //     if ($('#fromDate').val() > $('#toDate').val()) {
+            //         alert('Ngày bắt đầu không được lớn hơn ngày kết thúc');
+            //         return;
+            //     }
+
+            //     if (!$('#fromDate').val() && !$('#toDate').val()) {
+            //         alert('Vui lòng chọn ngày bắt đầu và ngày kết thúc');
+            //         return;
+            //     }
+            //     loadChartData($('#fromDate').val(), $('#toDate').val());
+            // });
+
+            // Cập nhật link Export Excel cho Top Sale Product khi nhấn Apply
             $('#filterBtn').on('click', function() {
-                if ($('#fromDate').val() > $('#toDate').val()) {
+                var fromDate = $('#fromDate').val();
+                var toDate = $('#toDate').val();
+                if (!fromDate || !toDate) {
+                    alert('Vui lòng chọn đầy đủ ngày');
+                    return;
+                }
+                if (fromDate > toDate) {
                     alert('Ngày bắt đầu không được lớn hơn ngày kết thúc');
                     return;
                 }
-
-                if (!$('#fromDate').val() && !$('#toDate').val()) {
-                    alert('Vui lòng chọn ngày bắt đầu và ngày kết thúc');
-                    return;
-                }
-                loadChartData($('#fromDate').val(), $('#toDate').val());
+                var baseUrl = "{{ route('admin.statistics.exportTopSaleProducts') }}";
+                var newHref = baseUrl + '?start_date=' + encodeURIComponent(fromDate) + '&end_date=' + encodeURIComponent(toDate);
+                $('#exportLinkTop').attr('href', newHref);
+                loadChartData(fromDate, toDate);
             });
+
             $('#resetBtn').on('click', function() {
                 $('#fromDate').val(0);
                 $('#toDate').val(0);
@@ -252,16 +279,22 @@
                 $('#toDateV2').val(0);
                 loadChartDataV2();
             });
+            // Cập nhật link Export Excel cho Product Sold khi nhấn Apply
             $('#filterBtnV2').on('click', function() {
-                if ($('#fromDateV2').val() > $('#toDateV2').val()) {
+                var fromDate = $('#fromDateV2').val();
+                var toDate = $('#toDateV2').val();
+                if (!fromDate || !toDate) {
+                    alert('Vui lòng chọn đầy đủ ngày');
+                    return;
+                }
+                if (fromDate > toDate) {
                     alert('Ngày bắt đầu không được lớn hơn ngày kết thúc');
                     return;
                 }
-                if (!$('#fromDateV2').val() && !$('#toDateV2').val()) {
-                    alert('Vui lòng chọn ngày bắt đầu và ngày kết thúc');
-                    return;
-                }
-                loadChartDataV2($('#fromDateV2').val(), $('#toDateV2').val());
+                var baseUrl = "{{ route('admin.statistics.exportproductSold') }}";
+                var newHref = baseUrl + '?start_date=' + encodeURIComponent(fromDate) + '&end_date=' + encodeURIComponent(toDate);
+                $('#exportLinkSold').attr('href', newHref);
+                loadChartDataV2(fromDate, toDate);
             });
         });
     </script>

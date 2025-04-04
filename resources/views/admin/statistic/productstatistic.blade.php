@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <h4 class="page-title">Welcome!</h4>
+                    <h4 class="page-title">Thống kê sản phẩm</h4>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@
         </div>
         
         @include('admin.statistic.components.bieu_do')
-
+        
         <div class="row vudovn">
             <div class="col-xl-6">
                 <!-- Todo-->
@@ -74,6 +74,9 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Top sale product</h5>
+                            <a href="{{ route('admin.statistics.exportTop10SaleProducts') }}" class="btn btn-primary">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                                </a>
                         </div>
                         <div id="yearly-sales-collapse" class="collapse show">
                             <div class="table-responsive">
@@ -115,6 +118,9 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Top Least Sold Products</h5>
+                            <a href="{{ route('admin.statistics.exportLeastSoldProducts') }}" class="btn btn-primary">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                                </a>
                         </div>
                         <div id="yearly-sales-collapse" class="collapse show">
                             <div class="table-responsive">
@@ -156,6 +162,9 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Low Stock Products</h5>
+                            <a href="{{ route('admin.statistics.exportLowStockProducts') }}" class="btn btn-primary">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                            </a>
                         </div>
                         <div id="yearly-sales-collapse" class="collapse show">
                             <div class="table-responsive">
@@ -197,6 +206,9 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Categories With Revenue</h5>
+                            <a href="{{ route('admin.statistics.exportProductsByCategory') }}" class="btn btn-primary">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                            </a>
                         </div>
                         <div id="yearly-sales-collapse" class="collapse show">
                             <div class="table-responsive">
@@ -235,6 +247,9 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Top view products</h5>
+                            <a href="{{ route('admin.statistics.exportTopViewProducts') }}" class="btn btn-primary  ">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                            </a>
                         </div>
                         <div id="yearly-sales-collapse" class="collapse show">
                             <div class="table-responsive">
@@ -276,6 +291,9 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Top comment products</h5>
+                            <a href="{{ route('admin.statistics.exportTopCommentProducts') }}" class="btn btn-primary  ">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                            </a>
                         </div>
                         <div id="yearly-sales-collapse" class="collapse show">
                             <div class="table-responsive">
