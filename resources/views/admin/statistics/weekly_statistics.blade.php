@@ -5,8 +5,8 @@
         <div class="text-center my-4">
             <h1>Thống Kê Đơn Hàng Theo Tuần</h1>
             <p>
-                Từ ngày: <strong>{{ $startOfWeek->format('d/m/Y') }}</strong> đến
-                <strong>{{ $endOfWeek->format('d/m/Y') }}</strong>
+                Từ ngày: <strong>{{ $startDate->format('d/m/Y') }}</strong> đến
+                <strong>{{ $endDate->format('d/m/Y') }}</strong>
             </p>
             <p>
                 Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
@@ -16,17 +16,27 @@
         <!-- Form chọn ngày -->
         <div class="row mb-4">
             <div class="col-md-8">
-                <form action="{{ route('admin.statistics.weeklyStatistics') }}" method="GET" class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label for="date" class="form-label">Chọn Ngày (để xác định tuần):</label>
-                        <input type="date" id="date" name="date" class="form-control"
-                            value="{{ $selectedDate->toDateString() }}">
+                <form action="{{ route('admin.statistics.weeklyStatistics') }}" method="GET">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="start_date">Ngày bắt đầu:</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control"
+                                    value="{{ request('start_date', now()->startOfWeek()->toDateString()) }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="end_date">Ngày kết thúc:</label>
+                                <input type="date" name="end_date" id="end_date" class="form-control"
+                                    value="{{ request('end_date', now()->endOfWeek()->toDateString()) }}">
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">Xem thống kê</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Thống kê</button>
                 </form>
             </div>
+
             <div class="col-md-4 text-end">
                 <div class="d-flex justify-content-end align-items-center border-start ps-3">
                     <div class="text-end">
@@ -73,17 +83,25 @@
             </div>
         </div>
 
-        <!-- Biểu đồ: Số Đơn Hàng & Doanh Thu Theo Ngày Trong Tuần -->
+        <!-- Biểu đồ: Số Đơn Hàng & Doanh Thu Theo Ngày Trong Tuần (Chart.js) -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="header-title mb-3">Biểu Đồ Số Đơn Hàng &amp; Doanh Thu Theo Ngày Trong Tuần</h5>
-                <div style="position: relative; height: 300px; width: 70%; margin: 0 auto;">
-                    <canvas id="weeklyChart"></canvas>
+                <div id="chartToolbar"
+                    style="position: absolute; top: 10px; right: 10px; z-index: 10; background: #fff; padding: 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+                    <button id="downloadPNG" title="Download PNG" class="btn btn-sm btn-light">Download PNG</button>
+                    <button id="downloadExcel" title="Download Excel" class="btn btn-sm btn-light">Download Excel</button>
                 </div>
+                <div id="chartToolbarContainer"
+                    style="position: relative; width: 70%; margin: 0 auto; height: 300px; max-height: 300px;">
+
+                    <!-- Canvas cho Chart.js -->
+                    <canvas id="weeklyChart" style="margin-top: 40px; height: 100%;"></canvas>
+                </div>
+
             </div>
         </div>
-
-        <!-- Bảng Top 10 Sản Phẩm Bán Chạy -->
+        <!-- Bảng Top 20 Sản Phẩm Bán Chạy Trong Tuần -->
         <div class="card mb-4">
             <div class="card-body">
                 <div class="card-widgets">
@@ -117,7 +135,8 @@
             <div class="card-body">
                 <div class="card-widgets">
                     <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                    <a data-bs-toggle="collapse" href="#top-customers-collapse" role="button" aria-expanded="false" aria-controls="top-customers-collapse">
+                    <a data-bs-toggle="collapse" href="#top-customers-collapse" role="button" aria-expanded="false"
+                        aria-controls="top-customers-collapse">
                         <i class="ri-subtract-line"></i></a>
                     <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
                 </div>
@@ -130,19 +149,22 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h5 class="mb-0">
-                                                {{ $index + 1 }}.    {{ $customer->user_name ?? 'Khách vãng lai' }}
+                                                {{ $index + 1 }}. {{ $customer->user_name ?? 'Khách vãng lai' }}
                                             </h5>
                                             <small class="text-muted">
                                                 Tổng mua: ${{ number_format($customer->total_purchase, 0) }}
                                             </small>
                                         </div>
-                                        @if(isset($customerProductsGrouped[$customer->id_user]))
-                                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#customer-{{ $customer->id_user }}" aria-expanded="false" aria-controls="customer-{{ $customer->id_user }}">
+                                        @if (isset($customerProductsGrouped[$customer->id_user]))
+                                            <button class="btn btn-sm btn-outline-primary" type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#customer-{{ $customer->id_user }}" aria-expanded="false"
+                                                aria-controls="customer-{{ $customer->id_user }}">
                                                 Xem chi tiết
                                             </button>
                                         @endif
                                     </div>
-                                    @if(isset($customerProductsGrouped[$customer->id_user]))
+                                    @if (isset($customerProductsGrouped[$customer->id_user]))
                                         <div class="collapse mt-2" id="customer-{{ $customer->id_user }}">
                                             <table class="table table-sm table-bordered mb-0">
                                                 <thead>
@@ -171,14 +193,14 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 
-    <!-- Nạp Chart.js từ CDN -->
+    <!-- Nạp Chart.js từ CDN cho biểu đồ Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Dữ liệu thống kê từ $dailyStats (đảm bảo có đầy đủ 7 ngày)
+        // Lấy dữ liệu thống kê từ controller (đảm bảo có dữ liệu 7 ngày)
+        // Dữ liệu thống kê từ controller
         var weeklyData = {!! json_encode($dailyStats) !!};
         var labels = weeklyData.map(function(item) {
             return item.order_date;
@@ -196,6 +218,7 @@
             return item.day_revenue;
         });
 
+        // Cấu hình biểu đồ Chart.js
         var ctx = document.getElementById('weeklyChart').getContext('2d');
         var weeklyChart = new Chart(ctx, {
             type: 'bar',
@@ -260,7 +283,72 @@
                 }
             }
         });
+        document.getElementById('downloadPNG').addEventListener('click', function() {
+            // Lấy data URL của canvas (mã hóa hình ảnh PNG)
+            var url = document.getElementById('weeklyChart').toDataURL("image/png");
+
+            // Tạo phần tử <a> tạm thời và kích hoạt download
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'weekly_chart.png'; // Tên file tải về
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        document.getElementById('downloadExcel').addEventListener('click', function() {
+    // Hàng dữ liệu: dòng tóm tắt tổng doanh thu, dòng trống và tiêu đề bảng
+    var ws_data = [
+        ["Tổng Doanh Thu Tuần", "{{ number_format($totalRevenue, 0) }} đ"],
+        [], // Dòng trống để phân cách
+        ["Ngày", "Tổng Đơn Hàng", "Đơn Hàng Thành Công", "Đơn Hàng Bị Hủy", "Doanh Thu (Delivered)"]
+    ];
+
+    // Thêm dữ liệu chi tiết theo từng ngày
+    for (var i = 0; i < weeklyData.length; i++) {
+        ws_data.push([
+            weeklyData[i].order_date,
+            weeklyData[i].total_orders,
+            weeklyData[i].delivered_orders,
+            weeklyData[i].cancelled_orders,
+            weeklyData[i].day_revenue
+        ]);
+    }
+
+    // Tạo workbook mới và chuyển dữ liệu thành worksheet
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    // Đặt chiều rộng cột (wch: width character) để file Excel trông đẹp hơn
+    ws['!cols'] = [
+        { wch: 20 }, // Cột "Ngày"
+        { wch: 15 }, // Cột "Tổng Đơn Hàng"
+        { wch: 20 }, // Cột "Đơn Hàng Thành Công"
+        { wch: 20 }, // Cột "Đơn Hàng Bị Hủy"
+        { wch: 20 }  // Cột "Doanh Thu (Delivered)"
+    ];
+
+    // Gắn worksheet vào workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Chart Data");
+
+    // Xuất workbook thành định dạng array buffer
+    var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    var blob = new Blob([wbout], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    // Tạo URL từ Blob và kích hoạt download
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'chart_data.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
     </script>
+
 @endsection
 
 @push('styles')

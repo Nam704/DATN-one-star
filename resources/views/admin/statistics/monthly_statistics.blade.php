@@ -72,16 +72,21 @@
     </div>
 
     <!-- Biểu đồ: Số Đơn Hàng & Doanh Thu Theo Ngày Trong Tháng -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="position: relative;">
         <div class="card-body">
             <h5 class="header-title mb-3">Biểu Đồ Số Đơn Hàng &amp; Doanh Thu Theo Ngày Trong Tháng</h5>
+            <!-- Toolbar cho download -->
+            <div id="chartToolbar" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: #fff; padding: 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+                <button id="downloadPNG" title="Download PNG" class="btn btn-sm btn-light">Download PNG</button>
+                <button id="downloadExcel" title="Download Excel" class="btn btn-sm btn-light">Download Excel</button>
+            </div>
             <div style="position: relative; height: 300px; width: 70%; margin: 0 auto;">
                 <canvas id="monthlyChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Bảng Top 10 Sản Phẩm Bán Chạy Trong Tháng -->
+    <!-- Bảng Top 50 Sản Phẩm Bán Chạy Trong Tháng -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="card-widgets">
@@ -108,7 +113,7 @@
         </div>
     </div>
 
-    <!-- Bảng Top 20 Người Mua Nhiều Nhất Trong Tháng -->
+    <!-- Bảng Top 50 Người Mua Nhiều Nhất Trong Tháng -->
     <div class="card">
         <div class="card-body">
             <div class="card-widgets">
@@ -163,10 +168,11 @@
     </div>
 </div>
 
-<!-- Nạp Chart.js từ CDN -->
+<!-- Nạp thư viện Chart.js và SheetJS (XLSX) từ CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Lấy dữ liệu thống kê từ $dailyStats
+    // Lấy dữ liệu thống kê từ controller (monthlyData)
     var monthlyData = {!! json_encode($dailyStats) !!};
     var labels = monthlyData.map(function(item) { return item.order_date; });
     var totalOrdersData = monthlyData.map(function(item) { return item.total_orders; });
@@ -174,6 +180,7 @@
     var cancelledData = monthlyData.map(function(item) { return item.cancelled_orders; });
     var revenueData = monthlyData.map(function(item) { return item.day_revenue; });
 
+    // Cấu hình biểu đồ Chart.js cho thống kê theo tháng
     var ctx = document.getElementById('monthlyChart').getContext('2d');
     var monthlyChart = new Chart(ctx, {
         type: 'bar',
@@ -230,6 +237,65 @@
                 }
             }
         }
+    });
+
+    // Sự kiện tải ảnh PNG từ biểu đồ
+    document.getElementById('downloadPNG').addEventListener('click', function() {
+        var url = document.getElementById('monthlyChart').toDataURL("image/png");
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'monthly_chart.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    // Sự kiện tải file Excel với định dạng cơ bản
+    document.getElementById('downloadExcel').addEventListener('click', function() {
+        // Chuẩn bị dữ liệu Excel dạng mảng (AOA)
+        var ws_data = [
+            ["Tổng Doanh Thu Tháng", "{{ number_format($totalRevenue, 0) }} đ"],
+            [], // Dòng trống phân cách
+            ["Ngày", "Tổng Đơn Hàng", "Đơn Hàng Thành Công", "Đơn Hàng Bị Hủy", "Doanh Thu (Delivered)"]
+        ];
+
+        // Duyệt qua dữ liệu thống kê theo ngày
+        for (var i = 0; i < monthlyData.length; i++) {
+            ws_data.push([
+                monthlyData[i].order_date,
+                monthlyData[i].total_orders,
+                monthlyData[i].delivered_orders,
+                monthlyData[i].cancelled_orders,
+                monthlyData[i].day_revenue
+            ]);
+        }
+
+        // Tạo workbook và worksheet
+        var wb = XLSX.utils.book_new();
+        var ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+        // Ví dụ: thiết lập chiều rộng cột cơ bản
+        ws['!cols'] = [
+            { wch: 20 }, // Cột "Ngày"
+            { wch: 15 }, // Cột "Tổng Đơn Hàng"
+            { wch: 20 }, // Cột "Đơn Hàng Thành Công"
+            { wch: 20 }, // Cột "Đơn Hàng Bị Hủy"
+            { wch: 20 }  // Cột "Doanh Thu (Delivered)"
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "Chart Data");
+
+        // Xuất workbook thành array buffer
+        var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        var blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'monthly_data.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     });
 </script>
 @endsection

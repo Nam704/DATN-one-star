@@ -901,12 +901,13 @@ public function exportTopCommentProducts()
 
     public function weeklyStatistics(Request $request)
     {
-        // 1. Xác định khoảng thời gian của tuần
-        $dateInput = $request->input('date', now()->toDateString());
-        $selectedDate = Carbon::parse($dateInput);
-        $startOfWeek = $selectedDate->copy()->startOfWeek(); // Thứ Hai
-        $endOfWeek   = $selectedDate->copy()->endOfWeek();     // Chủ Nhật
-        $dateRange = [$startOfWeek->toDateTimeString(), $endOfWeek->toDateTimeString()];
+        // 1. Lấy ngày bắt đầu và ngày kết thúc từ request, nếu không có sẽ mặc định là đầu và cuối tuần hiện tại
+        $startDateInput = $request->input('start_date', now()->startOfWeek()->toDateString());
+        $endDateInput   = $request->input('end_date', now()->endOfWeek()->toDateString());
+
+        $startDate = Carbon::parse($startDateInput);
+        $endDate   = Carbon::parse($endDateInput);
+        $dateRange = [$startDate->toDateTimeString(), $endDate->toDateTimeString()];
 
         // 2. Lấy ID của các trạng thái cần thiết
         $paidStatusId = DB::table('order_statuses')->where('name', 'Paid')->value('id');
@@ -951,15 +952,13 @@ public function exportTopCommentProducts()
         // Giá trị trung bình mỗi đơn hàng (AOV) dựa trên doanh thu Delivered
         $averageOrderValue = $deliveredOrders > 0 ? $totalRevenue / $deliveredOrders : 0;
 
-        // 4. Dữ liệu cho biểu đồ theo ngày trong tuần
-        // Lấy dữ liệu từ DB (chỉ những ngày có đơn hàng)
+        // 4. Dữ liệu cho biểu đồ theo ngày trong khoảng thời gian được chọn
         $rawDailyStats = DB::table('orders')
             ->select(
                 DB::raw('DATE(created_at) as order_date'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
-                // Tính doanh thu trong ngày chỉ từ các đơn Delivered
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as day_revenue')
             )
             ->whereBetween('created_at', $dateRange)
@@ -968,8 +967,8 @@ public function exportTopCommentProducts()
             ->get()
             ->keyBy('order_date');
 
-        // Tạo danh sách đầy đủ các ngày trong tuần (sử dụng CarbonPeriod)
-        $period = CarbonPeriod::create($startOfWeek, $endOfWeek);
+        // Tạo danh sách các ngày trong khoảng thời gian được chọn
+        $period = CarbonPeriod::create($startDate, $endDate);
         $dailyStats = [];
         foreach ($period as $date) {
             $day = $date->toDateString();
@@ -992,21 +991,20 @@ public function exportTopCommentProducts()
             }
         }
 
-        // 5. Top 20 sản phẩm bán chạy trong tuần
+        // 5. Top 20 sản phẩm bán chạy trong khoảng thời gian được chọn
         $productsSales = DB::table('order_details')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
             ->whereBetween('orders.created_at', $dateRange)
-            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ tính đơn hàng đã giao hàng
+            ->where('orders.id_order_status', $deliveredStatusId)
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(20)
             ->get();
 
-        // 6. Top 20 người mua nhiều nhất trong tuần (tính theo tổng giá trị mua hàng, chỉ Delivered)
-        // 6. Top 20 người mua nhiều nhất trong tuần (tính theo tổng giá trị mua hàng và tổng số lượng sản phẩm, chỉ Delivered)
+        // 6. Top 20 khách hàng mua nhiều nhất trong khoảng thời gian (theo tổng giá trị mua hàng, chỉ Delivered)
         $topCustomers = DB::table('orders')
             ->select(
                 'id_user',
@@ -1014,32 +1012,28 @@ public function exportTopCommentProducts()
                 DB::raw('SUM(total) as total_purchase')
             )
             ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
+            ->where('id_order_status', $deliveredStatusId)
             ->groupBy('id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(20)
             ->get();
 
-
-        // Lấy chi tiết các sản phẩm mà mỗi khách hàng mua (dành cho các đơn hàng Delivered)
+        // Lấy chi tiết các sản phẩm mà mỗi khách hàng mua (cho các đơn hàng Delivered)
         $customerProducts = DB::table('orders')
             ->join('order_details', 'orders.id', '=', 'order_details.id_order')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as quantity'))
             ->whereBetween('orders.created_at', $dateRange)
-            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
+            ->where('orders.id_order_status', $deliveredStatusId)
             ->groupBy('orders.id_user', 'products.name')
             ->get();
 
-        // Nhóm dữ liệu chi tiết theo id_user
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
-
         return view('admin.statistics.weekly_statistics', compact(
-            'selectedDate',
-            'startOfWeek',
-            'endOfWeek',
+            'startDate',
+            'endDate',
             'allTotalOrders',
             'totalRevenue',
             'paidOrders',
@@ -1050,7 +1044,7 @@ public function exportTopCommentProducts()
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',
-            'customerProductsGrouped'
+            'customerProductsGrouped',
         ));
     }
 
