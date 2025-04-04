@@ -32,20 +32,27 @@ class StatisticController extends Controller
         $this->category = $category;
         $this->order = $order;
     }
-    public function productStatistics()
+
+    public function productStatistics(Request $request)
     {
         if (auth()->check()) {
+            $startDate = $request->input('start_date', now()->startOfDay()->toDateString());
+            $endDate = $request->input('end_date', now()->endOfDay()->toDateString());
             $countData = [
-                "product" => $this->product->count(),
-                "revenue" => $this->order->where('id_order_status', '4')->sum('total'),
-                "order" => $this->order->where('id_order_status', '4')->count(),
-                "user" => $this->user->count()
+                "product" => $this->product->whereBetween('created_at', [$startDate, $endDate])->count(),
+                "revenue" => $this->order->where('id_order_status', '4')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->sum('total'),
+                "order" => $this->order->where('id_order_status', '4')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->count(),
+                "user" => $this->user->whereBetween('created_at', [$startDate, $endDate])->count()
+
             ];
             $topProduct = [
-                "top_sale_products" => $this->product->top_10_products(),
-                "least_sold_products" => $this->product->least_sold_products(),
+                "least_sold_products" => $this->product->least_sold_products($startDate, $endDate),
             ];
-            $low_stock_products = $this->product->low_stock_products();
+            $low_stock_products = $this->product->low_stock_products($startDate, $endDate);
             $categories_with_revenue = $this->category->categories_with_revenue();
             $top_view_products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
             $top_comment_products = [
@@ -71,37 +78,78 @@ class StatisticController extends Controller
                 'low_stock_products',
                 'categories_with_revenue',
                 'top_view_products',
-                'top_comment_products'
+                'top_comment_products',
+                'startDate',
+                'endDate'
             ));
         } else {
             return redirect()->route('admin.statistics.productStatistics');
         }
     }
-    
-    
+    // api biểu đồ sản phẩm bán chạy nhất
+    public function topSaleProducts(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $top_sale_products = $this->product->top_sale_products($start_date, $end_date);
+        return response()->json($top_sale_products);
+    }
+
+    // tạo api cho biểu đồ sản phẩm đã bán
+    public function productSold(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $top_sale_products = $this->product->productSold($start_date, $end_date);
+        return response()->json($top_sale_products);
+    }
+
+    //tạo api cho biểu đồ danh mục sản phẩm
+    public function categoryStatistics(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+
+        $query = Category::select('categories.name')
+            ->leftJoin('products', 'categories.id', '=', 'products.id_category')
+            ->whereNull('categories.deleted_at')
+            ->groupBy('categories.id', 'categories.name')
+            ->selectRaw('COUNT(products.id) as total_products');
+
+        if ($start_date && $end_date) {
+            $query->whereBetween('products.created_at', [$start_date, $end_date]);
+        }
+
+        $categories = $query->orderBy('total_products', 'desc')->get();
+
+        return response()->json($categories);
+    }
+
+
     public function exportTopSaleProducts(Request $request)
     {
         // Lấy tham số ngày từ request
         $start_date = $request->input('start_date');
         $end_date   = $request->input('end_date');
-    
+
         // Nếu có giá trị, chuyển thành khoảng thời gian đầy đủ
         $start_date_full = $start_date ? $start_date . ' 00:00:00' : null;
-        $end_date_full   = $end_date   ? $end_date . ' 23:59:59' : null;
-    
+        $end_date_full   = $end_date   ? $end_date   . ' 23:59:59' : null;
+
+
         // Lấy dữ liệu từ model Product
         $products = $this->product->top_sale_products($start_date_full, $end_date_full);
-    
+
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-    
+
         // 1. Tiêu đề báo cáo (dòng 1)
         $sheet->setCellValue('A1', 'Top Sản Phẩm Bán Chạy');
         $sheet->mergeCells('A1:E1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    
+
         // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
         // Nếu không có ngày nào được chọn, hiển thị 'Chưa chọn'
         $displayStart = $start_date ? $start_date : 'Chưa chọn';
@@ -112,12 +160,12 @@ class StatisticController extends Controller
         $sheet->mergeCells('D2:E2');
         $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2:E2')->getAlignment()
-              ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-              ->setVertical(Alignment::VERTICAL_CENTER);
-    
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
         // Dòng 3 để tạo khoảng cách (có thể merge để đảm bảo hiển thị đẹp)
         $sheet->mergeCells('A3:E3');
-    
+
         // 3. Header bảng (dòng 4)
         $sheet->setCellValue('A4', 'STT');
         $sheet->setCellValue('B4', 'Tên Sản Phẩm');
@@ -126,21 +174,21 @@ class StatisticController extends Controller
         $headerRange = 'A4:E4';
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    
+
         // Thiết lập độ rộng cột cố định cho cột C (ảnh)
         $sheet->getColumnDimension('C')->setWidth(20);
         foreach (['A', 'B', 'D', 'E'] as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-    
+
         // 4. Ghi dữ liệu bắt đầu từ dòng 5
         $row = 5;
         if ($products->isEmpty()) {
             $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
             $sheet->mergeCells('A5:E5');
             $sheet->getStyle('A5')->getAlignment()
-                  ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                  ->setVertical(Alignment::VERTICAL_CENTER);
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
         } else {
             $stt = 1;
             foreach ($products as $product) {
@@ -148,7 +196,7 @@ class StatisticController extends Controller
                 $sheet->setCellValue('A' . $row, $stt++);
                 $sheet->setCellValue('B' . $row, $product->name);
                 $sheet->setCellValue('D' . $row, $product->total_sold);
-    
+
                 // Chèn ảnh vào cột C
                 $imagePath = public_path($product->image_primary);
                 if (file_exists($imagePath)) {
@@ -167,20 +215,20 @@ class StatisticController extends Controller
                 } else {
                     $sheet->setCellValue('C' . $row, 'No image');
                 }
-    
+
                 // Căn giữa nội dung của hàng
                 $sheet->getStyle("A{$row}:D{$row}")
-                      ->getAlignment()
-                      ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                      ->setVertical(Alignment::VERTICAL_CENTER);
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
                 $row++;
             }
         }
-    
+
         // 5. Xuất file Excel
         $writer = new Xlsx($spreadsheet);
         $fileName = 'top_sale_products.xlsx';
-    
+
         return new StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
         }, 200, [
@@ -189,32 +237,32 @@ class StatisticController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
-    
-    
+
+
     public function exportproductSold(Request $request)
     {
         // Lấy tham số ngày từ request
         $start_date = $request->input('start_date');
         $end_date   = $request->input('end_date');
-    
+
         // Nếu có giá trị, chuyển đổi thành khoảng thời gian đầy đủ
         $start_date_full = $start_date ? $start_date . ' 00:00:00' : null;
         $end_date_full   = $end_date   ? $end_date   . ' 23:59:59' : null;
-    
+
         // Debug: bạn có thể kiểm tra giá trị này tạm thời
         // dd($start_date_full, $end_date_full);
-    
+
         // Lấy dữ liệu theo truy vấn từ model Product
         // Giả sử phương thức top_sale_products trong model đã xử lý điều kiện lọc theo created_at
         $products = $this->product->productSold($start_date_full, $end_date_full);
-    
+
         // Nếu không có dữ liệu nào, bạn có thể dd($products) để xem kết quả
         // dd($products);
-    
+
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-    
+
         // 1. Tiêu đề báo cáo (dòng 1)
         $sheet->setCellValue('A1', 'Sản Phẩm Đã Bán');
         $sheet->mergeCells('A1:E1');
@@ -222,7 +270,7 @@ class StatisticController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(
             \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
         );
-    
+
         // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
         $displayStart = $start_date ? $start_date : 'Chưa chọn';
         $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
@@ -232,12 +280,12 @@ class StatisticController extends Controller
         $sheet->mergeCells('D2:E2');
         $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2:E2')->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-    
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
         // Dòng 3 để trống
         $sheet->mergeCells('A3:D3');
-    
+
         // 3. Header bảng (dòng 4)
         $sheet->setCellValue('A4', 'STT');
         $sheet->setCellValue('B4', 'Tên Sản Phẩm');
@@ -248,20 +296,20 @@ class StatisticController extends Controller
         $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
             \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
         );
-    
+
         // Thiết lập độ rộng cột cố định cho cột D (ảnh)
         $sheet->getColumnDimension('D')->setWidth(20);
-        foreach (['A','B','C','E'] as $col) {
+        foreach (['A', 'B', 'C', 'E'] as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-    
+
         // 4. Ghi dữ liệu (từ dòng 5)
         if ($products->isEmpty()) {
             $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
             $sheet->mergeCells('A5:D5');
             $sheet->getStyle('A5')->getAlignment()
-                  ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                  ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         } else {
             $row = 5;
             $stt = 1;
@@ -270,7 +318,7 @@ class StatisticController extends Controller
                 $sheet->setCellValue('A' . $row, $stt++);
                 $sheet->setCellValue('B' . $row, $product->name);
                 $sheet->setCellValue('D' . $row, $product->total_sold);
-    
+
                 // Chèn ảnh vào cột D
                 $imagePath = public_path($product->image_primary);
                 if (file_exists($imagePath)) {
@@ -289,20 +337,20 @@ class StatisticController extends Controller
                 } else {
                     $sheet->setCellValue('C' . $row, 'No image');
                 }
-    
+
                 // Căn giữa nội dung của hàng
                 $sheet->getStyle("A{$row}:D{$row}")
-                      ->getAlignment()
-                      ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                      ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                 $row++;
             }
         }
-    
+
         // 5. Xuất file Excel
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $fileName = 'products_sold.xlsx';
-    
+
         return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
         }, 200, [
@@ -311,501 +359,513 @@ class StatisticController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
-    public function exportTop10SaleProducts()
-{
-    $products = (new Product)->top_10_products(); // Tạo đối tượng rồi gọi phương thức
+    public function exportLeastSoldProducts(Request $request)
+    {
+        // Lấy tham số ngày bắt đầu và kết thúc từ request
+        $start_date = $request->input('start_date');
+        $end_date   = $request->input('end_date');
 
+        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
+        $start_date = $start_date ?: now()->startOfDay()->toDateString();
+        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
 
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    // 1. Tiêu đề báo cáo (dòng 1)
-    $sheet->setCellValue('A1', 'Top Sản Phẩm Bán Chạy');
-    $sheet->mergeCells('A1:E1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
- 
-    // 3. Header bảng (dòng 4)
-    $sheet->setCellValue('A4', 'STT');
-    $sheet->setCellValue('B4', 'Tên Sản Phẩm');
-    $sheet->setCellValue('C4', 'Ảnh');
-    $sheet->setCellValue('D4', 'Tổng Số Bán');
-    $headerRange = 'A4:E4';
-    $sheet->getStyle($headerRange)->getFont()->setBold(true);
-    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
+        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
+        $products = $this->product->least_sold_products($start_date, $end_date);
 
-    // Thiết lập độ rộng cột cố định cho cột D (ảnh)
-    $sheet->getColumnDimension('D')->setWidth(20);
-    foreach (['A','B','C','E'] as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
+        // Khởi tạo Spreadsheet và lấy sheet chính
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // 4. Ghi dữ liệu (từ dòng 5)
-    if ($products->isEmpty()) {
-        $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
-        $sheet->mergeCells('A5:D5');
-        $sheet->getStyle('A5')->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-    } else {
-        $row = 5;
-        $stt = 1;
-        foreach ($products as $product) {
-            // STT, ID, Tên Sản Phẩm, Tổng Số Bán
-            $sheet->setCellValue('A' . $row, $stt++);
-            $sheet->setCellValue('B' . $row, $product->name);
-            $sheet->setCellValue('D' . $row, $product->total_sold);
+        // 1. Tiêu đề báo cáo (dòng 1)
+        $sheet->setCellValue('A1', 'Top sản phẩm bán tệ');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
 
-            // Chèn ảnh vào cột D
-            $imagePath = public_path($product->image_primary);
-            if (file_exists($imagePath)) {
-                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                $drawing->setPath($imagePath);
-                $drawing->setName('Product Image');
-                $drawing->setDescription('Product Image');
-                $drawing->setCoordinates('C' . $row);
-                $drawing->setWidth(50);
-                $drawing->setHeight(50);
-                // Điều chỉnh offset để ảnh nằm gần giữa ô
-                $drawing->setOffsetX(10);
-                $drawing->setOffsetY(5);
-                $drawing->setWorksheet($sheet);
-                $sheet->getRowDimension($row)->setRowHeight(60);
-            } else {
-                $sheet->setCellValue('C' . $row, 'No image');
-            }
+        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
+        $displayStart = $start_date ? $start_date : 'Chưa chọn';
+        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
+        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
+        $sheet->mergeCells('D2:E2');
+        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2:E2')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-            // Căn giữa nội dung của hàng
-            $sheet->getStyle("A{$row}:D{$row}")
-                  ->getAlignment()
-                  ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                  ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-            $row++;
+        // Dòng 3 để tạo khoảng cách
+        $sheet->mergeCells('A3:E3');
+
+        // 3. Header bảng (dòng 4)
+        $sheet->setCellValue('A4', 'STT');
+        $sheet->setCellValue('B4', 'Tên Sản Phẩm');
+        $sheet->setCellValue('C4', 'Ảnh ');
+        $sheet->setCellValue('D4', 'Tổng Số Lượng');
+        $headerRange = 'A4:E4';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // Thiết lập độ rộng cột cố định cho cột C (ảnh)
+        $sheet->getColumnDimension('C')->setWidth(20);
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-    }
 
-    // 5. Xuất file Excel
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    $fileName = 'top_sale_products.xlsx';
-
-    return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
-        'Cache-Control'       => 'max-age=0',
-    ]);
-}
-public function exportLeastSoldProducts()
-{
-    $products = $this->product->least_sold_products();
-
-
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    // 1. Tiêu đề báo cáo (dòng 1)
-    $sheet->setCellValue('A1', 'Top Sản Phẩm Bán Tệ');
-    $sheet->mergeCells('A1:E1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
- 
-    // 3. Header bảng (dòng 4)
-    $sheet->setCellValue('A4', 'STT');
-    $sheet->setCellValue('B4', 'Tên Sản Phẩm');
-    $sheet->setCellValue('C4', 'Ảnh ');
-    $sheet->setCellValue('D4', 'Tổng Số Bán');
-    $headerRange = 'A4:E4';
-    $sheet->getStyle($headerRange)->getFont()->setBold(true);
-    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
-
-    // Thiết lập độ rộng cột cố định cho cột D (ảnh)
-    $sheet->getColumnDimension('D')->setWidth(20);
-    foreach (['A','B','C','E'] as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-
-    // 4. Ghi dữ liệu (từ dòng 5)
-    if ($products->isEmpty()) {
-        $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
-        $sheet->mergeCells('A5:D5');
-        $sheet->getStyle('A5')->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-    } else {
+        // 4. Ghi dữ liệu (từ dòng 5)
         $row = 5;
-        $stt = 1;
-        foreach ($products as $product) {
-            // STT, ID, Tên Sản Phẩm, Tổng Số Bán
-            $sheet->setCellValue('A' . $row, $stt++);
-            $sheet->setCellValue('B' . $row, $product->name);
-            $sheet->setCellValue('D' . $row, $product->total_sold);
-
-            // Chèn ảnh vào cột D
-            $imagePath = public_path($product->image_primary);
-            if (file_exists($imagePath)) {
-                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                $drawing->setPath($imagePath);
-                $drawing->setName('Product Image');
-                $drawing->setDescription('Product Image');
-                $drawing->setCoordinates('C' . $row);
-                $drawing->setWidth(50);
-                $drawing->setHeight(50);
-                // Điều chỉnh offset để ảnh nằm gần giữa ô
-                $drawing->setOffsetX(10);
-                $drawing->setOffsetY(5);
-                $drawing->setWorksheet($sheet);
-                $sheet->getRowDimension($row)->setRowHeight(60);
-            } else {
-                $sheet->setCellValue('C' . $row, 'No image');
-            }
-
-            // Căn giữa nội dung của hàng
-            $sheet->getStyle("A{$row}:D{$row}")
-                  ->getAlignment()
-                  ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                  ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-            $row++;
-        }
-    }
-
-    // 5. Xuất file Excel
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    $fileName = 'least_sold_products.xlsx';
-
-    return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
-        'Cache-Control'       => 'max-age=0',
-    ]);
-}
-public function exportLowStockProducts()
-{
-    $products = $this->product->low_stock_products();
-
-
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    // 1. Tiêu đề báo cáo (dòng 1)
-    $sheet->setCellValue('A1', 'Sản phẩm sắp hết hàng(dưới 10 sản phẩm)');
-    $sheet->mergeCells('A1:E1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
- 
-    // 3. Header bảng (dòng 4)
-    $sheet->setCellValue('A4', 'STT');
-    $sheet->setCellValue('B4', 'Tên Sản Phẩm');
-    $sheet->setCellValue('C4', 'Ảnh ');
-    $sheet->setCellValue('D4', 'Tổng Số Lượng');
-    $headerRange = 'A4:E4';
-    $sheet->getStyle($headerRange)->getFont()->setBold(true);
-    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
-
-    // Thiết lập độ rộng cột cố định cho cột D (ảnh)
-    $sheet->getColumnDimension('D')->setWidth(20);
-    foreach (['A','B','C','E'] as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-
-    // 4. Ghi dữ liệu (từ dòng 5)
-    if ($products->isEmpty()) {
-        $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
-        $sheet->mergeCells('A5:D5');
-        $sheet->getStyle('A5')->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-    } else {
-        $row = 5;
-        $stt = 1;
-        foreach ($products as $product) {
-            // STT, ID, Tên Sản Phẩm, Tổng Số Bán
-            $sheet->setCellValue('A' . $row, $stt++);
-            $sheet->setCellValue('B' . $row, $product->name);
-            $sheet->setCellValue('D' . $row, $product->total_quantity);
-
-            // Chèn ảnh vào cột D
-            $imagePath = public_path($product->image_primary);
-            if (file_exists($imagePath)) {
-                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                $drawing->setPath($imagePath);
-                $drawing->setName('Product Image');
-                $drawing->setDescription('Product Image');
-                $drawing->setCoordinates('C' . $row);
-                $drawing->setWidth(50);
-                $drawing->setHeight(50);
-                // Điều chỉnh offset để ảnh nằm gần giữa ô
-                $drawing->setOffsetX(10);
-                $drawing->setOffsetY(5);
-                $drawing->setWorksheet($sheet);
-                $sheet->getRowDimension($row)->setRowHeight(60);
-            } else {
-                $sheet->setCellValue('C' . $row, 'No image');
-            }
-
-            // Căn giữa nội dung của hàng
-            $sheet->getStyle("A{$row}:D{$row}")
-                  ->getAlignment()
-                  ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                  ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-            $row++;
-        }
-    }
-
-    // 5. Xuất file Excel
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    $fileName = 'low_stock_products.xlsx';
-
-    return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
-        'Cache-Control'       => 'max-age=0',
-    ]);
-}
-public function exportProductsByCategory()
-{
-    // Lấy dữ liệu doanh thu theo danh mục
-    // Giả sử hàm categories_with_revenue() là static trong model Category
-    $categories = Category::categories_with_revenue();
-
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-
-    // 1. Tiêu đề báo cáo (dòng 1)
-    $sheet->setCellValue('A1', 'Sản phẩm theo danh mục');
-    $sheet->mergeCells('A1:D1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
-
-    // 2. Header bảng (dòng 3)
-    $sheet->setCellValue('A3', 'STT');
-    $sheet->setCellValue('B3', 'Tên Danh Mục');
-    $sheet->setCellValue('C3', 'Tổng Sản Phẩm');
-    $sheet->setCellValue('D3', 'Tổng Doanh Thu');
-    $headerRange = 'A3:D3';
-    $sheet->getStyle($headerRange)->getFont()->setBold(true);
-    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
-
-    // Thiết lập độ rộng cột (AutoSize)
-    foreach (['A', 'B', 'C', 'D'] as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-
-    // 3. Ghi dữ liệu bắt đầu từ dòng 4
-    $row = 4;
-    $stt = 1;
-    foreach ($categories as $category) {
-        $sheet->setCellValue('A' . $row, $stt++);
-        $sheet->setCellValue('B' . $row, $category->name);
-        $sheet->setCellValue('C' . $row, $category->total_products);
-        $sheet->setCellValue('D' . $row, number_format($category->total_revenue, 0, ',', '.') . ' VND');
-
-        // Căn giữa nội dung của hàng
-        $sheet->getStyle("A{$row}:D{$row}")
-              ->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-
-        $row++;
-    }
-
-    // 4. Xuất file Excel
-    $writer = new Xlsx($spreadsheet);
-    $fileName = 'categories_revenue.xlsx';
-
-    return new StreamedResponse(function () use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
-        'Cache-Control'       => 'max-age=0',
-    ]);
-}
-public function exportTopViewProducts()
-{
-    // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm
-    $products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
-
-    // Khởi tạo đối tượng Spreadsheet
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-
-    // 1. Tiêu đề báo cáo (dòng 1)
-    $sheet->setCellValue('A1', 'Top sản phẩm có nhiều view nhất');
-    $sheet->mergeCells('A1:D1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
-
-    // 2. Header bảng (dòng 3)
-    $sheet->setCellValue('A3', 'STT');
-    $sheet->setCellValue('B3', 'Tên Sản Phẩm');
-    $sheet->setCellValue('C3', 'Ảnh');
-    $sheet->setCellValue('D3', 'Số View');
-    
-    $headerRange = 'A3:D3';
-    $sheet->getStyle($headerRange)->getFont()->setBold(true);
-    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
-
-    $sheet->getColumnDimension('C')->setWidth(10);
-    foreach (['A', 'B', 'D', 'E'] as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-
-    // 3. Ghi dữ liệu bắt đầu từ dòng 4
-    $row = 4;
-    $stt = 1;
-    foreach ($products as $product) {
-        // STT và tên sản phẩm
-        $sheet->setCellValue('A' . $row, $stt++);
-        $sheet->setCellValue('B' . $row, $product->name);
-        $sheet->setCellValue('D' . $row, $product->view);
-
-        // Chèn ảnh vào cột C
-        $imagePath = public_path($product->image_primary);
-        if (file_exists($imagePath)) {
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setPath($imagePath);
-            $drawing->setName('Product Image');
-            $drawing->setDescription($product->name);
-            $drawing->setCoordinates('C' . $row);
-            $drawing->setWidth(50);
-            $drawing->setHeight(50);
-            // Điều chỉnh offset để ảnh nằm gần giữa ô
-            $drawing->setOffsetX(10);
-            $drawing->setOffsetY(5);
-            $drawing->setWorksheet($sheet);
-            $sheet->getRowDimension($row)->setRowHeight(60);
+        if ($products->isEmpty()) {
+            $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
+            $sheet->mergeCells('A5:E5');
+            $sheet->getStyle('A5')->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         } else {
-            $sheet->setCellValue('C' . $row, 'No image');
+            $stt = 1;
+            foreach ($products as $product) {
+                // STT và Tên sản phẩm
+                $sheet->setCellValue('A' . $row, $stt++);
+                $sheet->setCellValue('B' . $row, $product->name);
+                $sheet->setCellValue('D' . $row, $product->total_sold);
+
+                // Chèn ảnh vào cột C
+                $imagePath = public_path($product->image_primary);
+                if (file_exists($imagePath)) {
+                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                    $drawing->setPath($imagePath);
+                    $drawing->setName('Product Image');
+                    $drawing->setDescription('Product Image');
+                    $drawing->setCoordinates('C' . $row);
+                    $drawing->setWidth(50);
+                    $drawing->setHeight(50);
+                    // Điều chỉnh offset để ảnh nằm gần giữa ô
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setWorksheet($sheet);
+                    $sheet->getRowDimension($row)->setRowHeight(60);
+                } else {
+                    $sheet->setCellValue('C' . $row, 'No image');
+                }
+
+                // Căn giữa nội dung của hàng
+                $sheet->getStyle("A{$row}:D{$row}")
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $row++;
+            }
         }
 
-        // Căn giữa nội dung của hàng
-        $sheet->getStyle("A{$row}:D{$row}")
-              ->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        // 5. Xuất file Excel
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'leastsoldproducts' . $start_date . '_to_' . $end_date . '.xlsx';
 
-        $row++;
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
+            'Cache-Control'       => 'max-age=0',
+        ]);
     }
+    public function exportLowStockProducts(Request $request)
+    {
+        // Lấy tham số ngày bắt đầu và kết thúc từ request
+        $start_date = $request->input('start_date');
+        $end_date   = $request->input('end_date');
 
-    // 4. Xuất file Excel
-    $writer = new Xlsx($spreadsheet);
-    $fileName = 'top_view_products.xlsx';
+        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
+        $start_date = $start_date ?: now()->startOfDay()->toDateString();
+        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
 
-    return new StreamedResponse(function () use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
-        'Cache-Control'       => 'max-age=0',
-    ]);
-}
+        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
+        $products = $this->product->low_stock_products($start_date, $end_date);
 
-public function exportTopCommentProducts()
-{
-    // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm
-    $products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
+        // Khởi tạo Spreadsheet và lấy sheet chính
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // Khởi tạo đối tượng Spreadsheet
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+        // 1. Tiêu đề báo cáo (dòng 1)
+        $sheet->setCellValue('A1', 'Sản phẩm sắp hết hàng (dưới 10 sản phẩm)');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
 
-    // 1. Tiêu đề báo cáo (dòng 1)
-    $sheet->setCellValue('A1', 'Top sản phẩm có nhiều view nhất');
-    $sheet->mergeCells('A1:D1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
+        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
+        $displayStart = $start_date ? $start_date : 'Chưa chọn';
+        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
+        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
+        $sheet->mergeCells('D2:E2');
+        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2:E2')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-    // 2. Header bảng (dòng 3)
-    $sheet->setCellValue('A3', 'STT');
-    $sheet->setCellValue('B3', 'Tên Sản Phẩm');
-    $sheet->setCellValue('C3', 'Ảnh');
-    $sheet->setCellValue('D3', 'Số View');
-    
-    $headerRange = 'A3:D3';
-    $sheet->getStyle($headerRange)->getFont()->setBold(true);
-    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
-        \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
-    );
+        // Dòng 3 để tạo khoảng cách
+        $sheet->mergeCells('A3:E3');
 
-    $sheet->getColumnDimension('C')->setWidth(10);
-    foreach (['A', 'B', 'D', 'E'] as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
+        // 3. Header bảng (dòng 4)
+        $sheet->setCellValue('A4', 'STT');
+        $sheet->setCellValue('B4', 'Tên Sản Phẩm');
+        $sheet->setCellValue('C4', 'Ảnh Chính');
+        $sheet->setCellValue('D4', 'Tổng Số Lượng');
+        $headerRange = 'A4:E4';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
 
-    // 3. Ghi dữ liệu bắt đầu từ dòng 4
-    $row = 4;
-    $stt = 1;
-    foreach ($products as $product) {
-        // STT và tên sản phẩm
-        $sheet->setCellValue('A' . $row, $stt++);
-        $sheet->setCellValue('B' . $row, $product->name);
-        $sheet->setCellValue('D' . $row, $product->view);
+        // Thiết lập độ rộng cột cố định cho cột C (ảnh)
+        $sheet->getColumnDimension('C')->setWidth(20);
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
 
-        // Chèn ảnh vào cột C
-        $imagePath = public_path($product->image_primary);
-        if (file_exists($imagePath)) {
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setPath($imagePath);
-            $drawing->setName('Product Image');
-            $drawing->setDescription($product->name);
-            $drawing->setCoordinates('C' . $row);
-            $drawing->setWidth(50);
-            $drawing->setHeight(50);
-            // Điều chỉnh offset để ảnh nằm gần giữa ô
-            $drawing->setOffsetX(10);
-            $drawing->setOffsetY(5);
-            $drawing->setWorksheet($sheet);
-            $sheet->getRowDimension($row)->setRowHeight(60);
+        // 4. Ghi dữ liệu (từ dòng 5)
+        $row = 5;
+        if ($products->isEmpty()) {
+            $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
+            $sheet->mergeCells('A5:E5');
+            $sheet->getStyle('A5')->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         } else {
-            $sheet->setCellValue('C' . $row, 'No image');
+            $stt = 1;
+            foreach ($products as $product) {
+                // STT và Tên sản phẩm
+                $sheet->setCellValue('A' . $row, $stt++);
+                $sheet->setCellValue('B' . $row, $product->name);
+                $sheet->setCellValue('D' . $row, $product->total_quantity);
+
+                // Chèn ảnh vào cột C
+                $imagePath = public_path($product->image_primary);
+                if (file_exists($imagePath)) {
+                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                    $drawing->setPath($imagePath);
+                    $drawing->setName('Product Image');
+                    $drawing->setDescription('Product Image');
+                    $drawing->setCoordinates('C' . $row);
+                    $drawing->setWidth(50);
+                    $drawing->setHeight(50);
+                    // Điều chỉnh offset để ảnh nằm gần giữa ô
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setWorksheet($sheet);
+                    $sheet->getRowDimension($row)->setRowHeight(60);
+                } else {
+                    $sheet->setCellValue('C' . $row, 'No image');
+                }
+
+                // Căn giữa nội dung của hàng
+                $sheet->getStyle("A{$row}:D{$row}")
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $row++;
+            }
         }
 
-        // Căn giữa nội dung của hàng
-        $sheet->getStyle("A{$row}:D{$row}")
-              ->getAlignment()
-              ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-              ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        // 5. Xuất file Excel
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'low_stock_products_' . $start_date . '_to_' . $end_date . '.xlsx';
 
-        $row++;
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
+    public function exportProductsByCategory(Request $request)
+    {
+        // Lấy tham số ngày bắt đầu và kết thúc từ request
+        $start_date = $request->input('start_date');
+        $end_date   = $request->input('end_date');
+
+        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
+        $start_date = $start_date ?: now()->startOfDay()->toDateString();
+        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
+
+        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
+        $products = $this->product->least_sold_products($start_date, $end_date);
+
+        // Khởi tạo Spreadsheet và lấy sheet chính
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 1. Tiêu đề báo cáo (dòng 1)
+        $sheet->setCellValue('A1', 'Danh mục sản phẩm');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
+        $displayStart = $start_date ? $start_date : 'Chưa chọn';
+        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
+        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
+        $sheet->mergeCells('D2:E2');
+        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2:E2')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Dòng 3 để tạo khoảng cách
+        $sheet->mergeCells('A3:E3');
+
+        // 3. Header bảng (dòng 4)
+        $sheet->setCellValue('A4', 'STT');
+        $sheet->setCellValue('B4', 'Tên Sản Phẩm');
+        $sheet->setCellValue('C4', 'Ảnh ');
+        $sheet->setCellValue('D4', 'Tổng Số Lượng');
+        $headerRange = 'A4:E4';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // Thiết lập độ rộng cột cố định cho cột C (ảnh)
+        $sheet->getColumnDimension('C')->setWidth(20);
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 4. Ghi dữ liệu (từ dòng 5)
+        $row = 5;
+        if ($products->isEmpty()) {
+            $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
+            $sheet->mergeCells('A5:E5');
+            $sheet->getStyle('A5')->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        } else {
+            $stt = 1;
+            foreach ($products as $product) {
+                // STT và Tên sản phẩm
+                $sheet->setCellValue('A' . $row, $stt++);
+                $sheet->setCellValue('B' . $row, $product->name);
+                $sheet->setCellValue('D' . $row, $product->total_sold);
+
+                // Chèn ảnh vào cột C
+                $imagePath = public_path($product->image_primary);
+                if (file_exists($imagePath)) {
+                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                    $drawing->setPath($imagePath);
+                    $drawing->setName('Product Image');
+                    $drawing->setDescription('Product Image');
+                    $drawing->setCoordinates('C' . $row);
+                    $drawing->setWidth(50);
+                    $drawing->setHeight(50);
+                    // Điều chỉnh offset để ảnh nằm gần giữa ô
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setWorksheet($sheet);
+                    $sheet->getRowDimension($row)->setRowHeight(60);
+                } else {
+                    $sheet->setCellValue('C' . $row, 'No image');
+                }
+
+                // Căn giữa nội dung của hàng
+                $sheet->getStyle("A{$row}:D{$row}")
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $row++;
+            }
+        }
+
+        // 5. Xuất file Excel
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'categories_with_revenue' . $start_date . '_to_' . $end_date . '.xlsx';
+
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
+    public function exportTopViewProducts()
+    {
+        // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm
+        $products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
+
+        // Khởi tạo đối tượng Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 1. Tiêu đề báo cáo (dòng 1)
+        $sheet->setCellValue('A1', 'Top sản phẩm có nhiều view nhất');
+        $sheet->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // 2. Header bảng (dòng 3)
+        $sheet->setCellValue('A3', 'STT');
+        $sheet->setCellValue('B3', 'Tên Sản Phẩm');
+        $sheet->setCellValue('C3', 'Ảnh');
+        $sheet->setCellValue('D3', 'Số View');
+
+        $headerRange = 'A3:D3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        $sheet->getColumnDimension('C')->setWidth(10);
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 3. Ghi dữ liệu bắt đầu từ dòng 4
+        $row = 4;
+        $stt = 1;
+        foreach ($products as $product) {
+            // STT và tên sản phẩm
+            $sheet->setCellValue('A' . $row, $stt++);
+            $sheet->setCellValue('B' . $row, $product->name);
+            $sheet->setCellValue('D' . $row, $product->view);
+
+            // Chèn ảnh vào cột C
+            $imagePath = public_path($product->image_primary);
+            if (file_exists($imagePath)) {
+                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                $drawing->setPath($imagePath);
+                $drawing->setName('Product Image');
+                $drawing->setDescription($product->name);
+                $drawing->setCoordinates('C' . $row);
+                $drawing->setWidth(50);
+                $drawing->setHeight(50);
+                // Điều chỉnh offset để ảnh nằm gần giữa ô
+                $drawing->setOffsetX(10);
+                $drawing->setOffsetY(5);
+                $drawing->setWorksheet($sheet);
+                $sheet->getRowDimension($row)->setRowHeight(60);
+            } else {
+                $sheet->setCellValue('C' . $row, 'No image');
+            }
+
+            // Căn giữa nội dung của hàng
+            $sheet->getStyle("A{$row}:D{$row}")
+                ->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+            $row++;
+        }
+
+        // 4. Xuất file Excel
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'top_view_products.xlsx';
+
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
+            'Cache-Control'       => 'max-age=0',
+        ]);
     }
 
-    // 4. Xuất file Excel
-    $writer = new Xlsx($spreadsheet);
-    $fileName = 'top_comment_products.xlsx';
+    public function exportTopCommentProducts()
+    {
+        // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm
+        $products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
 
-    return new StreamedResponse(function () use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
-        'Cache-Control'       => 'max-age=0',
-    ]);
-}
-        public function dashboardStatistics()
+        // Khởi tạo đối tượng Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 1. Tiêu đề báo cáo (dòng 1)
+        $sheet->setCellValue('A1', 'Top sản phẩm có nhiều view nhất');
+        $sheet->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // 2. Header bảng (dòng 3)
+        $sheet->setCellValue('A3', 'STT');
+        $sheet->setCellValue('B3', 'Tên Sản Phẩm');
+        $sheet->setCellValue('C3', 'Ảnh');
+        $sheet->setCellValue('D3', 'Số View');
+
+        $headerRange = 'A3:D3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        $sheet->getColumnDimension('C')->setWidth(10);
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 3. Ghi dữ liệu bắt đầu từ dòng 4
+        $row = 4;
+        $stt = 1;
+        foreach ($products as $product) {
+            // STT và tên sản phẩm
+            $sheet->setCellValue('A' . $row, $stt++);
+            $sheet->setCellValue('B' . $row, $product->name);
+            $sheet->setCellValue('D' . $row, $product->view);
+
+            // Chèn ảnh vào cột C
+            $imagePath = public_path($product->image_primary);
+            if (file_exists($imagePath)) {
+                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                $drawing->setPath($imagePath);
+                $drawing->setName('Product Image');
+                $drawing->setDescription($product->name);
+                $drawing->setCoordinates('C' . $row);
+                $drawing->setWidth(50);
+                $drawing->setHeight(50);
+                // Điều chỉnh offset để ảnh nằm gần giữa ô
+                $drawing->setOffsetX(10);
+                $drawing->setOffsetY(5);
+                $drawing->setWorksheet($sheet);
+                $sheet->getRowDimension($row)->setRowHeight(60);
+            } else {
+                $sheet->setCellValue('C' . $row, 'No image');
+            }
+
+            // Căn giữa nội dung của hàng
+            $sheet->getStyle("A{$row}:D{$row}")
+                ->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+            $row++;
+        }
+
+        // 4. Xuất file Excel
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'top_comment_products.xlsx';
+
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
+    public function dashboardStatistics()
     {
         return view('admin.statistics.dashboard_statistics');
     }
@@ -1337,43 +1397,5 @@ public function exportTopCommentProducts()
             'topCustomers',
             'customerProductsGrouped'
         ));
-    }
-    // api biểu đồ sản phẩm bán chạy nhất
-    public function topSaleProducts(Request $request)
-    {
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
-        $top_sale_products = $this->product->top_sale_products($start_date, $end_date);
-        return response()->json($top_sale_products);
-    }
-
-    // tạo api cho biểu đồ sản phẩm đã bán
-    public function productSold(Request $request)
-    {
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
-        $top_sale_products = $this->product->productSold($start_date, $end_date);
-        return response()->json($top_sale_products);
-    }
-
-    //tạo api cho biểu đồ danh mục sản phẩm
-    public function categoryStatistics(Request $request)
-    {
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
-
-        $query = Category::select('categories.name')
-            ->leftJoin('products', 'categories.id', '=', 'products.id_category')
-            ->whereNull('categories.deleted_at')
-            ->groupBy('categories.id', 'categories.name')
-            ->selectRaw('COUNT(products.id) as total_products');
-
-        if ($start_date && $end_date) {
-            $query->whereBetween('products.created_at', [$start_date, $end_date]);
-        }
-
-        $categories = $query->orderBy('total_products', 'desc')->get();
-
-        return response()->json($categories);
     }
 }
