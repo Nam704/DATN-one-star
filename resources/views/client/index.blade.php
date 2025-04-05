@@ -100,6 +100,92 @@
                 @endforeach
 
             </div>
+
+
+            <!-- Phần Recommended Products -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="section_title">
+                        <h2><span> <strong>Recommended </strong>Products</span></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="product_carousel product_column5 owl-carousel">
+                        @forelse ($recommendedProducts as $product)
+                            @php
+                                // Sắp xếp các variant theo giá tăng dần và lấy variant đầu tiên (có giá thấp nhất)
+                                $minVariant = $product->variants->sortBy('price')->first();
+                            @endphp
+                            <div class="single_product">
+                                <div class="product_name">
+                                    <h3>
+                                        <a href="{{ route('client.products.detail', $product->id) }}">
+                                            {{ $product->name }}
+                                        </a>
+                                    </h3>
+                                    <p class="manufacture_product"><a href="#">Accessories</a></p>
+                                </div>
+                                <div class="product_thumb">
+                                    <a class="primary_img" href="{{ route('client.products.detail', $product->id) }}">
+                                        <img src="{{ asset($product->image_primary) }}" alt="">
+                                    </a>
+                                    <div class="label_product">
+                                        @if ($product->discount_percent)
+                                            <span class="label_sale">-{{ $product->discount_percent }}%</span>
+                                        @endif
+                                    </div>
+                                    <div class="action_links">
+                                        <ul>
+                                            <li class="quick_button">
+                                                <a href="#" data-bs-toggle="modal" data-bs-target="#modal_box"
+                                                    title="quick view">
+                                                    <span class="lnr lnr-magnifier"></span>
+                                                </a>
+                                            </li>
+                                            <li class="wishlist">
+                                                <a href="wishlist.html" title="Add to Wishlist">
+                                                    <span class="lnr lnr-heart"></span>
+                                                </a>
+                                            </li>
+                                            <li class="compare">
+                                                <a href="compare.html" title="compare">
+                                                    <span class="lnr lnr-sync"></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="product_content">
+                                    <div class="product_ratings">
+                                        <ul>
+                                            <li><a href="#"><i class="ion-star"></i></a></li>
+                                            <li><a href="#"><i class="ion-star"></i></a></li>
+                                            <li><a href="#"><i class="ion-star"></i></a></li>
+                                            <li><a href="#"><i class="ion-star"></i></a></li>
+                                            <li><a href="#"><i class="ion-star"></i></a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="product_footer d-flex align-items-center">
+                                        <div class="price_box">
+                                            @if ($minVariant)
+                                                <span class="regular_price">
+                                                    {{ $minVariant->price }}
+                                                </span>
+                                            @else
+                                                <span class="regular_price">N/A</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <p>No recommended products found</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 @endsection

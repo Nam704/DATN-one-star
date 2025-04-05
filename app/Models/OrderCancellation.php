@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class OrderCancellation extends Model
 {
     use HasFactory;
+    protected $table = 'order_cancellations';
     protected $fillable = ['order_id', 'reason_id', 'status'];
 
     // Quan hệ với bảng order

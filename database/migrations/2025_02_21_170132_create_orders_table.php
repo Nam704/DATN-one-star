@@ -25,9 +25,9 @@ return new class extends Migration
             $table->decimal('shipping', 10, 2)->nullable();
             $table->decimal('total', 15, 2);
             $table->string('payment_method');
-            $table->string('payment_status');
+            $table->string('payment_status')->nullable();
             $table->foreignId('id_ward')->nullable()->constrained('wards')->onDelete('cascade');
-            $table->foreignId('id_order_status')->constrained('order_statuses');
+            $table->foreignId('id_order_status')->nullable()->constrained('order_statuses');
             $table->foreignId('id_voucher')->nullable()->constrained('vouchers');
             $table->timestamps();
         });

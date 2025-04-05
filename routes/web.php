@@ -15,6 +15,7 @@ use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
 use Illuminate\Support\Facades\Hash;
@@ -40,7 +41,9 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-use App\Http\Controllers\web\VoucherController;
+use App\Http\Controllers\Web\ChatController;
+use App\Http\Controllers\Web\ProductDashboardController;
+use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
@@ -85,18 +88,55 @@ Route::prefix('auth/')->name('auth.')->group(
         });
     }
 );
+Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/send-message', [ChatController::class, 'sendMessage']);
+    // Route::get('/', 'ChatController@index')->name('index');
+    // Route::post('/send', 'ChatController@sendMessage')->name('send');
+});
 
-Route::prefix('admin')->name('admin.')->group(
+
+
+
+Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
     function () {
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
             Route::get('list', 'list')->name('list');
             Route::post('update-list', 'update');
             Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus');
             Route::get('detail/{id}', 'detail')->name('detail');
+            Route::post('accept-all', 'acceptAll')->name('acceptAll');
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
+            Route::get('order-status', [DashboardController::class, 'orderStatusStatistics'])->name('orderStatus');
         });
+
+        Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
+            Route::get('product-statistic', 'productStatistics')->name('productStatistics');
+            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts');
+            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold');
+            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts');
+            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts');
+            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts');
+            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory');
+            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts');
+            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts');
+
+
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
+            Route::get('productSold', 'productSold')->name('productSold');
+            Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics');
+        });
+
+        Route::controller(ProductDashboardController::class)->group(function () {
+            Route::get('dashboardProduct', 'dashboardProduct')->name('dashboardProduct');
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
+            Route::get('topViewProducts', 'topViewProducts')->name('topViewProducts');
+            Route::get('topLeastProducts', 'topLeastProducts')->name('topLeastProducts');
+        });
+
+
         Route::prefix('excels')->name('excels.')->controller(ExcelController::class)->group(function () {
             Route::post('create-product', 'createByExcel')->name('createProduct');
         });
@@ -105,7 +145,13 @@ Route::prefix('admin')->name('admin.')->group(
                 Route::get('/export-sample-file', 'exportSamplefile')->name('exportSamplefile');
             }
         );
-
+        Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
+            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
+            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
+            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
+            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
+            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
+        });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
             Route::get('list-category',  'listCategory')->name('listCategory');
@@ -114,6 +160,9 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('edit-category/{id}',  'editCategory')->name('editCategory');
             Route::put('edit-category/{id}',  'editPutCategory')->name('editPutCategory');
             Route::delete('delete-category/{id}',  'deleteCategory')->name('deleteCategory');
+            Route::get('trash',  'trash')->name('trash');
+            Route::post('restore/{id}',  'restoreCategory')->name('restoreCategory');
+            Route::delete('destroy-permanent/{id}', 'destroyPermanent')->name('destroyPermanent');
         });
 
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
@@ -182,6 +231,8 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
             Route::post('import-product', 'import')->name('importProduct');
             Route::get('detail/{id}', 'detail')->name('detail');
+            Route::get('stas/{id}', 'stas')->name('stas');
+            Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail');
         });
 
 
@@ -291,6 +342,7 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('add',  'addVoucher')->name('addVoucher');
             Route::post('add',  'addPostVoucher')->name('addPostVoucher');
             Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
+            Route::get('detail/{id}',  'detailVoucher')->name('detailVoucher');
             Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
             Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
         });
@@ -302,12 +354,17 @@ Route::prefix('client')->name('client.')->group(
             function () {
                 Route::get('/my-account', 'myAccount')->name('myAccount');
                 Route::post('create-address', 'createAddress')->name('addAddress');
+                Route::post('update-address', 'updateAddress')->name('updateAddress');
+                Route::post('delete-address', 'deleteAddress')->name('deleteAddress');
+                Route::post('set-default-address', 'setDefaultAddress')->name('setDefaultAddress'); // New route
+                Route::get('get-addresses', 'getAddresses')->name('getAddresses');
                 Route::post('update', 'update')->name('update');
             }
         );
         Route::prefix('products')->name('products.')->group(
             function () {
                 Route::get('detail/{id}', [ClientProductController::class, 'detail'])->name('detail');
+                Route::get('related/{id}', [ClientProductController::class, 'related'])->name('related');
             }
         );
 
@@ -319,17 +376,7 @@ Route::prefix('client')->name('client.')->group(
         Route::controller(SearchController::class)->group(function () {
             Route::get('/search', [SearchController::class, 'search'])->name('search');
         });
-        Route::controller(OrderController::class)->group(function () {
-            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-            Route::get('/client/order/{id}', [OrderController::class, 'show'])->name('order.show');
-            Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-            Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
-        });
-        //cổng thanh toán
-        Route::controller(PaymentController::class)->group(function () {
-            Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment'])->name('vnpay_payment');
-            Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
-        });
+
         Route::prefix('carts')->controller(CartControllerSession::class)->name('carts.')->group(
             function () {
                 Route::get('/get',  'getCart');
@@ -355,6 +402,8 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detail')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
+                Route::post('/cancel', 'cancel')->name('cancel');
+                Route::post('/retry-payment', 'retryPayment')->name('retryPayment');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(

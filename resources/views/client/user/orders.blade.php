@@ -17,7 +17,8 @@
                         <td>{{ $order->code }}</td>
                         <td>{{ $order->created_at }}</td>
                         <td><span class="status"
-                                data-order-id="{{ $order->id }}">{{ $order->orderStatus->name }}</span></td>
+                                data-order-id="{{ $order->id }}">{{ optional($order->orderStatus)->name ?? 'Chưa có trạng thái' }}
+                            </span></td>
                         <td>{{ $order->total }} </td>
                         <td><a href="{{ route('client.orders.detail', $order->id) }}" class="view">view</a></td>
                     </tr>

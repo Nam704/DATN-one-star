@@ -6,6 +6,7 @@
         <!-- Title -->
         <div class="d-flex justify-content-between align-items-center py-3">
             <h2 class="h5 mb-0"><a href="#" class="text-muted"></a> Order #{{ $order->code }}</h2>
+            <input type="hidden" value="{{ $order->id }}" id="order_id">
         </div>
 
         <!-- Main content -->
@@ -19,7 +20,8 @@
                                 <span class="me-3">{{ $order->created_at }}</span>
                                 <span class="me-3">#{{ $order->code }}</span>
                                 <span class="me-3">{{ $order->payment_method }}</span>
-                                <span class="badge rounded-pill bg-info">{{ $order->orderStatus->name }}</span>
+                                <span
+                                    class="badge rounded-pill bg-info">{{ $order->orderStatus->name ?? 'Chưa có trạng thái' }}</span>
                             </div>
                             <div class="d-flex">
                                 <button class="btn btn-link p-0 me-3 d-none d-lg-block btn-icon-text"><i
@@ -106,6 +108,9 @@
                                 <p>{{ $order->payment_method }} <br>
                                     Total: {{ $order->total }} <span
                                         class="badge bg-success rounded-pill">{{ $order->payment_status }}</span></p>
+                                @if ($order->payment_status != 'Paid')
+                                    <a class="btn btn-info" id="retry_payment">retry Payment</a>
+                                @endif
                             </div>
                             <div class="col-lg-6">
                                 <h3 class="h6">Billing address</h3>
@@ -146,7 +151,45 @@
                         </address>
                     </div>
                 </div>
+                <div class="card mb-4">
+                    <!-- Order Status -->
+                    <div class="card-body ">
+                        <div class="row">
+                            <div class="col-6">
+                                <h3 class="h6">Order Action</h3>
+                            </div>
+
+                        </div>
+
+                        <div class="order_action">
+                            <button class="btn btn-danger cancel">Hủy đơn</button>
+                            <div id="list-reason" style="display: none;">
+                                <select class="form-control mb-2" id="id_reason">
+                                    <option value="">-- Chọn lý do hủy --</option>
+                                    @foreach ($listReason as $reason)
+                                        <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="d-flex justify-content-between col-12">
+                                    <button type="button" id="confirm_cancel_order" class="btn btn-primary mb-2 col-6">Xác
+                                        nhận
+                                        Hủy</button>
+                                    <button type="button" id="exit_cancel_order" class="btn btn-danger mb-2 col-5">Hủy
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
+    </div>
+
+@endsection
+@section('scripts')
+    @vite('resources/js/orderClientDetail.js')
 @endsection

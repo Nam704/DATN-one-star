@@ -2,47 +2,98 @@
 
 namespace App\Services;
 
+use App\Jobs\ExpireOrder;
 use App\Models\Order;
 use App\Models\Order_status;
+use App\Models\OrderCancellation;
+use App\Models\OrderCancellationReason;
+use App\Models\OrderExpire;
+use App\Models\Product_variant;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
     protected $order;
     protected $orderStatus;
+    protected $orderExpire;
     protected $paymentService;
     protected $notificationService;
+    protected $orderCancellationReason;
     public function __construct(
         Order $order,
         PaymentService $paymentService,
         Order_status $orderStatus,
-        NotificationService $notificationService
+        OrderExpire $orderExpire,
+        NotificationService $notificationService,
+        OrderCancellationReason $orderCancellationReason
     ) {
+        $this->orderCancellationReason = $orderCancellationReason;
         $this->orderStatus = $orderStatus;
+        $this->orderExpire = $orderExpire;
         $this->paymentService = $paymentService;
         $this->order = $order;
         $this->notificationService = $notificationService;
         // Constructor logic
     }
-    public function cancelOrder(Request $request, $orderId)
+    function acceptAll($request)
     {
-        // $order = Order::findOrFail($orderId);
-
-        // if ($order->status == 'canceled' || $order->status == 'completed') {
-        //     return response()->json(['message' => 'Không thể hủy đơn hàng này'], 400);
-        // }
-
-        // $reason = OrderCancellationReason::findOrFail($request->reason_id);
-
-        // $order->update(['status' => 'canceled']);
-
-        // OrderCancellation::create([
-        //     'order_id' => $order->id,
-        //     'reason_id' => $reason->id,
-        // ]);
-
-        // return response()->json(['message' => 'Đơn hàng đã được hủy thành công', 'reason' => $reason->reason]);
+        $orderIds = $request->input('ids');
+        foreach ($orderIds as $orderId) {
+            $this->updateOrderStatus($orderId);
+        }
     }
+    function listReason()
+    {
+        return $this->orderCancellationReason->query()->select('id', 'reason')->orderBy('id', 'DESC')->get();
+    }
+    public function cancelOrder($request)
+    {
+        $orderId = $request->input("id_order");
+        $reasonId = $request->input("id_reason");
+
+        $order = Order::findOrFail($orderId);
+
+        // Kiểm tra trạng thái hiện tại có thể hủy không
+        $nonCancellableStatuses = ['Delivered', 'Cancelled', 'Refunded'];
+        if (in_array($order->orderStatus->name, $nonCancellableStatuses)) {
+            throw new \Exception("Đơn hàng không thể hủy ở trạng thái hiện tại.");
+        }
+
+        // Nếu đã yêu cầu hủy rồi thì không cần xử lý tiếp
+        if ($order->orderStatus->name == 'Cancel Requested') {
+            return null;
+        }
+
+        // Kiểm tra lý do hủy có tồn tại không
+        if (!OrderCancellationReason::find($reasonId)) {
+            throw new \Exception("Lý do hủy không hợp lệ.");
+        }
+
+        // Cập nhật trạng thái thành "Cancel Requested"
+        $cancelRequestedId = Order_status::where('name', 'Cancel Requested')->value('id');
+        $order->update(['id_order_status' => $cancelRequestedId]);
+
+        // Ghi nhận lý do hủy
+        OrderCancellation::create([
+            'order_id' => $orderId,
+            'reason_id' => $reasonId,
+        ]);
+        $dataNotification = [
+            'title' => 'Update Order',
+            'message' => "Update Order, vui lòng kiểm tra và xác nhận!",
+            'from_user_id' => $order->id_user,
+            'to_user_id' => null,
+            'type' => 'orders',
+            'status' => 'unread',
+            'goto_id' => $order->id,
+        ];
+        // dd($dataNotification);
+        $this->notificationService->sendPrivate($dataNotification);
+        return $order;
+    }
+
     function listStatus()
     {
         return $this->orderStatus->all();
@@ -62,7 +113,6 @@ class OrderService
         return DB::transaction(function () use ($data) {
             // DB::beginTransaction();
             $dataOrder = [
-
                 "id_user" => $data['id_user'] ?? null,
                 "user_name" => $data['user_name'],
                 "phone_number" => $data['phone_number'],
@@ -74,15 +124,18 @@ class OrderService
                 "shipping" => $data['shipping'],
                 "total" => $data['total'],
                 "payment_method" => $data['payment_method'],
-                "payment_status" => $data['payment_status'],
                 "id_ward" => $data['id_ward'] ?? null,
-                "id_order_status" => $data['id_order_status'],
                 "id_voucher" => $data['id_voucher'] ?? null,
             ];
             $order = $this->order->create($dataOrder);
             $order->update(["code" => time() . "" . $order->id]);
 
             foreach ($data['order_details'] as $item) {
+                $variant = Product_variant::where('id', $item['id_variant'])->lockForUpdate()->first();
+                if ($variant->quantity < $item['quantity']) {
+                    throw new \Exception("Insufficient product quantity");
+                }
+                $variant->decrement('quantity', $item['quantity']); // giảm sl sản phẩm trong kho
                 $order->orderDetails()->create([
                     'id_variant' => $item['id_variant'],
                     'quantity' => $item['quantity'],
@@ -90,18 +143,6 @@ class OrderService
                     'total' => $item['total'],
                 ]);
             }
-
-            $dataNotification = [
-                'title' => 'New Order',
-                'message' => "New Order, vui lòng kiểm tra và xác nhận!",
-                'from_user_id' => $order->id_user,
-                'to_user_id' => null,
-                'type' => 'orders',
-                'status' => 'unread',
-                'goto_id' => $order->id,
-            ];
-            // dd($dataNotification);
-            $this->notificationService->sendPrivate($dataNotification);
             return $order;
         });
     }

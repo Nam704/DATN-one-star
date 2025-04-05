@@ -13,31 +13,81 @@ class OrderStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        // Chèn các trạng thái vào bảng order_statuses
-        DB::table('order_statuses')->insert([
-            ['name' => 'Pending', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Không có trạng thái tiếp theo
-            ['name' => 'Processing', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Chờ xử lý
-            ['name' => 'Shipping', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Đang vận chuyển
-            ['name' => 'Delivered', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Đã giao hàng
-            ['name' => 'Cancelled', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Đã hủy
-            ['name' => 'Refunded', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Hoàn tiền
-            ['name' => 'Failed Delivery', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Giao hàng thất bại
-            ['name' => 'Awaiting Payment', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Chờ thanh toán
-            ['name' => 'Paid', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Đã thanh toán
-            ['name' => 'Payment Verification', 'created_at' => now(), 'updated_at' => now(), 'next_status_id' => null], // Đang xác minh thanh toán
-        ]);
+        // Danh sách tất cả trạng thái
+        $statuses = [
+            // Thanh toán & xử lý đơn
+            'Awaiting Payment',
+            'Payment Verification',
+            'Paid',
+            'Pending',
+            'Processing',
+            'Shipping',
+            'Delivered',
 
-        // Sau khi các trạng thái đã được chèn, chúng ta sẽ cập nhật `next_status_id` cho các trạng thái
-        // Các trạng thái tiếp theo sẽ được cập nhật từ bảng `order_statuses`
-        DB::table('order_statuses')->where('name', 'Pending')->update(['next_status_id' => DB::table('order_statuses')->where('name', 'Processing')->value('id')]);
-        DB::table('order_statuses')->where('name', 'Processing')->update(['next_status_id' => DB::table('order_statuses')->where('name', 'Shipping')->value('id')]);
-        DB::table('order_statuses')->where('name', 'Shipping')->update(['next_status_id' => DB::table('order_statuses')->where('name', 'Delivered')->value('id')]);
-        DB::table('order_statuses')->where('name', 'Delivered')->update(['next_status_id' => null]);
-        DB::table('order_statuses')->where('name', 'Cancelled')->update(['next_status_id' => null]);
-        DB::table('order_statuses')->where('name', 'Refunded')->update(['next_status_id' => null]);
-        DB::table('order_statuses')->where('name', 'Failed Delivery')->update(['next_status_id' => null]);
-        DB::table('order_statuses')->where('name', 'Awaiting Payment')->update(['next_status_id' => DB::table('order_statuses')->where('name', 'Paid')->value('id')]);
-        DB::table('order_statuses')->where('name', 'Paid')->update(['next_status_id' => DB::table('order_statuses')->where('name', 'Payment Verification')->value('id')]);
-        DB::table('order_statuses')->where('name', 'Payment Verification')->update(['next_status_id' => null]);
+            // Lỗi & Retry thanh toán
+            'Payment Failed',
+            'Payment Expired',
+            'Payment Retry Requested',
+
+            // Hủy đơn
+            'Cancel Requested',
+            'Cancel Under Review',
+            'Cancel Approved',
+            'Cancel Rejected',
+            'Cancelled',
+
+            // Hoàn đơn
+            'Return Requested',
+            'Return Under Review',
+            'Return Approved',
+            'Return Rejected',
+            'Refunded',
+
+            // Trường hợp khác
+            'Failed Delivery',
+        ];
+
+        // Chèn các trạng thái vào DB và lưu ID
+        $statusIds = [];
+        foreach ($statuses as $statusName) {
+            $statusIds[$statusName] = DB::table('order_statuses')->insertGetId([
+                'name' => $statusName,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'next_status_id' => null,
+            ]);
+        }
+
+        // Luồng xử lý đơn hàng chính
+        DB::table('order_statuses')->where('id', $statusIds['Awaiting Payment'])->update(['next_status_id' => $statusIds['Payment Verification']]);
+        DB::table('order_statuses')->where('id', $statusIds['Payment Verification'])->update(['next_status_id' => $statusIds['Paid']]);
+        DB::table('order_statuses')->where('id', $statusIds['Paid'])->update(['next_status_id' => $statusIds['Pending']]);
+        DB::table('order_statuses')->where('id', $statusIds['Pending'])->update(['next_status_id' => $statusIds['Processing']]);
+        DB::table('order_statuses')->where('id', $statusIds['Processing'])->update(['next_status_id' => $statusIds['Shipping']]);
+        DB::table('order_statuses')->where('id', $statusIds['Shipping'])->update(['next_status_id' => $statusIds['Delivered']]);
+
+        // Luồng lỗi & retry thanh toán
+        DB::table('order_statuses')->where('id', $statusIds['Payment Failed'])->update(['next_status_id' => $statusIds['Payment Retry Requested']]);
+        DB::table('order_statuses')->where('id', $statusIds['Payment Expired'])->update(['next_status_id' => $statusIds['Payment Retry Requested']]);
+        DB::table('order_statuses')->where('id', $statusIds['Payment Retry Requested'])->update(['next_status_id' => $statusIds['Awaiting Payment']]);
+
+        // Luồng hủy đơn
+        DB::table('order_statuses')->where('id', $statusIds['Cancel Requested'])->update(['next_status_id' => $statusIds['Cancel Under Review']]);
+        DB::table('order_statuses')->where('id', $statusIds['Cancel Under Review'])->update(['next_status_id' => $statusIds['Cancel Approved']]);
+        DB::table('order_statuses')->where('id', $statusIds['Cancel Approved'])->update(['next_status_id' => $statusIds['Cancelled']]);
+
+        // Luồng hoàn đơn
+        DB::table('order_statuses')->where('id', $statusIds['Return Requested'])->update(['next_status_id' => $statusIds['Return Under Review']]);
+        DB::table('order_statuses')->where('id', $statusIds['Return Under Review'])->update(['next_status_id' => $statusIds['Return Approved']]);
+        DB::table('order_statuses')->where('id', $statusIds['Return Approved'])->update(['next_status_id' => $statusIds['Refunded']]);
+
+        // Giao hàng thất bại → hủy hoặc hoàn
+        DB::table('order_statuses')->where('id', $statusIds['Failed Delivery'])->update(['next_status_id' => $statusIds['Cancel Requested']]);
+
+        // Các trạng thái kết thúc
+        $finalStates = ['Delivered', 'Cancelled', 'Refunded', 'Cancel Rejected', 'Return Rejected'];
+        foreach ($finalStates as $state) {
+            DB::table('order_statuses')->where('id', $statusIds[$state])->update(['next_status_id' => null]);
+        }
     }
 }

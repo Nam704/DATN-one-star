@@ -33,13 +33,15 @@ $(document).ready(function () {
                 console.log(response.redirect_url);
                 if (response.redirect_url) {
                     window.location.href = response.redirect_url;
-                } else {
-                    alert("lỗi khi lấy url");
                 }
             },
             error: function (xhr, status, error) {
                 console.error(error);
                 console.log(xhr.responseText);
+                var errorResponse = JSON.parse(xhr.responseText);
+                // Lấy phần thông báo lỗi
+                var errorMessage = errorResponse.error; // Lấy thông báo lỗi từ thuộc tính "error"
+                alert(errorMessage);
             },
         });
     });

@@ -22,7 +22,7 @@
                 <div class="mb-3">
                     <label for="id_parent">Danh mục cha:</label>
                     <select name="id_parent" id="id_parent" class="form-control">
-                        <option value="">Không có</option>
+                        <option value="0">Không có</option>
                         @foreach($category_parent as $parent)
                         <option value="{{ $parent->id }}" {{ $categories->id_parent == $parent->id ? 'selected' : '' }}>
                             {{ $parent->name }}

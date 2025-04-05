@@ -1,4 +1,4 @@
-@extends('client.layouts.layout')
+@extends('client.layouts.home.layout')
 @section('content')
     <div class="row">
         <!-- Sidebar: Bộ lọc -->
@@ -67,13 +67,9 @@
         <!-- Nội dung sản phẩm -->
         <div class="col-lg-9 col-md-12">
             {{-- product-list.blade.php --}}
-            @foreach ($bannerSlides as $slide)
-                @if ($slide->primaryImage)
-                    <div class="shop_banner">
-                        <img src="{{ asset($slide->primaryImage->image) }}" alt="{{ $slide->title }}" class="bannerSlide">
-                    </div>
-                @endif
-            @endforeach
+            <div class="shop_banner">
+                <img src="assets/img/bg/banner8.jpg" alt="">
+            </div>
             <div class="shop_title">
                 <h1>shop</h1>
             </div>
@@ -107,10 +103,12 @@
                 @include('client.shops.product-list')
             </div>
 
-            <div class="shop_toolbar t_bottom" id="pagination">
-                @include('client.shops.pagination')
-            </div>
+                    <div class="shop_toolbar t_bottom" id="pagination">
+                        @include('client.shops.pagination')
+                    </div>
 
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -192,11 +190,11 @@
             if (minPrice !== '') params.append('min_price', minPrice);
             if (maxPrice !== '') params.append('max_price', maxPrice);
 
-            // Lấy giá trị sắp xếp nếu có
-            let sortEl = document.getElementById('short');
-            if (sortEl && sortEl.value) {
-                params.append('orderby', sortEl.value);
-            }
+        // Lấy giá trị sắp xếp nếu có
+        let sortEl = document.getElementById('short');
+        if (sortEl && sortEl.value) {
+            params.append('orderby', sortEl.value);
+        }
 
             fetch('{{ route('client.filter') }}?' + params.toString())
                 .then(response => response.json())
@@ -221,10 +219,30 @@
                 el.addEventListener('change', fetchFilteredProducts);
             });
 
-            let sortSelect = document.getElementById('short');
-            if (sortSelect) {
-                sortSelect.addEventListener('change', fetchFilteredProducts);
-            }
-        });
-    </script>
+        let sortSelect = document.getElementById('short');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', fetchFilteredProducts);
+        }
+    });
+</script>
 @endsection
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const orderBySelect = document.getElementById("orderby");
+        const productList = document.getElementById("product-list");
+
+        orderBySelect.addEventListener("change", function() {
+            let products = Array.from(document.querySelectorAll(".pro"));
+
+            if (this.value === "price_asc") {
+                products.sort((a, b) => a.getAttribute("data-price") - b.getAttribute("data-price"));
+            } else if (this.value === "price_desc") {
+                products.sort((a, b) => b.getAttribute("data-price") - a.getAttribute("data-price"));
+            }
+
+            productList.innerHTML = "";
+            products.forEach(product => productList.appendChild(product));
+        });
+    });
+</script>
+

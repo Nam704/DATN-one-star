@@ -51,7 +51,7 @@ function getCart() {
         url: "http://127.0.0.1:8000/client/carts/get",
         method: "GET",
         success: function (response) {
-            console.log("Cart data from getCart:", response);
+            // console.log("Cart data from getCart:", response);
             updateCartUI(response);
         },
         error: function (xhr) {

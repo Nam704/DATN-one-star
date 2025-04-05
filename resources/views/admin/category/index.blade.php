@@ -13,6 +13,10 @@
                         Add new
                         category</a>
 
+                        <a href="{{ route('admin.categories.trash') }}" type="button" class="btn btn-sm btn-success">
+                                        <i class="fas fa-trash-alt"></i>Deleted category
+                                    </a> 
+
                 </div>
 
                 <div class="card-body">
@@ -38,14 +42,14 @@
                                 <td>{{$category->status}}</td>
                                 <td>
                                     <a href="{{route('admin.categories.editCategory',$category->id)}}">
-                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
+                                        <button type="button" class="btn btn-secondary btn-warning">Edit</button>
                                     </a> |
                                     <form action="{{route('admin.categories.deleteCategory',$category->id)}}"
                                         class="d-inline" method="POST"
-                                        onclick="return confirm('Ban co muon xoa khong')">
+                                        onclick="return confirm('Bạn có muốn xóa không?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-secondary btn-danger ">Xóa</button>
+                                        <button type="submit" class="btn btn-secondary btn-danger ">Delete</button>
                                     </form>
                                 </td>
                             </tr>

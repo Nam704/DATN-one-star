@@ -21,11 +21,11 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
         $this->call([
-            // RoleSeeder::class,
-            // UserSeeder::class,
-            // AddressSeeder::class,
-            // OrderStatusSeeder::class,
-            // OrderCancellationReasonSeeder::class
+            RoleSeeder::class,
+            UserSeeder::class,
+            AddressSeeder::class,
+            OrderStatusSeeder::class,
+            OrderCancellationReasonSeeder::class
         ]);
 
         // Tạo 10 slide

@@ -48,4 +48,46 @@ class Category extends Model
             ->selectRaw('MIN(product_variants.price) as min_price, MAX(product_variants.price) as max_price')
             ->first();  // Lấy một kết quả duy nhất vì chỉ có một min và max giá cho mỗi category
     }
+
+    // public static function categories_with_revenue()
+    // {
+    //     return self::select('categories.id', 'categories.name')
+    //         ->leftJoin('products', 'categories.id', '=', 'products.id_category')
+    //         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+    //         ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+    //         ->leftJoin('orders', function ($join) {
+    //             $join->on('order_details.id_order', '=', 'orders.id')
+    //                 ->where('orders.id_order_status', '=', 4);
+    //         })
+    //         ->whereNull('categories.deleted_at')
+    //         ->whereNull('products.deleted_at')
+    //         ->orWhereNull('products.id')
+    //         ->groupBy('categories.id', 'categories.name')
+    //         ->selectRaw('COALESCE(SUM(order_details.quantity * order_details.unit_price), 0) as total_revenue')
+    //         ->orderBy('total_revenue', 'desc')
+    //         ->get();
+    // }
+    public static function categories_with_revenue()
+{
+    return self::select('categories.id', 'categories.name')
+        ->leftJoin('products', 'categories.id', '=', 'products.id_category')
+        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+        ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+        ->leftJoin('orders', function ($join) {
+            $join->on('order_details.id_order', '=', 'orders.id')
+                ->where('orders.id_order_status', '=', 4);
+        })
+        ->whereNull('categories.deleted_at')
+        ->whereNull('products.deleted_at')
+        ->orWhereNull('products.id')
+        ->groupBy('categories.id', 'categories.name')
+        ->selectRaw('
+            COALESCE(SUM(order_details.quantity * order_details.unit_price), 0) as total_revenue,
+            COUNT(DISTINCT products.id) as total_products
+        ')
+        ->orderBy('total_revenue', 'desc')
+        ->get();
 }
+
+}
+
