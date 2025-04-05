@@ -87,4 +87,9 @@ class Product_variant extends Model
     {
         return $this->hasMany(Import_detail::class, 'id_product_variant');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

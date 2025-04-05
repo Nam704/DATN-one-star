@@ -15,7 +15,7 @@
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
-                                    aria-selected="false">Reviews (1)</a>
+                                    aria-selected="false">Comments (1)</a>
                             </li>
                         </ul>
                     </div>
@@ -70,56 +70,39 @@
                         <div class="tab-pane fade" id="reviews" role="tabpanel">
                             <div class="reviews_wrapper">
                                 <h2>1 review for Donec eu furniture</h2>
-                                <div class="reviews_comment_box">
-                                    <div class="comment_thmb">
-                                        <img src="assets/img/blog/comment2.jpg" alt="">
-                                    </div>
-                                    <div class="comment_text">
-                                        <div class="reviews_meta">
-                                            <div class="star_rating">
-                                                <ul>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                </ul>
-                                            </div>
-                                            <p><strong>admin </strong>- September 12, 2018</p>
-                                            <span>roadthemes</span>
+                                <div class="reviews_comment_box" id="comments-section">
+                                    @foreach ($comments as $comment)
+                                        <div class="comment_thmb">
+                                            <!-- Hiển thị avatar của người dùng -->
+                                            <img src="{{ asset($comment->user->avatar) }}" alt="User Avatar">
                                         </div>
-                                    </div>
-
+                                        <div class="comment_text">
+                                            <div class="reviews_meta">
+                                                <!-- Hiển thị tên người dùng và thời gian bình luận -->
+                                                <p><strong>{{ $comment->user->name }}</strong> -
+                                                    {{ $comment->created_at->format('F d, Y') }}</p>
+                                            </div>
+                                            <p>{{ $comment->comment }}</p>
+                                        </div>
+                                    @endforeach
                                 </div>
                                 <div class="comment_title">
                                     <h2>Add a review </h2>
                                     <p>Your email address will not be published. Required fields are marked </p>
                                 </div>
-                                <div class="product_ratting mb-10">
-                                    <h3>Your rating</h3>
-                                    <ul>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                    </ul>
-                                </div>
                                 <div class="product_review_form">
-                                    <form action="#">
+                                    <form id="comment-form"
+                                        action="{{ route('client.comment-product.add', ['id' => $product->id]) }}"
+                                        method="POST">
+                                        @csrf
                                         <div class="row">
                                             <div class="col-12">
                                                 <label for="review_comment">Your review </label>
-                                                <textarea name="comment" id="review_comment"></textarea>
+                                                <textarea name="comment" id="review_comment" required></textarea>
                                             </div>
                                             <div class="col-lg-6 col-md-6">
                                                 <label for="author">Name</label>
-                                                <input id="author" type="text">
-
-                                            </div>
-                                            <div class="col-lg-6 col-md-6">
-                                                <label for="email">Email </label>
-                                                <input id="email" type="text">
+                                                <input id="author" name="author" type="text" required>
                                             </div>
                                         </div>
                                         <button type="submit">Submit</button>
@@ -206,3 +189,53 @@
     </div>
 </section>
 <!--product area end-->
+
+<script>
+    $(document).ready(function() {
+        const commentUrl = "{{ route('client.comment-product.add', ['id' => $product->id]) }}";
+        // Xử lý khi người dùng gửi form
+        $('#comment-form').submit(function(e) {
+            e.preventDefault(); // Ngừng hành động mặc định của form (không reload trang)
+
+            var comment = $('#review_comment').val();
+            var author = $('#author').val();
+            var productId = '{{ $product->id }}'; // ID sản phẩm
+
+            // Gửi dữ liệu qua Ajax
+            $.ajax({
+                url: commentUrl,
+                type: 'POST',
+                data: {
+                    comment: comment,
+                    author: author,
+                    _token: '{{ csrf_token() }}' // Đảm bảo gửi token CSRF
+                },
+                success: function(response) {
+                    // Thêm bình luận vào phần hiển thị ngay lập tức
+                    $('#comments-section').prepend(`
+                    <div class="reviews_comment_box">
+                        <div class="comment_thmb">
+                            <img src="assets/img/blog/comment2.jpg" alt="">
+                        </div>
+                        <div class="comment_text">
+                            <div class="reviews_meta">
+                                <p><strong>${response.user_name}</strong> - ${response.created_at}</p>
+                                <span>${author}</span>
+                            </div>
+                            <p>${response.comment.comment}</p>
+                        </div>
+                    </div>
+                `);
+
+                    // Reset form
+                    $('#review_comment').val('');
+                    $('#author').val('');
+                },
+                error: function(xhr, status, error) {
+                    console.log("Lỗi: ", xhr.responseText); // Xem lỗi cụ thể từ Laravel
+                    alert('Có lỗi xảy ra, vui lòng thử lại.');
+                }
+            });
+        });
+    });
+</script>

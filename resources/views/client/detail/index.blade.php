@@ -140,7 +140,7 @@
         </div>
     </div>
 </div>
-@include('client.detail.product-info', ['relatedProducts' => $relatedProducts])
+@include('client.detail.product-info', ['relatedProducts' => $relatedProducts, 'comments' => $comments])
 <script>
     var product = @json($product);
 </script>

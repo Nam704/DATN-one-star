@@ -168,7 +168,7 @@
                 </div>
             </li>
 
-            {{-- contact --}}
+            {{-- slides --}}
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false"
                     aria-controls="sidebarPages" class="side-nav-link">
@@ -180,6 +180,23 @@
                     <ul class="side-nav-second-level">
                         <li>
                             <a href="{{ route('admin.slides.index') }}">Danh sách</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            {{-- slides --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarThird" aria-expanded="false"
+                    aria-controls="sidebarThird" class="side-nav-link">
+                    <i class="mdi mdi-comment-quote"></i>
+                    <span> Comment Product </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarThird">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.comments-product.index') }}">Danh sách</a>
                         </li>
                     </ul>
                 </div>

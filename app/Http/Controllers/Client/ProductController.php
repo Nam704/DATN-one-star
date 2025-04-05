@@ -22,7 +22,12 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
-        return view('client.detail.index', compact('product', 'relatedProducts'));
+        $comments = $product->comments()
+            ->whereNull('parent_id')
+            ->with('user')
+            ->get();
+            
+        return view('client.detail.index', compact('product', 'relatedProducts', 'comments'));
     }
 
     public function related($id)
