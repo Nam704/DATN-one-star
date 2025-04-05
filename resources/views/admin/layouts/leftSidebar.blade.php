@@ -90,7 +90,7 @@
                     </ul>
                 </div>
             </li>
-            
+
 
             <li class="side-nav-title">Components</li>
 
@@ -163,6 +163,23 @@
                     <ul class="side-nav-second-level">
                         <li>
                             <a href="{{ route('admin.contacts.index') }}">Danh sách liên hệ</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            {{-- contact --}}
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false"
+                    aria-controls="sidebarPages" class="side-nav-link">
+                    <i class="mdi mdi-folder-multiple-image"></i>
+                    <span> Slides </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPages">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.slides.index') }}">Danh sách</a>
                         </li>
                     </ul>
                 </div>

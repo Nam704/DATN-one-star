@@ -43,8 +43,8 @@ Route::prefix('admin')->group(
         );
         Route::prefix('categories')->controller(CategoryController::class)->group(
             function () {
-
                 Route::post('add', 'store');
+                Route::get('list', 'list');
             }
         );
 

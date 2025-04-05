@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Slide;
 use App\Services\CategoryService;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
@@ -22,6 +23,9 @@ class HomeController extends Controller
     {
         $categories = $this->categoryService->getCategories();
         // return ($categories);
-        return view('client.index', compact('categories'));
+        $homeSlides = Slide::whereJsonContains('display_locations', 'home')
+            ->with(['primaryImage', 'secondaryImages'])
+            ->get();
+        return view('client.index', compact('categories', 'homeSlides'));
     }
 }

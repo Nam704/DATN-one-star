@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Client\MyAccountController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Client\ContactController;
+use App\Http\Controllers\Client\SlideController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\TemplateExportController;
 use App\Http\Controllers\Web\BlogController as AppBlogController;
 use App\Http\Controllers\Web\ContactController as AppContactController;
+use App\Http\Controllers\Web\SlideController as AppSlideController;
 use Illuminate\Support\Facades\Mail;
 
 use App\Http\Controllers\Client\ProductController as ClientProductController;
@@ -83,9 +85,6 @@ Route::prefix('auth/')->name('auth.')->group(
         });
     }
 );
-
-
-
 
 Route::prefix('admin')->name('admin.')->group(
     function () {
@@ -207,6 +206,21 @@ Route::prefix('admin')->name('admin.')->group(
             Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
             Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
             Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats');
+        });
+
+        // Slides
+        Route::prefix('slides')->controller(AppSlideController::class)->name('slides.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
         });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
@@ -360,6 +374,10 @@ Route::prefix('client')->name('client.')->group(
         });
         Route::prefix('contact')->controller(ContactController::class)->name('contact.')->group(function () {
             Route::get('/index', [ContactController::class, 'index'])->name('index');
+            Route::post('/', 'store')->name('store');
+        });
+        Route::prefix('slide')->controller(SlideController::class)->name('slide.')->group(function () {
+            Route::get('/bannerHome', [SlideController::class, 'bannerHome'])->name('bannerHome');
             Route::post('/', 'store')->name('store');
         });
     }

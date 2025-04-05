@@ -7,6 +7,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Import_detail;
 use App\Models\Product;
+use App\Models\Slide;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -19,6 +20,12 @@ class ShopController extends Controller
                 ->orWhere('id_parent', 0);
         })->with('children')->get();
         $brands = Brand::where('status', 'active')->get();
+
+        //trang - slide
+        $bannerSlides = Slide::whereJsonContains('display_locations', 'banner')
+            ->where('is_active', 1)
+            ->with(['primaryImage', 'secondaryImages'])
+            ->get();
 
         // Determine the maximum price
         $maxPrice = (int)str_replace('.', '', $request->input('max_price', 50000000));
@@ -45,7 +52,7 @@ class ShopController extends Controller
         $products = $productsQuery->with(['variants.importDetails'])->paginate(12);
 
         // Return the view with data
-        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice'));
+        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice', 'bannerSlides'));
     }
 
     public function filter(Request $request)
@@ -100,6 +107,4 @@ class ShopController extends Controller
             'pagination' => $paginationHtml,
         ]);
     }
-
-
 }
