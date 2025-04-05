@@ -28,6 +28,19 @@ class Order extends Model
         "id_voucher",
 
     ];
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    // Kiểm tra đơn có thể hoàn tiền
+    public function isRefundable()
+    {
+        return in_array($this->id_order_status, [
+            Order_status::where('name', 'Return Requested')->first()->id,
+            Order_status::where('name', 'Return Approved')->first()->id
+        ]);
+    }
     public function orderExpire()
     {
         return $this->hasOne(OrderExpire::class, 'id_order', 'id');

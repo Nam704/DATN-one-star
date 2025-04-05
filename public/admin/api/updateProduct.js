@@ -25,7 +25,7 @@ productVariants.forEach((variant) => {
         });
     }
 });
-
+console.log(productVariants);
 // Chuyển Set thành mảng và parse lại object
 let formattedAttributes = Object.values(productAttributes).map((attr) => ({
     id: attr.id,

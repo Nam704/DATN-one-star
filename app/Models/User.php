@@ -30,6 +30,10 @@ class User extends Authenticatable
         'status',
         'deleted_at'
     ];
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
+    }
     public function addresses()
     {
         return $this->morphMany(Address::class, 'addressable');
@@ -151,5 +155,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'id_user');
     }
-
 }

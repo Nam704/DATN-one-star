@@ -41,6 +41,7 @@ use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 use App\Http\Controllers\Web\ChatController;
 use App\Http\Controllers\Web\ProductDashboardController;
+use App\Http\Controllers\Web\RefundController;
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
@@ -49,6 +50,23 @@ Route::get('/', function () {
     return view('admin.index');
 });
 
+// Người dùng
+Route::middleware(['auth'])->group(function () {
+    Route::get('/refunds/create', [RefundController::class, 'create'])->name('refunds.create');
+    Route::post('/refunds', [RefundController::class, 'store'])->name('refunds.store');
+});
+
+// Nhân viên
+Route::prefix('staff')->middleware(['auth', 'role:employee'])->group(function () {
+    Route::get('/refunds', [RefundController::class, 'index'])->name('staff.refunds.index');
+    Route::post('/refunds/{refund}/approve', [RefundController::class, 'approve'])->name('staff.refunds.approve');
+    Route::post('/refunds/{refund}/reject', [RefundController::class, 'reject'])->name('staff.refunds.reject');
+});
+
+// Quản lý
+Route::prefix('manager')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::post('/refunds/{refund}/process', [RefundController::class, 'finalProcess'])->name('manager.refunds.process');
+});
 
 // Route::get('/client/index', function () {
 //     return view('client.index');

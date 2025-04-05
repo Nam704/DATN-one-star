@@ -129,13 +129,14 @@ class ProductController extends Controller
                     return [
                         'value_id' => $attr->id,
                         'attribute_id' => $attr->attribute_id,
-                        'name' => $attr->name,
+                        'name' => $attr->attribute_name,
                         'value' => $attr->value,
 
                     ];
                 })
             ];
         });
+        // return $product->variants;
         $prepareData = $this->ProductService->prepareData();
         $categories = $prepareData['categories'];
         $brands = $prepareData['brands'];
@@ -255,64 +256,61 @@ class ProductController extends Controller
 
 
     public function variantDetails($productId, $variantId, Request $request)
-{
-    // Lấy thông tin sản phẩm
-    $product = Product::findOrFail($productId);
+    {
+        // Lấy thông tin sản phẩm
+        $product = Product::findOrFail($productId);
 
-    // Lấy thông tin biến thể
-    $variant = Product_variant::findOrFail($variantId);
+        // Lấy thông tin biến thể
+        $variant = Product_variant::findOrFail($variantId);
 
-    // Lấy danh sách đơn hàng liên quan đến biến thể này
-    $orderDetails = Order_detail::where('id_variant', $variantId)
-        ->with(['order.user', 'order.orderStatus']) // Lấy thông tin đơn hàng, người dùng và trạng thái
-        ->get();
+        // Lấy danh sách đơn hàng liên quan đến biến thể này
+        $orderDetails = Order_detail::where('id_variant', $variantId)
+            ->with(['order.user', 'order.orderStatus']) // Lấy thông tin đơn hàng, người dùng và trạng thái
+            ->get();
 
-    // Nhóm đơn hàng theo người dùng
-    $users = [];
-    $allStatuses = []; // Mảng chứa tất cả trạng thái đơn hàng
+        // Nhóm đơn hàng theo người dùng
+        $users = [];
+        $allStatuses = []; // Mảng chứa tất cả trạng thái đơn hàng
 
-    foreach ($orderDetails as $orderDetail) {
-        $userId = $orderDetail->order->user->id;
-        $orderId = $orderDetail->order->id;
-        $statusName = $orderDetail->order->orderStatus->name;
+        foreach ($orderDetails as $orderDetail) {
+            $userId = $orderDetail->order->user->id;
+            $orderId = $orderDetail->order->id;
+            $statusName = $orderDetail->order->orderStatus->name;
 
-        if (!isset($users[$userId])) {
-            $users[$userId] = [
-                'user' => $orderDetail->order->user,
-                'address' => $orderDetail->order->address,
-                'orders' => []
-            ];
+            if (!isset($users[$userId])) {
+                $users[$userId] = [
+                    'user' => $orderDetail->order->user,
+                    'address' => $orderDetail->order->address,
+                    'orders' => []
+                ];
+            }
+
+            if (!isset($users[$userId]['orders'][$orderId])) {
+                $users[$userId]['orders'][$orderId] = [
+                    'order_id' => $orderId,
+                    'statuses' => []
+                ];
+            }
+
+            if (!in_array($statusName, $users[$userId]['orders'][$orderId]['statuses'])) {
+                $users[$userId]['orders'][$orderId]['statuses'][] = $statusName;
+            }
+
+            // Thêm trạng thái vào danh sách tất cả trạng thái (loại bỏ trùng lặp)
+            if (!in_array($statusName, $allStatuses)) {
+                $allStatuses[] = $statusName;
+            }
         }
 
-        if (!isset($users[$userId]['orders'][$orderId])) {
-            $users[$userId]['orders'][$orderId] = [
-                'order_id' => $orderId,
-                'statuses' => []
-            ];
-        }
+        // Lấy trạng thái được chọn từ request
+        $selectedStatus = $request->query('status');
 
-        if (!in_array($statusName, $users[$userId]['orders'][$orderId]['statuses'])) {
-            $users[$userId]['orders'][$orderId]['statuses'][] = $statusName;
-        }
-
-        // Thêm trạng thái vào danh sách tất cả trạng thái (loại bỏ trùng lặp)
-        if (!in_array($statusName, $allStatuses)) {
-            $allStatuses[] = $statusName;
-        }
+        return view('admin.product.productVariantDetail', [
+            'product' => $product,
+            'variant' => $variant,
+            'users' => array_values($users), // Chuyển từ mảng kết hợp sang mảng tuần tự
+            'allStatuses' => $allStatuses, // Danh sách tất cả trạng thái
+            'selectedStatus' => $selectedStatus // Trạng thái được chọn
+        ]);
     }
-
-    // Lấy trạng thái được chọn từ request
-    $selectedStatus = $request->query('status');
-
-    return view('admin.product.productVariantDetail', [
-        'product' => $product,
-        'variant' => $variant,
-        'users' => array_values($users), // Chuyển từ mảng kết hợp sang mảng tuần tự
-        'allStatuses' => $allStatuses, // Danh sách tất cả trạng thái
-        'selectedStatus' => $selectedStatus // Trạng thái được chọn
-    ]);
-}
-
-
-
 }
