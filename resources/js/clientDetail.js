@@ -75,7 +75,6 @@ $(document).ready(function () {
                 $("#save_address").text("Save Address");
 
                 refreshAddressList();
-
             },
             error: function (xhr, status, error) {
                 console.error(error);
@@ -91,37 +90,137 @@ $(document).ready(function () {
 
     $(document).on("click", ".edit-address", function () {
         var addressId = $(this).data("id");
-        var addressDetail = $(this).data("detail");
         var wardId = $(this).data("ward");
-        var districtId = $(this).data("district");
         var provinceId = $(this).data("province");
-        var isDefault = $(this).data("default") == 1;
 
-        $("#address_id").val(addressId);
-        $("#address_detail").val(addressDetail);
-        $("#is_default").prop("checked", isDefault);
+        // Gửi yêu cầu AJAX để lấy thông tin chi tiết địa chỉ
+        $.ajax({
+            type: "get",
+            url: "http://127.0.0.1:8000/api/address/details",
+            data: {
+                id_ward: wardId,
+            },
+            dataType: "json",
+            success: function (response) {
+                if (response.length > 0) {
+                    var data = response[0];
 
-        if (provinceId) {
-           setTimeout(function () {
-                $("#province").val(provinceId).trigger("change");
+                    // Điền thông tin vào form
+                    $("#address_id").val(addressId);
+                    $("#address_detail").val(data.address_detail);
 
-                setTimeout(function () {
-                    if (districtId) {
-                        $("#district").val(districtId).trigger("change");
+                    // 1. Tải danh sách tỉnh (provinces) từ API và điền vào dropdown #province
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/address/provinces", // API lấy danh sách tỉnh
+                        dataType: "json",
+                        success: function (provinces) {
+                            // Xóa các options cũ trong dropdown province
+                            $("#province").html(
+                                '<option value="">Chọn Tỉnh/Thành phố</option>'
+                            );
+                            // Thêm các options vào dropdown #province
+                            $.each(provinces, function (key, province) {
+                                var selected =
+                                    province.id == data.province_id
+                                        ? "selected"
+                                        : "";
+                                $("#province").append(
+                                    '<option value="' +
+                                        province.id +
+                                        '" ' +
+                                        selected +
+                                        ">" +
+                                        province.name +
+                                        "</option>"
+                                );
+                            });
+                            // Kích hoạt dropdown #province
+                            $("#province").prop("disabled", false);
 
-                        setTimeout(function () {
-                            if (wardId) {
-                                $("#ward").val(wardId);
-                            }
-                        }, 500);
+                            // Sau khi province đã được cập nhật, tiếp tục tải district
+                            loadDistricts(data.province_id, data.district_id);
+                        },
+                    });
+
+                    // 3. Kiểm tra nếu địa chỉ này là mặc định, đánh dấu checkbox
+                    if (data.is_default) {
+                        $("#is_default").prop("checked", true);
+                    } else {
+                        $("#is_default").prop("checked", false);
                     }
-                }, 500);
-            }, 100);
+                } else {
+                    alert("Không tìm thấy dữ liệu địa chỉ.");
+                }
+            },
+            error: function () {
+                alert("Có lỗi khi lấy dữ liệu địa chỉ.");
+            },
+        });
+
+        // Hàm tải district từ API
+        function loadDistricts(provinceId, selectedDistrictId) {
+            // Gửi yêu cầu AJAX để lấy danh sách district cho tỉnh đã chọn
+            $.ajax({
+                url: "/api/address/districts/" + provinceId, // API lấy danh sách quận theo tỉnh
+                type: "GET",
+                dataType: "json",
+                success: function (districts) {
+                    // Xóa các options cũ trong dropdown district
+                    $("#district").html(
+                        '<option value="">Chọn Quận/Huyện</option>'
+                    );
+                    // Thêm các options vào dropdown #district
+                    $.each(districts, function (key, district) {
+                        var selected =
+                            district.id == selectedDistrictId ? "selected" : "";
+                        $("#district").append(
+                            '<option value="' +
+                                district.id +
+                                '" ' +
+                                selected +
+                                ">" +
+                                district.name +
+                                "</option>"
+                        );
+                    });
+                    // Kích hoạt dropdown #district
+                    $("#district").prop("disabled", false);
+
+                    // Sau khi district đã được cập nhật, tiếp tục tải ward
+                    loadWards(selectedDistrictId);
+                },
+            });
         }
 
-        $("#save_address").text("Update Address");
-
-
+        // Hàm tải wards từ API
+        function loadWards(districtId) {
+            // Gửi yêu cầu AJAX để lấy danh sách ward cho quận đã chọn
+            $.ajax({
+                url: "/api/address/wards/" + districtId, // API lấy danh sách phường theo quận
+                type: "GET",
+                dataType: "json",
+                success: function (wards) {
+                    // Xóa các options cũ trong dropdown ward
+                    $("#ward").html('<option value="">Chọn Phường/Xã</option>');
+                    // Thêm các options vào dropdown #ward
+                    $.each(wards, function (key, ward) {
+                        var selected = ward.id == wardId ? "selected" : "";
+                        $("#ward").append(
+                            '<option value="' +
+                                ward.id +
+                                '" ' +
+                                selected +
+                                ">" +
+                                ward.name +
+                                "</option>"
+                        );
+                    });
+                    // Kích hoạt dropdown #ward
+                    $("#ward").prop("disabled", false);
+                },
+            });
+        }
     });
 
     $(document).on("click", ".delete-address", function () {
@@ -175,7 +274,6 @@ $(document).ready(function () {
                         "</div>"
                 );
 
-
                 refreshAddressList();
             },
             error: function (xhr, status, error) {
@@ -189,14 +287,11 @@ $(document).ready(function () {
         });
     });
 
-
     $(document).on("click", "#cancel-edit", function () {
         resetAddressForm();
 
-
         $("#save_address").text("Save Address");
     });
-
 
     function resetAddressForm() {
         $("#address_id").val("");
@@ -206,13 +301,11 @@ $(document).ready(function () {
         $("#address-alert").html("");
     }
 
-
     function refreshAddressList() {
         $.ajax({
             url: "http://127.0.0.1:8000/client/users/get-addresses",
             method: "GET",
             success: function (response) {
-
                 var tableBody = $("#address-list-table tbody");
                 tableBody.empty();
 

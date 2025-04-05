@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\District;
 use App\Models\Province;
 use Illuminate\Http\Request;
@@ -28,5 +29,12 @@ class AddressController extends Controller
         $district = District::findOrFail($districtId);
         $wards = $district->wards;
         return response()->json($wards);
+    }
+    function detail(Request $request)
+    {
+        $idWard = $request->input('id_ward');
+        $address = Address::find($idWard);
+        $details = $address->getAddressDetailsByWard($idWard);
+        return response()->json($details);
     }
 }

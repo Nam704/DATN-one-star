@@ -25,10 +25,7 @@
                         <td>{{ $address->is_default ? 'Yes' : 'No' }}</td>
                         <td>
                             <button class="btn btn-sm btn-primary edit-address" data-id="{{ $address->id }}"
-                                data-detail="{{ $address->address_detail }}" data-ward="{{ $address->ward_id ?? '' }}"
-                                data-district="{{ isset($address->ward_id) && isset($wardData[$address->ward_id]) ? $wardData[$address->ward_id]->district->id : '' }}"
-                                data-province="{{ isset($address->ward_id) && isset($wardData[$address->ward_id]) ? $wardData[$address->ward_id]->district->province->id : '' }}"
-                                data-default="{{ $address->is_default }}">
+                                data-ward="{{ $address->id_ward ?? '' }}">
                                 Edit
                             </button>
                             @if (!$address->is_default)
