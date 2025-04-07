@@ -216,7 +216,7 @@ class Product extends Model
             ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
-            ->where('orders.id_order_status', '=', 4)
+            ->where('orders.id_order_status', '=', 7)
             ->select(
                 'products.id',
                 'products.name',
@@ -274,7 +274,7 @@ public function top_view_product($start_date, $end_date)
     }
 
 
-    public function least_sold_products($startDate, $endDate)
+    public function least_sold_products($start_date, $end_date)
     {
         return DB::table('products')
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
@@ -284,18 +284,19 @@ public function top_view_product($start_date, $end_date)
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status = 7 AND orders.created_at BETWEEN "' . $startDate . '" AND "' . $endDate . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
+                DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status =  7 AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
-            ->where('product_variants.status', '=', 'active')  // Kiểm tra trạng thái sản phẩm variant
+            ->where('product_variants.status', '=', 'active')
+            ->where('products.created_at', '<=', $end_date) // Chỉ lấy sản phẩm đã tồn tại trước hoặc tại $endDate
             ->groupBy('products.id', 'products.name', 'products.image_primary')
-            ->orderBy('total_sold', 'asc')  // Sắp xếp theo số lượng bán (từ thấp đến cao)
+            ->orderBy('total_sold', 'asc')
             ->get();
     }
     
     
     
-    public function low_stock_products($startDate, $endDate)
+    public function low_stock_products($start_date, $end_date)
 {
     $query = DB::table('products')
         ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
@@ -307,7 +308,7 @@ public function top_view_product($start_date, $end_date)
         )
         ->where('products.status', '=', 'active')
         ->where('product_variants.status', '=', 'active')
-        ->whereBetween('product_variants.updated_at', [$startDate, $endDate])
+        ->whereBetween('product_variants.updated_at', [$start_date, $end_date])
         ->groupBy('products.id', 'products.name', 'products.image_primary')
         ->havingRaw('SUM(product_variants.quantity) < 10')
         ->orderBy('total_quantity', 'asc');

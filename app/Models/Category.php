@@ -67,27 +67,40 @@ class Category extends Model
     //         ->orderBy('total_revenue', 'desc')
     //         ->get();
     // }
-    public static function categories_with_revenue()
-{
-    return self::select('categories.id', 'categories.name')
+    public static function categories_with_revenue($start_date, $end_date)
+    {
+        return self::select('categories.id', 'categories.name')
         ->leftJoin('products', 'categories.id', '=', 'products.id_category')
         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
         ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
-        ->leftJoin('orders', function ($join) {
-            $join->on('order_details.id_order', '=', 'orders.id')
-                ->where('orders.id_order_status', '=', 4);
-        })
+        ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
         ->whereNull('categories.deleted_at')
         ->whereNull('products.deleted_at')
-        ->orWhereNull('products.id')
         ->groupBy('categories.id', 'categories.name')
         ->selectRaw('
-            COALESCE(SUM(order_details.quantity * order_details.unit_price), 0) as total_revenue,
-            COUNT(DISTINCT products.id) as total_products
-        ')
-        ->orderBy('total_revenue', 'desc')
+            -- Tổng doanh thu từ đơn hàng hoàn thành
+            COALESCE(SUM(
+                CASE 
+                    WHEN orders.id_order_status = 7 AND orders.created_at BETWEEN ? AND ? 
+                    THEN order_details.quantity * order_details.unit_price 
+                    ELSE 0 
+                END
+            ), 0) as total_revenue,
+
+            -- Tổng số sản phẩm được tạo trong khoảng thời gian
+            COUNT(DISTINCT 
+                CASE 
+                    WHEN products.created_at BETWEEN ? AND ? 
+                    THEN products.id 
+                    ELSE NULL 
+                END
+            ) as total_products
+        ', [$start_date, $end_date, $start_date, $end_date])
+        ->orderByDesc('total_revenue')
         ->get();
-}
+
+    }
+    
 
 }
 

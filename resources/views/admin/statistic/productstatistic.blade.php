@@ -91,7 +91,7 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Top Least Sold Products</h5>
-                            <a href="{{ route('admin.statistics.exportLeastSoldProducts',request()->query()) }}" class="btn btn-primary">
+                            <a href="{{ route('admin.statistics.exportLeastSoldProducts',request()->query()) }}" class="btn btn-primary" style="margin-top: 10px;">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                                 </a>
                         </div>
@@ -124,7 +124,48 @@
                         </div>
                     </div>
                 </div> <!-- end card-->
-            </div> <!-- end col-->  
+            </div> <!-- end col-->
+            
+            <div class="col-xl-6">
+                <!-- Todo-->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="p-3">
+                            <div class="card-widgets">
+                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
+                            </div>
+                            <h5 class="header-title mb-0">Categories With Revenue</h5>
+                            <a href="{{ route('admin.statistics.exportProductsByCategory',request()->query() ) }}" class="btn btn-primary" style="margin-top: 10px;">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                            </a>
+                        </div>
+                        <div id="yearly-sales-collapse" class="collapse show">
+                            <div class="table-responsive">
+                                <table class="table table-nowrap table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Total product</th>
+                                            <th>Total Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($categories_with_revenue as $key => $product)
+                                            <tr>
+                                                <td>{{ $key + 1 }}</td>
+                                                <td>{{ $product->name }}</td>
+                                                <td>{{ $product->total_products }}</td>
+                                                <td>{{ number_format($product->total_revenue) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- end card-->
+            </div> <!-- end col-->
 
             <div class="col-xl-6">
                 <!-- Todo-->
@@ -135,7 +176,7 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Low Stock Products</h5>
-                            <a href="{{ route('admin.statistics.exportLowStockProducts', request()->query()) }}" class="btn btn-primary">
+                            <a href="{{ route('admin.statistics.exportLowStockProducts', request()->query()) }}" class="btn btn-primary" style="margin-top: 10px;">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                             </a>
                         </div>
@@ -178,49 +219,8 @@
                             <div class="card-widgets">
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
-                            <h5 class="header-title mb-0">Categories With Revenue</h5>
-                            <a href="{{ route('admin.statistics.exportProductsByCategory',request()->query() ) }}" class="btn btn-primary">
-                                   <i class="ri-file-excel-2-line"></i> Export Excel
-                            </a>
-                        </div>
-                        <div id="yearly-sales-collapse" class="collapse show">
-                            <div class="table-responsive">
-                                <table class="table table-nowrap table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Name</th>
-                                            <th>Total product</th>
-                                            <th>Total Revenue</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($categories_with_revenue as $key => $product)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $product->name }}</td>
-                                                <td>{{ $product->total_products }}</td>
-                                                <td>{{ number_format($product->total_revenue) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- end card-->
-            </div> <!-- end col-->
-
-            <div class="col-xl-6">
-                <!-- Todo-->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="p-3">
-                            <div class="card-widgets">
-                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                            </div>
                             <h5 class="header-title mb-0">Top view products</h5>
-                            <a href="{{ route('admin.statistics.exportTopViewProducts') }}" class="btn btn-primary  ">
+                            <a href="{{ route('admin.statistics.exportTopViewProducts') }}" class="btn btn-primary  " style="margin-top: 10px;">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                             </a>
                         </div>
@@ -264,7 +264,7 @@
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
                             <h5 class="header-title mb-0">Top comment products</h5>
-                            <a href="{{ route('admin.statistics.exportTopCommentProducts') }}" class="btn btn-primary  ">
+                            <a href="{{ route('admin.statistics.exportTopCommentProducts') }}" class="btn btn-primary  " style="margin-top: 10px;">
                                    <i class="ri-file-excel-2-line"></i> Export Excel
                             </a>
                         </div>

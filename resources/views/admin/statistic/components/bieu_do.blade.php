@@ -18,7 +18,7 @@
                         <button id="resetBtn" class="btn btn-success">Clear</button>
                     </div>
                     <div class="col">
-                    <a id="exportLinkTop" href="{{ route('admin.statistics.exportTopSaleProducts') }}" class="btn btn-primary"><i class="ri-file-excel-2-line"></i>Export Excel</a>
+                    <a id="exportLinkTop" href="{{ route('admin.statistics.exportTopSaleProducts') }}" class="btn btn-primary" style="margin-top: 10px;"><i class="ri-file-excel-2-line"></i>Export Excel</a>
                     </div>
 
                 </div>
@@ -48,7 +48,7 @@
                         <button id="resetBtnV2" class="btn btn-success">Clear</button>
                     </div>
                     <div class="col">
-                    <a id="exportLinkSold" href="{{ route('admin.statistics.exportproductSold') }}" class="btn btn-primary"><i class="ri-file-excel-2-line"></i>Export Excel</a>
+                    <a id="exportLinkSold" href="{{ route('admin.statistics.exportproductSold') }}" class="btn btn-primary" style="margin-top: 10px;"><i class="ri-file-excel-2-line"></i>Export Excel</a>
                     </div>
 
                 </div>
