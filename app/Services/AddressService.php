@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\Address;
+use App\Models\Ward;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AddressService
 {
@@ -13,15 +16,15 @@ class AddressService
     {
         $this->address = $address;
     }
-    public function getFullAddress($model, $modelId)
-    {
-        // return [$model, $modelId];
-        $object = $model->find($modelId);
-        if (!$object) {
-            return null;
-        }
-        return $this->address->getAddresses($model, $modelId);
-    }
+    // public function getFullAddress($model, $modelId)
+    // {
+    //     // return [$model, $modelId];
+    //     $object = $model->find($modelId);
+    //     if (!$object) {
+    //         return null;
+    //     }
+    //     return $this->address->getAddresses($model, $modelId);
+    // }
     public function getAddress($model, $modelId, $addressId)
     {
         $object = $model->find($modelId);
@@ -92,6 +95,39 @@ class AddressService
             return $object->addresses()
                 ->where('is_default', false)
                 ->delete();
+        }
+    }
+    public function getFullAddress($user, $userId)
+    {
+        try {
+            return Address::where('addressable_id', $userId)->get();
+        } catch (\Exception $e) {
+            Log::error('Error fetching addresses: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+
+    public function getAllWards(): Collection
+    {
+        try {
+            // Eager load the district and province relationships to avoid N+1 query issues
+            return Ward::with(['district.province'])->get();
+        } catch (\Exception $e) {
+            Log::error('Error fetching wards: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+
+    public function getWardsByIds(array $wardIds): Collection
+    {
+        try {
+            return Ward::with(['district.province'])
+                ->whereIn('id', $wardIds)
+                ->get()
+                ->keyBy('id');
+        } catch (\Exception $e) {
+            Log::error('Error fetching wards by IDs: ' . $e->getMessage());
+            return collect([]);
         }
     }
 }

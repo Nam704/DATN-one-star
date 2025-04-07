@@ -12,7 +12,13 @@ class Address extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['address_detail', 'is_default', 'id_ward'];
+    protected $fillable = [
+        'address_detail',
+        'is_default',
+        'id_ward',
+        'addressable_type',
+        'addressable_id',
+    ];
 
     // Quan hệ polymorphic
     public function addressable()

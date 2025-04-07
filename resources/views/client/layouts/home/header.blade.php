@@ -20,41 +20,42 @@
                             <ul>
                                 <i class="ion-android-person me-1"></i>
                                 @if (Auth::check())
+                                    <li class="top_links"><a href="#">
+                                            {{ auth()->user()->name }}
 
-                                <li class="top_links"><a href="#">
-                                        {{ auth()->user()->name }}
 
+                                            <i class="ion-ios-arrow-down"></i></a>
+                                        <ul class="dropdown_links">
+                                            <li><a href="checkout.html">Checkout </a></li>
+                                            <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
+                                            <li><a href="cart.html">Shopping Cart</a></li>
+                                            <li><a href="wishlist.html">Wishlist</a></li>
+                                            <li><a href="{{ route('auth.logout') }}">Logout</a></li>
 
-                                        <i class="ion-ios-arrow-down"></i></a>
-                                    <ul class="dropdown_links">
-                                        <li><a href="checkout.html">Checkout </a></li>
-                                        <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
-                                        <li><a href="cart.html">Shopping Cart</a></li>
-                                        <li><a href="wishlist.html">Wishlist</a></li>
-                                        <li><a href="{{ route('auth.logout') }}">Logout</a></li>
-
-                                    </ul>
-                                </li>
+                                        </ul>
+                                    </li>
                                 @else
-                                <li class="top_links"><a href="#">
-                                        My Account
-                                        <i class="ion-ios-arrow-down"></i></a>
-                                    <ul class="dropdown_links">
+                                    <li class="top_links"><a href="#">
+                                            My Account
+                                            <i class="ion-ios-arrow-down"></i></a>
+                                        <ul class="dropdown_links">
 
-                                        <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
+                                            <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
 
-                                    </ul>
-                                </li>
+                                        </ul>
+                                    </li>
                                 @endif
 
                                 <li class="language"><a href="#"><img
-                                            src=" {{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i
-                                            class="ion-ios-arrow-down"></i></a>
+                                            src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                            alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_language">
-                                        <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                        <li><a href="#"><img
+                                                    src=" {{ asset('client/assets/img/logo/language.png') }}"
                                                     alt=""> English</a>
                                         </li>
-                                        <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language2.png') }}"
+                                        <li><a href="#"><img
+                                                    src=" {{ asset('client/assets/img/logo/language2.png') }}"
                                                     alt=""> Germany</a>
                                         </li>
                                     </ul>
@@ -83,7 +84,8 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-6">
                     <div class="logo">
-                        <a href="{{ route('client.home') }}"><img src="/client/assets/img/logo/logo-2.png" alt="img"></a>
+                        <a href="{{ route('client.home') }}"><img src="/client/assets/img/logo/logo-2.png"
+                                alt="img"></a>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-6">
@@ -91,13 +93,11 @@
                         <div class="search-container mobile-search" style="position: relative;">
                             <form action="#">
                                 <div class="search_box">
-                                    <input type="text" class="search-input" placeholder="Search entire store here ..."
-                                        autocomplete="off">
+                                    <input type="text" class="search-input" placeholder="Search entire store here ..." autocomplete="off">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>
-                            <div class="search-result"
-                                style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
+                            <div class="search-result" style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                         </div>
 
 
@@ -140,7 +140,7 @@
                                         </li>
                                     </ul>
                                 </li>
-                                <li><a href="{{ route('client.blog.index' ) }}">Blogs</a></li>
+                                <li><a href="{{ route('client.blog.index') }}">Blogs</a></li>
                                 <li><a href="{{ route('client.contact.index') }}">Contact Us</a></li>
                             </ul>
                         </nav>
@@ -181,12 +181,14 @@
                                 </ul>
                             </li>
                             <li class="language"><a href="#"><img
-                                        src=" {{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i
-                                        class="ion-ios-arrow-down"></i></a>
+                                        src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                        alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                 <ul class="dropdown_language">
-                                    <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                    <li><a href="#"><img
+                                                src=" {{ asset('client/assets/img/logo/language.png') }}"
                                                 alt=""> English</a></li>
-                                    <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language2.png') }}"
+                                    <li><a href="#"><img
+                                                src=" {{ asset('client/assets/img/logo/language2.png') }}"
                                                 alt=""> Germany</a>
                                     </li>
                                 </ul>
@@ -214,13 +216,11 @@
                     <div class="search-container mobile-search" style="position: relative;">
                         <form action="#">
                             <div class="search_box">
-                                <input type="text" class="search-input" placeholder="Search entire store here ..."
-                                    autocomplete="off">
+                                <input type="text" class="search-input" placeholder="Search entire store here ..." autocomplete="off">
                                 <button type="submit"><i class="ion-ios-search-strong"></i></button>
                             </div>
                         </form>
-                        <div class="search-result"
-                            style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
+                        <div class="search-result" style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                     </div>
                     <div id="menu" class="text-left ">
                         <ul class="offcanvas_main_menu">
@@ -242,32 +242,48 @@
 <!--Offcanvas menu area end-->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function(){
-    $('.search-input').on('keyup', function(){
-        var query = $(this).val();
-        // Tìm container chứa ô tìm kiếm hiện hành và phần kết quả tương ứng
-        var searchResultContainer = $(this).closest('.search-container').find('.search-result');
-        if(query != ''){
-            $.ajax({
-                url: "{{ route('client.search') }}",
-                type: "GET",
-                data: { query: query },
-                success: function(data){
-                    searchResultContainer.fadeIn();
-                    searchResultContainer.html(data);
-                }
-            });
-        } else {
-            searchResultContainer.fadeOut();
-            searchResultContainer.html("");
-        }
-    });
+    $(document).ready(function() {
+        var searchInput = $('.search-input');
+        var searchResultContainer = $('.search-result');
 
-    // Ẩn kết quả gợi ý khi click bên ngoài container search
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('.search-container').length) {
-            $('.search-result').fadeOut();
-        }
+        // Lắng nghe sự kiện keyup cho ô tìm kiếm
+        searchInput.on('keyup', function(e) {
+            var query = $(this).val();
+
+            // Nếu có nội dung, thực hiện Ajax để lấy gợi ý
+            if (query !== '') {
+                $.ajax({
+                    url: "{{ route('client.search') }}",
+                    type: "GET",
+                    data: { query: query },
+                    success: function(data) {
+                        searchResultContainer.fadeIn();
+                        searchResultContainer.html(data);
+                    }
+                });
+            } else {
+                searchResultContainer.fadeOut();
+                searchResultContainer.html("");
+            }
+
+            // Nếu nhấn Enter (keyCode 13), chuyển hướng sang trang shop với tham số tìm kiếm
+            if (e.keyCode === 13) {
+                window.location.href = "{{ route('client.shop') }}" + "?search=" + encodeURIComponent(query);
+            }
+        });
+
+        // Xử lý sự kiện submit của form (click vào icon search)
+        $('.search-container form').on('submit', function(e) {
+            e.preventDefault(); // Ngăn hành vi submit mặc định
+            var query = searchInput.val();
+            window.location.href = "{{ route('client.shop') }}" + "?search=" + encodeURIComponent(query);
+        });
+
+        // Ẩn kết quả gợi ý khi click bên ngoài container search
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.search-container').length) {
+                searchResultContainer.fadeOut();
+            }
+        });
     });
-});
 </script>
