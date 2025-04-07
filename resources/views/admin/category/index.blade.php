@@ -39,7 +39,12 @@
                                 <td>{{ $key+1 }}</td>
                                 <td>{{$category->name}}</td>
                                 <td>{{ $category->parent->name ?? 'Không có danh mục cha' }}</td>
-                                <td>{{$category->status}}</td>
+                                <td>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="status_{{ $category->id }}" 
+                                               {{ $category->status == 'active' ? 'checked' : '' }} disabled>
+                                    </div>
+                                </td>
                                 <td>
                                     <a href="{{route('admin.categories.editCategory',$category->id)}}">
                                         <button type="button" class="btn btn-secondary btn-warning">Edit</button>

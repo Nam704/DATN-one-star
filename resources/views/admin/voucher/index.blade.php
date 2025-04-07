@@ -45,7 +45,10 @@
                                     <td>{{ number_format($voucher->min_amount, 0) }}VNĐ</td>
                                     <td>{{ number_format($voucher->max_discount_amount, 0) }}VNĐ</td>
                                     <td>
-                                    <span class="badge bg-success">{{$voucher->status}}</span>
+                                     <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="status_{{ $voucher->id }}" 
+                                               {{ $voucher->status == 'active' ? 'checked' : '' }} disabled>
+                                    </div>
                                     </td>
                                     <td>
                                         <a href="{{ route('admin.vouchers.editVoucher', $voucher->id) }}" class="btn btn-warning ">Edit</a>
@@ -82,6 +85,7 @@
 @endsection
 @push('styles')
 <x-admin.data-table-styles />
+
 @endpush
 
 @push('scripts')
