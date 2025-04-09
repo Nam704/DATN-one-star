@@ -120,7 +120,7 @@ class NotificationService
 
     public function sendPrivate($data)
     {
-        Log::info('sendPrivate');
+        // Log::info('sendPrivate');
         // Lọc người dùng có vai trò admin và employee
         $recipients = User::whereHas('role', function ($query) {
             $query->whereIn('name', ['admin', 'employee']);

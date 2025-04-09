@@ -23,12 +23,12 @@ class PaymentController extends Controller
     }
     public function handleVnpayReturn(Request $request)
     {
-        $orderId = substr($request->get('vnp_TxnRef'), 10); // Cắt bỏ timestamp, lấy ID đơn hàng
-        $order = Order::find($orderId);
+        $orderCode = $request->get('vnp_TxnRef'); // Cắt bỏ timestamp, lấy ID đơn hàng
+        $order = Order::where('code', $orderCode)->first();
 
         if (!$order) {
             // return redirect()->route('client.orders.index')->with('error', 'Đơn hàng không tồn tại.');
-            return 'Đơn hàng không tồn tại.' . $orderId;
+            return 'Đơn hàng không tồn tại.';
         }
 
         // Kiểm tra kết quả thanh toán

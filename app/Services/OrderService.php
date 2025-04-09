@@ -175,7 +175,9 @@ class OrderService
         }
 
         // Bước 10: Xử lý sau khi tạo đơn hàng
+        // Bước 10: Xử lý sau khi tạo đơn hàng
         try {
+
             session()->forget('checkout_data');
         } catch (\Exception $e) {
             throw new \Exception('Lỗi khi xóa dữ liệu checkout trong session: ' . $e->getMessage());

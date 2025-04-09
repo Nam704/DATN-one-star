@@ -20,14 +20,11 @@ class CheckoutController extends Controller
         $this->paymentService = $paymentService;
         $this->voucherService = $voucherService;
     }
-    public function payment(Request $request)
-    {
-        // $this->paymentService->vnpay_payment();
-    }
+
     public function index()
     {
         $data = session()->get('checkout_data', []);
-        Log::info($data);
+        // Log::info($data);
         $user = auth()->user();
 
         if (empty($data)) {

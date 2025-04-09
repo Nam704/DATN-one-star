@@ -38,6 +38,12 @@ $(document).ready(function () {
             .then((response) => {
                 console.log(response);
                 GlobalUtils.showNotification(response.data.message);
+                if (response.data.redirect_url) {
+                    window.location.href = response.data.redirect_url;
+                } else {
+                    // Cho COD, chuyển hướng đến trang thành công
+                    window.location.href = `${GlobalUtils.baseUrl}/client/orders/success`;
+                }
             })
             .catch((error) => {
                 console.log(error);

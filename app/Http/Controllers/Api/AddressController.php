@@ -38,7 +38,7 @@ class AddressController extends Controller
         $address = Address::find($id);
         $obj = $address->addressable;
         $details = $address->getAddress($obj, $obj->id, $id);
-        Log::info($obj);
+        // Log::info($obj);
         return response()->json($details);
     }
     function detailDefault(Request $request)
@@ -48,7 +48,7 @@ class AddressController extends Controller
         $address = Address::find($id);
         $obj = $address->addressable;
         $details = $address->getAddressDefault($obj, $obj->id, $id);
-        Log::info($obj);
+        // Log::info($obj);
         return response()->json($details);
     }
 }

@@ -50,16 +50,23 @@ class OrderController extends Controller
         try {
             $data = $request->all();
             $order = $this->orderService->createOrder($data);
-            return response()->json([
+            $vnpayResponse = $this->orderStatusService->updateInitialStatus($order);
+
+            $responseData = [
                 'status' => 200,
                 'message' => 'Đặt hàng thành công',
-                'data' => $order
-            ]);
+                'order' => $order,
+            ];
+
+            if ($vnpayResponse) {
+                $responseData['redirect_url'] = $vnpayResponse['data'];
+            }
+
+            return response()->json($responseData);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => $e->getMessage(),
-
             ], 500);
         }
     }
