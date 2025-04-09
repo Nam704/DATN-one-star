@@ -25,10 +25,10 @@ class Voucher extends Model
         'applies_to',
     ];
 
-     // Cast applies_to thành mảng
-    //  protected $casts = [
-    //     'applies_to' => 'array',
-    // ];
+    // Cast applies_to thành mảng
+    protected $casts = [
+        'applies_to' => 'array',
+    ];
 
     public function orders()
     {

@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\District;
 use App\Models\Province;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AddressController extends Controller
 {
@@ -32,9 +33,22 @@ class AddressController extends Controller
     }
     function detail(Request $request)
     {
-        $idWard = $request->input('id_ward');
-        $address = Address::find($idWard);
-        $details = $address->getAddressDetailsByWard($idWard);
+        $id = $request->input('id');
+        // Log::info($idWard);
+        $address = Address::find($id);
+        $obj = $address->addressable;
+        $details = $address->getAddress($obj, $obj->id, $id);
+        Log::info($obj);
+        return response()->json($details);
+    }
+    function detailDefault(Request $request)
+    {
+        $id = $request->input('id');
+        // Log::info($idWard);
+        $address = Address::find($id);
+        $obj = $address->addressable;
+        $details = $address->getAddressDefault($obj, $obj->id, $id);
+        Log::info($obj);
         return response()->json($details);
     }
 }

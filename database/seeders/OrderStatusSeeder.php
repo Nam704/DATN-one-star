@@ -13,45 +13,46 @@ class OrderStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        // Danh sách tất cả trạng thái
+        // Danh sách tất cả trạng thái với group_status
         $statuses = [
             // Thanh toán & xử lý đơn
-            'Awaiting Payment',
-            'Payment Verification',
-            'Paid',
-            'Pending',
-            'Processing',
-            'Shipping',
-            'Delivered',
+            'Awaiting Payment' => 'Payment Pending',
+            'Payment Verification' => 'Payment Pending',
+            'Paid' => 'Paid',
+            'Pending' => 'In Progress',
+            'Processing' => 'In Progress',
+            'Shipping' => 'In Progress',
+            'Delivered' => 'Delivered',
 
             // Lỗi & Retry thanh toán
-            'Payment Failed',
-            'Payment Expired',
-            'Payment Retry Requested',
+            'Payment Failed' => 'Payment Issue',
+            'Payment Expired' => 'Payment Issue',
+            'Payment Retry Requested' => 'Payment Issue',
 
             // Hủy đơn
-            'Cancel Requested',
-            'Cancel Under Review',
-            'Cancel Approved',
-            'Cancel Rejected',
-            'Cancelled',
+            'Cancel Requested' => 'Cancel Requested',
+            'Cancel Under Review' => 'Under Review',
+            'Cancel Approved' => 'Cancelled',
+            'Cancel Rejected' => 'Under Review',
+            'Cancelled' => 'Cancelled',
 
             // Hoàn đơn
-            'Return Requested',
-            'Return Under Review',
-            'Return Approved',
-            'Return Rejected',
-            'Refunded',
+            'Return Requested' => 'Return Requested',
+            'Return Under Review' => 'Under Review',
+            'Return Approved' => 'Refunded',
+            'Return Rejected' => 'Under Review',
+            'Refunded' => 'Refunded',
 
             // Trường hợp khác
-            'Failed Delivery',
+            'Failed Delivery' => 'Delivery Failed',
         ];
 
         // Chèn các trạng thái vào DB và lưu ID
         $statusIds = [];
-        foreach ($statuses as $statusName) {
+        foreach ($statuses as $statusName => $groupStatus) {
             $statusIds[$statusName] = DB::table('order_statuses')->insertGetId([
                 'name' => $statusName,
+                'group_status' => $groupStatus, // Thêm group_status
                 'created_at' => now(),
                 'updated_at' => now(),
                 'next_status_id' => null,

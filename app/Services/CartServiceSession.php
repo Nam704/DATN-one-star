@@ -105,7 +105,8 @@ class CartServiceSession
         }
 
         Session::put('cart', $cart);
-        Log::info('Cart updated', ['cart' => $cart]);
+
+        // Log::info('Cart updated', ['cart' => $cart]);
 
         return ['message' => 'Cart updated', 'cart' => $cart];
     }

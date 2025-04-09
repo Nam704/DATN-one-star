@@ -8,18 +8,14 @@
         </div>
     </div>
     <div class="cart_items">
-
+        <!-- Dữ liệu sẽ được render bởi updateCartUI -->
     </div>
 
-
     <div class="mini_cart_table">
-        <div class="cart_total">
-            <span>Sub total:</span>
-            <span class="price">${{-- number_format($subtotal,2) --}}</span>
-        </div>
+
         <div class="cart_total mt-10">
             <span>Total:</span>
-            <span class="price">${{-- number_format($subtotal,2) --}}</span>
+            <span class="price cart-total"></span>
         </div>
     </div>
 
@@ -27,9 +23,6 @@
         <div class="cart_button">
             <a href="{{ route('client.carts.viewCart') }}">View cart</a>
         </div>
-        <div class="cart_button">
-            <a class="active" href="{{-- route('checkout') --}}">Checkout</a>
-        </div>
-    </div>
 
+    </div>
 </div>

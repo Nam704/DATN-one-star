@@ -10,7 +10,7 @@ class Order_status extends Model
     use HasFactory;
 
     protected $table = 'order_statuses';
-    protected $fillable = ['id', 'name'];
+    protected $fillable = ['name', 'group_status', 'next_status_id'];
 
     public function orders()
     {

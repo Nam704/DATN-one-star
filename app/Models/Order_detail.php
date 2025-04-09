@@ -9,14 +9,11 @@ class Order_detail extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'id',
-        'id_order',
-        'id_variant',
-        'quantity',
-        'unit_price',
-        'total',
+        'id_order', 'id_variant', 'variant_data', 'quantity', 'unit_price', 'total',
+    ];
 
-
+    protected $casts = [
+        'variant_data' => 'array',
     ];
 
     public function order()

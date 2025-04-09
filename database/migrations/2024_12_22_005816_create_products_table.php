@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('image_primary', 250)->nullable();
             $table->string('status')->default('active');
+            $table->integer('view')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

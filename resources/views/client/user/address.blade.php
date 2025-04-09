@@ -58,21 +58,21 @@
             <div class="form-group mb-3 col-md-4">
                 <label for="province">Province/City</label>
                 <select id="province" class="form-control">
-                    <option value="">Select Province/City</option>
+
                 </select>
             </div>
 
             <div class="form-group mb-3 col-md-4">
                 <label for="district">District</label>
-                <select id="district" class="form-control" disabled>
-                    <option value="">Select District</option>
+                <select id="district" class="form-control">
+
                 </select>
             </div>
 
             <div class="form-group mb-3 col-md-4">
                 <label for="ward">Ward</label>
-                <select id="ward" class="form-control" disabled>
-                    <option value="">Select Ward</option>
+                <select id="ward" class="form-control">
+
                 </select>
             </div>
 

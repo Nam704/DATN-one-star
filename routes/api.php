@@ -17,11 +17,14 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\NotificationController;
 
 use App\Http\Controllers\Api\ProductImageDescriptionController;
+use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\CartController;
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\OrderController;
 
+Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus']);
 
 Route::prefix('admin')->group(
     function () {
@@ -39,7 +42,7 @@ Route::prefix('admin')->group(
         });
 
         Route::prefix('users')->name('user.')->group(
-            function () { }
+            function () {}
         );
         Route::prefix('categories')->controller(CategoryController::class)->group(
             function () {
@@ -94,6 +97,7 @@ Route::prefix('product-variants')->controller(ProductVariantController::class)->
     function () {
         Route::get('/{idProduct}', 'getProductVariants');
         Route::get('total/{idProduct}', 'total');
+        Route::get('/attribute-value/{id}',  'show');
     }
 );
 Route::prefix('products')->controller(ProductController::class)->group(
@@ -107,13 +111,14 @@ Route::prefix('address')->controller(AddressController::class)->name('address.')
         Route::get('provinces', 'getProvinces');
         Route::get('districts/{provinceId}',  'getDistrictsByProvince');
         Route::get('wards/{districtId}', 'getWardsByDistrict');
-        Route::get('details/', 'detail');
+        Route::get('details', 'detail');
+        Route::get('detail-default', 'detailDefault');
     }
 );
 Route::prefix('client')->group(
     function () {
         Route::prefix('users')->name('user.')->group(
-            function () { }
+            function () {}
         );
         // Route::prefix('carts')->controller(CartController::class)->name('carts.')->group(
         //     function () {
@@ -123,10 +128,4 @@ Route::prefix('client')->group(
 
     }
 );
-// Make sure to use the Client AddressController here
-// đạt
-Route::prefix('address')->controller(\App\Http\Controllers\Client\AddressController::class)->group(function () {
-    Route::get('provinces', 'getProvinces');
-    Route::get('districts/{provinceId}', 'getDistricts');
-    Route::get('wards/{districtId}', 'getWards');
-});
+Route::post('/coupon/apply', [VoucherController::class, 'applyCoupon']);

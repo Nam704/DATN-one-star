@@ -83,7 +83,8 @@
                                             </div>
                                             <div class="product_footer d-flex align-items-center">
                                                 <div class="price_box">
-                                                    <span class="regular_price"> {{ $product->min_price }}</span>
+                                                    <span class="regular_price">
+                                                        {{ number_format($product->min_price, 0, ',', '.') }} ₫</span>
 
                                                 </div>
                                                 {{-- <div class="add_to_cart">
@@ -100,7 +101,6 @@
                 @endforeach
 
             </div>
-
 
             <!-- Phần Recommended Products -->
             <div class="row">
@@ -171,7 +171,7 @@
                                         <div class="price_box">
                                             @if ($minVariant)
                                                 <span class="regular_price">
-                                                    {{ $minVariant->price }}
+                                                    {{ number_format($minVariant->price, 0, ',', '.') }} ₫
                                                 </span>
                                             @else
                                                 <span class="regular_price">N/A</span>

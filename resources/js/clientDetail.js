@@ -1,3 +1,4 @@
+import "./bootstrap";
 $(document).ready(function () {
     console.log("this is account details");
     var csrfToken = document
@@ -98,12 +99,13 @@ $(document).ready(function () {
             type: "get",
             url: "http://127.0.0.1:8000/api/address/details",
             data: {
-                id_ward: wardId,
+                id: addressId,
             },
             dataType: "json",
             success: function (response) {
-                if (response.length > 0) {
-                    var data = response[0];
+                console.log(response);
+                if (response) {
+                    var data = response;
 
                     // Điền thông tin vào form
                     $("#address_id").val(addressId);
@@ -153,7 +155,8 @@ $(document).ready(function () {
                     alert("Không tìm thấy dữ liệu địa chỉ.");
                 }
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
                 alert("Có lỗi khi lấy dữ liệu địa chỉ.");
             },
         });

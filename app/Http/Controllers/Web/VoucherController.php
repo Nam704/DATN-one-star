@@ -20,7 +20,10 @@ class VoucherController extends Controller
     // Với mỗi voucher, chuyển đổi trường applies_to thành tên hiển thị
     foreach ($vouchers as $voucher) {
       // Giả sử dữ liệu được lưu dưới dạng JSON
-      $applies = json_decode($voucher->applies_to, true);
+      $applies = is_string($voucher->applies_to)
+        ? json_decode($voucher->applies_to, true)
+        : $voucher->applies_to;
+
       $names   = [];
       if (is_array($applies)) {
         foreach ($applies as $item) {
@@ -103,8 +106,8 @@ class VoucherController extends Controller
           // Chỉ kiểm tra khi loại giảm giá là phần trăm
           if ($request->type === 'percentage' && $value > 0) {
             // Kiểm tra nếu có min_amount thì mới thực hiện phép tính
-            if (!empty($request->min_amount) && $value < ($request->discount_amount * $request->min_amount / 100)) {
-              $fail('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng mức giảm giá phần trăm.');
+            if (!empty($request->min_amount) && $value > ($request->discount_amount * $request->min_amount / 100)) {
+              $fail('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng mức giảm giá phần trăm.');
             }
           }
         }
@@ -125,7 +128,9 @@ class VoucherController extends Controller
   public function editVoucher($id)
   {
     $vouchers = Voucher::findOrFail($id);
-    $vouchers->applies_to = json_decode($vouchers->applies_to, true);
+    $vouchers->applies_to = is_string($vouchers->applies_to)
+      ? json_decode($vouchers->applies_to, true)
+      : $vouchers->applies_to;
 
     $categories = Category::all();
     $products   = Product::all();
@@ -187,8 +192,8 @@ class VoucherController extends Controller
           // Chỉ kiểm tra khi loại giảm giá là phần trăm
           if ($request->type === 'percentage' && $value > 0) {
             // Kiểm tra nếu có min_amount thì mới thực hiện phép tính
-            if (!empty($request->min_amount) && $value < ($request->discount_amount * $request->min_amount / 100)) {
-              $fail('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng mức giảm giá phần trăm.');
+            if (!empty($request->min_amount) && $value > ($request->discount_amount * $request->min_amount / 100)) {
+              $fail('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng mức giảm giá phần trăm.');
             }
           }
         }
@@ -227,7 +232,9 @@ class VoucherController extends Controller
   public function detailVoucher($id)
   {
     $vouchers = Voucher::findOrFail($id);
-    $vouchers->applies_to = json_decode($vouchers->applies_to, true);
+    $vouchers->applies_to = is_string($vouchers->applies_to)
+      ? json_decode($vouchers->applies_to, true)
+      : $vouchers->applies_to;
 
     $categories = Category::all();
     $products   = Product::all();

@@ -7,6 +7,11 @@ export default defineConfig({
             input: [
                 "resources/css/app.css",
                 "resources/js/app.js",
+                "resources/js/utilities/global.js",
+                "resources/js/client/cartDetail.js",
+                "resources/js/client/productDetail.js",
+                "resources/js/client/checkout.js",
+
                 "resources/js/public.js",
                 "resources/js/private.js",
                 "resources/js/admin.js",

@@ -3,7 +3,7 @@
     <div class="container">
         <!-- Title -->
         <div class="d-flex justify-content-between align-items-center py-3">
-            <h2 class="h5 mb-0"><a href="#" class="text-muted"></a> Order #{{ $order->code }}</h2>
+            <h2 class="h5 mb-0">Order #{{ $order->code }}</h2>
         </div>
 
         <!-- Main content -->
@@ -20,17 +20,25 @@
                                 <span class="badge rounded-pill bg-info">{{ $order->orderStatus->name }}</span>
                             </div>
                             <div class="d-flex">
-                                <button class="btn btn-link p-0 me-3 d-none d-lg-block btn-icon-text"><i
-                                        class="bi bi-download"></i> <span class="text">Invoice</span></button>
+                                <button class="btn btn-link p-0 me-3 btn-icon-text" id="download-invoice">
+                                    <i class="bi bi-download"></i> <span class="text">Invoice</span>
+                                </button>
                                 <div class="dropdown">
                                     <button class="btn btn-link p-0 text-muted" type="button" data-bs-toggle="dropdown">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="#"><i class="bi bi-pencil"></i> Edit</a>
-                                        </li>
-                                        <li><a class="dropdown-item" href="#"><i class="bi bi-printer"></i> Print</a>
-                                        </li>
+                                        @foreach ($nextStatuses as $status)
+                                            <li>
+                                                <a class="dropdown-item change-status" href="#"
+                                                    data-order-id="{{ $order->id }}"
+                                                    data-status-id="{{ $status->id }}">
+                                                    <i class="bi bi-arrow-right"></i> {{ $status->name }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                        <li><a class="dropdown-item" href="#" id="print-order"><i
+                                                    class="bi bi-printer"></i> Print</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -39,9 +47,8 @@
                             <tbody>
                                 @foreach ($order->orderDetails as $detail)
                                     @php
-                                        // dd($detail);
                                         $variant = $detail->productVariant;
-                                        $image = $variant->images->url;
+                                        $image = $variant->images ? $variant->images->url : 'default-image.jpg';
                                         $values = $variant->attributeValues;
                                     @endphp
                                     <tr>
@@ -53,9 +60,8 @@
                                                 </div>
                                                 <div class="flex-lg-grow-1 ms-3">
                                                     <h6 class="small mb-0">
-                                                        <a href="#" class="text-reset">
-                                                            {{ $variant->product->name }}
-                                                        </a>
+                                                        <a href="#"
+                                                            class="text-reset">{{ $variant->product->name }}</a>
                                                     </h6>
                                                     @foreach ($values as $value)
                                                         <div>
@@ -63,33 +69,38 @@
                                                                 {{ $value->value }}</span>
                                                         </div>
                                                     @endforeach
-
                                                 </div>
                                             </div>
                                         </td>
                                         <td>Quantity: {{ $detail->quantity }}</td>
-                                        <td class="text-end">{{ $detail->total }}</td>
+                                        <td class="text-end">{{ number_format($detail->total, 2) }} ₫</td>
                                     </tr>
                                 @endforeach
-
                             </tbody>
                             <tfoot>
                                 <tr>
-
                                     <td colspan="2">Subtotal</td>
-                                    <td class="text-end">{{ $order->subtotal }}</td>
+                                    <td class="text-end">{{ number_format($order->subtotal, 2) }} ₫</td>
                                 </tr>
                                 <tr>
                                     <td colspan="2">Shipping</td>
-                                    <td class="text-end">{{ $order->shipping }}</td>
+                                    <td class="text-end">{{ number_format($order->shipping ?? 0, 2) }} ₫</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">Discount (Code: {{ $order->id_voucher }})</td>
-                                    <td class="text-danger text-end">{{ $order->id_voucher ?? '' }}</td>
+                                    <td colspan="2">Discount</td>
+                                    <td class="text-danger text-end">
+                                        @if ($order->voucher)
+                                            {{ number_format($order->subtotal - $order->total + ($order->shipping ?? 0), 2) }}
+                                            ₫
+                                            (Code: {{ $order->voucher->code }})
+                                        @else
+                                            0 ₫
+                                        @endif
+                                    </td>
                                 </tr>
                                 <tr class="fw-bold">
                                     <td colspan="2">TOTAL</td>
-                                    <td class="text-end">{{ $order->total }}</td>
+                                    <td class="text-end">{{ number_format($order->total, 2) }} ₫</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -102,17 +113,16 @@
                             <div class="col-lg-6">
                                 <h3 class="h6">Payment Method</h3>
                                 <p>{{ $order->payment_method }} <br>
-                                    Total: {{ $order->total }} <span
-                                        class="badge bg-success rounded-pill">{{ $order->payment_status }}</span></p>
+                                    Total: {{ number_format($order->total, 2) }} ₫
+                                    <span class="badge bg-success rounded-pill">{{ $order->payment_status }}</span>
+                                </p>
                             </div>
                             <div class="col-lg-6">
-                                <h3 class="h6">Billing address</h3>
+                                <h3 class="h6">Billing Address</h3>
                                 <address>
-                                    <strong>{{ $order->user_name }}</strong>
-                                    <br>
-                                    <p> {{ $order->address->details($order->id_ward) }}</p>
-
-                                    <abbr title="Phone">P:</abbr> {{ $order->phone_number }}
+                                    <strong>{{ $order->user_data['name'] ?? 'N/A' }}</strong><br>
+                                    {{ $order->address_data['details'] ?? 'N/A' }}<br>
+                                    <abbr title="Phone">P:</abbr> {{ $order->user_data['phone'] ?? 'N/A' }}
                                 </address>
                             </div>
                         </div>
@@ -127,24 +137,67 @@
                         <p>{{ $order->note ?? 'No notes' }}</p>
                     </div>
                 </div>
+                <!-- Shipping Information -->
                 <div class="card mb-4">
-                    <!-- Shipping information -->
                     <div class="card-body">
                         <h3 class="h6">Shipping Information</h3>
-                        <strong>FedEx</strong>
-                        <span><a href="#" class="text-decoration-underline" target="_blank">FF1234567890</a> <i
-                                class="bi bi-box-arrow-up-right"></i> </span>
+                        <strong>FedEx</strong><br>
+                        <span><a href="#" class="text-decoration-underline">FF1234567890</a></span>
                         <hr>
                         <h3 class="h6">Address</h3>
                         <address>
-                            <strong>{{ $order->user_name }}</strong>
-                            <p> {{ $order->address->details($order->id_ward) }}</p>
-                            <br>
-                            <abbr title="Phone">P:</abbr> {{ $order->phone_number }}
+                            <strong>{{ $order->user_data['name'] ?? 'N/A' }}</strong><br>
+                            {{ $order->address_data['details'] ?? 'N/A' }}<br>
+                            <abbr title="Phone">P:</abbr> {{ $order->user_data['phone'] ?? 'N/A' }}
                         </address>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Script xử lý hành động -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // In đơn hàng
+            $('#print-order').on('click', function(e) {
+                e.preventDefault();
+                window.print();
+            });
+
+            // Tải invoice (giả lập)
+            $('#download-invoice').on('click', function(e) {
+                e.preventDefault();
+                alert('Downloading invoice...'); // Thay bằng logic thực tế
+            });
+
+            // Thay đổi trạng thái đơn hàng
+            $('.change-status').on('click', function(e) {
+                e.preventDefault();
+                const orderId = $(this).data('order-id');
+                const statusId = $(this).data('status-id');
+                const statusName = $(this).text().trim();
+
+                if (confirm(`Bạn có muốn chuyển trạng thái đơn hàng sang "${statusName}" không?`)) {
+                    axios.post('/api/orders/' + orderId + '/update-status', {
+                            status_id: statusId
+                        })
+                        .then(response => {
+                            if (response.data.success) {
+                                alert('Trạng thái đơn hàng đã được cập nhật!');
+                                location.reload(); // Tải lại trang để cập nhật giao diện
+                            } else {
+                                alert('Lỗi: ' + response.data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            alert('Đã xảy ra lỗi khi cập nhật trạng thái.');
+                        });
+                }
+            });
+        });
+    </script>
 @endsection

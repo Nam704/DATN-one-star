@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\CheckoutController;
 use App\Http\Controllers\Client\HomeController;
@@ -377,7 +378,7 @@ Route::prefix('client')->name('client.')->group(
             Route::get('/search', [SearchController::class, 'search'])->name('search');
         });
 
-        Route::prefix('carts')->controller(CartControllerSession::class)->name('carts.')->group(
+        Route::prefix('carts')->controller(CartController::class)->name('carts.')->group(
             function () {
                 Route::get('/get',  'getCart');
                 Route::post('/add',  'addToCart');
@@ -394,13 +395,13 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/', 'create')->name('create');
                 Route::get('/show', 'index')->name('index');
                 Route::post('/store', 'store')->name('store');
-                Route::post('/payment', 'payment')->name('payment');
+                // Route::post('/payment', 'payment')->name('payment');
             }
         );
         Route::prefix('orders')->controller(ClientOrderController::class)->name('orders.')->group(
             function () {
                 Route::post('/store', 'store')->name('store');
-                Route::get('/detail/{id}', 'detail')->name('detail');
+                Route::get('/detail/{id}', 'detailOrder')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
                 Route::post('/cancel', 'cancel')->name('cancel');
                 Route::post('/retry-payment', 'retryPayment')->name('retryPayment');

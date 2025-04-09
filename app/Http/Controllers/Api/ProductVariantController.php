@@ -24,4 +24,32 @@ class ProductVariantController extends Controller
         $total =  $this->product_variant->total($idProduct)->count();
         return response()->json(['total' => $total]);
     }
+    public function show($id)
+    {
+        $variant = Product_variant::with('attributeValues')->find($id);
+
+        if (!$variant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Biến thể không tồn tại',
+            ], 404);
+        }
+
+        // Chuẩn bị dữ liệu trả về
+        $data = [
+            'id' => $variant->id,
+            'sku' => $variant->sku,
+            'attributeValues' => $variant->attributeValues->map(function ($attr) {
+                return [
+                    'attribute_name' => $attr->attribute_name,
+                    'value' => $attr->value,
+                ];
+            }),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
 }

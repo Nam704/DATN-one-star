@@ -48,55 +48,19 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         try {
-            $dataSession = session('dataCheckout');
-
-            $data = [
-                'order' => $dataSession['cart'],
-                'details' => $dataSession['details'],
-                'user' => $request->input('userData'),
-            ];
-            $data['order']['payment_method'] = $request->input('payment_method');
-            $dataFormatted = [
-                "id_user" => $data["order"]["id_user"] ?? null,
-                "user_name" => $data["user"]["name"] ?? null,
-                "phone_number" => $data["user"]["phone"] ?? null,
-                "email" => $data["user"]["email"] ?? null,
-                "id_address" => $data["user"]["id_address"] ?? null,
-                "address_detail" => $data["user"]["address"] ?? null,
-                "note" => $data["user"]["order_note"] ?? null,
-                "subtotal" => $data["order"]["subTotal"] ?? 0,
-                "shipping" => $data["order"]["shipping"] ?? 0,
-                "payment_method" => $data["order"]["payment_method"],
-                "id_ward" => $data["user"]["ward"] ?? null,
-                "total" => $data["order"]["total"] ?? 0,
-                "status" => "Awaiting Payment",
-                "id_voucher" => null,
-            ];
-
-            $order_details = [];
-            foreach ($data["details"] as $item) {
-                $order_details[] = [
-                    "id_variant" => $item["id_variant"],
-                    "quantity" => $item["quantity"],
-                    "unit_price" => $item["price"],
-                    "total" => $item["product_total"],
-                ];
-            }
-            $dataFormatted['order_details'] = $order_details;
-            Log::info($dataFormatted);
-            $order = $this->orderService->store($dataFormatted);
-            $this->orderStatusService->updateInitialStatus($order);
-
-            $redirect_url = route('client.user.myAccount');
+            $data = $request->all();
+            $order = $this->orderService->createOrder($data);
             return response()->json([
-                'status' => 'success',
-                'redirect_url' => $redirect_url,
+                'status' => 200,
+                'message' => 'Đặt hàng thành công',
+                'data' => $order
             ]);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
             return response()->json([
-                'error' => $e->getMessage(),
-            ], 400);
+                'status' => 500,
+                'message' => $e->getMessage(),
+
+            ], 500);
         }
     }
     public function cancel(Request $request)
@@ -123,12 +87,11 @@ class OrderController extends Controller
         ];
         $this->notificationService->sendPrivate($data);
     }
-    public function detail($id)
+    public function detailOrder($id)
     {
-        $order = $this->orderService->getOrderDetail($id);
-        $listReason = $this->orderService->listReason();
+        // Lấy đơn hàng với dữ liệu tối ưu từ hàm details
+        $order = Order::findOrFail($id)->detailsOrder();
         // return $order;
-        return view('client.orders.detail', compact('order', 'listReason'));
-        // dd($order);
+        return view('client.orders.detail', ['order' => $order]);
     }
 }

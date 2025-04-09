@@ -9,24 +9,26 @@ class Order extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'id',
-        "code",
-        "user_name",
-        "id_user",
-        "phone_number",
-        "email",
-        "id_address",
-        "address_detail",
-        "note",
-        "subtotal",
-        "shipping",
-        "payment_method",
-        "payment_status",
-        "id_ward",
-        "total",
-        "id_order_status",
-        "id_voucher",
+        'code',
+        'id_user',
+        'user_data',
+        'address_data',
+        'voucher_data',
+        'note',
+        'subtotal',
+        'shipping',
+        'total',
+        'payment_method',
+        'payment_status',
+        'id_order_status',
+        'created_at',
+        'updated_at',
+    ];
 
+    protected $casts = [
+        'user_data' => 'array',
+        'address_data' => 'array',
+        'voucher_data' => 'array',
     ];
     public function refunds()
     {
@@ -81,35 +83,62 @@ class Order extends Model
             return $detail->quantity * $detail->unit_price;
         });
     }
-    public function details()
-    {
-        return $this->load([
-            "orderDetails" => function ($query) {
-                $query->select("id", "id_order", "id_variant", "quantity", "unit_price", "total")
-                    ->with([
-                        "productVariant" => function ($query) {
-                            $query->select('id', 'sku', 'id_product')
-                                ->with([
-                                    "product" => function ($query) {
-                                        $query->select('id', 'name', 'image_primary', 'id_brand', 'id_category')
-                                            ->with([
-                                                "Category" => function ($query) {
-                                                    $query->select('id', 'name');
-                                                },
-                                                "Brand" => function ($query) {
-                                                    $query->select('id', 'name');
-                                                }
-                                            ]);
-                                    },
-                                    "images" => function ($query) {
-                                        $query->select('id', 'id_product_variant', 'url');
-                                    },
-                                    "attributeValues"
+    // Hàm details tối ưu hóa dữ liệu
 
-                                ]);
-                        }
-                    ]);
-            }
+    public function detailsOrder()
+    {
+        // Lấy thông tin đơn hàng cơ bản
+        $orderData = $this->only([
+            'id',
+            'code',
+            'created_at',
+            'payment_method',
+            'payment_status',
+            'subtotal',
+            'shipping',
+            'total',
+            'note'
         ]);
+
+        // Lấy thông tin user từ user_data (JSON)
+        $userData = json_decode($this->user_data, true);
+        $orderData['user_name'] = $userData['name'] ?? 'N/A';
+        $orderData['user_phone'] = $userData['phone'] ?? 'N/A';
+        $orderData['user_email'] = $userData['email'] ?? 'N/A';
+
+        // Lấy thông tin địa chỉ từ address_data (JSON)
+        $addressData = json_decode($this->address_data, true);
+        $orderData['address'] = $addressData['address_detail'] ?? 'N/A';
+        $orderData['ward'] = $addressData['name_ward'] ?? 'N/A';
+        $orderData['district'] = $addressData['name_district'] ?? 'N/A';
+        $orderData['province'] = $addressData['name_province'] ?? 'N/A';
+
+        // Lấy thông tin voucher từ voucher_data (JSON, nếu có)
+        $voucherData = json_decode($this->voucher_data, true);
+        $orderData['voucher_code'] = $voucherData['code'] ?? 'N/A';
+
+        // Lấy trạng thái đơn hàng từ quan hệ orderStatus
+        $orderData['order_status'] = $this->orderStatus ? $this->orderStatus->only('id', 'name') : null;
+
+        // Lấy chi tiết đơn hàng từ orderDetails và variant_data (JSON)
+        $orderDetails = $this->orderDetails->map(function ($detail) {
+            $variantData = json_decode($detail->variant_data, true);
+
+            return [
+                'id' => $detail->id,
+                'quantity' => $detail->quantity,
+                'unit_price' => $detail->unit_price,
+                'total' => $detail->total,
+                'name' => $variantData['name'] ?? 'N/A',
+                'sku' => $variantData['sku'] ?? 'N/A',
+                'image' => $variantData['image'] ?? 'default.jpg',
+                'attributes' => $variantData['attribute_values'] ?? [],
+            ];
+        });
+
+        // Thêm chi tiết đơn hàng vào dữ liệu trả về
+        $orderData['order_details'] = $orderDetails;
+
+        return $orderData;
     }
 }

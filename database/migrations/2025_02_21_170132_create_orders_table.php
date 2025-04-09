@@ -13,23 +13,20 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique()->nullable();
-            $table->foreignId('id_user')->nullable()->constrained('users')->onDelete('cascade');
-            $table->string('user_name');
-            $table->string('phone_number');
-            $table->string('email');
-            $table->foreignId('id_address')->nullable()->constrained('addresses')->onDelete('cascade');
-            $table->string('address_detail')->nullable();
+            $table->string('code')->unique();
+            $table->foreignId('id_user')->nullable()->constrained('users')->onDelete('set null')->index(); // Thêm index rõ ràng
+            $table->json('user_data');
+            $table->json('address_data');
+            $table->json('voucher_data')->nullable();
             $table->string('note')->nullable();
             $table->decimal('subtotal', 15, 2);
             $table->decimal('shipping', 10, 2)->nullable();
             $table->decimal('total', 15, 2);
             $table->string('payment_method');
-            $table->string('payment_status')->nullable();
-            $table->foreignId('id_ward')->nullable()->constrained('wards')->onDelete('cascade');
-            $table->foreignId('id_order_status')->nullable()->constrained('order_statuses');
-            $table->foreignId('id_voucher')->nullable()->constrained('vouchers');
+            $table->string('payment_status')->nullable()->index(); // Thêm index
+            $table->foreignId('id_order_status')->nullable()->constrained('order_statuses')->onDelete('cascade');
             $table->timestamps();
+            $table->index('created_at'); // Thêm index
         });
     }
 

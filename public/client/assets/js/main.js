@@ -1,6 +1,6 @@
 (function ($) {
     "use strict";
-    console.log("hello client");
+
     new WOW().init();
 
     /*---background image---*/

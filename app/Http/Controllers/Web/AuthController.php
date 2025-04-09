@@ -81,10 +81,10 @@ class AuthController extends Controller
             return redirect()->back()->with('error', 'An error occurred during login.');
         }
     }
-    function logout()
+    function logout(Request $request)
     {
         Auth::logout();
-
+        $request->session()->invalidate();
         return redirect()->route('auth.login');
     }
     public function getFormRegister()

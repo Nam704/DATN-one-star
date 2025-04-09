@@ -21,7 +21,7 @@ class ProductController extends Controller
             ->where('id', '!=', $product->id)
             ->limit(4)
             ->get();
-
+        // return $product;
         return view('client.detail.index', compact('product', 'relatedProducts'));
     }
 
