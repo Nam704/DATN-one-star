@@ -13,37 +13,37 @@ class OrderStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        // Danh sách tất cả trạng thái với group_status
+        // Danh sách tất cả trạng thái với group_status đã gộp
         $statuses = [
-            // Thanh toán & xử lý đơn
-            'Awaiting Payment' => 'Payment Pending',
-            'Payment Verification' => 'Payment Pending',
-            'Paid' => 'Paid',
-            'Pending' => 'In Progress',
-            'Processing' => 'In Progress',
-            'Shipping' => 'In Progress',
-            'Delivered' => 'Delivered',
+            // Thanh toán
+            'Awaiting Payment' => 'Payment',
+            'Payment Verification' => 'Payment',
+            'Paid' => 'Payment',
+            'Payment Failed' => 'Payment',
+            'Payment Expired' => 'Payment',
+            'Payment Retry Requested' => 'Payment',
 
-            // Lỗi & Retry thanh toán
-            'Payment Failed' => 'Payment Issue',
-            'Payment Expired' => 'Payment Issue',
-            'Payment Retry Requested' => 'Payment Issue',
+            // Xử lý đơn hàng
+            'Pending' => 'Order Processing',
+            'Processing' => 'Order Processing',
+            'Shipping' => 'Order Processing',
+            'Delivered' => 'Order Processing',
 
             // Hủy đơn
-            'Cancel Requested' => 'Cancel Requested',
-            'Cancel Under Review' => 'Under Review',
-            'Cancel Approved' => 'Cancelled',
-            'Cancel Rejected' => 'Under Review',
-            'Cancelled' => 'Cancelled',
+            'Cancel Requested' => 'Cancellation',
+            'Cancel Under Review' => 'Cancellation',
+            'Cancel Approved' => 'Cancellation',
+            'Cancel Rejected' => 'Cancellation',
+            'Cancelled' => 'Cancellation',
 
             // Hoàn đơn
-            'Return Requested' => 'Return Requested',
-            'Return Under Review' => 'Under Review',
-            'Return Approved' => 'Refunded',
-            'Return Rejected' => 'Under Review',
-            'Refunded' => 'Refunded',
+            'Return Requested' => 'Return/Refund',
+            'Return Under Review' => 'Return/Refund',
+            'Return Approved' => 'Return/Refund',
+            'Return Rejected' => 'Return/Refund',
+            'Refunded' => 'Return/Refund',
 
-            // Trường hợp khác
+            // Giao hàng thất bại
             'Failed Delivery' => 'Delivery Failed',
         ];
 
@@ -52,7 +52,7 @@ class OrderStatusSeeder extends Seeder
         foreach ($statuses as $statusName => $groupStatus) {
             $statusIds[$statusName] = DB::table('order_statuses')->insertGetId([
                 'name' => $statusName,
-                'group_status' => $groupStatus, // Thêm group_status
+                'group_status' => $groupStatus,
                 'created_at' => now(),
                 'updated_at' => now(),
                 'next_status_id' => null,
@@ -82,7 +82,7 @@ class OrderStatusSeeder extends Seeder
         DB::table('order_statuses')->where('id', $statusIds['Return Under Review'])->update(['next_status_id' => $statusIds['Return Approved']]);
         DB::table('order_statuses')->where('id', $statusIds['Return Approved'])->update(['next_status_id' => $statusIds['Refunded']]);
 
-        // Giao hàng thất bại → hủy hoặc hoàn
+        // Giao hàng thất bại → hủy
         DB::table('order_statuses')->where('id', $statusIds['Failed Delivery'])->update(['next_status_id' => $statusIds['Cancel Requested']]);
 
         // Các trạng thái kết thúc

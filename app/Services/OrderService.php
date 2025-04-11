@@ -48,7 +48,7 @@ class OrderService
             $dataOrder = $requestData['data_order'];
             $checkoutData = session('checkout_data');
             if (!$checkoutData) {
-                throw new \Exception('Không tìm thấy dữ liệu checkout trong session');
+                throw new \Exception('Dữ liệu đơn hàng đã được dùng, hoặc hết hạn!');
             }
             $variants = $checkoutData['variants'];
             $coupon = $checkoutData['coupon'];

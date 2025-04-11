@@ -141,4 +141,27 @@ class Order extends Model
 
         return $orderData;
     }
+    public function canRetryPayment()
+    {
+        // Check if payment method is VNPAY
+        if ($this->payment_method !== 'VNPAY') {
+            return false;
+        }
+
+        // Eligible payment statuses for retry
+        $eligibleStatuses = ['Payment Failed', 'Payment Expired'];
+        if (!in_array($this->payment_status, $eligibleStatuses)) {
+            return false;
+        }
+
+        // Check product availability
+        foreach ($this->orderDetails as $detail) {
+            $variant = Product_variant::find($detail->id_variant); // Assuming a Variant model exists
+            if (!$variant || $variant->stock < $detail->quantity) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

@@ -42,7 +42,7 @@ $(document).ready(function () {
                     window.location.href = response.data.redirect_url;
                 } else {
                     // Cho COD, chuyển hướng đến trang thành công
-                    window.location.href = `${GlobalUtils.baseUrl}/client/orders/success`;
+                    window.location.href = `${GlobalUtils.baseUrl}/client/users/my-account`;
                 }
             })
             .catch((error) => {
