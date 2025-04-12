@@ -22,12 +22,26 @@ class RoleMiddleware
             return $next($request);
         }
 
-        // Kiểm tra nếu vai trò người dùng có trong danh sách vai trò được phép
-        if (!in_array($userRole, $roles)) {
-            abort(403, 'Unauthorized action.');
-            // Không cho phép truy cập
+          // Nếu không có roles cụ thể được chỉ định, cho phép truy cập tất cả các role
+          if (empty($roles)) {
+            return $next($request);
+        } else {
+            // Kiểm tra nếu vai trò người dùng có trong danh sách vai trò được chỉ định
+            if (in_array($userRole, $roles)) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        // Thay vì abort, redirect về dashboard với thông báo
+        return redirect()->route('admin.dashboard')->with('error', 'Bạn không có quyền truy cập chức năng này!'); //phần mới
+
+        // // Kiểm tra nếu vai trò người dùng có trong danh sách vai trò được phép
+        // if (!in_array($userRole, $roles)) {
+        //     abort(403, 'Unauthorized action.');
+        //     // Không cho phép truy cập
+        // }
+
+        // return $next($request); phần cũ
+
     }
 }

@@ -40,7 +40,9 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 use App\Http\Controllers\Web\ChatController;
+use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\ProductDashboardController;
+use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
@@ -327,6 +329,24 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('detail/{id}',  'detailVoucher')->name('detailVoucher');
             Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
             Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
+        });
+
+         // Roles management - Sử dụng role:admin để đảm bảo chỉ admin mới truy cập được
+         Route::prefix('roles')->name('roles.')->middleware(['role:admin'])->controller(RoleController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/{id}/permissions', 'showPermissions')->name('permissions');
+            Route::put('/{id}/permissions', 'updatePermissions')->name('permissions.update');
+        });
+
+        // Route kiểm tra quyền hạn
+        Route::prefix('permissions')->name('permissions.')->controller(PermissionController::class)->group(function () {
+            Route::get('/check', 'checkPermission')->name('check');
+            Route::get('/test/{permission}', 'testAccess')->name('test');
         });
     }
 );

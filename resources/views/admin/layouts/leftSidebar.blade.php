@@ -29,7 +29,8 @@
         <ul class="side-nav">
 
             <li class="side-nav-title">Main</li>
-
+            
+            @if(auth()->user()->hasPermission('dashboard-access'))
             <li class="side-nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="side-nav-link">
                     <i class="ri-dashboard-3-line"></i>
@@ -37,11 +38,13 @@
                     <span> Dashboard </span>
                 </a>
             </li>
-
+            @endif    
+            
+            @if(auth()->user()->hasPermission('view-orders'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false" aria-controls="sidebarPages"
                     class="side-nav-link">
-                    <i class="ri-pages-line"></i>
+                    <i class="ri-file-list-3-line"></i>
                     <span> Orders </span>
                     <span class="menu-arrow"></span>
                 </a>
@@ -54,7 +57,9 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-users'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
                     aria-controls="sidebarPagesAuth" class="side-nav-link">
@@ -71,11 +76,13 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-products'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarLayouts" aria-expanded="false" aria-controls="sidebarLayouts"
                     class="side-nav-link">
-                    <i class="ri-layout-line"></i>
+                    <i class="ri-box-3-line"></i>
                     <span class="badge bg-warning float-end">New</span>
                     <span> Product </span>
                 </a>
@@ -84,16 +91,63 @@
                         <li>
                             <a href="{{ route('admin.products.list') }}">List</a>
                         </li>
+                        @if(auth()->user()->hasPermission('create-products'))
                         <li>
                             <a href="{{ route('admin.products.create') }}">Create</a>
                         </li>
+                        @endif
                     </ul>
                 </div>
             </li>
+            @endif
             
 
             <li class="side-nav-title">Components</li>
 
+            <!-- start thêm -->
+            @if(auth()->user()->hasPermission('view-roles'))
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarRoles" aria-expanded="false" aria-controls="sidebarRoles"
+                        class="side-nav-link">
+                        <i class="ri-shield-user-line"></i>
+                        <span> Roles </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarRoles">
+                        <ul class="side-nav-second-level">
+                            <li>
+                                <a href="{{ route('admin.roles.index') }}">List</a>
+                            </li>
+                            @if(auth()->user()->hasPermission('create-roles'))
+                                <li>
+                                    <a href="{{ route('admin.roles.create') }}">Create</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                </li>
+            @endif
+
+            {{-- @if(auth()->user()->role->name == 'admin') --}}
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarPermissions" aria-expanded="false"
+                        aria-controls="sidebarPermissions" class="side-nav-link">
+                        <i class="ri-key-2-line"></i>
+                        <span> Kiểm tra quyền </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarPermissions">
+                        <ul class="side-nav-second-level">
+                            <li>
+                                <a href="{{ route('admin.permissions.check') }}">Kiểm tra quyền</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            {{-- @endif --}}
+        <!-- end thêm -->
+             
+        @if(auth()->user()->hasPermission('view-products'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarBaseUI" aria-expanded="false" aria-controls="sidebarBaseUI"
                     class="side-nav-link">
@@ -115,7 +169,9 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-products'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false"
                     aria-controls="sidebarExtendedUI" class="side-nav-link">
@@ -132,8 +188,10 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
             {{-- blogs --}}
+            @if(auth()->user()->hasPermission('view-blogs'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false"
                     aria-controls="sidebarThirdLevel" class="side-nav-link">
@@ -150,8 +208,10 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
             {{-- contact --}}
+            @if(auth()->user()->hasPermission('view-contacts') || auth()->user()->hasPermission('view-users'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
                     aria-controls="sidebarPagesAuth" class="side-nav-link">
@@ -167,11 +227,13 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-products'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
                     class="side-nav-link">
-                    <i class="ri-pencil-ruler-2-line"></i>
+                    <i class="ri-history-line"></i>
                     <span> Audit </span>
                     <span class="menu-arrow"></span>
                 </a>
@@ -184,11 +246,13 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-products') || auth()->user()->hasPermission('view-categories'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false"
                     aria-controls="sidebarCharts" class="side-nav-link">
-                    <i class="ri-donut-chart-fill"></i>
+                    <i class="ri-price-tag-3-line"></i>
                     <span> Brand </span>
                     <span class="menu-arrow"></span>
                 </a>
@@ -201,11 +265,13 @@
                     </ul>
                 </div>
             </li>
-
+            @endif
+            
+            @if(auth()->user()->hasPermission('view-categories'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarForms" aria-expanded="false" aria-controls="sidebarForms"
                     class="side-nav-link">
-                    <i class="ri-survey-line"></i>
+                    <i class="ri-grid-line"></i>
                     <span> Category </span>
                     <span class="menu-arrow"></span>
                 </a>
@@ -218,7 +284,9 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-products'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false"
                     aria-controls="sidebarTables" class="side-nav-link">
@@ -235,11 +303,13 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-reports'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarMaps" aria-expanded="false" aria-controls="sidebarMaps"
                     class="side-nav-link">
-                    <i class="ri-map-pin-line"></i>
+                    <i class="ri-pie-chart-2-line"></i>
                     <span>Statistics </span>
                     <span class="menu-arrow"></span>
                 </a>
@@ -252,11 +322,13 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
+            @if(auth()->user()->hasPermission('view-vouchers'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarMultiLevel" aria-expanded="false"
                     aria-controls="sidebarMultiLevel" class="side-nav-link">
-                    <i class="ri-share-line"></i>
+                    <i class="ri-coupon-line"></i>
                     <span> Vouchers </span>
                     <span class="menu-arrow"></span>
                 </a>
@@ -268,6 +340,7 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
         </ul>
         <!--- End Sidemenu -->

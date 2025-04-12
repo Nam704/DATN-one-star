@@ -20,6 +20,7 @@ class Product extends Model
         'id_category',
         'description',
         'image_primary',
+        'view',
         'status',
         'created_at',
         'updated_at',
