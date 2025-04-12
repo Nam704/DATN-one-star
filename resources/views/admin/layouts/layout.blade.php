@@ -26,8 +26,8 @@
         <div class="content-page">
             <div class="content">
 
-              <!-- Flash Messages phần thêm--> 
-              <div class="container-fluid mt-2">
+                <!-- Flash Messages -->
+                <div class="container-fluid mt-2">
                     @if(session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
@@ -55,8 +55,8 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
-                </div> 
-                <!-- End Flash Messages phần thêm -->
+                </div>
+                <!-- End Flash Messages -->
 
                 <!-- Start Content-->
                 @yield('content')
@@ -96,9 +96,8 @@
     @stack('scripts')
     <script>
         const currentUserId = "{{ auth()->id() }}";
-
-         // Auto-hide alerts after 5 seconds
-         document.addEventListener('DOMContentLoaded', function () {
+ // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function () {
              setTimeout(function () {
                  const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function (alert) {
@@ -106,7 +105,7 @@
                     bsAlert.close();
                 });
             }, 5000);
-        }); // Phần thêm
+        });
     </script>
     @vite('resources/js/app.js')
     @vite('resources/js/public.js')

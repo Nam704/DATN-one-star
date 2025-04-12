@@ -4,10 +4,32 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <h4 class="page-title">Kiểm tra quyền hạn</h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="page-title">Kiểm tra quyền hạn</h4>
+                    </div>
                 </div>
             </div>
         </div>
+
+        @if(session('success'))
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <div class="row">
             <div class="col-md-6">
@@ -70,7 +92,7 @@
                                                 @foreach($modulePermissions as $permission)
                                                     <li
                                                         class="list-group-item d-flex justify-content-between align-items-center 
-                                                                                                                                {{ in_array($permission->name, $rolePermissions) ? 'list-group-item-success' : '' }}">
+                                                                                                                                                                    {{ in_array($permission->name, $rolePermissions) ? 'list-group-item-success' : '' }}">
                                                         {{ $permission->display_name }}
                                                         <span class="d-flex">
                                                             <small class="me-2 text-muted">{{ $permission->name }}</small>

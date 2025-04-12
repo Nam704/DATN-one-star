@@ -347,6 +347,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         Route::prefix('permissions')->name('permissions.')->controller(PermissionController::class)->group(function () {
             Route::get('/check', 'checkPermission')->name('check');
             Route::get('/test/{permission}', 'testAccess')->name('test');
+            Route::get('/refresh', 'refreshPermissions')->name('refresh')->middleware('role:admin');
         });
     }
 );

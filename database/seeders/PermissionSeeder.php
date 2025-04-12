@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class PermissionSeeder extends Seeder
 {
@@ -14,7 +15,19 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Define modules
+        // Tạm thời tắt kiểm tra khóa ngoại
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        // Xóa dữ liệu cũ trong bảng role_permissions
+        DB::table('role_permissions')->truncate();
+
+        // Xóa dữ liệu cũ trong bảng permissions
+        DB::table('permissions')->truncate();
+
+        // Bật lại kiểm tra khóa ngoại
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Define modules (cập nhật đầy đủ các module từ routes)
         $modules = [
             'users',
             'roles',
@@ -24,6 +37,11 @@ class PermissionSeeder extends Seeder
             'blogs',
             'vouchers',
             'reports',
+            'suppliers',
+            'imports',
+            'attributes',
+            'brands',
+            'contacts',
         ];
 
         // Define actions
@@ -81,13 +99,33 @@ class PermissionSeeder extends Seeder
             $employeePermissions = Permission::whereIn('name', [
                 'view-products',
                 'edit-products',
+                'create-products',
                 'view-orders',
                 'edit-orders',
                 'view-categories',
+                'view-suppliers',
+                'view-imports',
+                'view-attributes',
+                'view-brands',
                 'dashboard-access',
+                'view-reports',
             ])->get();
 
             $employeeRole->permissions()->attach($employeePermissions->pluck('id')->toArray());
+        }
+
+        // Assign basic permissions to user role
+        $userRole = Role::where('name', 'user')->first();
+
+        if ($userRole) {
+            $userPermissions = Permission::whereIn('name', [
+                'view-products',
+                'view-categories',
+                'view-brands',
+                'view-blogs',
+            ])->get();
+
+            $userRole->permissions()->attach($userPermissions->pluck('id')->toArray());
         }
     }
 }

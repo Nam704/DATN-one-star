@@ -16,7 +16,8 @@ class PermissionMiddleware
      */
     public function handle(Request $request, Closure $next, $permissions): Response
     {
-        if (Auth::guest()) {
+        // Nếu chưa đăng nhập, chuyển hướng về trang đăng nhập
+        if (!Auth::check()) {
             return redirect()->route('auth.getFormLogin');
         }
 
