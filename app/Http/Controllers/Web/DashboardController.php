@@ -57,7 +57,6 @@ class DashboardController extends Controller
         return response()->json($orderStatusStats);
     }
 
-
     public function dailyStatistics_Dashboard()
     {
         $statusData = Order::whereDate('created_at', Carbon::today())
