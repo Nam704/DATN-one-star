@@ -7,8 +7,8 @@
     <div class="row">
         <!-- Card: Tổng Đơn Hàng -->
         <div class="col-md-3">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
                     <h6 class="text-uppercase mt-0">Tổng Đơn Hàng</h6>
                     <h2 class="my-2">{{ number_format($totalOrders) }}</h2>
                 </div>
@@ -17,8 +17,8 @@
 
         <!-- Card: Tổng Đơn Pending -->
         <div class="col-md-3">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
+            <div class="card text-white bg-success">
+                <div class="card-body">
                     <h6 class="text-uppercase mt-0">Tổng Đơn Pending</h6>
                     <h2 class="my-2">{{ number_format($pendingOrders) }}</h2>
                 </div>
@@ -122,6 +122,74 @@
             </div> <!-- End Card -->
         </div>
     </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-widgets">
+                        <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
+                        <a data-bs-toggle="collapse" href="#cancel-reasons-collapse" role="button" aria-expanded="false"
+                            aria-controls="cancel-reasons-collapse">
+                            <i class="ri-subtract-line"></i>
+                        </a>
+                        <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
+                    </div>
+                    <h5 class="header-title mb-3">Lý Do Hủy Đơn</h5>
+                    <div id="cancel-reasons-collapse" class="collapse show">
+                        @if ($cancelReasons->isNotEmpty())
+                            <div class="list-group">
+                                @foreach ($cancelReasons as $reason)
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-0">{{ $reason->reason }}</h5>
+                                                <small class="text-muted">
+                                                    Số lượng: {{ number_format($reason->total) }}
+                                                </small>
+                                            </div>
+                                            @if (isset($cancelledProductsGrouped[$reason->reason_id]))
+                                                <button class="btn btn-sm btn-outline-primary" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#reason-{{ $reason->reason_id }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="reason-{{ $reason->reason_id }}">
+                                                    Xem chi tiết
+                                                </button>
+                                            @endif
+                                        </div>
+                                        @if (isset($cancelledProductsGrouped[$reason->reason_id]))
+                                            <div class="collapse mt-2" id="reason-{{ $reason->reason_id }}">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sản Phẩm</th>
+                                                            <th>Số Lượng Hủy</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($cancelledProductsGrouped[$reason->reason_id] as $prod)
+                                                            <tr>
+                                                                <td>{{ $prod->product_name }}</td>
+                                                                <td>{{ number_format($prod->quantity) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-center text-muted">Không có dữ liệu lý do hủy cho ngày này.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-lg-6">
             <div class="card">

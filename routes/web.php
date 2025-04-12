@@ -49,7 +49,6 @@ Route::get('/', function () {
     return view('admin.index');
 });
 
-
 // Route::get('/client/index', function () {
 //     return view('client.index');
 // });
@@ -107,6 +106,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
             Route::get('order-status', [DashboardController::class, 'orderStatusStatistics'])->name('orderStatus');
+            Route::get('/daily-statistics-dashboard', [DashboardController::class, 'dailyStatistics_Dashboard'])->name('dailyStatistics_Dashboard');
+            Route::get('/weekly-order-stats', [DashboardController::class, 'weeklyOrderStats'])->name('weeklyOrderStats');
+
         });
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
