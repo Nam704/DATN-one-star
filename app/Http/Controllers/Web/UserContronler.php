@@ -9,7 +9,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Auth;
 
 class UserContronler extends Controller
 {
@@ -41,8 +41,42 @@ class UserContronler extends Controller
 
     public function index()
     {
-        $users = User::with('role')->get();
-        return view('admin.user.list', compact('users'));
+        $users = User::with('role')
+        ->whereHas('role', function ($query) {
+            $query->where('name', 'admin');
+        })
+        ->get();
+
+    return view('admin.user.list', compact('users'));
+    }
+
+    
+    public function listemployee()
+    {
+        $users = User::with('role')
+        ->whereHas('role', function ($query) {
+            $query->where('name', '	employee');
+        })
+        ->get();
+
+    return view('admin.user.listemployee', compact('users'));
+    }
+    
+    public function listuser()
+    {
+        $users = User::with('role')
+        ->whereHas('role', function ($query) {
+            $query->where('name', '	user');
+        })
+        ->get();
+
+    return view('admin.user.listuser', compact('users'));
+    }
+    public function listtkkhoa()
+    {
+
+     $listTaiKhoan = User::where('status', 'inactive')->get(); // Lọc các tài khoản bị khóa
+    return view('admin.user.listtkkhoa',compact('listTaiKhoan'));
     }
 
     public function create()
@@ -64,7 +98,31 @@ class UserContronler extends Controller
 
     public function update(Request $request, $id) {}
 
-    public function destroy($id) {}
+    public function lock($id)
+{
+    $user = User::findOrFail($id);
+    $user->is_lock = 'inactive'; // khóa tài khoản
+    $user->save();
+
+    // Nếu tự khóa chính mình thì đăng xuất
+    if (Auth::id() === $user->id) {
+        Auth::logout();
+        return redirect()->view('client.index')->with('success', 'Tài khoản của bạn đã bị khóa và bạn đã bị đăng xuất.');
+    }
+
+    // Chuyển hướng phù hợp theo vai trò
+    $role = $user->role->name;
+    if ($role === 'admin') {
+        return redirect()->route('admin.users.listadmin')->with('success', 'Đã khóa tài khoản Admin.');
+    } elseif ($role === 'employee') {
+        return redirect()->route('admin.users.listemployee')->with('success', 'Đã khóa tài khoản Nhân viên.');
+    } elseif ($role === 'user') {
+        return redirect()->route('admin.users.listuser')->with('success', 'Đã khóa tài khoản Người dùng.');
+    }
+
+    return redirect()->back()->with('success', 'Tài khoản đã bị khóa.');
+}
+
 
     public function chart_user($id)
     {

@@ -238,6 +238,12 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         // Users
         Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('listemployee', 'listemployee')->name('listemployee');
+            Route::get('listuser', 'listuser')->name('listuser');
+            Route::get('listtkkhoa', 'listtkkhoa')->name('listtkkhoa');
+            Route::get('lock/{id}', 'lock')->name('lock');
+            Route::post('opentk/{id}', 'opentk')->name('opentk');
+
             Route::get('/create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('/{id}/show', 'show')->name('show');

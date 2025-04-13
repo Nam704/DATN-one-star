@@ -7,19 +7,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="page-title-box">
-                        <div class="page-title-right">
-                            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
-                                <i class="ri-add-line align-middle me-1"></i>
-                                Add User
-                            </a>
-                            <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary me-2">
-                                <i class="ri-delete-bin-line align-middle me-1"></i>
-                                Trash
-                            </a>
-                            <a class="btn btn-soft-info" href="{{ route('admin.users.charts') }}"> <i
-                                    class="mdi mdi-chart-areaspline fs-18 me-1 lh-1"></i>Thống kê</a>
-                        </div>
-                        <h4 class="page-title">Users Management</h4>
+                        <h4 class="page-title">Danh sách Tài khoản khóa</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -38,7 +26,7 @@
                         </thead>
 
                         <tbody>
-                            @foreach ($users as $key => $value)
+                            @foreach ($listTaiKhoan as $key => $value)
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $value->name }}</td>
@@ -55,34 +43,18 @@
 
                                 </td>
                                 <td>
-                                    <div class="btn-group">
-                                        <a href="{{ route('admin.users.show', $value->id) }}">
-                                            <button type="button" class="btn btn-sm btn-info me-1" title="Xem chi tiết">
-                                                <i class="mdi mdi-eye-outline"></i>
-                                            </button>
-                                        </a>
-
-                                        <a href="{{ route('admin.users.edit', $value->id) }}">
-                                            <button type="button" class="btn btn-sm btn-success me-1" title="Sửa người dùng">
-                                                <i class="mdi mdi-account-edit-outline"></i>
-                                            </button>
-                                        </a>
-
-                                        <a href="{{ route('admin.users.lock', $value->id) }}">
-                                            <button type="button" class="btn btn-secondary btn-sm" onclick="return confirm('Bạn có muốn khóa tài khoản này không')">  <i class="mdi mdi-lock me-1 fs-5"></i></button>
-                                        </a>
-                                    </div>
+                                  
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
-                            <tr>
+                        <tr>
                                 <th>STT</th>
-                                <th>Danh mục</th>
+                                <th>Tên người dùng</th>
                                 <th>Hình ảnh</th>
-                                <th>Tiêu đề</th>
-                                <th>Ngày đăng tải</th>
+                                <th>Email</th>
+                                <th>Phân quyền</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
