@@ -17,6 +17,9 @@ class ProductController extends Controller
     public function detail($id)
     {
         $product = $this->productService->productDetail($id);
+         // Tự động tăng view mỗi lần xem chi tiết
+         $product->increment('view');
+         
         $relatedProducts = Product::where('id_category', $product->id_category)
             ->where('id', '!=', $product->id)
             ->limit(4)
