@@ -7,6 +7,7 @@ use App\Models\Ward;
 use App\Models\UserAddress;
 use App\Services\UserService;
 use App\Services\AddressService;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -15,18 +16,22 @@ class AuthController extends Controller
     protected $cartService;
     protected $userService;
     protected $addressService;
-
-    public function __construct(UserService $userService, AddressService $addressService)
-    {
+    protected $orderService;
+    public function __construct(
+        UserService $userService,
+        AddressService $addressService,
+        OrderService $orderService
+    ) {
+        $this->orderService = $orderService;
         $this->userService = $userService;
         $this->addressService = $addressService;
     }
 
-    public function myAccount()
+    public function myAccount(Request $request)
     {
         $user = $this->userService->details();
         $addresses = $user ? $this->userService->getAddress($user) : collect([]);
-        $orders = $user ? $user->orders()->orderBy("id", "DESC")->paginate(10) : collect([]);
+        $data = $this->orderService->searchOrders($request);
         $wardData = [];
         if ($addresses->count() > 0) {
             $wardIds = $addresses->pluck('id_ward')->filter()->unique()->toArray();
@@ -35,7 +40,7 @@ class AuthController extends Controller
                 $wardData[$ward->id] = $ward;
             }
         }
-        return view('client.user.index', compact('user', 'addresses', 'orders', 'wardData'));
+        return view('client.user.index', compact('user', 'addresses', 'wardData'), $data);
     }
 
     public function createAddress(Request $request)

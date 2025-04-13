@@ -31,7 +31,7 @@
 
     <!-- Filter and Search -->
     <div class="filters mb-4">
-        <form method="GET" action="{{ route('client.orders.list') }}" class="row g-3">
+        <form method="GET" action="{{ route('client.user.myAccount') }}" class="row g-3">
             <!-- Status Tabs -->
             <div class="col-12">
                 <ul class="nav nav-tabs">
@@ -39,10 +39,12 @@
                         <a class="nav-link {{ request('status') == 'All' || !request('status') ? 'active' : '' }}"
                             href="?status=All">All</a>
                     </li>
-                    @foreach ($statuses as $status)
+                    @foreach ($groupStatuses as $groupStatus)
                         <li class="nav-item">
-                            <a class="nav-link {{ request('status') == $status->name ? 'active' : '' }}"
-                                href="?status={{ $status->name }}">{{ $status->name }}</a>
+                            <a class="nav-link {{ request('group_status') == $groupStatus ? 'active' : '' }}"
+                                href="?group_status={{ $groupStatus }}">{{ $groupStatus }}
+                                ({{ $groupStatusCounts[$groupStatus] ?? 0 }})
+                            </a>
                         </li>
                     @endforeach
                 </ul>
@@ -95,7 +97,7 @@
                 @foreach ($orders as $order)
                     <tr>
                         <td>{{ $order->code }}</td>
-                        <td>{{ $order->user_data['name'] ?? 'N/A' }}</td>
+                        <td>{{ json_decode($order->user_data, true)['name'] ?? 'N/A' }}</td>
                         <td>
                             <span
                                 class="badge {{ $order->orderStatus->group_status == 'Delivered' ? 'bg-success' : ($order->orderStatus->group_status == 'Cancelled' ? 'bg-danger' : 'bg-warning') }}">

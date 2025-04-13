@@ -28,8 +28,7 @@ class OrderStatusService
         $method = $order->payment_method;
 
         if ($method === 'COD') {
-            $this->handleCOD($order);
-            return null; // Không có URL chuyển hướng cho COD
+            return $this->handleCOD($order);
         } elseif ($method === 'VNPAY') {
             return $this->handleVNPAY($order); // Trả về dữ liệu từ handleVNPAY
         } else {
@@ -45,6 +44,12 @@ class OrderStatusService
         $order->id_order_status = $pending->id;
         $order->payment_status = 'Awaiting Payment';
         $order->save();
+        $redirectUrl = route('client.user.myAccount');
+        return [
+            'code' => '00',
+            'message' => 'success',
+            'redirectUrl' => $redirectUrl
+        ];
     }
 
     protected function handleVNPAY(Order $order)

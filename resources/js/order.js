@@ -1,117 +1,84 @@
 import Echo from "laravel-echo";
-import "./bootstrap";
-
+import "./app.js";
 $(document).ready(function () {
-    loadOrder();
-    $(document).on("click", ".accept", function (e) {
-        e.preventDefault(); // Ngừng hành động mặc định của nút
-
-        var orderId = $(this).data("order-id"); // Lấy ID đơn hàng từ thuộc tính data
-
-        var url = "http://127.0.0.1:8000/admin/orders/update-status/" + orderId;
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: {
-                _token: $("meta[name='csrf-token']").attr("content"),
-            },
-            success: function (response) {
-                // Xử lý khi cập nhật trạng thái thành công
-                alert(response.message); // Hiển thị thông báo thành công
-                loadOrder();
-            },
-            error: function (xhr, status, error) {
-                // // Xử lý khi có lỗi
-                // alert("Có lỗi xảy ra, vui lòng thử lại.");
-                console.log(xhr.responseText);
-                alert(error);
-            },
-        });
-    });
-    window.Echo.private("private-notifications").listen(
-        "PrivateNotification",
-        (event) => {
-            // Cập nhật giao diện thông báo
-            loadOrder();
-        }
-    );
-    $("#statuses").change(function (e) {
-        e.preventDefault();
-        loadOrder();
-    });
-
-    selectAll();
-    acceptAll();
-});
-function acceptAll() {
-    $(".accept-all").click(function (e) {
-        e.preventDefault();
-
-        var ids = idSelect();
-        console.log(ids);
-        $.ajax({
-            type: "POST",
-            url: "http://127.0.0.1:8000/admin/orders/accept-all",
-            data: {
-                _token: $("meta[name='csrf-token']").attr("content"),
-                ids: ids,
-            },
-            success: function (response) {
-                // Xử lý khi cập nhật trạng thái thành công
-                alert(response.message); // Hiển thị thông báo thành công
-                $(".select-all").prop("checked", false);
-                loadOrder();
-            },
-            error: function (xhr, status, error) {
-                // // Xử lý khi có lỗi
-                // alert("Có lỗi xảy ra, vui lòng thử lại.");
-                console.log(xhr.responseText);
-                alert(error);
-            }, 
-        });
-    });
-}
-function idSelect() {
-    var checkboxes = $(".checkbox-select:checked");
-    var ids = Array.from(checkboxes).map(function (checkbox) {
-        return checkbox.value;
-    });
-    return ids;
-}
-function selectAll() {
-    $(".select-all").change(function () {
-        var order_list = $(".order_list");
-        if (this.checked) {
-            order_list.each(function () {
-                $(this).find("input[type='checkbox']").prop("checked", true);
+    // Hàm gửi yêu cầu AJAX để tải dữ liệu
+    function loadOrders(url, params) {
+        axios
+            .get(url, {
+                params: params,
+            })
+            .then((response) => {
+                console.log("Response:", response.data);
+                if (response.data.success) {
+                    $("#ordersTable tbody").html(response.data.html);
+                    $("#pagination").html(response.data.pagination);
+                    GlobalUtils.showNotification("Đã tải dữ liệu thành công", {
+                        backgroundColor: "#00b09b",
+                    });
+                } else {
+                    GlobalUtils.showNotification(
+                        response.data.message || "Lỗi khi tải dữ liệu",
+                        { backgroundColor: "#ff4444" }
+                    );
+                }
+            })
+            .catch((error) => {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                GlobalUtils.showNotification("Có lỗi xảy ra khi tải dữ liệu", {
+                    backgroundColor: "#ff4444",
+                });
             });
-        } else {
-            order_list.find("input[type='checkbox']").prop("checked", false);
+    }
+
+    // Xử lý gửi form lọc
+    $("#filterForm").on("submit", function (e) {
+        e.preventDefault();
+
+        // Lấy dữ liệu từ form và chuẩn hóa thành object
+        let formDataArray = $(this).serializeArray();
+        let formData = {};
+        formDataArray.forEach((item) => {
+            formData[item.name] = item.value || null;
+        });
+
+        // Kiểm tra hợp lệ ngày
+        const dateFrom = formData.date_from;
+        const dateTo = formData.date_to;
+        if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
+            GlobalUtils.showNotification(
+                "Ngày bắt đầu không thể sau ngày kết thúc",
+                { backgroundColor: "#ff4444" }
+            );
+            return;
         }
+
+        // Thông báo nếu không chọn ngày (hiển thị tất cả đơn hàng)
+        if (!dateFrom && !dateTo) {
+            GlobalUtils.showNotification("Đang hiển thị tất cả đơn hàng", {
+                backgroundColor: "#00b09b",
+            });
+        }
+
+        // Gửi yêu cầu AJAX qua Axios
+        loadOrders(`${GlobalUtils.baseUrl}/admin/orders/list`, formData);
+
+        // Đóng modal
+        $("#filterModal").modal("hide");
     });
-}
 
-function loadOrder() {
-    var status = $("#statuses").val();
-
-    // Xây dựng URL đúng
-    var url = "http://127.0.0.1:8000/admin/orders/update-list?status=" + status;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {
-            status: status,
-            _token: $("meta[name='csrf-token']").attr("content"),
-        },
-        dataType: "json",
-        success: function (response) {
-            console.log(response);
-
-            $(".order_list").html(response.html);
-        },
-        error: function (xhr, status, error) {
-            console.log(error);
-        },
+    // Xử lý nút "Xem tất cả" (xóa date_from và date_to)
+    $("#clearDateFilters").on("click", function () {
+        $('input[name="date_from"]').val("");
+        $('input[name="date_to"]').val("");
+        GlobalUtils.showNotification("Đã xóa giới hạn thời gian", {
+            backgroundColor: "#00b09b",
+        });
     });
-}
+
+    // Xử lý click vào các nút phân trang
+    $(document).on("click", "#pagination .pagination a", function (e) {
+        e.preventDefault();
+        const url = $(this).attr("href");
+        loadOrders(url, {});
+    });
+});

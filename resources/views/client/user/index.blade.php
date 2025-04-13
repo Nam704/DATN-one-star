@@ -20,11 +20,9 @@
                     <div class="col-sm-12 col-md-9 col-lg-9">
                         <!-- Tab panes -->
                         <div class="tab-content dashboard_content">
-
                             @include('client.user.orders')
-
-                            {{-- @include('client.user.address') --}}
-                            {{-- @include('client.user.accountDetails') --}}
+                            @include('client.user.address')
+                            @include('client.user.accountDetails')
                         </div>
 
                     </div>

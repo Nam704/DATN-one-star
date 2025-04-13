@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('order_cancellation_reasons', function (Blueprint $table) {
             $table->id();
             $table->string('reason');
+            $table->string('to')->default('client');
             $table->timestamps();
         });
     }

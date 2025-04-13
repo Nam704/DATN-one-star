@@ -5,7 +5,6 @@ use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\CheckoutController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
-use App\Http\Controllers\Client\MyAccountController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Client\ContactController;
 use App\Http\Controllers\Web\AuthController;
@@ -122,6 +121,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus');
             Route::get('detail/{id}', 'detail')->name('detail');
             Route::post('accept-all', 'acceptAll')->name('acceptAll');
+            Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation');
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
@@ -403,9 +403,11 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detailOrder')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
-                Route::post('/cancel', 'cancel')->name('cancel');
-                Route::post('/retry-payment', 'retryPayment')->name('retryPayment');
+                // Route::post('/cancel', 'cancel')->name('cancel');
+                // Route::post('/retry-payment', 'retryPayment')->name('retryPayment');
                 Route::get('/',  'orders')->name('list');
+                Route::post('/{orderId}/retry-payment',  'retryPayment')->name('retryPayment');
+                Route::post('/{orderId}/cancel', 'cancelOrder')->name('cancelOrder');
             }
         );
         Route::prefix('payment')->controller(ClientPaymentController::class)->name('payment.')->group(
@@ -415,10 +417,7 @@ Route::prefix('client')->name('client.')->group(
         );
 
 
-        Route::prefix('my-account')->controller(MyAccountController::class)->name('my-account.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::put('/{id}', 'update')->name('update'); // sua thong tin
-        });
+
         Route::prefix('blog')->controller(BlogController::class)->name('blog.')->group(function () {
             Route::get('/index', [BlogController::class, 'index'])->name('index');
             Route::get('show/{id}', 'show')->name('show');

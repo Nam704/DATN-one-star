@@ -36,17 +36,19 @@ $(document).ready(function () {
         axios
             .post(`${GlobalUtils.baseUrl}/client/orders/store`, formData)
             .then((response) => {
-                console.log(response);
+                // console.log(response.data);
+                // console.log(response.data.data);
                 GlobalUtils.showNotification(response.data.message);
-                if (response.data.redirect_url) {
-                    window.location.href = response.data.redirect_url;
+                if (response.data.data) {
+                    window.location.href = response.data.data.redirectUrl;
                 } else {
                     // Cho COD, chuyển hướng đến trang thành công
-                    window.location.href = `${GlobalUtils.baseUrl}/client/users/my-account`;
+                    // window.location.href = `${GlobalUtils.baseUrl}/client/orders`;
                 }
             })
             .catch((error) => {
                 console.log(error);
+
                 GlobalUtils.showNotification(error.response.data.message, {
                     backgroundColor: "#ff4444",
                 });

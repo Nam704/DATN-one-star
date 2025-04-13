@@ -70,7 +70,7 @@ class PaymentService
         return [
             'code' => '00',
             'message' => 'success',
-            'data' => $vnp_Url
+            'redirectUrl' => $vnp_Url
         ];
     }
 }

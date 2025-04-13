@@ -139,7 +139,7 @@ class NotificationService
                 'goto_id' => $data['goto_id'],
             ]);
         }
-        Log::info($recipients);
+        // Log::info($recipients);
         // Gửi thông báo qua broadcasting
         broadcast(new PrivateNotification($data));
     }

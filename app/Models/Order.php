@@ -30,6 +30,10 @@ class Order extends Model
         'address_data' => 'array',
         'voucher_data' => 'array',
     ];
+    public function orderCancellations()
+    {
+        return $this->hasMany(OrderCancellation::class, 'order_id');
+    }
     public function refunds()
     {
         return $this->hasMany(Refund::class);
@@ -116,6 +120,7 @@ class Order extends Model
         // Lấy thông tin voucher từ voucher_data (JSON, nếu có)
         $voucherData = json_decode($this->voucher_data, true);
         $orderData['voucher_code'] = $voucherData['code'] ?? 'N/A';
+        $orderData['discount'] = $voucherData['discount'] ?? 'N/A';
 
         // Lấy trạng thái đơn hàng từ quan hệ orderStatus
         $orderData['order_status'] = $this->orderStatus ? $this->orderStatus->only('id', 'name') : null;
@@ -132,7 +137,7 @@ class Order extends Model
                 'name' => $variantData['name'] ?? 'N/A',
                 'sku' => $variantData['sku'] ?? 'N/A',
                 'image' => $variantData['image'] ?? 'default.jpg',
-                'attributes' => $variantData['attribute_values'] ?? [],
+                'attributes' => $variantData['values'] ?? [],
             ];
         });
 

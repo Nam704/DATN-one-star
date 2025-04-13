@@ -14,6 +14,7 @@ use App\Services\RetryPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -36,98 +37,60 @@ class OrderController extends Controller
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
     }
-    public function retryPayment($id)
+    public function store(Request $request)
     {
-        $order = Order::findOrFail($id);
+        try {
+            // Kiểm tra checkout_data trong session
+            if (!session()->has('checkout_data')) {
+                throw new \Exception('Dữ liệu thanh toán không tồn tại hoặc đã hết hạn.');
+            }
 
-        if (!$order->canRetryPayment()) {
-            return redirect()->back()->with('error', 'This order is not eligible for re-payment.');
+            // Gọi OrderService::handleCreateOrder để tạo đơn hàng
+            $response = $this->orderService->handleCreateOrder($request);
+
+            // Tùy chỉnh response nếu thành công
+            if ($response->getStatusCode() === 201) {
+                $data = $response->getData(true); // Lấy dữ liệu dưới dạng mảng
+
+                // Kiểm tra cấu trúc $data['data'] trước khi truy cập
+                if (!isset($data['data']) || !is_array($data['data'])) {
+                    throw new \Exception('Dữ liệu đơn hàng từ service không hợp lệ.');
+                }
+
+                return response()->json($data, 201);
+            }
+
+            // Trả về response từ handleCreateOrder cho các trường hợp lỗi
+            return $response;
+        } catch (\Exception $e) {
+            // Ghi log chi tiết với stack trace
+            Log::error('Error in order store', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'debug' => config('app.debug') ? [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ] : [],
+                'data' => null,
+            ], 400);
         }
-
-        // Redirect to VNPAY payment gateway (pseudo-code)
-        $vnpayUrl = $this->generateVnpayPaymentUrl($order);
-        return redirect($vnpayUrl);
-    }
-
-    private function generateVnpayPaymentUrl($order)
-    {
-        // Implement VNPAY payment URL generation logic here
-        // Example: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?params...
-        return 'vnpay_payment_url';
     }
     public function orders(Request $request)
     {
-        $user = Auth::user();
-        $query = Order::where('id_user', $user->id)->with('orderStatus');
+        // Gọi service để tìm kiếm và lọc đơn hàng
+        $data = $this->orderService->searchOrders($request);
 
-        // 1. Tìm kiếm dựa trên code hoặc tên khách hàng (search)
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                    ->orWhere('user_data->name', 'like', "%{$search}%");
-            });
-        }
-
-        // 2. Lọc theo trạng thái (status)
-        if ($request->filled('status') && $request->status !== 'All') {
-            $status = Order_status::where('name', $request->status)->first();
-            if ($status) {
-                $query->where('id_order_status', $status->id);
-            }
-        }
-
-        // 3. Lọc theo nhóm trạng thái (group_status)
-        if ($request->filled('group_status')) {
-            $query->whereHas('orderStatus', function ($q) use ($request) {
-                $q->where('group_status', $request->group_status);
-            });
-        }
-
-        // 4. Lọc theo tổng tiền (min_total và max_total)
-        if ($request->filled('min_total') && is_numeric($request->min_total)) {
-            $query->where('total', '>=', $request->min_total);
-        }
-        if ($request->filled('max_total') && is_numeric($request->max_total)) {
-            $query->where('total', '<=', $request->max_total);
-        }
-
-        // 5. Lọc theo phí vận chuyển (min_shipping và max_shipping)
-        if ($request->filled('min_shipping') && is_numeric($request->min_shipping)) {
-            $query->where('shipping', '>=', $request->min_shipping);
-        }
-        if ($request->filled('max_shipping') && is_numeric($request->max_shipping)) {
-            $query->where('shipping', '<=', $request->max_shipping);
-        }
-
-        // 6. Sắp xếp (group_by)
-        if ($request->filled('group_by')) {
-            $query->orderBy($request->group_by);
-        }
-
-        // 7. Tính toán các chỉ số tổng hợp (summary metrics)
-        $totalOrders = Order::where('id_user', $user->id)->count();
-        $openOrders = Order::where('id_user', $user->id)
-            ->whereHas('orderStatus', function ($q) {
-                $q->where('group_status', 'In Progress');
-            })->count();
-        $averagePrice = Order::where('id_user', $user->id)->avg('total');
-
-        // 8. Phân trang kết quả
-        $orders = $query->paginate(10);
-
-        // 9. Lấy tất cả trạng thái để hiển thị trong dropdown
-        $statuses = Order_status::all();
-
-        // 10. Lấy danh sách group_status duy nhất
-        $groupStatuses = Order_status::select('group_status')
-            ->distinct()
-            ->whereNotNull('group_status')
-            ->pluck('group_status')
-            ->toArray();
-
-        // 11. Trả về view
-        return view('client.user.index', compact('orders', 'totalOrders', 'openOrders', 'averagePrice', 'statuses', 'groupStatuses'));
+        // Trả về view với dữ liệu từ service
+        return view('client.user.index', $data);
     }
     // public function retryPayment(Request $request)
     // {
@@ -140,31 +103,7 @@ class OrderController extends Controller
     //     $result =   $this->retryPaymentService->retryPayment($orderId);
     //     return response()->json($result);
     // }
-    public function store(Request $request)
-    {
-        try {
-            $data = $request->all();
-            $order = $this->orderService->createOrder($data);
-            $vnpayResponse = $this->orderStatusService->updateInitialStatus($order);
 
-            $responseData = [
-                'status' => 200,
-                'message' => 'Đặt hàng thành công',
-                'order' => $order,
-            ];
-
-            if ($vnpayResponse) {
-                $responseData['redirect_url'] = $vnpayResponse['data'];
-            }
-
-            return response()->json($responseData);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
     public function cancel(Request $request)
     {
         $order = $this->orderService->cancelOrder($request);
@@ -191,9 +130,38 @@ class OrderController extends Controller
     }
     public function detailOrder($id)
     {
-        // Lấy đơn hàng với dữ liệu tối ưu từ hàm details
-        $order = Order::findOrFail($id)->detailsOrder();
-        // return $order;
-        return view('client.orders.detail', ['order' => $order]);
+        $order = Order::findOrFail($id);
+        $orderDetails = $order->detailsOrder();
+        $orderService = app(\App\Services\OrderService::class); // Hoặc inject qua constructor
+        return view('client.orders.detail', compact('order', 'orderDetails', 'orderService'));
+    }
+    public function retryPayment(Request $request, $orderId)
+    {
+        try {
+            $this->orderService->retryPayment($orderId);
+            return redirect()->back()->with('success', 'Thanh toán lại thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function cancelOrder(Request $request, $orderId)
+    {
+        try {
+            $request->validate([
+                'reason_id' => 'required|exists:order_cancellation_reasons,id',
+            ], [
+                'reason_id.required' => 'Vui lòng chọn lý do hủy.',
+                'reason_id.exists' => 'Lý do hủy không hợp lệ.',
+            ]);
+
+            $reasonId = $request->input('reason_id');
+            $this->orderService->cancelOrder($orderId, $reasonId);
+            return redirect()->back()->with('success', 'Yêu cầu hủy đơn hàng đã được gửi.');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }
