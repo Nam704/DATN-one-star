@@ -39,6 +39,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Web\AddressController;
 use App\Http\Controllers\Web\ChatController;
 use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\ProductDashboardController;
@@ -234,7 +235,13 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail');
         });
 
-
+        //Address
+        Route::prefix('address')->name('address.')->controller(AddressController::class)->group(function () {
+            Route::get('provinces', 'getProvinces')->name('getProvinces');
+            Route::get('districts/{provinceId}', 'getDistricts')->name('getDistricts');
+            Route::get('wards/{districtId}', 'getWards')->name('getWards');
+        });
+        
         // Users
         Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
             Route::get('/', 'index')->name('index');

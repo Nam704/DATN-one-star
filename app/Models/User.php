@@ -167,5 +167,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'id_user');
     }
-
+    public function isLocked()
+    {
+        return $this->is_lock === 'inactive';
+    }
 }

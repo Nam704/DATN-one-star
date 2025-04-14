@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserContronler extends Controller
 {
@@ -45,6 +47,7 @@ class UserContronler extends Controller
         ->whereHas('role', function ($query) {
             $query->where('name', 'admin');
         })
+        ->where('is_lock', '!=', 'inactive')  // Exclude locked users
         ->get();
 
     return view('admin.user.list', compact('users'));
@@ -53,29 +56,33 @@ class UserContronler extends Controller
     
     public function listemployee()
     {
-        $users = User::with('role')
-        ->whereHas('role', function ($query) {
-            $query->where('name', '	employee');
-        })
-        ->get();
-
-    return view('admin.user.listemployee', compact('users'));
+        $users = User::with('role') // Lấy người dùng kèm vai trò
+                    ->whereHas('role', function ($query) {
+                        $query->where('name', 'employee');
+                    })
+                    ->where('is_lock', '!=', 'inactive')
+                    ->get();
+    
+        return view('admin.user.listemployee', compact('users'));
     }
     
     public function listuser()
     {
-        $users = User::with('role')
-        ->whereHas('role', function ($query) {
-            $query->where('name', '	user');
-        })
-        ->get();
-
-    return view('admin.user.listuser', compact('users'));
+        // Lấy danh sách người dùng có vai trò 'user'
+        $users = User::with('role') // Lấy quan hệ với role
+            ->whereHas('role', function ($query) {
+                $query->where('name', 'user'); // Đảm bảo không có khoảng trắng dư
+            })
+            ->where('is_lock', '!=', 'inactive')
+            ->get();
+    
+        // Trả về view với danh sách người dùng
+        return view('admin.user.listuser', compact('users'));
     }
     public function listtkkhoa()
     {
 
-     $listTaiKhoan = User::where('status', 'inactive')->get(); // Lọc các tài khoản bị khóa
+     $listTaiKhoan = User::where('is_lock', 'inactive')->get(); // Lọc các tài khoản bị khóa
     return view('admin.user.listtkkhoa',compact('listTaiKhoan'));
     }
 
@@ -85,7 +92,112 @@ class UserContronler extends Controller
         return view('admin.user.create', compact('roles'));
     }
 
-    public function store(Request $request) {}
+public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255|unique:users,name',
+        'email' => [
+            'required',
+            'string',
+            'email',
+            'max:255',
+            'unique:users,email',
+            'regex:/^[\w\.-]+@(fpt\.edu\.vn|gmail\.com)$/',
+        ],
+        'phone' => [
+            'required',
+            'unique:users,phone',
+            'regex:/^0(3|5|7|8|9)\d{8}$/', // Thêm dấu phân cách đúng
+        ],
+        'password' => 'required|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|regex:/[@$!%*?&]/',
+        'province_id' => 'required|exists:provinces,id',
+        'district_id' => 'required|exists:districts,id',
+        'ward_id' => 'required|exists:wards,id',
+        'address_detail' => 'required|string|max:255',
+        'id_role' => 'required|exists:roles,id',
+        'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+    ], [
+        'name.required' => 'Vui lòng nhập tên người dùng.',
+        'name.unique' => 'Tên người dùng đã tồn tại.',
+
+        'email.required' => 'Email không được trống',
+        'email.regex' => 'Email không hợp lệ',
+        'email.max' => 'Email không quá 255 ký tự',
+        'email.unique' => 'Email đã có',
+
+        'phone.required' => 'Vui lòng nhập số điện thoại.',
+        'phone.unique' => 'Số điện thoại đã tồn tại.',
+        'phone.regex' => 'Số điện thoại không hợp lệ. Số điện thoại phải bắt đầu bằng 03, 05, 07, 08, 09 và có 10 chữ số.',
+
+        'password.required' => 'Mật khẩu không được trống',
+        'password.min' => 'Mật khẩu phải ít nhất 8 ký tự',
+        'password.regex' => 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa, một chữ cái viết thường, một chữ số và một ký tự đặc biệt.',
+
+        'province_id.required' => 'Vui lòng chọn Tỉnh / Thành phố.',
+        'province_id.exists' => 'Tỉnh / Thành phố không hợp lệ.',
+
+        'district_id.required' => 'Vui lòng chọn Quận / Huyện.',
+        'district_id.exists' => 'Quận / Huyện không hợp lệ.',
+
+        'ward_id.required' => 'Vui lòng chọn Xã / Phường.',
+        'ward_id.exists' => 'Xã / Phường không hợp lệ.',
+
+        'address_detail.required' => 'Vui lòng nhập địa chỉ chi tiết.',
+
+        'id_role.required' => 'Vui lòng chọn quyền hạn.',
+        'id_role.exists' => 'Quyền hạn không hợp lệ.',
+
+        'profile_image.image' => 'Tệp tải lên phải là ảnh.',
+        'profile_image.mimes' => 'Ảnh phải có định dạng: jpeg, png, jpg, gif,webp,svg.',
+        'profile_image.max' => 'Kích thước ảnh tối đa là 2MB.',
+    ]);
+    
+
+    // Handle profile image upload (optional)
+    $profileImagePath = null;
+
+if ($request->hasFile('profile_image')) {
+    $file = $request->file('profile_image');
+
+    if ($file->isValid()) {
+        $profileImagePath = $file->store('profile_image', 'public');
+    } else {
+        return back()->withErrors(['profile_image' => 'Ảnh không hợp lệ hoặc bị lỗi khi tải lên.'])->withInput();
+    }
+}
+
+    // Create the user
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'password' => Hash::make($request->password),
+        'id_role' => $request->id_role,
+        'profile_image' => $profileImagePath,
+        'status' => 'active',
+        'is_lock' => 'active',
+    ]);
+
+    // Create default address
+    $user->address()->create([
+        'address_detail' => $request->address_detail,
+        'id_ward' => $request->ward_id,
+        'is_default' => true,
+    ]);
+
+    $roleName = $user->role->name;
+
+    if ($roleName == 'admin') {
+        return redirect()->route('admin.users.index')->with('success', 'Tài khoản admin đã được tạo thành công');
+    } elseif ($roleName == 'employee') {
+        return redirect()->route('admin.users.listemployee')->with('success', 'Tài khoản nhân viên đã được tạo thành công');
+    } elseif ($roleName == 'user') {
+        return redirect()->route('admin.users.listuser')->with('success', 'Tài khoản người dùng đã được tạo thành công');
+    }
+
+    return redirect()->route('admin.users.index')->with('success', 'Tài khoản đã được tạo thành công');
+}
+
 
     public function show($id)
     {
@@ -94,34 +206,181 @@ class UserContronler extends Controller
         return view('admin.user.detail', compact('user', 'order'));
     }
 
-    public function edit($id) {}
+    public function edit($id) {
+         // Lấy thông tin người dùng cần chỉnh sửa
+         $user = User::findOrFail($id);
+         $roles = Role::all(); // Lấy tất cả các quyền (roles) để hiển thị trong dropdown
+ 
+         // Trả về view với thông tin người dùng và danh sách quyền
+         return view('admin.user.edit', compact('user', 'roles'));
+    }
 
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255|unique:users,name,' . $id,
+        'email' => [
+            'required',
+            'string',
+            'email',
+            'max:255',
+            'unique:users,email,' . $id,
+            'regex:/^[\w\.-]+@(fpt\.edu\.vn|gmail\.com)$/',
+        ],
+        'phone' => [
+            'required',
+            'unique:users,phone,' . $id,
+            'regex:/^0(3|5|7|8|9)\d{8}$/', // Thêm dấu phân cách đúng
+        ],
+        'password' => 'nullable|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|regex:/[@$!%*?&]/',
+        'province_id' => 'required|exists:provinces,id',
+        'district_id' => 'required|exists:districts,id',
+        'ward_id' => 'required|exists:wards,id',
+        'address_detail' => 'nullable|string|max:255',
+        'id_role' => 'required|exists:roles,id',
+        'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+    ], [
+        'name.required' => 'Vui lòng nhập tên người dùng.',
+        'name.unique' => 'Tên người dùng đã tồn tại.',
+
+        'email.required' => 'Email không được trống',
+        'email.regex' => 'Email không hợp lệ',
+        'email.max' => 'Email không quá 255 ký tự',
+        'email.unique' => 'Email đã có',
+
+        'phone.required' => 'Vui lòng nhập số điện thoại.',
+        'phone.unique' => 'Số điện thoại đã tồn tại.',
+        'phone.regex' => 'Số điện thoại không hợp lệ. Số điện thoại phải bắt đầu bằng 03, 05, 07, 08, 09 và có 10 chữ số.',
+
+        'password.required' => 'Mật khẩu không được trống',
+        'password.min' => 'Mật khẩu phải ít nhất 8 ký tự',
+        'password.regex' => 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa, một chữ cái viết thường, một chữ số và một ký tự đặc biệt.',
+
+        'province_id.required' => 'Vui lòng chọn Tỉnh / Thành phố.',
+        'province_id.exists' => 'Tỉnh / Thành phố không hợp lệ.',
+
+        'district_id.required' => 'Vui lòng chọn Quận / Huyện.',
+        'district_id.exists' => 'Quận / Huyện không hợp lệ.',
+
+        'ward_id.required' => 'Vui lòng chọn Xã / Phường.',
+        'ward_id.exists' => 'Xã / Phường không hợp lệ.',
+
+        'address_detail.required' => 'Vui lòng nhập địa chỉ chi tiết.',
+
+        'id_role.required' => 'Vui lòng chọn quyền hạn.',
+        'id_role.exists' => 'Quyền hạn không hợp lệ.',
+
+        'profile_image.image' => 'Tệp tải lên phải là ảnh.',
+        'profile_image.mimes' => 'Ảnh phải có định dạng: jpeg, png, jpg, gif,webp,svg.',
+        'profile_image.max' => 'Kích thước ảnh tối đa là 2MB.',
+    ]);
+  // Cập nhật thông tin người dùng
+  $user = User::findOrFail($id);
+    // Xử lý ảnh hồ sơ (tùy chọn)
+    $profileImagePath = null;
+    if ($request->hasFile('profile_image')) {
+        $file = $request->file('profile_image');
+
+        if ($file->isValid()) {
+            // Xóa ảnh cũ nếu có
+            if ($user->profile_image && Storage::exists('public/' . $user->profile_image)) {
+                Storage::delete('public/' . $user->profile_image);
+            }
+            // Lưu ảnh mới
+            $profileImagePath = $file->store('profile_image', 'public');
+        } else {
+            return back()->withErrors(['profile_image' => 'Ảnh không hợp lệ hoặc bị lỗi khi tải lên.'])->withInput();
+        }
+    }
+
+    $user->update([
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'password' => $request->password ? Hash::make($request->password) : $user->password,
+        'id_role' => $request->id_role,
+        'profile_image' => $profileImagePath ?? $user->profile_image,
+        'status' => 'active',
+        'is_lock' => 'active',
+    ]);
+
+    // Kiểm tra xem người dùng có địa chỉ hay chưa
+    if ($user->address) {
+        // Nếu người dùng đã có địa chỉ, cập nhật địa chỉ chi tiết và các trường khác
+        $user->address->update([
+            'address_detail' => $request->address_detail,
+            'id_ward' => $request->ward_id,
+        ]);
+    } else {
+        // Nếu không có địa chỉ, tạo mới địa chỉ
+        if ($request->address_detail) {
+            $user->address()->create([
+                'address_detail' => $request->address_detail,
+                'id_ward' => $request->ward_id,
+                'is_default' => true,
+            ]);
+        }
+    }
+
+    // Kiểm tra quyền và điều hướng
+    $roleName = $user->role->name;
+    if ($roleName == 'admin') {
+        return redirect()->route('admin.users.index')->with('success', 'Tài khoản admin đã được cập nhật thành công');
+    } elseif ($roleName == 'employee') {
+        return redirect()->route('admin.users.listemployee')->with('success', 'Tài khoản nhân viên đã được cập nhật thành công');
+    } elseif ($roleName == 'user') {
+        return redirect()->route('admin.users.listuser')->with('success', 'Tài khoản người dùng đã được cập nhật thành công');
+    }
+
+    return redirect()->route('admin.users.index')->with('success', 'Tài khoản đã được cập nhật thành công');
+}
+
 
     public function lock($id)
 {
     $user = User::findOrFail($id);
     $user->is_lock = 'inactive'; // khóa tài khoản
+    $user->status = 'inactive'; // Đặt trạng thái thành "inactive" (ngừng hoạt động)
     $user->save();
 
     // Nếu tự khóa chính mình thì đăng xuất
     if (Auth::id() === $user->id) {
         Auth::logout();
-        return redirect()->view('client.index')->with('success', 'Tài khoản của bạn đã bị khóa và bạn đã bị đăng xuất.');
+        return redirect()->route('auth.getFormLogin')->with('success', 'Tài khoản của bạn đã bị khóa và bạn đã bị đăng xuất.');
     }
 
     // Chuyển hướng phù hợp theo vai trò
     $role = $user->role->name;
     if ($role === 'admin') {
-        return redirect()->route('admin.users.listadmin')->with('success', 'Đã khóa tài khoản Admin.');
+        return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Admin.');
     } elseif ($role === 'employee') {
-        return redirect()->route('admin.users.listemployee')->with('success', 'Đã khóa tài khoản Nhân viên.');
+        return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Nhân viên.');
     } elseif ($role === 'user') {
-        return redirect()->route('admin.users.listuser')->with('success', 'Đã khóa tài khoản Người dùng.');
+        return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Người dùng.');
     }
 
     return redirect()->back()->with('success', 'Tài khoản đã bị khóa.');
 }
+public function opentk($id)
+{
+    $user = User::findOrFail($id);
+    $user->is_lock = 'active'; // Mở khóa tài khoản
+    $user->status = 'active'; // Mở hoạt động
+    $user->save();
+
+    // Chuyển hướng phù hợp theo vai trò
+    $role = $user->role->name;
+    if ($role === 'admin') {
+        return redirect()->route('admin.users.index')->with('success', 'Đã mở khóa tài khoản Admin.');
+    } elseif ($role === 'employee') {
+        return redirect()->route('admin.users.listemployee')->with('success', 'Đã mở khóa tài khoản Nhân viên.');
+    } elseif ($role === 'user') {
+        return redirect()->route('admin.users.listuser')->with('success', 'Đã mở khóa tài khoản Người dùng.');
+    }
+
+    return redirect()->back()->with('success', 'Tài khoản đã được mở khóa.');
+}
+
 
 
     public function chart_user($id)

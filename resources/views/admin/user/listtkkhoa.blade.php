@@ -31,8 +31,8 @@
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $value->name }}</td>
                                 <td>
-                                    <img src="{{ asset($value->profile_image ?? '/admin/assets/images/user-201.png') }}"
-                                        alt="err" height="50px">
+                                    <img src="{{ $value->profile_image ? asset('storage/' . $value->profile_image) : asset('admin/assets/images/user-201.png') }}"
+                                        style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
                                 </td>
                                 <td>{{ $value->email }}</td>
                                 <td>{{ $value->role->name }}</td>
@@ -43,13 +43,23 @@
 
                                 </td>
                                 <td>
-                                  
+                                <a href="{{ route('admin.users.show', $value->id) }}">
+                                            <button type="button" class="btn btn-sm btn-info me-1" title="Xem chi tiết">
+                                                <i class="mdi mdi-eye-outline"></i>
+                                            </button>
+                                        </a>
+                                    <!-- Nút mở khóa -->
+                                    <form action="{{ route('admin.users.opentk', $value->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('POST')
+                                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Bạn có muốn mở khóa tài khoản này không')"><i class="mdi mdi-lock-open"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
-                        <tr>
+                            <tr>
                                 <th>STT</th>
                                 <th>Tên người dùng</th>
                                 <th>Hình ảnh</th>
@@ -70,10 +80,6 @@
 @push('styles')
 <x-admin.data-table-styles />
 @endpush
-
 @push('scripts')
 <x-admin.data-table-scripts />
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('admin/api/blog.js') }}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 @endpush
