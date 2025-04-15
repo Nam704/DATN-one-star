@@ -339,24 +339,49 @@ if ($request->hasFile('profile_image')) {
     public function lock($id)
 {
     $user = User::findOrFail($id);
-    $user->is_lock = 'inactive'; // khóa tài khoản
-    $user->status = 'inactive'; // Đặt trạng thái thành "inactive" (ngừng hoạt động)
-    $user->save();
-
-    // Nếu tự khóa chính mình thì đăng xuất
-    if (Auth::id() === $user->id) {
-        Auth::logout();
-        return redirect()->route('auth.getFormLogin')->with('success', 'Tài khoản của bạn đã bị khóa và bạn đã bị đăng xuất.');
+    $currentUser = Auth::user(); 
+     // Không cho phép tự khóa chính mình
+    if ($currentUser->id === $user->id) {
+        return redirect()->back()->with('error', 'Bạn không thể khóa tài khoản của chính mình.');
     }
 
-    // Chuyển hướng phù hợp theo vai trò
-    $role = $user->role->name;
-    if ($role === 'admin') {
-        return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Admin.');
-    } elseif ($role === 'employee') {
-        return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Nhân viên.');
-    } elseif ($role === 'user') {
-        return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Người dùng.');
+    $currentRole = $currentUser->role->name;
+    $targetRole = $user->role->name;
+
+    // Admin đang đăng nhập
+    if ($currentRole === 'admin') {
+        if ($targetRole === 'admin') {
+            return redirect()->back()->with('error', 'Admin không thể khóa Admin khác.');
+        } elseif ($targetRole === 'employee') {
+            $user->is_lock = 'inactive';
+            $user->status = 'inactive';
+            $user->save();
+            return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Nhân viên.');
+        } elseif ($targetRole === 'user') {
+            $user->is_lock = 'inactive';
+            $user->status = 'inactive';
+            $user->save();
+            return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Người dùng.');
+        }
+    }
+
+    if ($currentRole === 'employee') {
+        if ($targetRole === 'admin') {
+            return redirect()->back()->with('error', 'Bạn không có quyền khóa tài khoản Admin.');
+        }
+
+        if ($targetRole === 'employee') {
+            return redirect()->back()->with('error', 'Bạn không có quyền khóa tài khoản Nhân viên khác.');
+        }
+
+        if ($targetRole === 'user') {
+            // Khóa trực tiếp tài khoản user
+            $user->is_lock = 'inactive';
+            $user->status = 'inactive';
+            $user->save();
+
+            return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Người dùng.');
+        }
     }
 
     return redirect()->back()->with('success', 'Tài khoản đã bị khóa.');

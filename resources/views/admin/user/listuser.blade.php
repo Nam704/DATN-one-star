@@ -77,12 +77,12 @@
                             @endforeach
                         </tbody>
                         <tfoot>
-                            <tr>
+                        <tr>
                                 <th>STT</th>
-                                <th>Danh mục</th>
+                                <th>Tên người dùng</th>
                                 <th>Hình ảnh</th>
-                                <th>Tiêu đề</th>
-                                <th>Ngày đăng tải</th>
+                                <th>Email</th>
+                                <th>Phân quyền</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>

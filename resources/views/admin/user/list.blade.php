@@ -19,7 +19,7 @@
                             <a class="btn btn-soft-info" href="{{ route('admin.users.charts') }}"> <i
                                     class="mdi mdi-chart-areaspline fs-18 me-1 lh-1"></i>Thống kê</a>
                         </div>
-                        <h4 class="page-title">Users Management</h4>
+                        <h4 class="page-title">Danh sách admin</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -43,12 +43,9 @@
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $value->name }}</td>
                                 <td>
-                                <td>
                                     <img src="{{ $value->profile_image ? asset('storage/' . $value->profile_image) : asset('admin/assets/images/user-201.png') }}"
                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
-                                </td>
-
-                                </td>
+                                </td>   
                                 <td>{{ $value->email }}</td>
                                 <td>{{ $value->role->name }}</td>
                                 <td>
@@ -80,12 +77,12 @@
                             @endforeach
                         </tbody>
                         <tfoot>
-                            <tr>
+                        <tr>
                                 <th>STT</th>
-                                <th>Danh mục</th>
+                                <th>Tên người dùng</th>
                                 <th>Hình ảnh</th>
-                                <th>Tiêu đề</th>
-                                <th>Ngày đăng tải</th>
+                                <th>Email</th>
+                                <th>Phân quyền</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
