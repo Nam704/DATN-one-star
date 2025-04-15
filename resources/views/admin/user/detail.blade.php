@@ -14,9 +14,10 @@
             <div class="profile-user-box">
                 <div class="row">
                     <div class="col-sm-6">
-                        <div class="profile-user-img"><img
-                                src="{{ asset($user->profile_image ?? '/admin/assets/images/users/avatardefault_92824.webp') }}"
-                                alt="img" class="avatar-lg rounded-circle"></div>
+                        <div class="profile-user-img">
+                            <img src="{{ $user->profile_image ? asset('storage/' . $user->profile_image) : asset('admin/assets/images/user-201.png') }}"
+                                alt="img" class="avatar-lg rounded-circle">
+                        </div>
                         <div class="">
                             <h4 class="mt-4 fs-17 ellipsis">{{ $user->name }}</h4>
                             <p class="font-13"> Vai trò : {{$user->role->name}}</p>
