@@ -10,6 +10,8 @@ use App\Models\OrderCancellation;
 use App\Models\OrderCancellationReason;
 use App\Models\OrderExpire;
 use App\Models\Product_variant;
+use App\Models\User;
+use App\Models\UserRestriction;
 use App\Models\Voucher;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Services\VoucherService;
+use Illuminate\Support\Facades\Cache;
 
 class OrderService
 {
@@ -30,6 +33,8 @@ class OrderService
     protected $orderCancellationReason;
     protected $voucherService;
     protected $orderStatusService;
+    protected $userRestriction;
+
     public function __construct(
         Order $order,
         PaymentService $paymentService,
@@ -38,9 +43,11 @@ class OrderService
         NotificationService $notificationService,
         OrderCancellationReason $orderCancellationReason,
         VoucherService $voucherService,
-        OrderStatusService $orderStatusService
+        OrderStatusService $orderStatusService,
+        UserRestriction $userRestriction
 
     ) {
+        $this->userRestriction = $userRestriction;
         $this->orderCancellationReason = $orderCancellationReason;
         $this->orderStatus = $orderStatus;
         $this->orderExpire = $orderExpire;
@@ -296,33 +303,56 @@ class OrderService
     public function cancelOrder($orderId, $reasonId)
     {
         try {
+            $user = Auth::user();
+            if (!$user) {
+                throw new \Exception('Bạn cần đăng nhập để hủy đơn hàng.');
+            }
+
+            // Kiểm tra khóa tài khoản
+            if ($user->isLocked()) {
+                throw new \Exception('Tài khoản của bạn đã bị khóa do vi phạm chính sách hủy đơn.');
+            }
+
+            // Kiểm tra giới hạn hủy
+            $cancelLimit = 3;
+            $cancelCount = $this->getCancelCount($user->id);
+            if ($cancelCount >= $cancelLimit) {
+                $this->restrictUser($user->id);
+                // Đăng xuất người dùng
+                Auth::logout();
+                throw new \Exception('Bạn đã hủy quá số đơn hàng cho phép (3 lần/ngày). Tài khoản bị khóa 48 giờ.');
+            }
+
+            // Kiểm tra khả năng hủy đơn
             if (!$this->canCancelOrder($orderId)) {
                 throw new \Exception('Đơn hàng không thể hủy ở trạng thái hiện tại.');
             }
 
             $order = $this->order->findOrFail($orderId);
 
-            // Kiểm tra lý do hủy
             if (!OrderCancellationReason::find($reasonId)) {
                 throw new \Exception('Lý do hủy không hợp lệ.');
             }
 
-            // Cập nhật trạng thái thành "Cancel Requested"
+            // Lưu trạng thái hiện tại
+            $currentStatusId = $order->id_order_status;
+
+            // Cập nhật trạng thái đơn hàng
             $cancelRequestedId = Order_status::where('name', 'Cancel Requested')->value('id');
             $order->update(['id_order_status' => $cancelRequestedId]);
 
-            // Ghi nhận lý do hủy
+            // Tạo bản ghi hủy đơn
             OrderCancellation::create([
                 'order_id' => $orderId,
                 'reason_id' => $reasonId,
                 'from' => 'client',
-                'status' => 'pending'
-
+                'status' => 'pending',
+                'previous_status_id' => $currentStatusId,
             ]);
 
-            // Gửi thông báo
+            // Gửi thông báo cho admin
             $dataNotification = [
-                'title' => 'Update Order',
+                'title' => 'Yêu cầu hủy đơn hàng',
                 'message' => "Đơn hàng {$order->code} đã yêu cầu hủy. Vui lòng kiểm tra!",
                 'from_user_id' => $order->id_user,
                 'to_user_id' => null,
@@ -332,12 +362,78 @@ class OrderService
             ];
             $this->notificationService->sendPrivate($dataNotification);
 
+            // Xóa cache
+            Cache::forget("user_cancel_count_{$user->id}");
+
             return $order;
         } catch (\Exception $e) {
             Log::error('Lỗi trong cancelOrder: ' . $e->getMessage());
             throw $e;
         }
     }
+    /**
+     * Kiểm tra xem người dùng có bị khóa hủy đơn hàng không
+     */
+    protected function isUserRestricted($userId)
+    {
+        return UserRestriction::where('user_id', $userId)
+            ->where('restriction_type', 'cancel_order')
+            ->where('expires_at', '>', now())
+            ->exists();
+    }
+
+    /**
+     * Khóa tài khoản người dùng trong 48 giờ
+     */
+    protected function restrictUser($userId)
+    {
+        // Khóa tài khoản
+        $user = User::findOrFail($userId);
+        $user->is_lock = true;
+        $user->save();
+
+        // Tạo bản ghi giới hạn
+        $this->userRestriction->create([
+            'user_id' => $userId,
+            'restriction_type' => 'cancel_order',
+            'restricted_at' => now(),
+            'expires_at' => now()->addHours(48),
+        ]);
+
+        // Gửi thông báo
+        $this->notificationService->sendPrivate([
+            'title' => 'Tài khoản bị khóa',
+            'message' => 'Tài khoản của bạn đã bị khóa 48 giờ do vi phạm chính sách hủy đơn (quá 3 lần/ngày).',
+            'from_user_id' => null,
+            'to_user_id' => $userId,
+            'type' => 'system',
+            'status' => 'unread',
+            'goto_id' => null,
+        ]);
+
+        Log::info("Tài khoản ID {$userId} bị khóa do hủy đơn quá giới hạn.");
+    }
+
+    /**
+     * Đếm số lần hủy đơn trong 24 giờ
+     */
+    /**
+     * Đếm số lần hủy đơn trong 24 giờ
+     */
+    protected function getCancelCount($userId)
+    {
+        $cacheKey = "user_cancel_count_{$userId}";
+        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($userId) {
+            return OrderCancellation::where('from', 'client')
+                ->where('created_at', '>=', now()->subDay())
+                ->whereHas('order', function ($q) use ($userId) {
+                    $q->where('id_user', $userId);
+                })
+                ->count();
+        });
+    }
+
+
     public function canCancelOrder($orderId)
     {
         try {

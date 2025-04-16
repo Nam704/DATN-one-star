@@ -14,7 +14,9 @@ class PaymentController extends Controller
 {
     protected $orderService;
     protected $orderStatusService;
+    protected $notificationService;
     function __construct(
+
         NotificationService $notificationService,
         OrderStatusService $orderStatusService
     ) {

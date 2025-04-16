@@ -11,6 +11,8 @@ export default defineConfig({
                 "resources/js/client/cartDetail.js",
                 "resources/js/client/productDetail.js",
                 "resources/js/client/checkout.js",
+                "resources/js/admin.order.js",
+                "resources/js/admin/listOrder.js",
 
                 "resources/js/public.js",
                 "resources/js/private.js",
@@ -18,7 +20,7 @@ export default defineConfig({
                 "resources/js/employee.js",
                 "resources/js/user.js",
                 "resources/js/client.js",
-                "resources/js/order.js",
+
                 "resources/js/clientDetail.js",
                 "resources/js/orderClientDetail.js",
                 "resources/js/chat.js",

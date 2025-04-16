@@ -50,35 +50,30 @@ class AuthController extends Controller
     }
     public function login(AuthRequest $request)
     {
-
         try {
-
             $credentials = $request->only('email', 'password');
 
-            if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $user = User::where('email', $credentials['email'])->first();
 
+            if ($user && $user->is_lock) {
+                return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.');
+            }
+
+            if (Auth::attempt($credentials, $request->filled('remember'))) {
                 $user = Auth::user();
                 if ($user->isAdmin()) {
-                    return redirect()->route('admin.dashboard'); // Admin dashboard
+                    return redirect()->route('admin.dashboard');
                 } elseif ($user->isUser()) {
-                    // return "go to user dashboard";
-                    return redirect()->route('client.home'); // Admin dashboard
-
-                    // return redirect()->route('user.dashboard'); // User dashboard
+                    return redirect()->route('client.home');
                 } elseif ($user->isEmployee()) {
-                    return redirect()->route('admin.dashboard'); // Admin dashboard
-
-                    // return "go to employee dashboard";
-                    // return redirect()->route('employee.dashboard'); // Client dashboard
+                    return redirect()->route('admin.dashboard');
                 }
-            } else {
-                // return "out auth attempt";
-                return redirect()->back()->with('error', 'Cannot log in, please check your email and password again.');
             }
+
+            return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra email và mật khẩu.');
         } catch (\Exception $e) {
-            // Handle the exception
-            // return "in try catch";
-            return redirect()->back()->with('error', 'An error occurred during login.');
+            Log::error('Lỗi đăng nhập: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi trong quá trình đăng nhập.');
         }
     }
     function logout(Request $request)

@@ -1,5 +1,5 @@
 import Echo from "laravel-echo";
-import "./app.js";
+import "../app.js";
 $(document).ready(function () {
     // Hàm gửi yêu cầu AJAX để tải dữ liệu
     function loadOrders(url, params) {

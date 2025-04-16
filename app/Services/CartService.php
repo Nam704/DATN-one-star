@@ -21,7 +21,14 @@ class CartService
             ? $this->getDatabaseCart(Auth::id())
             : $this->getSessionCart();
     }
-
+    public function store()
+    {
+        $cart = Cart::created(
+            [
+                'id_user' => Auth::id(),
+            ]
+        );
+    }
     /**
      * Thêm sản phẩm vào giỏ hàng
      */

@@ -105,8 +105,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Cancellation Info -->
-
             </div>
             <div class="col-lg-4">
                 <!-- Customer Notes -->
@@ -116,8 +114,7 @@
                         <p>{{ $orderDetails['note'] ?? 'No notes' }}</p>
                     </div>
                 </div>
-                <!-- hủy đơn hàng -->
-
+                <!-- Cancellation Info -->
                 @if ($order->orderCancellations->isNotEmpty())
                     <div class="card mb-4">
                         <div class="card-body">
@@ -130,7 +127,9 @@
                                         <strong>Ghi chú:</strong> {{ $cancellation->note }} <br>
                                     @endif
                                     <strong>Thời gian yêu cầu:</strong>
-                                    {{ $cancellation->created_at->format('d/m/Y H:i') }}
+                                    {{ $cancellation->created_at->format('d/m/Y H:i') }} <br>
+                                    <strong>Thời gian cập nhật:</strong>
+                                    {{ $cancellation->updated_at->format('d/m/Y H:i') }}
                                 </p>
                             @endforeach
                         </div>
@@ -151,10 +150,13 @@
                                     <select name="action" id="action" class="form-control" required>
                                         <option value="">Chọn hành động</option>
                                         <option value="approve">Phê duyệt hủy</option>
-
+                                        <option value="reject">Từ chối hủy</option>
                                     </select>
                                 </div>
-
+                                <div class="form-group mb-2">
+                                    <label for="admin_note">Ghi chú (bắt buộc khi từ chối):</label>
+                                    <textarea name="admin_note" id="admin_note" class="form-control"></textarea>
+                                </div>
                                 <button type="submit" class="btn btn-primary mb-2">Xử lý</button>
                             </form>
                         @endif

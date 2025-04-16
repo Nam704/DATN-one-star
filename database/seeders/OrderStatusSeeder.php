@@ -37,7 +37,7 @@ class OrderStatusSeeder extends Seeder
             'Cancel Requested' => 'Cancelled',
             'Cancel Under Review' => 'Cancelled',
             'Cancel Approved' => 'Cancelled',
-            // 'Cancel Rejected' => 'Cancelled',
+            'Cancel Rejected' => 'Cancelled',
             'Cancelled' => 'Cancelled',
             'Failed Delivery' => 'Cancelled', // Gộp Failed Delivery vào Cancelled
 
@@ -78,7 +78,7 @@ class OrderStatusSeeder extends Seeder
         DB::table('order_statuses')->where('id', $statusIds['Cancel Requested'])->update(['next_status_id' => $statusIds['Cancel Under Review']]);
         DB::table('order_statuses')->where('id', $statusIds['Cancel Under Review'])->update(['next_status_id' => $statusIds['Cancel Approved']]);
         DB::table('order_statuses')->where('id', $statusIds['Cancel Approved'])->update(['next_status_id' => $statusIds['Cancelled']]);
-
+        DB::table('order_statuses')->where('id', $statusIds['Cancel Rejected'])->update(['next_status_id' => $statusIds['Pending']]); // Quay lại Pending
         // Luồng hoàn đơn
         DB::table('order_statuses')->where('id', $statusIds['Return Requested'])->update(['next_status_id' => $statusIds['Return Under Review']]);
         DB::table('order_statuses')->where('id', $statusIds['Return Under Review'])->update(['next_status_id' => $statusIds['Return Approved']]);

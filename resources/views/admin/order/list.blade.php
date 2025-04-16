@@ -99,36 +99,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($orders as $order)
-                                            <tr>
-                                                <td>{{ $order->code }}</td>
-                                                <td>{{ json_decode($order->user_data, true)['name'] ?? 'N/A' }}</td>
-                                                <td>{{ json_decode($order->user_data, true)['email'] ?? 'N/A' }}</td>
-                                                <td>
-                                                    <span
-                                                        class="badge {{ $order->orderStatus->group_status == 'Delivered' ? 'bg-success' : ($order->orderStatus->group_status == 'Cancelled' ? 'bg-danger' : 'bg-warning') }}">
-                                                        {{ $order->orderStatus->name ?? 'N/A' }}
-                                                    </span>
-                                                </td>
-                                                <td>{{ number_format($order->total, 2) }}</td>
-                                                <td>{{ number_format($order->shipping, 2) }}</td>
-                                                <td>{{ $order->payment_method }}</td>
-                                                <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
-                                                <td>
-                                                    <a href="{{ route('admin.orders.detail', $order->id) }}"
-                                                        class="btn btn-sm btn-info">View</a>
-                                                    @if ($order->orderStatus->name == 'Cancel Requested')
-                                                        <a href="{{-- route('admin.orders.approveCancel',$order->id) --}}"
-                                                            class="btn btn-sm btn-success">Approve Cancel</a>
-                                                    @endif
-                                                    <a href="{{-- route('admin.orders.updateStatus',$order->id) --}}" class="btn btn-sm btn-warning">Update
-                                                        Status</a>
-                                                </td>
-                                            </tr>
-                                        @endforeach
+                                        @include('admin.order.order_list', ['orders' => $orders])
                                     </tbody>
                                 </table>
-
                             </div>
 
                             <!-- Pagination -->
@@ -186,8 +159,8 @@
                         <!-- Min Total -->
                         <div class="mb-3">
                             <label for="min_total" class="form-label">Min Total</label>
-                            <input type="number" name="min_total" class="form-control"
-                                value="{{ request('min_total') }}" placeholder="Min Total">
+                            <input type="number" name="min_total" class="form-control" value="{{ request('min_total') }}"
+                                placeholder="Min Total">
                         </div>
                         <!-- Max Total -->
                         <div class="mb-3">
@@ -237,5 +210,5 @@
 @endpush
 @push('scripts')
     <x-admin.data-table-scripts />
-    @vite('resources/js/order.js')
+    @vite('resources/js/admin/listOrder.js')
 @endpush

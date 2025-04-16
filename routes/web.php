@@ -83,27 +83,32 @@ Route::get('excel/read', [ExcelController::class, 'index']);
 Route::get('/make-password', function () {
     return Hash::make('1234');
 });
-Route::prefix('auth/')->name('auth.')->group(
-    function () {
-        Route::controller(GoogleController::class)->group(function () {
-            Route::get('google', 'redirectToGoogle')->name('google');
-            Route::get('google/callback', 'handleGoogleCallback');
-        });
-        Route::controller(AuthController::class)->group(function () {
-            Route::get('login', 'getFormLogin')->name('getFormLogin');
-            Route::post('login', 'login')->name('login');
-            Route::get('register', 'getFormRegister')->name('getFormRegister');
-            Route::post('register', 'register')->name('register');
-            Route::get('logout', 'logout')->name('logout');
-            Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
-            Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
+Route::prefix('auth/')->name('auth.')->group(function () {
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('login', 'getFormLogin')->name('getFormLogin');
+        Route::post('login', 'login')->name('login');
+        Route::get('register', 'getFormRegister')->name('getFormRegister');
+        Route::post('register', 'register')->name('register');
+        Route::get('forgot-password', 'getFormForgotPassword')->name('getFormForgotPassword');
+        Route::post('forgot-password', 'sendPasswordResetEmail')->name('sendPasswordResetEmail');
+        Route::get('reset-password/{id}/{token}', 'getfromResetPassword')->name('getfromResetPassword');
+        Route::post('reset-password', 'resetPassword')->name('resetPassword');
+    });
 
-            Route::get('reset-password/{id}/{token}', 'getfromResetPassword')->name('getfromResetPassword');
-            Route::post('reset-password', 'resetPassword')->name('resetPassword');
-            Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
-        });
-    }
-);
+    // Google login
+    Route::controller(GoogleController::class)->group(function () {
+        Route::get('google', 'redirectToGoogle')->name('google');
+        Route::get('google/callback', 'handleGoogleCallback');
+    });
+});
+
+Route::prefix('auth/')->name('auth.')->middleware(['auth', 'check.lock'])->group(function () {
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('logout', 'logout')->name('logout');
+        Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
+    });
+});
+
 Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::post('/send-message', [ChatController::class, 'sendMessage']);

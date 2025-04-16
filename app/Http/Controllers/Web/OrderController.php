@@ -17,31 +17,69 @@ class OrderController extends Controller
     {
         $this->orderService = $orderService;
     }
-    public function processCancellation(Request $request, $orderId)
+    public function getRestrictedUsers(Request $request)
     {
         try {
-            // Validate input
+            $result = $this->orderService->getRestrictedUsers($request);
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function unrestrictUser($userId)
+    {
+        try {
+            $this->orderService->unrestrictUser($userId);
+            return response()->json([
+                'success' => true,
+                'message' => 'Tài khoản đã được mở khóa.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+    public function processCancellation(Request $request, $orderId)
+    {
+
+        try {
+
             $request->validate([
-                'action' => 'required|in:review,approve',
-                'admin_note' => 'nullable|string|max:500',
+                'action' => 'required|in:review,approve,reject',
+                'admin_note' => 'required_if:action,reject|string|nullable|max:500',
             ], [
                 'action.required' => 'Vui lòng chọn hành động.',
                 'action.in' => 'Hành động không hợp lệ.',
-
+                'admin_note.required_if' => 'Ghi chú là bắt buộc khi từ chối hủy đơn.',
             ]);
+            Log::info('Request data:', $request->all());
             $action = $request->input('action');
-            // Gọi processCancelRequest từ OrderServiceManager
-            $order = $this->orderService->processCancelRequest($orderId, $action);
-            // Thông báo thành công
+            $adminNote = $request->input('admin_note');
+
+            $order = $this->orderService->processCancelRequest($orderId, $action, $adminNote);
+
             $message = match ($action) {
-                'review' => 'Yêu cầu hủy đơn hàng đã được chuyển sang trạng thái xem xét.',
+                'review' => 'Yêu cầu hủy đơn hàng đang được xem xét.',
                 'approve' => 'Yêu cầu hủy đơn hàng đã được phê duyệt.',
+                'reject' => 'Yêu cầu hủy đơn hàng đã bị từ chối.',
                 default => 'Xử lý yêu cầu hủy thành công.',
             };
 
             return redirect()->back()->with('success', $message);
         } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->withInput();
+            $firstError = $e->validator->errors()->first();
+            return redirect()->back()
+                ->with('error', $firstError)
+                ->withInput();
         } catch (\Exception $e) {
             Log::error('Lỗi khi xử lý yêu cầu hủy: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
@@ -74,18 +112,30 @@ class OrderController extends Controller
 
     public function updateStatus($orderId)
     {
-        // Gọi phương thức updateOrderStatus trong service
-        $order = $this->orderService->updateOrderStatus($orderId);
+        try {
+            $order = $this->orderService->updateOrderStatus($orderId);
 
-        if (!$order) {
-            return response()->json(['error' => 'Trang thái đạt tối đa'], 400);
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trạng thái đã đạt tối đa hoặc không thể cập nhật.',
+                ], 400);
+            }
+
+            event(new OrderNotification($order));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công.',
+                'order' => $order,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi cập nhật trạng thái đơn hàng: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
         }
-        event(new OrderNotification($order));
-        return response()->json([
-            'message' => 'Cập nhật trạng thái thành công.',
-            'order' => $order,
-
-        ]);
     }
     public function detail($id)
     {
