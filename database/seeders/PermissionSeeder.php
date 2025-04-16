@@ -30,7 +30,7 @@ class PermissionSeeder extends Seeder
         // Define modules (cập nhật đầy đủ các module từ routes)
         $modules = [
             'users',
-            'roles',
+            'statistics',
             'products',
             'categories',
             'orders',
@@ -54,13 +54,23 @@ class PermissionSeeder extends Seeder
 
         // Create permissions for each module and action
         foreach ($modules as $module) {
-            foreach ($actions as $action) {
+            // For the statistics module, only create 'view' permission
+            if ($module === 'statistics') {
                 Permission::create([
-                    'name' => "$action-$module",
-                    'display_name' => ucfirst($action) . ' ' . ucfirst($module),
-                    'description' => 'Can ' . $action . ' ' . $module,
+                    'name' => "view-$module",
+                    'display_name' => 'View Statistics',
+                    'description' => 'Can view statistics',
                     'module' => $module,
                 ]);
+            } else {
+                foreach ($actions as $action) {
+                    Permission::create([
+                        'name' => "$action-$module",
+                        'display_name' => ucfirst($action) . ' ' . ucfirst($module),
+                        'description' => 'Can ' . $action . ' ' . $module,
+                        'module' => $module,
+                    ]);
+                }
             }
         }
 
@@ -98,10 +108,8 @@ class PermissionSeeder extends Seeder
         if ($employeeRole) {
             $employeePermissions = Permission::whereIn('name', [
                 'view-products',
-                'edit-products',
-                'create-products',
+                'view-statistics',
                 'view-orders',
-                'edit-orders',
                 'view-categories',
                 'view-suppliers',
                 'view-imports',
@@ -114,18 +122,5 @@ class PermissionSeeder extends Seeder
             $employeeRole->permissions()->attach($employeePermissions->pluck('id')->toArray());
         }
 
-        // Assign basic permissions to user role
-        $userRole = Role::where('name', 'user')->first();
-
-        if ($userRole) {
-            $userPermissions = Permission::whereIn('name', [
-                'view-products',
-                'view-categories',
-                'view-brands',
-                'view-blogs',
-            ])->get();
-
-            $userRole->permissions()->attach($userPermissions->pluck('id')->toArray());
-        }
     }
 }

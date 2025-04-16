@@ -120,7 +120,7 @@
                         <h5 class="card-title mb-0">Kết quả kiểm tra quyền</h5>
                     </div>
                     <div class="card-body">
-                        <div id="testResults" class="alert alert-info">
+                        <div id="testResults" >
                             Chọn "Kiểm tra" bên cạnh quyền để xem kết quả
                         </div>
                     </div>
@@ -129,8 +129,11 @@
         </div>
     </div>
 @endsection
-
+@push('styles')
+<x-admin.data-table-styles />
+@endpush
 @push('scripts')
+<x-admin.data-table-scripts />
     <script>
         $(document).ready(function () {
             $('.test-permission').click(function (e) {
