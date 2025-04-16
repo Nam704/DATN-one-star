@@ -74,6 +74,7 @@ class Category extends Model
         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
         ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
         ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+        ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  // sua
         ->whereNull('categories.deleted_at')
         ->whereNull('products.deleted_at')
         ->groupBy('categories.id', 'categories.name')
@@ -81,7 +82,7 @@ class Category extends Model
             -- Tổng doanh thu từ đơn hàng hoàn thành
             COALESCE(SUM(
                 CASE 
-                    WHEN orders.id_order_status = 7 AND orders.created_at BETWEEN ? AND ? 
+                    WHEN order_statuses.name = "Delivered" AND orders.created_at BETWEEN ? AND ? 
                     THEN order_details.quantity * order_details.unit_price 
                     ELSE 0 
                 END

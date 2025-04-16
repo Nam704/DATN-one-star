@@ -162,7 +162,8 @@ class Product extends Model
                   ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                   ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                   ->join('orders', 'order_details.id_order', '=', 'orders.id')
-                  ->where('orders.id_order_status', '=', 7)
+                  ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+                  ->where('order_statuses.name', '=', 'Delivered')
                   ->whereBetween('orders.created_at', [$start_date, $end_date])
                   ->select(
                       'products.id',
@@ -180,7 +181,8 @@ class Product extends Model
               ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
               ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
               ->join('orders', 'order_details.id_order', '=', 'orders.id')
-              ->where('orders.id_order_status', '=', 7)
+              ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+              ->where('order_statuses.name', '=', 'Delivered')
               ->select(
                   'products.id',
                   'products.name',
@@ -199,7 +201,8 @@ class Product extends Model
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
-                ->where('orders.id_order_status', '=', 7)
+                ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+                ->where('order_statuses.name', '=', 'Delivered')
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -217,7 +220,8 @@ class Product extends Model
             ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
-            ->where('orders.id_order_status', '=', 7)
+            ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+            ->where('order_statuses.name', '=', 'Delivered')
             ->select(
                 'products.id',
                 'products.name',
@@ -235,6 +239,7 @@ class Product extends Model
         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
         ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
         ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+        ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
         ->select(
             'products.id',
             'products.name',
@@ -242,7 +247,7 @@ class Product extends Model
             DB::raw("
                 COALESCE(SUM(
                     CASE 
-                        WHEN orders.id_order_status = 7
+                        WHEN order_statuses.name = 'Delivered'
                         " . ($start_date && $end_date ? " AND orders.created_at BETWEEN '$start_date' AND '$end_date'" : "") . "
                         THEN order_details.quantity 
                         ELSE 0 
@@ -281,11 +286,12 @@ public function top_view_product($start_date, $end_date)
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+            ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') //them
             ->select(
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status =  7 AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
+                DB::raw('COALESCE(SUM(CASE WHEN order_statuses.name = "Delivered" AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
             ->where('product_variants.status', '=', 'active')
@@ -327,7 +333,8 @@ public function top_view_product($start_date, $end_date)
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
-                ->where('orders.id_order_status', '=', 7)
+                ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+                ->where('order_statuses.name', '=', 'Delivered')
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -343,7 +350,8 @@ public function top_view_product($start_date, $end_date)
             ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
-            ->where('orders.id_order_status', '=', 7)
+            ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+            ->where('order_statuses.name', '=', 'Delivered')
             ->select(
                 'products.id',
                 'products.name',
