@@ -40,11 +40,16 @@ class StatisticController extends Controller
             $end_date = Carbon::parse($request->input('end_date'))->endOfDay();
             $countData = [
                 "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
-                "revenue" => $this->order->where('id_order_status', '7')
-                    ->whereBetween('created_at', [$start_date, $end_date])
-                    ->sum('total'),
-                "order" => $this->order->where('id_order_status', '7')
-                    ->whereBetween('created_at', [$start_date, $end_date])
+                "revenue" => $this->order
+                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+                    ->where('order_statuses.name', 'Delivered')  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
+                    ->whereBetween('orders.created_at', [$start_date, $end_date])
+                    ->sum('orders.total'),
+
+                "order" => $this->order
+                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+                    ->where('order_statuses.name', 'Delivered')  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
+                    ->whereBetween('orders.created_at', [$start_date, $end_date])
                     ->count(),
                 "user" => $this->user->whereBetween('created_at', [$start_date, $end_date])->count()
 
@@ -364,11 +369,11 @@ class StatisticController extends Controller
         // Lấy tham số ngày bắt đầu và kết thúc từ request
         $start_date = $request->input('start_date');
         $end_date   = $request->input('end_date');
-    
+
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
         $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
         $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
-    
+
         // Đảm bảo cả hai ngày đều là đối tượng Carbon
         $start_date = Carbon::parse($start_date)->startOfDay();
         $end_date   = Carbon::parse($end_date)->endOfDay();
@@ -481,11 +486,11 @@ class StatisticController extends Controller
         // Lấy tham số ngày bắt đầu và kết thúc từ request
         $start_date = $request->input('start_date');
         $end_date   = $request->input('end_date');
-    
+
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
         $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
         $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
-    
+
         // Đảm bảo cả hai ngày đều là đối tượng Carbon
         $start_date = Carbon::parse($start_date)->startOfDay();
         $end_date   = Carbon::parse($end_date)->endOfDay();
@@ -598,11 +603,11 @@ class StatisticController extends Controller
         // Lấy tham số ngày bắt đầu và kết thúc từ request
         $start_date = $request->input('start_date');
         $end_date   = $request->input('end_date');
-    
+
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
         $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
         $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
-    
+
         // Đảm bảo cả hai ngày đều là đối tượng Carbon
         $start_date = Carbon::parse($start_date)->startOfDay();
         $end_date   = Carbon::parse($end_date)->endOfDay();
