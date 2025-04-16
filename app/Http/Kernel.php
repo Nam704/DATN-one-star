@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'check.lock' => \App\Http\Middleware\CheckAccountLock::class,
         // 'role' => \App\Http\Middleware\CheckRole::class,
+        'permission' => \App\Http\Middleware\PermissionMiddleware::class,    // permisson
     ];
 }

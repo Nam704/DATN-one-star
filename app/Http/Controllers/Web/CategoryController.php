@@ -72,6 +72,19 @@ class CategoryController extends Controller
                 return back()->withErrors(['id_parent' => 'Danh mục không thể trở thành cha của danh mục con của chính nó.']);
             }
         }
+        
+        // Check nếu muốn chuyển sang 'inactive' nhưng còn sản phẩm
+    if ($request->status === 'inactive' && $category->products()->count() > 0) {
+        return back()->withErrors(['status' => 'Không thể ngừng hoạt động danh mục còn chứa sản phẩm.']);
+    } 
+
+       // 5. Không cho chuyển sang 'inactive' nếu có danh mục con đang active
+       if (
+        $request->status === 'inactive' &&
+        $category->children()->where('status', 'active')->exists()
+    ) {
+        return back()->withErrors(['status' => 'Không thể ngừng hoạt động khi vẫn còn danh mục con đang hoạt động.']);
+    }
 
         $category->update([
             'name' => $request->name,

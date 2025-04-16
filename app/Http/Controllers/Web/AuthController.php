@@ -61,6 +61,16 @@ class AuthController extends Controller
 
             if (Auth::attempt($credentials, $request->filled('remember'))) {
                 $user = Auth::user();
+
+                //khóa tk
+                if ($user->is_lock) {
+                    Auth::logout();
+                    return redirect()->route('auth.getFormLogin')->withErrors([
+                        'email' => 'Tài khoản của bạn đã bị khóa.'
+                    ]);
+                }
+
+
                 if ($user->isAdmin()) {
                     return redirect()->route('admin.dashboard');
                 } elseif ($user->isUser()) {
@@ -68,11 +78,15 @@ class AuthController extends Controller
                 } elseif ($user->isEmployee()) {
                     return redirect()->route('admin.dashboard');
                 }
+            } else {
+                // return "out auth attempt";
+                return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra lại email và mật khẩu.');
             }
 
             return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra email và mật khẩu.');
         } catch (\Exception $e) {
-            Log::error('Lỗi đăng nhập: ' . $e->getMessage());
+            // Handle the exception
+            // return "in try catch";
             return redirect()->back()->with('error', 'Đã xảy ra lỗi trong quá trình đăng nhập.');
         }
     }

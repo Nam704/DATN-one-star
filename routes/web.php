@@ -39,9 +39,12 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Web\AddressController;
 use App\Http\Controllers\Web\ChatController;
+use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\ProductDashboardController;
 use App\Http\Controllers\Web\RefundController;
+use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
@@ -134,20 +137,20 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         });
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
-            Route::get('product-statistic', 'productStatistics')->name('productStatistics');
-            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts');
-            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold');
-            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts');
-            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts');
-            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts');
-            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory');
-            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts');
-            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts');
+            Route::get('product-statistic', 'productStatistics')->name('productStatistics')->middleware('permission:view-statistics');
+            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts')->middleware('permission:view-statistics');
+            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold')->middleware('permission:view-statistics');
+            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts')->middleware('permission:view-statistics');
+            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts')->middleware('permission:view-statistics');
+            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts')->middleware('permission:view-statistics');
+            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory')->middleware('permission:view-statistics');
+            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts')->middleware('permission:view-statistics');
+            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts')->middleware('permission:view-statistics');
 
 
-            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
-            Route::get('productSold', 'productSold')->name('productSold');
-            Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics');
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts')->middleware('permission:view-statistics');
+            Route::get('productSold', 'productSold')->name('productSold')->middleware('permission:view-statistics');
+            Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics')->middleware('permission:view-statistics');
         });
 
         Route::controller(ProductDashboardController::class)->group(function () {
@@ -167,117 +170,129 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             }
         );
         Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
-            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics');
-            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics');
-            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics');
-            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics');
-            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics');
+            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics')->middleware('permission:view-statistics');
+            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics')->middleware('permission:view-statistics');
+            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics')->middleware('permission:view-statistics');
+            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics')->middleware('permission:view-statistics');
+            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics')->middleware('permission:view-statistics');
         });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
-            Route::get('list-category',  'listCategory')->name('listCategory');
-            Route::get('add-category',  'addCategory')->name('addCategory');
-            Route::post('add-category',  'addPostCategory')->name('addPostCategory');
-            Route::get('edit-category/{id}',  'editCategory')->name('editCategory');
-            Route::put('edit-category/{id}',  'editPutCategory')->name('editPutCategory');
-            Route::delete('delete-category/{id}',  'deleteCategory')->name('deleteCategory');
-            Route::get('trash',  'trash')->name('trash');
-            Route::post('restore/{id}',  'restoreCategory')->name('restoreCategory');
-            Route::delete('destroy-permanent/{id}', 'destroyPermanent')->name('destroyPermanent');
+            Route::get('list-category',  'listCategory')->name('listCategory')->middleware('permission:view-categories');
+            Route::get('add-category',  'addCategory')->name('addCategory')->middleware('permission:create-categories');
+            Route::post('add-category',  'addPostCategory')->name('addPostCategory')->middleware('permission:create-categories');
+            Route::get('edit-category/{id}',  'editCategory')->name('editCategory')->middleware('permission:edit-categories');
+            Route::put('edit-category/{id}',  'editPutCategory')->name('editPutCategory')->middleware('permission:edit-categories');
+            Route::delete('delete-category/{id}',  'deleteCategory')->name('deleteCategory')->middleware('permission:delete-categories');
+            Route::get('trash',  'trash')->name('trash')->middleware('permission:view-categories');
+            Route::post('restore/{id}',  'restoreCategory')->name('restoreCategory')->middleware('permission:edit-categories');
+            Route::delete('destroy-permanent/{id}', 'destroyPermanent')->name('destroyPermanent')->middleware('permission:delete-categories');
         });
 
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/', 'index')->name('index')->middleware('permission:view-attributes');
+            Route::get('/create', 'create')->name('create')->middleware('permission:create-attributes');
+            Route::post('/', 'store')->name('store')->middleware('permission:create-attributes');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('permission:edit-attributes');
+            Route::put('/{id}', 'update')->name('update')->middleware('permission:edit-attributes');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status')->middleware('permission:edit-attributes');
+            Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-attributes');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-attributes');
+            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-attributes');
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-attributes');
         });
 
         // Brands Routes
         Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::get('/', 'index')->name('index')->middleware('permission:view-brands');
+            Route::get('/create', 'create')->name('create')->middleware('permission:create-brands');
+            Route::post('/', 'store')->name('store')->middleware('permission:create-brands');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('permission:edit-brands');
+            Route::put('/{id}', 'update')->name('update')->middleware('permission:edit-brands');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status')->middleware('permission:edit-brands');
+            Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-brands');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-brands');
+            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-brands');
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-brands');
         });
 
         // Blogs
         Route::prefix('blogs')->controller(AppBlogController::class)->name('blogs.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/show', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
+            Route::get('/', 'index')->name('index')->middleware('permission:view-blogs');
+            Route::get('/create', 'create')->name('create')->middleware('permission:create-blogs');
+            Route::post('/', 'store')->name('store')->middleware('permission:create-blogs');
+            Route::get('/{id}/show', 'show')->name('show')->middleware('permission:view-blogs');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('permission:edit-blogs');
+            Route::put('/{id}', 'update')->name('update')->middleware('permission:edit-blogs');
 
-            Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-blogs');
+            Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-blogs');
+            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-blogs');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-blogs');
         });
 
         // Contact
         Route::prefix('contacts')->controller(AppContactController::class)->name('contacts.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/show', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
+            Route::get('/', 'index')->name('index')->middleware('permission:view-contacts');
+            Route::get('/create', 'create')->name('create')->middleware('permission:create-contacts');
+            Route::post('/', 'store')->name('store')->middleware('permission:create-contacts');
+            Route::get('/{id}/show', 'show')->name('show')->middleware('permission:view-contacts');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('permission:edit-contacts');
+            Route::put('/{id}', 'update')->name('update')->middleware('permission:edit-contacts');
 
-            Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-contacts');
+            Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-contacts');
+            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-contacts');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-contacts');
         });
 
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
-            Route::get('/create',  'create')->name('create'); // Hiển thị form thêm sản phẩm
-            Route::post('/store',  'store')->name('store');
-            Route::get('/',  'list')->name('list');
-            Route::get('/edit/{id}',  'edit')->name('edit');
-            Route::post('/update/{id}',  'update')->name('update');
-            Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel');
-            Route::post('import-product', 'import')->name('importProduct');
-            Route::get('detail/{id}', 'detail')->name('detail');
-            Route::get('stas/{id}', 'stas')->name('stas');
-            Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail');
+            Route::get('/create',  'create')->name('create')->middleware('permission:create-products'); // Hiển thị form thêm sản phẩm
+            Route::post('/store',  'store')->name('store')->middleware('permission:create-products');
+            Route::get('/',  'list')->name('list')->middleware('permission:view-products');
+            Route::get('/edit/{id}',  'edit')->name('edit')->middleware('permission:edit-products');
+            Route::post('/update/{id}',  'update')->name('update')->middleware('permission:edit-products');
+            Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel')->middleware('permission:create-products');
+            Route::post('import-product', 'import')->name('importProduct')->middleware('permission:create-products');
+            Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-products');
+            Route::get('stas/{id}', 'stas')->name('stas')->middleware('permission:view-products');
+            Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail')->middleware('permission:view-products');
         });
 
+        //Address
+        Route::prefix('address')->name('address.')->controller(AddressController::class)->group(function () {
+            Route::get('provinces', 'getProvinces')->name('getProvinces');
+            Route::get('districts/{provinceId}', 'getDistricts')->name('getDistricts');
+            Route::get('wards/{districtId}', 'getWards')->name('getWards');
+        });
 
         // Users
         Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/show', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
+            Route::get('/', 'index')->name('index')->middleware('permission:view-users');
+            Route::get('listemployee', 'listemployee')->name('listemployee')->middleware('permission:view-users');
+            Route::get('listuser', 'listuser')->name('listuser')->middleware('permission:view-users');
+            Route::get('listtkkhoa', 'listtkkhoa')->name('listtkkhoa')->middleware('permission:view-users');
+            Route::get('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-users');
+            Route::post('opentk/{id}', 'opentk')->name('opentk')->middleware('permission:edit-users');
 
-            Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
+            Route::get('/create', 'create')->name('create')->middleware('permission:create-users');
+            Route::post('/', 'store')->name('store')->middleware('permission:create-users');
+            Route::get('/{id}/show', 'show')->name('show')->middleware('permission:view-users');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('permission:edit-users');
+            Route::put('/{id}', 'update')->name('update')->middleware('permission:edit-users');
+
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-users');
+            Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-users');
+            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-users');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-users');
 
             // Biểu đồ thống kê
-            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user');
-            Route::get('/charts', 'charts')->name('charts');
-            Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
-            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
-            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
-            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats');
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-users');
+            Route::get('/charts', 'charts')->name('charts')->middleware('permission:view-reports');
+            Route::get('/getUserStats', 'getUserStats')->name('getUserStats')->middleware('permission:view-users');
+            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats')->middleware('permission:view-users');
+            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders')->middleware('permission:view-users');
+            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats')->middleware('permission:view-users');
         });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
@@ -292,33 +307,33 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         );
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(
             function () {
-                Route::get('add', 'getFormAdd')->name('getFormAdd');
-                Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate');
-                Route::get('/', 'list')->name('list');
-                Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
-                Route::post('add', 'add')->name('add');
-                Route::post('edit/{id}', 'edit')->name('edit');
+                Route::get('add', 'getFormAdd')->name('getFormAdd')->middleware('permission:create-suppliers');
+                Route::get('edit/{id}', 'getFormUpdate')->name('getFormUpdate')->middleware('permission:edit-suppliers');
+                Route::get('/', 'list')->name('list')->middleware('permission:view-suppliers');
+                Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive')->middleware('permission:edit-suppliers');
+                Route::post('add', 'add')->name('add')->middleware('permission:create-suppliers');
+                Route::post('edit/{id}', 'edit')->name('edit')->middleware('permission:edit-suppliers');
             }
         );
 
         Route::prefix('imports')->controller(ImportController::class)->name('imports.')->group(
             function () {
-                Route::get('add', 'getFormAdd')->name('getFormAdd');
-                Route::get('detail/{id}', 'detail')->name('detail');
-                Route::post('/upload', 'importExcel')->name('upload');
+                Route::get('add', 'getFormAdd')->name('getFormAdd')->middleware('permission:create-imports');
+                Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-imports');
+                Route::post('/upload', 'importExcel')->name('upload')->middleware('permission:create-imports');
 
-                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit');
-                Route::get('/list-approved', 'listApproved')->name('listApproved');
-                Route::get('/list-pending', 'listPending')->name('listPending');
-                Route::get('/list-rejected', 'listRejected')->name('listRejected');
+                Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit')->middleware('permission:edit-imports');
+                Route::get('/list-approved', 'listApproved')->name('listApproved')->middleware('permission:view-imports');
+                Route::get('/list-pending', 'listPending')->name('listPending')->middleware('permission:view-imports');
+                Route::get('/list-rejected', 'listRejected')->name('listRejected')->middleware('permission:view-imports');
 
                 // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
-                Route::post('add', 'add')->name('add');
-                Route::post('edit/{id}', 'edit')->name('edit');
+                Route::post('add', 'add')->name('add')->middleware('permission:create-imports');
+                Route::post('edit/{id}', 'edit')->name('edit')->middleware('permission:edit-imports');
                 Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
                 Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');
 
-                Route::get('update-price/{id}', 'updatePrice')->name('updatePrice');
+                Route::get('update-price/{id}', 'updatePrice')->name('updatePrice')->middleware('permission:edit-imports');
             }
         );
 
@@ -333,24 +348,39 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         });
         Route::prefix('product_audits')->name('product_audits.')
             ->controller(ProductAuditController::class)->group(function () {
-                Route::get('list', 'list')->name('list');
-                Route::get('/', 'index')->name('index');
-                Route::get('create', 'create')->name('create');
-                Route::post('store', 'store')->name('store');
-                Route::get('edit/{id}', 'edit')->name('edit');
-                Route::put('update/{id}', 'update')->name('update');
-                Route::get('destroy/{id}', 'destroy')->name('destroy');
-                Route::get('show/{id}', 'show')->name('show');
+                Route::get('list', 'list')->name('list')->middleware('permission:view-products');
+                Route::get('/', 'index')->name('index')->middleware('permission:view-products');
+                Route::get('create', 'create')->name('create')->middleware('permission:create-products');
+                Route::post('store', 'store')->name('store')->middleware('permission:create-products');
+                Route::get('edit/{id}', 'edit')->name('edit')->middleware('permission:edit-products');
+                Route::put('update/{id}', 'update')->name('update')->middleware('permission:edit-products');
+                Route::get('destroy/{id}', 'destroy')->name('destroy')->middleware('permission:delete-products');
+                Route::get('show/{id}', 'show')->name('show')->middleware('permission:view-products');
             });
 
         Route::prefix('vouchers')->name('vouchers.')->controller(VoucherController::class)->group(function () {
-            Route::get('list',  'listVoucher')->name('listVoucher');
-            Route::get('add',  'addVoucher')->name('addVoucher');
-            Route::post('add',  'addPostVoucher')->name('addPostVoucher');
-            Route::get('edit/{id}',  'editVoucher')->name('editVoucher');
-            Route::get('detail/{id}',  'detailVoucher')->name('detailVoucher');
-            Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher');
-            Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher');
+            Route::get('list',  'listVoucher')->name('listVoucher')->middleware('permission:view-vouchers');
+            Route::get('add',  'addVoucher')->name('addVoucher')->middleware('permission:create-vouchers');
+            Route::post('add',  'addPostVoucher')->name('addPostVoucher')->middleware('permission:create-vouchers');
+            Route::get('edit/{id}',  'editVoucher')->name('editVoucher')->middleware('permission:edit-vouchers');
+            Route::get('detail/{id}',  'detailVoucher')->name('detailVoucher')->middleware('permission:view-vouchers');
+            Route::put('edit/{id}',  'editPutVoucher')->name('editPutVoucher')->middleware('permission:edit-vouchers');
+            Route::delete('delete/{id}',  'deleteVoucher')->name('deleteVoucher')->middleware('permission:delete-vouchers');
+        });
+
+        // Roles management - Sử dụng role:admin để đảm bảo chỉ admin mới truy cập được
+        Route::prefix('roles')->name('roles.')->middleware(['role:admin'])->controller(RoleController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}/detail', 'detail')->name('detail');
+            Route::get('/{id}/permissions', 'showPermissions')->name('permissions');
+            Route::put('/{id}/permissions', 'updatePermissions')->name('permissions.update');
+        });
+
+        // Route kiểm tra quyền hạn
+        Route::prefix('permissions')->name('permissions.')->controller(PermissionController::class)->group(function () {
+            Route::get('/check', 'checkPermission')->name('check');
+            Route::get('/test/{permission}', 'testAccess')->name('test');
+            Route::get('/refresh', 'refreshPermissions')->name('refresh')->middleware('role:admin');
         });
     }
 );

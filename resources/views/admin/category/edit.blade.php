@@ -39,6 +39,9 @@
                         <option value="active" {{ $categories->status == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ $categories->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
+                    @error('status')
+                    <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div>
                     <button type="submit" class="btn btn-success">Xác nhận</button>

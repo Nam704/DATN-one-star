@@ -12,14 +12,14 @@
                                 <i class="ri-add-line align-middle me-1"></i>
                                 Add User
                             </a>
-                            <a href="{{ route('admin.users.listtkkhoa') }}" class="btn btn-secondary ">
+                            <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary">
                                 <i class="ri-delete-bin-line align-middle me-1"></i>
                                 Trash
                             </a>
                             <a class="btn btn-soft-info" href="{{ route('admin.users.charts') }}"> <i
                                     class="mdi mdi-chart-areaspline fs-18 me-1 lh-1"></i>Thống kê</a>
                         </div>
-                        <h4 class="page-title">Danh sách admin</h4>
+                        <h4 class="page-title">Danh sách người dùng</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -45,7 +45,7 @@
                                 <td>
                                     <img src="{{ $value->profile_image ? asset('storage/' . $value->profile_image) : asset('admin/assets/images/user-201.png') }}"
                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
-                                </td>   
+                                </td>
                                 <td>{{ $value->email }}</td>
                                 <td>{{ $value->role->name }}</td>
                                 <td>

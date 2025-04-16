@@ -144,6 +144,22 @@ class User extends Authenticatable
             return true;
         }
     }
+
+    // permissions
+    public function hasPermission($permission)
+    {
+        // Admin luôn có mọi quyền
+        if ($this->role->name === 'admin') {
+            return true;
+        }
+
+        // Check quyền thông qua role
+        if ($this->role && $this->role->permissions) {
+            return $this->role->permissions->contains('name', $permission);
+        }
+
+        return false;
+    }
     /**
      * The attributes that should be cast.
      *
