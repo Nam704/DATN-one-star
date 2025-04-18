@@ -483,20 +483,8 @@ class StatisticController extends Controller
     }
     public function exportLowStockProducts(Request $request)
     {
-        // Lấy tham số ngày bắt đầu và kết thúc từ request
-        $start_date = $request->input('start_date');
-        $end_date   = $request->input('end_date');
-
-        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
-        $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
-
-        // Đảm bảo cả hai ngày đều là đối tượng Carbon
-        $start_date = Carbon::parse($start_date)->startOfDay();
-        $end_date   = Carbon::parse($end_date)->endOfDay();
-
-        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
-        $products = $this->product->low_stock_products($start_date, $end_date);
+        
+        $products = $this->product->low_stock_products();
 
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new Spreadsheet();
@@ -509,18 +497,6 @@ class StatisticController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(
             \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
         );
-
-        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
-        $displayStart = $start_date ? $start_date : 'Chưa chọn';
-        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
-        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
-        $sheet->mergeCells('A2:C2');
-        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
-        $sheet->mergeCells('D2:E2');
-        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A2:E2')->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Dòng 3 để tạo khoảng cách
         $sheet->mergeCells('A3:E3');
@@ -588,7 +564,7 @@ class StatisticController extends Controller
 
         // 5. Xuất file Excel
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $fileName = 'low_stock_products_' . $start_date . '_to_' . $end_date . '.xlsx';
+        $fileName = 'low_stock_products.xlsx';
 
         return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
@@ -960,13 +936,12 @@ class StatisticController extends Controller
 
     public function weeklyStatistics(Request $request)
     {
-        // 1. Lấy ngày bắt đầu và ngày kết thúc từ request, nếu không có sẽ mặc định là đầu và cuối tuần hiện tại
-        $startDateInput = $request->input('start_date', now()->startOfWeek()->toDateString());
-        $endDateInput   = $request->input('end_date', now()->endOfWeek()->toDateString());
-
-        $startDate = Carbon::parse($startDateInput);
-        $endDate   = Carbon::parse($endDateInput);
-        $dateRange = [$startDate->toDateTimeString(), $endDate->toDateTimeString()];
+        // 1. Xác định khoảng thời gian của tuần
+        $dateInput = $request->input('date', now()->toDateString());
+        $selectedDate = Carbon::parse($dateInput);
+        $startOfWeek = $selectedDate->copy()->startOfWeek(); // Thứ Hai
+        $endOfWeek   = $selectedDate->copy()->endOfWeek();     // Chủ Nhật
+        $dateRange = [$startOfWeek->toDateTimeString(), $endOfWeek->toDateTimeString()];
 
         // 2. Lấy ID của các trạng thái cần thiết
         $paidStatusId = DB::table('order_statuses')->where('name', 'Paid')->value('id');
@@ -1011,13 +986,15 @@ class StatisticController extends Controller
         // Giá trị trung bình mỗi đơn hàng (AOV) dựa trên doanh thu Delivered
         $averageOrderValue = $deliveredOrders > 0 ? $totalRevenue / $deliveredOrders : 0;
 
-        // 4. Dữ liệu cho biểu đồ theo ngày trong khoảng thời gian được chọn
+        // 4. Dữ liệu cho biểu đồ theo ngày trong tuần
+        // Lấy dữ liệu từ DB (chỉ những ngày có đơn hàng)
         $rawDailyStats = DB::table('orders')
             ->select(
                 DB::raw('DATE(created_at) as order_date'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
+                // Tính doanh thu trong ngày chỉ từ các đơn Delivered
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as day_revenue')
             )
             ->whereBetween('created_at', $dateRange)
@@ -1026,8 +1003,8 @@ class StatisticController extends Controller
             ->get()
             ->keyBy('order_date');
 
-        // Tạo danh sách các ngày trong khoảng thời gian được chọn
-        $period = CarbonPeriod::create($startDate, $endDate);
+        // Tạo danh sách đầy đủ các ngày trong tuần (sử dụng CarbonPeriod)
+        $period = CarbonPeriod::create($startOfWeek, $endOfWeek);
         $dailyStats = [];
         foreach ($period as $date) {
             $day = $date->toDateString();
@@ -1050,20 +1027,21 @@ class StatisticController extends Controller
             }
         }
 
-        // 5. Top 20 sản phẩm bán chạy trong khoảng thời gian được chọn
+        // 5. Top 20 sản phẩm bán chạy trong tuần
         $productsSales = DB::table('order_details')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
             ->whereBetween('orders.created_at', $dateRange)
-            ->where('orders.id_order_status', $deliveredStatusId)
+            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ tính đơn hàng đã giao hàng
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(20)
             ->get();
 
-        // 6. Top 20 khách hàng mua nhiều nhất trong khoảng thời gian (theo tổng giá trị mua hàng, chỉ Delivered)
+        // 6. Top 20 người mua nhiều nhất trong tuần (tính theo tổng giá trị mua hàng, chỉ Delivered)
+        // 6. Top 20 người mua nhiều nhất trong tuần (tính theo tổng giá trị mua hàng và tổng số lượng sản phẩm, chỉ Delivered)
         $topCustomers = DB::table('orders')
             ->select(
                 'id_user',
@@ -1071,28 +1049,32 @@ class StatisticController extends Controller
                 DB::raw('SUM(total) as total_purchase')
             )
             ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
+            ->where('id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(20)
             ->get();
 
-        // Lấy chi tiết các sản phẩm mà mỗi khách hàng mua (cho các đơn hàng Delivered)
+
+        // Lấy chi tiết các sản phẩm mà mỗi khách hàng mua (dành cho các đơn hàng Delivered)
         $customerProducts = DB::table('orders')
             ->join('order_details', 'orders.id', '=', 'order_details.id_order')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as quantity'))
             ->whereBetween('orders.created_at', $dateRange)
-            ->where('orders.id_order_status', $deliveredStatusId)
+            ->where('orders.id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
             ->groupBy('orders.id_user', 'products.name')
             ->get();
 
+        // Nhóm dữ liệu chi tiết theo id_user
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+
         return view('admin.statistics.weekly_statistics', compact(
-            'startDate',
-            'endDate',
+            'selectedDate',
+            'startOfWeek',
+            'endOfWeek',
             'allTotalOrders',
             'totalRevenue',
             'paidOrders',
@@ -1103,7 +1085,7 @@ class StatisticController extends Controller
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',
-            'customerProductsGrouped',
+            'customerProductsGrouped'
         ));
     }
 

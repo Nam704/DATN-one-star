@@ -264,10 +264,11 @@ class Product extends Model
 }
 
 
-public function top_view_product($start_date, $end_date)
+public function top_view_product()
   {
       return DB::table('products')
           ->where('status', '=', 'active')
+          ->where('view', '>', 0)
           ->select(
               'id',
               'name',
@@ -298,12 +299,13 @@ public function top_view_product($start_date, $end_date)
           ->where('products.created_at', '<=', $end_date) // Chỉ lấy sản phẩm đã tồn tại trước hoặc tại $endDate
           ->groupBy('products.id', 'products.name', 'products.image_primary')
           ->orderBy('total_sold', 'asc')
+          ->limit(10)
           ->get();
   }
   
   
   
-  public function low_stock_products($start_date, $end_date)
+  public function low_stock_products()
 {
   $query = DB::table('products')
       ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
@@ -315,7 +317,6 @@ public function top_view_product($start_date, $end_date)
       )
       ->where('products.status', '=', 'active')
       ->where('product_variants.status', '=', 'active')
-      ->whereBetween('product_variants.updated_at', [$start_date, $end_date])
       ->groupBy('products.id', 'products.name', 'products.image_primary')
       ->havingRaw('SUM(product_variants.quantity) < 10')
       ->orderBy('total_quantity', 'asc');
