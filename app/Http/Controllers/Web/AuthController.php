@@ -48,42 +48,85 @@ class AuthController extends Controller
         $user->save();
         return redirect()->back()->with('success', 'Profile updated successfully');
     }
+    // public function login(AuthRequest $request)
+    // {
+    //     try {
+    //         $credentials = $request->only('email', 'password');
+
+    //         $user = User::where('email', $credentials['email'])->first();
+
+    //         if ($user && $user->is_lock) {
+    //             return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.');
+    //         }
+
+    //         if (Auth::attempt($credentials, $request->filled('remember'))) {
+    //             $user = Auth::user();
+
+    //             //khóa tk
+    //             if ($user->is_lock) {
+    //                 Auth::logout();
+    //                 return redirect()->route('auth.getFormLogin')->withErrors([
+    //                     'email' => 'Tài khoản của bạn đã bị khóa.'
+    //                 ]);
+    //             }
+
+
+    //             if ($user->isAdmin()) {
+    //                 return redirect()->route('admin.dashboard');
+    //             } elseif ($user->isUser()) {
+    //                 return redirect()->route('client.home');
+    //             } elseif ($user->isEmployee()) {
+    //                 return redirect()->route('admin.dashboard');
+    //             }
+    //         } else {
+    //             // return "out auth attempt";
+    //             return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra lại email và mật khẩu.');
+    //         }
+
+    //         return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra email và mật khẩu.');
+    //     } catch (\Exception $e) {
+    //         // Handle the exception
+    //         // return "in try catch";
+    //         return redirect()->back()->with('error', 'Đã xảy ra lỗi trong quá trình đăng nhập.');
+    //     }
+    // }
     public function login(AuthRequest $request)
     {
+
         try {
+
             $credentials = $request->only('email', 'password');
 
-            $user = User::where('email', $credentials['email'])->first();
-
-            if ($user && $user->is_lock) {
-                return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.');
-            }
-
             if (Auth::attempt($credentials, $request->filled('remember'))) {
+
                 $user = Auth::user();
 
                 //khóa tk
-                if ($user->is_lock) {
+                if ($user->is_lock === 'inactive') {
                     Auth::logout();
                     return redirect()->route('auth.getFormLogin')->withErrors([
                         'email' => 'Tài khoản của bạn đã bị khóa.'
                     ]);
                 }
-
+                
 
                 if ($user->isAdmin()) {
-                    return redirect()->route('admin.dashboard');
+                    return redirect()->route('admin.dashboard'); // Admin dashboard
                 } elseif ($user->isUser()) {
-                    return redirect()->route('client.home');
+                    // return "go to user dashboard";
+                    return redirect()->route('client.home'); // Admin dashboard
+
+                    // return redirect()->route('user.dashboard'); // User dashboard
                 } elseif ($user->isEmployee()) {
-                    return redirect()->route('admin.dashboard');
+                    return redirect()->route('admin.dashboard'); // Admin dashboard
+
+                    // return "go to employee dashboard";
+                    // return redirect()->route('employee.dashboard'); // Client dashboard
                 }
             } else {
                 // return "out auth attempt";
                 return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra lại email và mật khẩu.');
             }
-
-            return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra email và mật khẩu.');
         } catch (\Exception $e) {
             // Handle the exception
             // return "in try catch";
