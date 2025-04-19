@@ -129,3 +129,5 @@ Route::prefix('client')->group(
     }
 );
 Route::post('/coupon/apply', [VoucherController::class, 'applyCoupon']);
+Route::get('/vouchers/valid', [VoucherController::class, 'getValidVouchers']);
+Route::get('/vouchers/{code}/products', [VoucherController::class, 'getApplicableProducts']);

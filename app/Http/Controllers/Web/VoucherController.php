@@ -7,24 +7,19 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class VoucherController extends Controller
 {
   public function listVoucher()
   {
     $vouchers = Voucher::all();
-    // Lấy tất cả danh mục và sản phẩm (nếu số lượng không quá lớn)
-    $categories = Category::all()->keyBy('id'); // mảng key theo id
-    $products   = Product::all()->keyBy('id');
+    $categories = Category::all()->keyBy('id');
+    $products = Product::all()->keyBy('id');
 
-    // Với mỗi voucher, chuyển đổi trường applies_to thành tên hiển thị
     foreach ($vouchers as $voucher) {
-      // Giả sử dữ liệu được lưu dưới dạng JSON
-      $applies = is_string($voucher->applies_to)
-        ? json_decode($voucher->applies_to, true)
-        : $voucher->applies_to;
-
-      $names   = [];
+      $applies = $voucher->applies_to ?? [];
+      $names = [];
       if (is_array($applies)) {
         foreach ($applies as $item) {
           if (strpos($item, 'category_') === 0) {
@@ -40,9 +35,9 @@ class VoucherController extends Controller
           }
         }
       }
-      // Gắn chuỗi tên vào thuộc tính tạm applies_to_names
       $voucher->applies_to_names = implode(', ', $names);
     }
+
     return view('admin.voucher.index')->with([
       'vouchers' => $vouchers
     ]);
@@ -50,8 +45,8 @@ class VoucherController extends Controller
 
   public function addVoucher()
   {
-    $categories = Category::all(); // Lấy danh sách danh mục
-    $products   = Product::all();   // Lấy danh sách sản phẩm (nếu cần
+    $categories = Category::all();
+    $products = Product::all();
     return view('admin.voucher.add', compact('categories', 'products'));
   }
 
@@ -69,7 +64,7 @@ class VoucherController extends Controller
           if ($request->type === 'percentage' && $value > 100) {
             $fail('Giá trị giảm giá theo phần trăm không thể lớn hơn 100%.');
           }
-          if ($request->type === 'fixed' && $value > 1000000) { // Giới hạn fixed tối đa
+          if ($request->type === 'fixed' && $value > 1000000) {
             $fail('Giá trị giảm giá cố định không thể lớn hơn 1,000,000.');
           }
           if ($request->type === 'fixed' && $request->min_amount && $value > $request->min_amount) {
@@ -78,7 +73,7 @@ class VoucherController extends Controller
         }
       ],
       'type' => 'required|in:percentage,fixed',
-      'quantity'   => 'required|integer|min:1|max:1000',
+      'quantity' => 'required|integer|min:1|max:1000',
       'user_limit' => 'required|integer|min:1|lte:quantity|max:10',
       'start_date' => 'required|date|after_or_equal:today',
       'end_date' => 'required|date|after_or_equal:start_date',
@@ -87,12 +82,6 @@ class VoucherController extends Controller
         'numeric',
         'min:0',
         function ($attribute, $value, $fail) use ($request) {
-          // Kiểm tra nếu là dạng "percentage" thì `min_amount` bắt buộc phải có
-          // if ($request->type === 'percentage' && (!$value || $value <= 0)) {
-          //     $fail('Số tiền tối thiểu bắt buộc đối với giảm giá phần trăm.');
-          // }
-
-          // Kiểm tra nếu là dạng "fixed", `min_amount` không thể nhỏ hơn `discount_amount`
           if ($request->type === 'fixed' && $value !== null && $value < $request->discount_amount) {
             $fail('Số tiền tối thiểu không thể nhỏ hơn giá trị giảm giá.');
           }
@@ -103,9 +92,7 @@ class VoucherController extends Controller
         'numeric',
         'min:0',
         function ($attribute, $value, $fail) use ($request) {
-          // Chỉ kiểm tra khi loại giảm giá là phần trăm
           if ($request->type === 'percentage' && $value > 0) {
-            // Kiểm tra nếu có min_amount thì mới thực hiện phép tính
             if (!empty($request->min_amount) && $value > ($request->discount_amount * $request->min_amount / 100)) {
               $fail('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng mức giảm giá phần trăm.');
             }
@@ -113,13 +100,23 @@ class VoucherController extends Controller
         }
       ],
       'status' => 'required|in:active,inactive',
-      'applies_to'   => 'nullable|array',
-      'applies_to.*' => 'string', // Mỗi phần tử của mảng là chuỗi
+      'applies_to' => 'nullable|array',
+      'applies_to.*' => [
+        'string',
+        function ($attribute, $value, $fail) {
+          Log::debug('Validating applies_to item:', [$value]);
+          if (!preg_match('/^product_[0-9]+$/', $value) && !preg_match('/^category_[0-9]+$/', $value)) {
+            $fail("Giá trị $value không hợp lệ. Phải có định dạng product_[số] hoặc category_[số].");
+          }
+        },
+      ],
     ]);
 
-    // Chuyển mảng sang JSON
-    $validatedData['applies_to'] = json_encode($validatedData['applies_to'] ?? []);
-    // Tạo voucher mới
+    // Kiểm tra applies_to trước khi lưu
+    $appliesTo = $validatedData['applies_to'] ?? [];
+    Log::debug('Saving applies_to:', [$appliesTo]);
+    $validatedData['applies_to'] = $appliesTo; // Laravel sẽ tự json_encode
+
     Voucher::create($validatedData);
 
     return redirect()->route('admin.vouchers.listVoucher')->with('success', 'Voucher đã được tạo thành công!');
@@ -127,15 +124,11 @@ class VoucherController extends Controller
 
   public function editVoucher($id)
   {
-    $vouchers = Voucher::findOrFail($id);
-    $vouchers->applies_to = is_string($vouchers->applies_to)
-      ? json_decode($vouchers->applies_to, true)
-      : $vouchers->applies_to;
-
+    $voucher = Voucher::findOrFail($id);
     $categories = Category::all();
-    $products   = Product::all();
+    $products = Product::all();
     return view('admin.voucher.edit')->with([
-      'voucher' => $vouchers,
+      'voucher' => $voucher,
       'categories' => $categories,
       'products' => $products
     ]);
@@ -155,7 +148,7 @@ class VoucherController extends Controller
           if ($request->type === 'percentage' && $value > 100) {
             $fail('Giá trị giảm giá theo phần trăm không thể lớn hơn 100%.');
           }
-          if ($request->type === 'fixed' && $value > 1000000) { // Giới hạn fixed tối đa
+          if ($request->type === 'fixed' && $value > 1000000) {
             $fail('Giá trị giảm giá cố định không thể lớn hơn 1,000,000.');
           }
           if ($request->type === 'fixed' && $request->min_amount && $value > $request->min_amount) {
@@ -164,7 +157,7 @@ class VoucherController extends Controller
         }
       ],
       'type' => 'required|in:percentage,fixed',
-      'quantity'   => 'required|integer|min:1|max:1000',
+      'quantity' => 'required|integer|min:1|max:1000',
       'user_limit' => 'required|integer|min:1|lte:quantity|max:10',
       'start_date' => 'required|date',
       'end_date' => 'required|date|after_or_equal:start_date',
@@ -173,12 +166,6 @@ class VoucherController extends Controller
         'numeric',
         'min:0',
         function ($attribute, $value, $fail) use ($request) {
-          // Kiểm tra nếu là dạng "percentage" thì `min_amount` bắt buộc phải có
-          // if ($request->type === 'percentage' && (!$value || $value <= 0)) {
-          //     $fail('Số tiền tối thiểu bắt buộc đối với giảm giá phần trăm.');
-          // }
-
-          // Kiểm tra nếu là dạng "fixed", `min_amount` không thể nhỏ hơn `discount_amount`
           if ($request->type === 'fixed' && $value !== null && $value < $request->discount_amount) {
             $fail('Số tiền tối thiểu không thể nhỏ hơn giá trị giảm giá.');
           }
@@ -189,9 +176,7 @@ class VoucherController extends Controller
         'numeric',
         'min:0',
         function ($attribute, $value, $fail) use ($request) {
-          // Chỉ kiểm tra khi loại giảm giá là phần trăm
           if ($request->type === 'percentage' && $value > 0) {
-            // Kiểm tra nếu có min_amount thì mới thực hiện phép tính
             if (!empty($request->min_amount) && $value > ($request->discount_amount * $request->min_amount / 100)) {
               $fail('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng mức giảm giá phần trăm.');
             }
@@ -199,47 +184,35 @@ class VoucherController extends Controller
         }
       ],
       'status' => 'required|in:active,inactive',
-      'applies_to'       => 'nullable|array',
-      'applies_to.*'     => 'string',
+      'applies_to' => 'nullable|array',
+      'applies_to.*' => [
+        'string',
+        function ($attribute, $value, $fail) {
+          Log::debug('Validating applies_to item:', [$value]);
+          if (!preg_match('/^product_[0-9]+$/', $value) && !preg_match('/^category_[0-9]+$/', $value)) {
+            $fail("Giá trị $value không hợp lệ. Phải có định dạng product_[số] hoặc category_[số].");
+          }
+        },
+      ],
     ]);
 
-    // Lấy voucher theo ID
     $voucher = Voucher::findOrFail($id);
-    $validatedData['applies_to'] = json_encode($validatedData['applies_to'] ?? []);
-    // Cập nhật dữ liệu
-    $voucher->update(
-      $validatedData
-      // [
-      // 'name' => $request->name,
-      // 'code' => $request->code,
-      // 'description' => $request->description,
-      // 'discount_amount' => $request->discount_amount,
-      // 'type' => $request->type,
-      // 'quantity' => $request->quantity,
-      // 'user_limit' => $request->user_limit,
-      // 'start_date' => $request->start_date,
-      // 'end_date' => $request->end_date,
-      // 'min_amount' => $request->min_amount,
-      // 'max_discount_amount' => $request->max_discount_amount,
-      // 'status' => $request->status,
-      // 'applies_to' => $request->applies_to,
-      // ]
-    );
+    $appliesTo = $validatedData['applies_to'] ?? [];
+    Log::debug('Updating applies_to:', [$appliesTo]);
+    $validatedData['applies_to'] = $appliesTo;
 
-    // Chuyển hướng với thông báo thành công
+    $voucher->update($validatedData);
+
     return redirect()->route('admin.vouchers.listVoucher')->with('success', 'Cập nhật voucher thành công!');
   }
+
   public function detailVoucher($id)
   {
-    $vouchers = Voucher::findOrFail($id);
-    $vouchers->applies_to = is_string($vouchers->applies_to)
-      ? json_decode($vouchers->applies_to, true)
-      : $vouchers->applies_to;
-
+    $voucher = Voucher::findOrFail($id);
     $categories = Category::all();
-    $products   = Product::all();
+    $products = Product::all();
     return view('admin.voucher.detail')->with([
-      'voucher' => $vouchers,
+      'voucher' => $voucher,
       'categories' => $categories,
       'products' => $products
     ]);
