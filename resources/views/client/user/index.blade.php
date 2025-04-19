@@ -6,28 +6,46 @@
             {{-- <a href="{{ route('client.orders.check') }}">Check order</a> --}}
             <div class="account_dashboard">
                 <div class="row">
-                    <div class="col-sm-12 col-md-3 col-lg-3">
-                        <!-- Nav tabs -->
-                        <div class="dashboard_tab_button">
-                            <ul role="tablist" class="nav flex-column dashboard-list" id="nav-tab">
-                                <li> <a href="#orders" data-toggle="tab" class="nav-link active">Orders</a></li>
-                                <li><a href="#address" data-toggle="tab" class="nav-link">Addresses</a></li>
-                                <li><a href="#account-details" data-toggle="tab" class="nav-link">Account details</a></li>
-                                <li><a href="{{ route('auth.logout') }}" class="nav-link">logout</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-9 col-lg-9">
-                        <!-- Tab panes -->
+                    <div class="col-12">
+                        @if (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        <!-- Tab điều hướng nằm ngang -->
+                        <ul role="tablist" class="nav nav-tabs mb-3" id="nav-tab">
+                            <li class="nav-item">
+                                <a href="#orders" data-toggle="tab" class="nav-link active">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#address" data-toggle="tab" class="nav-link">Addresses</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#account-details" data-toggle="tab" class="nav-link">Account details</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    Logout
+                                </a>
+                            </li>
+                            <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
+                                style="display: none;">
+                                @csrf
+                            </form>
+                        </ul>
+
+                        <!-- Nội dung tab -->
                         <div class="tab-content dashboard_content">
                             @include('client.user.orders')
                             @include('client.user.address')
                             @include('client.user.accountDetails')
                         </div>
-
                     </div>
                 </div>
             </div>
+
         </div>
         </div>
     </section>

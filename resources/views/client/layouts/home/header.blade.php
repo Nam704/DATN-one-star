@@ -6,13 +6,7 @@
                 <div class="row align-items-center">
                     <div class="col-lg-6 col-md-6">
                         <div class="follow_us">
-                            <label>Follow Us:</label>
-                            <ul class="follow_link">
-                                <li><a href="#"><i class="ion-social-facebook"></i></a></li>
-                                <li><a href="#"><i class="ion-social-twitter"></i></a></li>
-                                <li><a href="#"><i class="ion-social-googleplus"></i></a></li>
-                                <li><a href="#"><i class="ion-social-youtube"></i></a></li>
-                            </ul>
+
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6">
@@ -20,53 +14,55 @@
                             <ul>
                                 <i class="ion-android-person me-1"></i>
                                 @if (Auth::check())
+                                    <li class="top_links"><a href="#">
+                                            {{ auth()->user()->name }}
 
-                                <li class="top_links"><a href="#">
-                                        {{ auth()->user()->name }}
+                                            <i class="ion-ios-arrow-down"></i></a>
+                                        <ul class="dropdown_links">
+                                            <li><a href="{{ route('client.checkout.index') }}">Checkout </a></li>
+                                            <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
+                                            <li><a href="{{ route('client.carts.viewCart') }}">Shopping Cart</a></li>
 
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link"
+                                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                                    Logout
+                                                </a>
+                                            </li>
 
-                                        <i class="ion-ios-arrow-down"></i></a>
-                                    <ul class="dropdown_links">
-                                        <li><a href="checkout.html">Checkout </a></li>
-                                        <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
-                                        <li><a href="cart.html">Shopping Cart</a></li>
-                                        <li><a href="wishlist.html">Wishlist</a></li>
-                                        <li><a href="{{ route('auth.logout') }}">Logout</a></li>
+                                            <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                            </form>
 
-                                    </ul>
-                                </li>
+                                        </ul>
+                                    </li>
                                 @else
-                                <li class="top_links"><a href="#">
-                                        My Account
-                                        <i class="ion-ios-arrow-down"></i></a>
-                                    <ul class="dropdown_links">
+                                    <li class="top_links"><a href="#">
+                                            My Account
+                                            <i class="ion-ios-arrow-down"></i></a>
+                                        <ul class="dropdown_links">
 
-                                        <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
+                                            <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
 
-                                    </ul>
-                                </li>
+                                        </ul>
+                                    </li>
                                 @endif
 
                                 <li class="language"><a href="#"><img
-                                            src=" {{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i
-                                            class="ion-ios-arrow-down"></i></a>
+                                            src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                            alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_language">
-                                        <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                        <li><a href="#"><img
+                                                    src=" {{ asset('client/assets/img/logo/language.png') }}"
                                                     alt=""> English</a>
                                         </li>
-                                        <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language2.png') }}"
-                                                    alt=""> Germany</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="currency"><a href="#">$ USD<i class="ion-ios-arrow-down"></i></a>
-                                    <ul class="dropdown_currency">
-                                        <li><a href="#">EUR – Euro</a></li>
-                                        <li><a href="#">GBP – British Pound</a></li>
-                                        <li><a href="#">INR – India Rupee</a></li>
-                                    </ul>
-                                </li>
 
+                                    </ul>
+                                </li>
+                                <li class="currency"><a href="#">$ VNĐ<i class="ion-ios-arrow-down"></i></a>
+
+                                </li>
 
                             </ul>
                         </div>
@@ -83,7 +79,8 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-6">
                     <div class="logo">
-                        <a href="{{ route('client.home') }}"><img src="/client/assets/img/logo/logo-2.png" alt="img"></a>
+                        <a href="{{ route('client.home') }}"><img src="/client/assets/img/logo/logo-2.png"
+                                alt="img"></a>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-6">
@@ -91,8 +88,8 @@
                         <div class="search-container mobile-search" style="position: relative;">
                             <form action="#">
                                 <div class="search_box">
-                                    <input type="text" class="search-input" placeholder="Search entire store here ..."
-                                        autocomplete="off">
+                                    <input type="text" class="search-input"
+                                        placeholder="Search entire store here ..." autocomplete="off">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>
@@ -100,16 +97,11 @@
                                 style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
                         </div>
 
-
                         <div class="middel_right_info">
 
-                            <div class="header_wishlist">
-                                <a href="wishlist.html"><span class="lnr lnr-heart"></span> Wish list </a>
-                                <span class="wishlist_quantity">3</span>
-                            </div>
                             <div class="mini_cart_wrapper">
                                 <a href="javascript:void(0)"><span class="lnr lnr-cart"></span>My Cart </a>
-                                <span class="cart_quantity">2</span>
+                                <span class="cart_quantity"></span>
 
                             </div>
                         </div>
@@ -140,7 +132,7 @@
                                         </li>
                                     </ul>
                                 </li>
-                                <li><a href="{{ route('client.blog.index' ) }}">Blogs</a></li>
+                                <li><a href="{{ route('client.blog.index') }}">Blogs</a></li>
                                 <li><a href="{{ route('client.contact.index') }}">Contact Us</a></li>
                             </ul>
                         </nav>
@@ -168,7 +160,6 @@
                         <a href="#"><i class="ion-android-close"></i></a>
                     </div>
 
-
                     <div class="top_right text-end">
                         <ul>
                             <li class="top_links"><a href="#"><i class="ion-android-person"></i> My Account<i
@@ -181,12 +172,14 @@
                                 </ul>
                             </li>
                             <li class="language"><a href="#"><img
-                                        src=" {{ asset('client/assets/img/logo/language.png') }}" alt="">en-gb<i
-                                        class="ion-ios-arrow-down"></i></a>
+                                        src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                        alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
                                 <ul class="dropdown_language">
-                                    <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language.png') }}"
+                                    <li><a href="#"><img
+                                                src=" {{ asset('client/assets/img/logo/language.png') }}"
                                                 alt=""> English</a></li>
-                                    <li><a href="#"><img src=" {{ asset('client/assets/img/logo/language2.png') }}"
+                                    <li><a href="#"><img
+                                                src=" {{ asset('client/assets/img/logo/language2.png') }}"
                                                 alt=""> Germany</a>
                                     </li>
                                 </ul>
@@ -198,7 +191,6 @@
                                     <li><a href="#">INR – India Rupee</a></li>
                                 </ul>
                             </li>
-
 
                         </ul>
                     </div>
@@ -242,32 +234,34 @@
 <!--Offcanvas menu area end-->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function(){
-    $('.search-input').on('keyup', function(){
-        var query = $(this).val();
-        // Tìm container chứa ô tìm kiếm hiện hành và phần kết quả tương ứng
-        var searchResultContainer = $(this).closest('.search-container').find('.search-result');
-        if(query != ''){
-            $.ajax({
-                url: "{{ route('client.search') }}",
-                type: "GET",
-                data: { query: query },
-                success: function(data){
-                    searchResultContainer.fadeIn();
-                    searchResultContainer.html(data);
-                }
-            });
-        } else {
-            searchResultContainer.fadeOut();
-            searchResultContainer.html("");
-        }
-    });
+    $(document).ready(function() {
+        $('.search-input').on('keyup', function() {
+            var query = $(this).val();
+            // Tìm container chứa ô tìm kiếm hiện hành và phần kết quả tương ứng
+            var searchResultContainer = $(this).closest('.search-container').find('.search-result');
+            if (query != '') {
+                $.ajax({
+                    url: "{{ route('client.search') }}",
+                    type: "GET",
+                    data: {
+                        query: query
+                    },
+                    success: function(data) {
+                        searchResultContainer.fadeIn();
+                        searchResultContainer.html(data);
+                    }
+                });
+            } else {
+                searchResultContainer.fadeOut();
+                searchResultContainer.html("");
+            }
+        });
 
-    // Ẩn kết quả gợi ý khi click bên ngoài container search
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('.search-container').length) {
-            $('.search-result').fadeOut();
-        }
+        // Ẩn kết quả gợi ý khi click bên ngoài container search
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.search-container').length) {
+                $('.search-result').fadeOut();
+            }
+        });
     });
-});
 </script>
