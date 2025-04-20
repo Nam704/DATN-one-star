@@ -138,15 +138,30 @@
                 <!-- Order actions -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="h6">Order Actions</h3>
+                        <h3 class="h6">Hành động đơn hàng</h3>
 
                         <!-- Nút thanh toán lại -->
-                        @if ($order->canRetryPayment())
+                        @php
+                            $retryPaymentService = app(\App\Services\RetryPaymentService::class);
+                            $canRetry = $retryPaymentService->canRetryPayment($order->id);
+                            // echo $canRetry['message'];
+                        @endphp
+                        @if ($canRetry['success'])
                             <form action="{{ route('client.orders.retryPayment', $order->id) }}" method="POST"
                                 class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-warning mb-2">Thanh toán lại</button>
                             </form>
+                        @elseif (
+                            !$canRetry['success'] &&
+                                in_array($orderDetails['order_status']['name'], [
+                                    'Payment Failed',
+                                    'Payment Expired',
+                                    'Payment Retry Requested',
+                                ]))
+                            <div class="alert alert-warning mt-2">
+                                Không thể thanh toán lại: {{ $canRetry['message'] }}
+                            </div>
                         @endif
 
                         <!-- Form hủy đơn hàng -->

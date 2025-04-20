@@ -7960,6 +7960,7 @@ textarea:-ms-input-placeholder {
   text-align: left;
   padding: 12px;
 }
+
 .btn-b {
   background: #333;
   border: 0;
@@ -8957,7 +8958,7 @@ textarea:-ms-input-placeholder {
 }
 
 .dashboard_content a {
-  color: #ffd54c;
+  /* color: #ffd54c; */
   font-weight: 500;
 }
 

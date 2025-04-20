@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('shipping', 10, 2)->nullable();
             $table->decimal('total', 15, 2);
             $table->string('payment_method');
+            $table->integer('payment_attempts')->default(0);
             $table->string('payment_status')->nullable()->index(); // Thêm index
             $table->foreignId('id_order_status')->nullable()->constrained('order_statuses')->onDelete('cascade');
             $table->timestamps();

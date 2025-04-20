@@ -45,7 +45,6 @@ class OrderService
         VoucherService $voucherService,
         OrderStatusService $orderStatusService,
         UserRestriction $userRestriction
-
     ) {
         $this->userRestriction = $userRestriction;
         $this->orderCancellationReason = $orderCancellationReason;
@@ -56,21 +55,17 @@ class OrderService
         $this->notificationService = $notificationService;
         $this->voucherService = $voucherService;
         $this->orderStatusService = $orderStatusService;
-        // Constructor logic
     }
 
     public function createOrder(array $requestData)
     {
-        // Bắt đầu transaction để đảm bảo toàn vẹn dữ liệu
         return DB::transaction(function () use ($requestData) {
-            // Bước 0: Validate dữ liệu đầu vào
             try {
                 $validator = Validator::make($requestData, [
                     'data_user' => 'required|array',
                     'data_user.name' => 'required|string|max:255',
-                    'data_user.phone' => 'required|string|max:20|regex:/^[0-9]{10,15}$/', // Số điện thoại 10-15 chữ số
+                    'data_user.phone' => 'required|string|max:20|regex:/^[0-9]{10,15}$/',
                     'data_user.email' => 'required|email|max:255',
-
                     'data_address' => 'required|array',
                     'data_address.province' => 'required|string|max:50',
                     'data_address.name_province' => 'required|string|max:255',
@@ -79,12 +74,10 @@ class OrderService
                     'data_address.ward' => 'required|string|max:50',
                     'data_address.name_ward' => 'required|string|max:255',
                     'data_address.address_detail' => 'required|string|max:500',
-
                     'data_order' => 'required|array',
                     'data_order.order_note' => 'nullable|string|max:1000',
-                    'data_order.payment_method' => 'required|string|in:COD,VNPAY', // Các phương thức thanh toán hợp lệ
+                    'data_order.payment_method' => 'required|string|in:COD,VNPAY',
                 ], [
-                    // Thông báo lỗi tùy chỉnh (tùy chọn)
                     'data_user.name.required' => 'Tên người dùng là bắt buộc.',
                     'data_user.email.required' => 'Email là bắt buộc.',
                     'data_user.email.email' => 'Email không đúng định dạng.',
@@ -99,7 +92,6 @@ class OrderService
                     throw new ValidationException($validator);
                 }
 
-                // Validate checkout_data từ session
                 $checkoutData = session('checkout_data');
                 if (!$checkoutData) {
                     throw new \Exception('Dữ liệu đơn hàng đã được dùng, hoặc hết hạn!');
@@ -123,76 +115,43 @@ class OrderService
                 if ($validator->fails()) {
                     throw new ValidationException($validator);
                 }
-            } catch (ValidationException $e) {
-                throw new \Exception($e->validator->errors()->first());
-            } catch (\Exception $e) {
-                throw new \Exception('Lỗi khi validate dữ liệu: ' . $e->getMessage());
-            }
 
-            // Bước 1: Chuẩn bị dữ liệu
-            try {
                 $dataUser = $requestData['data_user'];
                 $dataAddress = $requestData['data_address'];
                 $dataOrder = $requestData['data_order'];
                 $variants = $checkoutData['variants'];
                 $coupon = $checkoutData['coupon'];
-            } catch (\Exception $e) {
-                throw new \Exception('Lỗi khi chuẩn bị dữ liệu: ' . $e->getMessage());
-            }
 
-            // Bước 2: Tính subtotal trước để dùng cho voucher
-            try {
                 $subtotal = 0;
                 $variantIds = [];
                 foreach ($variants as $variant) {
                     $subtotal += $variant['price'] * $variant['quantity'];
                     $variantIds[] = $variant['id_variant'];
                 }
-            } catch (\Exception $e) {
-                throw new \Exception('Lỗi khi tính subtotal: ' . $e->getMessage());
-            }
 
-            // Bước 3: Xử lý voucher (nếu có) bằng VoucherService
-            $voucher = null;
-            $discount = 0;
-            if ($coupon) {
-                try {
-                    // Gọi VoucherService để áp dụng coupon
+                $voucher = null;
+                $discount = 0;
+                if ($coupon) {
                     $voucherResult = $this->voucherService->applyCoupon($coupon, $variantIds, $subtotal);
-
                     if (!$voucherResult['success']) {
                         throw new \Exception($voucherResult['message']);
                     }
-
                     $discount = $voucherResult['discount'];
-
-                    // Lấy thông tin voucher từ DB để lưu vào đơn hàng
                     $voucher = Voucher::where('code', $coupon)
                         ->where('status', 'active')
                         ->where('start_date', '<=', now())
                         ->where('end_date', '>=', now())
                         ->where('quantity', '>', 0)
                         ->first();
-
                     if (!$voucher) {
                         throw new \Exception('Không tìm thấy voucher hợp lệ trong cơ sở dữ liệu');
                     }
-                } catch (\Exception $e) {
-                    throw new \Exception('Lỗi khi xử lý voucher: ' . $e->getMessage());
                 }
-            }
 
-            // Bước 4: Tính shipping (giả định = 0)
-            $shipping = 0; // Thay đổi logic tính shipping nếu cần
+                $shipping = 0;
+                $total = $subtotal - $discount + $shipping;
+                $orderCode = 'ORD-' . uniqid();
 
-            // Bước 5: Tính total
-            $total = $subtotal - $discount + $shipping;
-
-            // Bước 6: Tạo mã đơn hàng unique
-            $orderCode = 'ORD-' . uniqid();
-
-            // Bước 7: Lưu thông tin vào bảng orders
-            try {
                 $order = new Order();
                 $order->code = $orderCode;
                 $order->id_user = auth()->id() ?? null;
@@ -213,29 +172,16 @@ class OrderService
                 }
                 $order->id_order_status = $orderStatus->id;
                 $order->save();
-            } catch (\Exception $e) {
-                throw new \Exception('Lỗi khi lưu thông tin đơn hàng: ' . $e->getMessage());
-            }
 
-            // Bước 8: Lưu thông tin vào bảng order_details và kiểm tra số lượng
-            try {
                 foreach ($variants as $inputVariant) {
-                    // Lấy biến thể từ DB với khóa để tránh xung đột
                     $variant = Product_variant::where('id', $inputVariant['id_variant'])->lockForUpdate()->first();
-
                     if (!$variant) {
                         throw new \Exception("Biến thể sản phẩm với ID {$inputVariant['id_variant']} không tồn tại");
                     }
-
-                    // Kiểm tra số lượng
                     if ($variant->quantity < $inputVariant['quantity']) {
                         throw new \Exception("Số lượng sản phẩm không đủ cho biến thể ID {$inputVariant['id_variant']}. Hiện có: {$variant->quantity}, Yêu cầu: {$inputVariant['quantity']}");
                     }
-
-                    // Giảm số lượng trong kho
                     $variant->decrement('quantity', $inputVariant['quantity']);
-
-                    // Lưu chi tiết đơn hàng
                     $orderDetail = new Order_detail();
                     $orderDetail->id_order = $order->id;
                     $orderDetail->id_variant = $inputVariant['id_variant'];
@@ -245,33 +191,23 @@ class OrderService
                     $orderDetail->total = $inputVariant['price'] * $inputVariant['quantity'];
                     $orderDetail->save();
                 }
-            } catch (\Exception $e) {
-                throw new \Exception('Lỗi khi lưu chi tiết đơn hàng: ' . $e->getMessage());
-            }
 
-            // Bước 9: Cập nhật thông tin voucher (nếu có)
-            if ($voucher && $discount > 0) {
-                try {
+                if ($voucher && $discount > 0) {
                     $voucher->total_usage += 1;
                     $voucher->quantity -= 1;
                     $voucher->save();
-                } catch (\Exception $e) {
-                    throw new \Exception('Lỗi khi cập nhật thông tin voucher: ' . $e->getMessage());
                 }
-            }
 
-            // Bước 10: Xử lý sau khi tạo đơn hàng
-            try {
                 session()->forget('checkout_data');
+                return $order;
+            } catch (ValidationException $e) {
+                throw new \Exception($e->validator->errors()->first());
             } catch (\Exception $e) {
-                throw new \Exception('Lỗi khi xóa dữ liệu checkout trong session: ' . $e->getMessage());
+                throw new \Exception('Lỗi khi tạo đơn hàng: ' . $e->getMessage());
             }
-
-            return $order; // Trả về đơn hàng vừa tạo
         });
     }
 
-    // Hàm xử lý response (nếu dùng trong API)
     public function handleCreateOrder($request)
     {
         try {
@@ -308,22 +244,18 @@ class OrderService
                 throw new \Exception('Bạn cần đăng nhập để hủy đơn hàng.');
             }
 
-            // Kiểm tra khóa tài khoản
             if ($user->isLocked()) {
                 throw new \Exception('Tài khoản của bạn đã bị khóa do vi phạm chính sách hủy đơn.');
             }
 
-            // Kiểm tra giới hạn hủy
             $cancelLimit = 3;
             $cancelCount = $this->getCancelCount($user->id);
             if ($cancelCount >= $cancelLimit) {
                 $this->restrictUser($user->id);
-                // Đăng xuất người dùng
                 Auth::logout();
                 throw new \Exception('Bạn đã hủy quá số đơn hàng cho phép (3 lần/ngày). Tài khoản bị khóa 48 giờ.');
             }
 
-            // Kiểm tra khả năng hủy đơn
             if (!$this->canCancelOrder($orderId)) {
                 throw new \Exception('Đơn hàng không thể hủy ở trạng thái hiện tại.');
             }
@@ -334,14 +266,10 @@ class OrderService
                 throw new \Exception('Lý do hủy không hợp lệ.');
             }
 
-            // Lưu trạng thái hiện tại
             $currentStatusId = $order->id_order_status;
-
-            // Cập nhật trạng thái đơn hàng
             $cancelRequestedId = Order_status::where('name', 'Cancel Requested')->value('id');
             $order->update(['id_order_status' => $cancelRequestedId]);
 
-            // Tạo bản ghi hủy đơn
             OrderCancellation::create([
                 'order_id' => $orderId,
                 'reason_id' => $reasonId,
@@ -350,7 +278,6 @@ class OrderService
                 'previous_status_id' => $currentStatusId,
             ]);
 
-            // Gửi thông báo cho admin
             $dataNotification = [
                 'title' => 'Yêu cầu hủy đơn hàng',
                 'message' => "Đơn hàng {$order->code} đã yêu cầu hủy. Vui lòng kiểm tra!",
@@ -362,18 +289,14 @@ class OrderService
             ];
             $this->notificationService->sendPrivate($dataNotification);
 
-            // Xóa cache
             Cache::forget("user_cancel_count_{$user->id}");
-
             return $order;
         } catch (\Exception $e) {
             Log::error('Lỗi trong cancelOrder: ' . $e->getMessage());
             throw $e;
         }
     }
-    /**
-     * Kiểm tra xem người dùng có bị khóa hủy đơn hàng không
-     */
+
     protected function isUserRestricted($userId)
     {
         return UserRestriction::where('user_id', $userId)
@@ -382,17 +305,12 @@ class OrderService
             ->exists();
     }
 
-    /**
-     * Khóa tài khoản người dùng trong 48 giờ
-     */
     protected function restrictUser($userId)
     {
-        // Khóa tài khoản
         $user = User::findOrFail($userId);
         $user->is_lock = true;
         $user->save();
 
-        // Tạo bản ghi giới hạn
         $this->userRestriction->create([
             'user_id' => $userId,
             'restriction_type' => 'cancel_order',
@@ -400,7 +318,6 @@ class OrderService
             'expires_at' => now()->addHours(48),
         ]);
 
-        // Gửi thông báo
         $this->notificationService->sendPrivate([
             'title' => 'Tài khoản bị khóa',
             'message' => 'Tài khoản của bạn đã bị khóa 48 giờ do vi phạm chính sách hủy đơn (quá 3 lần/ngày).',
@@ -414,12 +331,6 @@ class OrderService
         Log::info("Tài khoản ID {$userId} bị khóa do hủy đơn quá giới hạn.");
     }
 
-    /**
-     * Đếm số lần hủy đơn trong 24 giờ
-     */
-    /**
-     * Đếm số lần hủy đơn trong 24 giờ
-     */
     protected function getCancelCount($userId)
     {
         $cacheKey = "user_cancel_count_{$userId}";
@@ -432,7 +343,6 @@ class OrderService
                 ->count();
         });
     }
-
 
     public function canCancelOrder($orderId)
     {
@@ -461,74 +371,12 @@ class OrderService
             return false;
         }
     }
-    public function retryPayment($orderId)
-    {
-        try {
-            if (!$this->canRetryPayment($orderId)) {
-                throw new \Exception('Đơn hàng không đủ điều kiện để thanh toán lại.');
-            }
 
-            $order = $this->order->findOrFail($orderId);
-
-            // Gọi API thanh toán (giả định PaymentService xử lý)
-            $paymentResult = $this->paymentService->vnpay_payment($order);
-
-            if ($paymentResult['success']) {
-                $order->payment_status = 'Paid';
-                $order->save();
-                return true;
-            } else {
-                $order->payment_status = 'Payment Failed';
-                $order->save();
-                throw new \Exception('Thanh toán thất bại: ' . $paymentResult['message']);
-            }
-        } catch (\Exception $e) {
-            Log::error('Lỗi trong retryPayment: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-    public function canRetryPayment($orderId)
-    {
-        try {
-            $order = $this->order->findOrFail($orderId);
-
-            // Kiểm tra phương thức thanh toán
-            if ($order->payment_method !== 'VNPAY') {
-                return false;
-            }
-
-            // Kiểm tra trạng thái thanh toán
-            $eligibleStatuses = ['Payment Failed', 'Payment Expired'];
-            if (!in_array($order->payment_status, $eligibleStatuses)) {
-                return false;
-            }
-
-            // Kiểm tra thời gian: đơn hàng phải trong vòng 12 tiếng
-            $timeLimit = Carbon::parse($order->created_at)->addHours(12);
-            if (Carbon::now()->greaterThan($timeLimit)) {
-                return false;
-            }
-
-            // Kiểm tra tồn kho sản phẩm
-            foreach ($order->orderDetails as $detail) {
-                $variant = Product_variant::find($detail->id_variant);
-                if (!$variant || $variant->stock < $detail->quantity) {
-                    return false;
-                }
-            }
-
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Lỗi trong canRetryPayment: ' . $e->getMessage());
-            return false;
-        }
-    }
     public function searchOrders(Request $request, $perPage = 10)
     {
         $user = Auth::user();
         $query = Order::where('id_user', $user->id)->with('orderStatus');
 
-        // 1. Tìm kiếm dựa trên code hoặc tên khách hàng (search)
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -537,14 +385,12 @@ class OrderService
             });
         }
 
-        // 2. Lọc theo nhóm trạng thái (group_status)
         if ($request->filled('group_status') && $request->group_status !== 'All') {
             $query->whereHas('orderStatus', function ($q) use ($request) {
                 $q->where('group_status', $request->group_status);
             });
         }
 
-        // 3. Lọc theo tổng tiền (min_total và max_total)
         if ($request->filled('min_total') && is_numeric($request->min_total)) {
             $query->where('total', '>=', $request->min_total);
         }
@@ -552,7 +398,6 @@ class OrderService
             $query->where('total', '<=', $request->max_total);
         }
 
-        // 4. Lọc theo phí vận chuyển (min_shipping và max_shipping)
         if ($request->filled('min_shipping') && is_numeric($request->min_shipping)) {
             $query->where('shipping', '>=', $request->min_shipping);
         }
@@ -560,33 +405,24 @@ class OrderService
             $query->where('shipping', '<=', $request->max_shipping);
         }
 
-        // 5. Sắp xếp (group_by)
         if ($request->filled('group_by')) {
             $query->orderBy($request->group_by);
         }
 
-        // 6. Tính toán các chỉ số tổng hợp (summary metrics)
         $totalOrders = Order::where('id_user', $user->id)->count();
-
-        // Tính openOrders: Tổng các đơn hàng thuộc Awaiting Delivery và Shipping
         $openOrders = Order::where('id_user', $user->id)
             ->whereHas('orderStatus', function ($q) {
                 $q->whereIn('group_status', ['Awaiting Delivery', 'Shipping']);
             })->count();
-
         $averagePrice = Order::where('id_user', $user->id)->avg('total');
 
-        // 7. Phân trang kết quả
         $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-        // 8. Lấy danh sách group_status duy nhất
         $groupStatuses = Order_status::select('group_status')
             ->distinct()
             ->whereNotNull('group_status')
             ->pluck('group_status')
             ->toArray();
 
-        // 9. Tính số lượng đơn hàng cho mỗi group_status (dùng cho tabs)
         $groupStatusCounts = [];
         foreach ($groupStatuses as $group) {
             $groupStatusCounts[$group] = Order::where('id_user', $user->id)
@@ -595,7 +431,6 @@ class OrderService
                 })->count();
         }
 
-        // Trả về dữ liệu
         return compact(
             'orders',
             'totalOrders',
@@ -606,8 +441,7 @@ class OrderService
         );
     }
 
-
-    function listReason()
+    public function listReason()
     {
         return $this->orderCancellationReason->query()->select('id', 'reason')->where('to', 'client')->orderBy('id', 'DESC')->get();
     }

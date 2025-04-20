@@ -82,14 +82,14 @@
 
     <!-- Orders Table -->
     <div class="table-responsive">
-        <table class="table table-dark table-striped">
+        <table class="table table-light table-striped">
             <thead>
                 <tr>
                     <th>Number</th>
                     <th>Customer</th>
                     <th>Status</th>
                     <th>Total</th>
-                    <th>Shipping Cost</th>
+                    <th>Time</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -105,13 +105,17 @@
                             </span>
                         </td>
                         <td>{{ number_format($order->total, 2) }}</td>
-                        <td>{{ number_format($order->shipping, 2) }}</td>
+                        <td>{{ $order->created_at }}</td>
                         <td>
                             <a href="{{ route('client.orders.detail', $order->id) }}"
-                                class="btn btn-sm btn-info">View</a>
-                            @if ($order->canRetryPayment())
+                                class="btn btn-sm btn-info">Xem</a>
+                            @php
+                                $retryPaymentService = app(\App\Services\RetryPaymentService::class);
+                                $canRetry = $retryPaymentService->canRetryPayment($order->id);
+                            @endphp
+                            @if ($canRetry['success'])
                                 <a href="{{ route('client.orders.retryPayment', $order->id) }}"
-                                    class="btn btn-sm btn-warning">Retry Payment</a>
+                                    class="btn btn-sm btn-warning">Thanh toán lại</a>
                             @endif
                         </td>
                     </tr>

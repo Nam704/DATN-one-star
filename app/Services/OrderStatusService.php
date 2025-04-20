@@ -22,9 +22,6 @@ class OrderStatusService
         $this->paymentService = $paymentService;
     }
 
-    /**
-     * Cập nhật trạng thái đơn hàng dựa trên phương thức thanh toán
-     */
     public function updateInitialStatus(Order $order)
     {
         $method = $order->payment_method;
@@ -57,18 +54,18 @@ class OrderStatusService
     protected function handleVNPAY(Order $order)
     {
         $status = Order_status::where('name', 'Awaiting Payment')->first();
+        if (!$status) throw new \Exception('Awaiting Payment status not found');
 
-        $order->id_order_status = $status->next_status_id;
-        $order->payment_status = 'Payment Verification';
+        $order->id_order_status = $status->id;
+        $order->payment_status = 'Awaiting Payment';
         $order->save();
 
         $orderExpire = $this->orderExpire->create([
             'id_order' => $order->id,
-            'expires_at' => Carbon::now()->addMinutes(1),
+            'expires_at' => Carbon::now()->addMinutes(30),
         ]);
 
         ExpireOrder::dispatch($orderExpire->id)->delay($orderExpire->expires_at);
-
         return $this->paymentService->vnpay_payment($order);
     }
 
@@ -92,78 +89,15 @@ class OrderStatusService
         $order->save();
     }
 
-    /**
-     * Lấy danh sách trạng thái tiếp theo
-     */
     public function getAvailableNextStatuses(Order $order)
     {
         $currentStatus = $order->orderStatus;
         $next = Order_status::find($currentStatus->next_status_id);
-
         return $next ? [$next] : [];
     }
 
-    /**
-     * Kiểm tra trạng thái cuối
-     */
     public function isFinalStatus(Order $order)
     {
         return $order->orderStatus->next_status_id === null;
-    }
-
-    public function vnpay_payment($order)
-    {
-        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://127.0.0.1:8000/client/payment";
-        $vnp_TmnCode = "ASFZEFO2";
-        $vnp_HashSecret = "1P0E4T01EMVDNJ0EIY4955QEHXK1IH27";
-
-        $vnp_TxnRef = $order->code;
-        $vnp_OrderInfo = "Thanh Toán Đơn Hàng";
-        $vnp_OrderType = "OneStar";
-        $vnp_Amount = $order->total * 100;
-        $vnp_Locale = "VN";
-        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
-
-        $inputData = array(
-            "vnp_Version" => "2.1.0",
-            "vnp_TmnCode" => $vnp_TmnCode,
-            "vnp_Amount" => $vnp_Amount,
-            "vnp_Command" => "pay",
-            "vnp_CreateDate" => date('YmdHis'),
-            "vnp_CurrCode" => "VND",
-            "vnp_IpAddr" => $vnp_IpAddr,
-            "vnp_Locale" => $vnp_Locale,
-            "vnp_OrderInfo" => $vnp_OrderInfo,
-            "vnp_OrderType" => $vnp_OrderType,
-            "vnp_ReturnUrl" => $vnp_Returnurl,
-            "vnp_TxnRef" => $vnp_TxnRef,
-        );
-
-        ksort($inputData);
-        $query = "";
-        $i = 0;
-        $hashdata = "";
-        foreach ($inputData as $key => $value) {
-            if ($i == 1) {
-                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-            } else {
-                $hashdata .= urlencode($key) . "=" . urlencode($value);
-                $i = 1;
-            }
-            $query .= urlencode($key) . "=" . urlencode($value) . '&';
-        }
-
-        $vnp_Url = $vnp_Url . "?" . $query;
-        if (isset($vnp_HashSecret)) {
-            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
-        }
-
-        return [
-            'code' => '00',
-            'message' => 'success',
-            'data' => $vnp_Url
-        ];
     }
 }
