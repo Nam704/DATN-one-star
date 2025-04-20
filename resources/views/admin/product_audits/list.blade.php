@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">List Supplier</h4>
+                    <h4 class="header-title">Danh sách kiểm toán</h4>
 
                     <div>
                         @if (session('success'))
@@ -29,16 +29,15 @@
 
                     </div>
                     <a href="{{route('admin.imports.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
-                        Add new import
+                        Thêm mới
                     </a>
-                    <a href="{{ route('admin.export.exportSamplefile') }}" class="btn btn-sm btn-primary">Get Sample
-                        file</a>
+                    <a href="{{ route('admin.export.exportSamplefile') }}" class="btn btn-sm btn-primary">Tải tệp file</a>
                     <div class="row mt-2">
                         <form class="col-6 d-flex" action="{{ route('admin.imports.upload') }}" method="POST"
                             enctype="multipart/form-data">
                             @csrf
                             <input type="file" name="file" required class="form-control">
-                            <button type="submit" class=" ms-1 btn btn-primary">Import</button>
+                            <button type="submit" class=" ms-1 btn btn-primary">Nhập</button>
                         </form>
                     </div>
 
@@ -55,11 +54,11 @@
                             class="table table-striped dt-responsive nowrap table-striped  w-100">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>User</th>
-                                    <th>Type</th>
-                                    <th>Quantity</th>
-                                    <th>Detail</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Người dùng</th>
+                                    <th>Loại</th>
+                                    <th>Số lượng</th>
+                                    <th>Hành động</th>
 
                                 </tr>
                             </thead>
@@ -76,7 +75,7 @@
                                         @if ($item->action_type == 'import')
                                         <a href="{{ route('admin.imports.detail',['id'=>$item->id_import]) }}"
                                             class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye"></i> Detail
+                                            <i class="fas fa-eye"></i> Chi tiết
                                         </a>
                                         @endif
 
@@ -89,11 +88,11 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>User</th>
-                                    <th>Type</th>
-                                    <th>Quantity</th>
-                                    <th>Detail</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Người dùng</th>
+                                    <th>Loại </th>
+                                    <th>Số lượng</th>
+                                    <th>Hành động</th>
 
                                 </tr>
                             </tfoot>

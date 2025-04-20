@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="mt-4">
 
-                        <h1 class="text-center">Product Audit</h1>
+                        <h1 class="text-center">Kiểm toán sản phẩm</h1>
 
                         @if (session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>

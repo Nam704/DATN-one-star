@@ -16,10 +16,10 @@
                         <thead>
                             <tr>
                                 <th>Stt</th>
-                                <th>Name</th>
-                                <td>Parent</td>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Tên</th>
+                                <td>Danh mục cha</td>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
 
@@ -50,10 +50,10 @@
                         <tfoot>
                             <tr>
                                 <th>Stt</th>
-                                <th>Name</th>
-                                <td>Parent</td>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Tên</th>
+                                <td>Danh mục cha</td>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
                         </tfoot>
                     </table>

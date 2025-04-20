@@ -63,8 +63,8 @@
             @yield('content')
         </div>
         <div class="footer">
-            <p>Need help? Contact our support team at support@example.com</p>
-            <p>© {{ date('Y') }} Your Store Name. All rights reserved.</p>
+            <p>Cần trợ giúp? Liên hệ với nhóm hỗ trợ của chúng tôi tại onestart@example.com</p>
+            <p>© {{ date('Y') }} Tên cửa hàng của bạn. Mọi quyền được bảo lưu.</p>
         </div>
     </div>
 </body>

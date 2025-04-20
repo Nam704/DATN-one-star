@@ -252,6 +252,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('/',  'list')->name('list')->middleware('permission:view-products');
             Route::get('/edit/{id}',  'edit')->name('edit')->middleware('permission:edit-products');
             Route::post('/update/{id}',  'update')->name('update')->middleware('permission:edit-products');
+            Route::delete('/destroy/{id}',  'destroy')->name('destroy')->middleware('permission:delete-products');
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel')->middleware('permission:create-products');
             Route::post('import-product', 'import')->name('importProduct')->middleware('permission:create-products');
             Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-products');

@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">List Supplier</h4>
+                    <h4 class="header-title">Danh sách nhà cung cấp</h4>
                     @if (session('success'))
                     <p class="alert alert-primary">
                         {{ session('success') }}
@@ -14,7 +14,7 @@
                     @endif
 
                     <a href="{{route('admin.suppliers.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
-                        Add new supplier
+                        Thêm mới
                     </a>
 
                 </div>
@@ -25,11 +25,11 @@
                         class="table table-striped dt-responsive nowrap table-striped  w-100">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Address</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Tên</th>
+                                <th>Địa chỉ</th>
+                                <th>Số điện thoại</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
 
                             </tr>
                         </thead>
@@ -61,12 +61,13 @@
 
                         </tbody>
                         <tfoot>
-                            <tr>
-                                <th>Name</th>
-                                <th>Address</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                        <tr>
+                                <th>Tên</th>
+                                <th>Địa chỉ</th>
+                                <th>Số điện thoại</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+
                             </tr>
                         </tfoot>
                     </table>

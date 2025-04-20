@@ -204,7 +204,6 @@
                 "searching": false,
             });
             $('#table3').DataTable({
-                responsive: true,
                 "language": {
                     "lengthMenu": "Hiển thị _MENU_ bản ghi mỗi trang",
                     "zeroRecords": "Không tìm thấy dữ liệu",

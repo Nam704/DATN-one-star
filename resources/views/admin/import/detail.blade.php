@@ -6,10 +6,10 @@
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item"><a href="javascript: void(0);">Imports</a></li>
-                    <li class="breadcrumb-item active">Import Details</li>
+                    <li class="breadcrumb-item active">Chi tiết nhập hàng</li>
                 </ol>
             </div>
-            <h4 class="page-title">Import Details #{{ $import->id }}</h4>
+            <h4 class="page-title">Chi tiết nhập hàng #{{ $import->id }}</h4>
             <div>
                 @if (session('success'))
                 <p class="alert alert-primary">
@@ -38,7 +38,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <a href="{{route('admin.imports.listApproved')}}" class="btn btn-sm btn-primary">Back to list</a>
+                <a href="{{route('admin.imports.listApproved')}}" class="btn btn-sm btn-primary">Quay lại</a>
                 @if ($import->status == 'approved')
                 <a href="{{ route('admin.imports.updatePrice',$import->id) }}" class="btn btn-info">Cập nhật giá</a>
                 @endif
@@ -46,19 +46,19 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <p><strong>Supplier:</strong> {{ $import->supplier->name }}</p>
+                        <p><strong>Nhà cung cấp:</strong> {{ $import->supplier->name }}</p>
                     </div>
                     <div class="col-md-3">
-                        <p><strong>Import Name:</strong> {{ $import->name }}</p>
+                        <p><strong>Tên:</strong> {{ $import->name }}</p>
                     </div>
                     <div class="col-md-3">
-                        <p><strong>Import Date:</strong> {{ $import->import_date }}</p>
+                        <p><strong>Ngày cung cấp:</strong> {{ $import->import_date }}</p>
                     </div>
                     <div class="col-md-3">
-                        <p><strong>Total Amount:</strong> {{ number_format($import->total_amount, 2) }}</p>
+                        <p><strong>Tổng số lượng:</strong> {{ number_format($import->total_amount, 2) }}</p>
                     </div>
                     <div class="col-md-12">
-                        <p><strong>Note:</strong> {{ $import->note }}</p>
+                        <p><strong>Ghi chú:</strong> {{ $import->note }}</p>
                     </div>
                 </div>
                 @if ($import->status == 'pending')
@@ -66,27 +66,27 @@
                     <a href="{{ route('admin.imports.accept',['id'=>$import->id]) }}"
                         class="btn btn-primary btn-sm col-5">
                         <i class="fas fa-trash"></i>
-                        Accept
+                        Chấp nhận
                     </a>
                     <a href="{{ route('admin.imports.reject',['id'=>$import->id]) }}"
                         class="btn btn-danger btn-sm col-5">
                         <i class="fas fa-trash"></i>
-                        Reject
+                        Từ chối
                     </a>
                 </div>
                 @endif
 
                 <div class="mt-4">
-                    <h5>Import Details</h5>
+                    <h5>Chi tiết nhập</h5>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Product Variant</th>
-                                    <th>Quantity</th>
-                                    <th>Price Per Unit</th>
-                                    <th>Expected Price</th>
-                                    <th>Total Price</th>
+                                    <th>Sản phẩm biến thể</th>
+                                    <th>Tổng</th>
+                                    <th>Giá mỗi đơn vị</th>
+                                    <th>Giá dự kiến</th>
+                                    <th>Tổng giá</th>
                                 </tr>
                             </thead>
                             <tbody>

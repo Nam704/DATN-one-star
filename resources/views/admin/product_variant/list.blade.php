@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">List variant from {{ $product ?$product->name:"" }}</h4>
+                    <h4 class="header-title">Danh sách biến thể của {{ $product ?$product->name:"" }}</h4>
                     @if (session('success'))
                     <p class="alert alert-primary">
                         {{ session('success') }}
@@ -15,7 +15,7 @@
 
                     <a href="{{-- route('admin.suppliers.getFormAdd') --}}" type="button"
                         class="btn btn-sm btn-primary">
-                        Add new variant
+                        Thêm mới
                     </a>
 
                 </div>
@@ -28,9 +28,9 @@
                             <tr>
 
                                 <th>SKU</th>
-                                <th>Status</th>
-                                <th>Quantity</th>
-                                <th>Action</th>
+                                <th>Trạng thái</th>
+                                <th>Số lượng</th>
+                                <th>Hành động</th>
 
                             </tr>
                         </thead>
@@ -62,9 +62,9 @@
                         <tfoot>
                             <tr>
                                 <th>SKU</th>
-                                <th>Status</th>
-                                <th>Quantity</th>
-                                <th>Action</th>
+                                <th>Trạng thái</th>
+                                <th>Số lượng</th>
+                                <th>Hành động</th>
                             </tr>
                         </tfoot>
                     </table>

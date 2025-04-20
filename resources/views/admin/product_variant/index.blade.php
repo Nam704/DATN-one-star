@@ -6,12 +6,11 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">Fixed Header</h4>
+                    <h4 class="header-title">Danh sách biến thể sản phẩm</h4>
 
 
                     <a href="{{ route('admin.productvariant.addProductVariant') }}" type="button" class="btn btn-sm btn-primary">
-                        Add new
-                        variant</a>
+                        Thêm mới</a>
 
                 </div>
 
@@ -22,10 +21,10 @@
                         <thead>
                         <tr>
                                 <th>Stt</th>
-                                <th>Product Name</th>
+                                <th>Tên sản phẩm</th>
                                 <td>Sku</td>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
 
@@ -54,10 +53,10 @@
                         <tfoot>
                         <tr>
                                 <th>Stt</th>
-                                <th>Product Name</th>
+                                <th>Tên sản phẩm</th>
                                 <td>Sku</td>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
                         </tfoot>
                     </table>

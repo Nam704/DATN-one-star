@@ -3,7 +3,7 @@
     <div class="container">
         <!-- Title -->
         <div class="d-flex justify-content-between align-items-center py-3">
-            <h2 class="h5 mb-0"><a href="#" class="text-muted"></a> Order #{{ $orderDetails['code'] }}</h2>
+            <h2 class="h5 mb-0"><a href="#" class="text-muted"></a> Đơn hàng #{{ $orderDetails['code'] }}</h2>
             <input type="hidden" value="{{ $order->id }}" id="order_id">
         </div>
 
@@ -48,22 +48,22 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>Quantity: {{ $detail['quantity'] }}</td>
+                                        <td>Số lượng: {{ $detail['quantity'] }}</td>
                                         <td class="text-end"> {{ number_format($detail['total'], 0, ',', '.') }} ₫</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="2">Subtotal</td>
+                                    <td colspan="2">Tổng cộng</td>
                                     <td class="text-end">{{ number_format($orderDetails['subtotal'], 0, ',', '.') }} ₫</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">Shipping</td>
+                                    <td colspan="2">Vận chuyển</td>
                                     <td class="text-end">{{ number_format($orderDetails['shipping'], 0, ',', '.') }} ₫</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">Discount (Code: {{ $orderDetails['voucher_code'] ?? 'N/A' }})</td>
+                                    <td colspan="2">Giảm giá (Mã: {{ $orderDetails['voucher_code'] ?? 'N/A' }})</td>
                                     <td class="text-danger text-end">
                                         @if ($orderDetails['discount'] !== 'N/A')
                                             {{ number_format($orderDetails['discount'], 0, ',', '.') ?? '' }}
@@ -74,7 +74,7 @@
                                     </td>
                                 </tr>
                                 <tr class="fw-bold">
-                                    <td colspan="2">TOTAL</td>
+                                    <td colspan="2">Tổng</td>
                                     <td class="text-end">{{ number_format($orderDetails['total'], 0, ',', '.') ?? '' }} ₫
                                     </td>
                                 </tr>
@@ -87,14 +87,14 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6">
-                                <h3 class="h6">Payment Method</h3>
+                                <h3 class="h6">Phương thức thanh toán</h3>
                                 <p>{{ $orderDetails['payment_method'] }} <br>
-                                    Total: {{ number_format($orderDetails['total'], 0, ',', '.') ?? '' }} ₫ <span
+                                    Tổng: {{ number_format($orderDetails['total'], 0, ',', '.') ?? '' }} ₫ <span
                                         class="badge bg-success rounded-pill">{{ $orderDetails['payment_status'] }}</span>
                                 </p>
                             </div>
                             <div class="col-lg-6">
-                                <h3 class="h6">Billing Address</h3>
+                                <h3 class="h6">Địa chỉ thanh toán</h3>
                                 <address>
                                     <strong>{{ $orderDetails['user_name'] ?? 'N/A' }}</strong><br>
                                     <p>{{ $orderDetails['address'] }}, {{ $orderDetails['ward'] }},
@@ -110,7 +110,7 @@
                 <!-- Customer Notes -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="h6">Customer Notes</h3>
+                        <h3 class="h6">Khách hàng ghi chú</h3>
                         <p>{{ $orderDetails['note'] ?? 'No notes' }}</p>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                 <!-- Order actions -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="h6">Order Actions</h3>
+                        <h3 class="h6">Hành động đơn hàng</h3>
 
                         <!-- Form xử lý yêu cầu hủy -->
                         @if (in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))

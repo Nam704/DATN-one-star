@@ -13,7 +13,7 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label for="id_parent">Product name</label>
+                    <label for="id_parent">Tên sản phẩm</label>
                     <select name="id_product" id="id_product" class="form-control">
                         @foreach($products as $product)
                             <option value="{{ $product->id }}">{{ $product->name }}</option>
@@ -25,7 +25,7 @@
                 <input type="text" name="sku" class="form-control" id="sku" required>
                 </div>
                 <div class="mb-3">
-                    <label for="status">Status</label>
+                    <label for="status">Trạng thái</label>
                     <select class="form-select" aria-label="Default select example" name="status">
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>

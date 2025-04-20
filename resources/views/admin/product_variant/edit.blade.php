@@ -11,7 +11,7 @@
                 @method('PUT')
 
                 <div class="mb-3">
-                    <label for="id_parent">Product name</label>
+                    <label for="id_parent">Tên sản phẩm</label>
                     <select name="id_product" id="id_product" class="form-control">
                         @foreach($products as $product)
                         <option value="{{ $product->id }}" {{ $product->id == $product_variant->id_product ? 'selected' : '' }}>{{$product->name}}</option>
@@ -29,7 +29,7 @@
                     @enderror
                 </div>
                 <div class="mb-3">
-                    <label for="status">Status</label>
+                    <label for="status">Trạng thái</label>
                     <select class="form-select" aria-label="Default select example" name="status">
                         <option value="active" {{ $product_variant->status == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ $product_variant->status == 'inactive' ? 'selected' : '' }}>Inactive</option>

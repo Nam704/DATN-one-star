@@ -3,15 +3,15 @@
 @section('title', 'Order Cancellation')
 
 @section('content')
-<h2>Order #{{ $order->order_number }} Has Been Canceled</h2>
+<h2>Đơn hàng #{{ $order->order_number }} đã được hủy bỏ</h2>
 
 <div class="cancellation-details">
-    <p><strong>Reason:</strong> {{ $order->cancellation_reason }}</p>
+    <p><strong>Lý do:</strong> {{ $order->cancellation_reason }}</p>
 
     @if($order->refund_amount)
-    <p>Refund amount of ${{ number_format($order->refund_amount, 2) }} will be processed within 5-7 business days.</p>
+    <p>Số tiền hoàn lại ${{ number_format($order->refund_amount, 2) }} sẽ được xử lý trong còng 5 ngày làm việc.</p>
     @endif
 </div>
 
-<a href="{{ route('shop.products') }}" class="button">Continue Shopping</a>
+<a href="{{ route('shop.products') }}" class="button">Tiếp tục mua hàng</a>
 @endsection

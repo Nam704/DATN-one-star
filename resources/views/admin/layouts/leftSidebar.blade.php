@@ -28,8 +28,6 @@
         <!--- Sidemenu -->
         <ul class="side-nav">
 
-            <li class="side-nav-title">Main</li>
-
             @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('dashboard-access'))
             <li class="side-nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="side-nav-link">
@@ -109,7 +107,6 @@
             @endif
             
 
-            <li class="side-nav-title">Components</li>
 
             @if(auth()->check() && auth()->user()->role->name === 'admin')
                 <li class="side-nav-item">

@@ -54,10 +54,10 @@
 
                                         <div class="form-group text-right mb-0">
                                             <button class="btn btn-primary waves-effect waves-light mr-1" type="submit">
-                                                Submit
+                                                Gửi
                                             </button>
                                             <button type="reset" class="btn btn-secondary waves-effect waves-light">
-                                                Reset
+                                                Đặt lại
                                             </button>
                                         </div>
                                     </form>

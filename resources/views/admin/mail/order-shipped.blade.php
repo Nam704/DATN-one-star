@@ -1,15 +1,15 @@
 @extends('emails.layouts.email')
 
-@section('title', 'Order Shipped')
+@section('title', 'Đơn hàng đã được giao')
 
 @section('content')
-<h2>Your Order is On Its Way!</h2>
+<h2>Đơn hàng của bạn đang trên đường vận chuyển!</h2>
 
 <div class="shipping-details">
-    <p>Order #{{ $order->order_number }} has been handed over to our shipping partner.</p>
-    <p><strong>Tracking Number:</strong> {{ $order->tracking_number }}</p>
-    <p><strong>Expected Delivery:</strong> {{ $order->delivery_date }}</p>
+    <p>Đơn hàng  #{{ $order->order_number }} đã được chuyển giao cho dododis tác vận chuyển của chúng tôi.</p>
+    <p><strong>Số theo dõi:</strong> {{ $order->tracking_number }}</p>
+    <p><strong>Dự kiến giao hàng:</strong> {{ $order->delivery_date }}</p>
 </div>
 
-<a href="{{ $order->tracking_url }}" class="button">Track Shipment</a>
+<a href="{{ $order->tracking_url }}" class="button">Theo dõi lô hàng</a>
 @endsection

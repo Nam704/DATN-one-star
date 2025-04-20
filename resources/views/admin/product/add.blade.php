@@ -207,8 +207,7 @@
                                     </div>
                                 </div>
 
-                                <button type="button" id="show_add_category" class="btn btn-link">+ Add new
-                                    category</button>
+                                <button type="button" id="show_add_category" class="btn btn-link">+ Thêm danh mục</button>
                             </div>
                         </div>
                     </div>
@@ -250,8 +249,7 @@
                                     </div>
                                 </div>
 
-                                <button type="button" id="show_add_brand" class="btn btn-link">+ Add new
-                                    brand</button>
+                                <button type="button" id="show_add_brand" class="btn btn-link">+ Thêm thương hiệu</button>
 
                             </div>
                         </div>

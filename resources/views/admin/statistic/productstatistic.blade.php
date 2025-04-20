@@ -103,7 +103,7 @@
                                             <th>Stt</th>
                                             <th>Tên sản phẩm</th>
                                             <th>Ảnh</th>
-                                            <th>Tổng số lượng</th>
+                                            <th>Số lượng bán</th>
                                         </tr>
                                     </thead>
                                     <tbody>

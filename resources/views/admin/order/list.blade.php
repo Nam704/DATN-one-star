@@ -6,14 +6,14 @@
                 <div class="card">
                     <div class="tab-pane fade show active" id="orders">
                         <div class="card-header">
-                            <h3>Orders > List</h3>
+                            <h3>Đơn hàng > Danh sách</h3>
 
                             <!-- Summary Metrics -->
                             <div class="summary row mb-1">
                                 <div class="col-md-3">
                                     <div class="widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Total Orders</h5>
+                                            <h5>Tổng đơn hàng</h5>
                                             <p>{{ $totalOrders }}</p>
                                         </div>
                                     </div>
@@ -21,7 +21,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Open Orders</h5>
+                                            <h5>Mở đơn hàng </h5>
                                             <p>{{ $openOrders }}</p>
                                         </div>
                                     </div>
@@ -29,7 +29,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Average Price</h5>
+                                            <h5>Giá trung bình</h5>
                                             <p>{{ number_format($averagePrice, 2) }}</p>
                                         </div>
                                     </div>
@@ -37,7 +37,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Total Revenue</h5>
+                                            <h5>Tổng doanh thu</h5>
                                             <p>{{ number_format($totalRevenue, 2) }}</p>
                                         </div>
                                     </div>
@@ -54,7 +54,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request('group_status') == 'All' || !request('group_status') ? 'active' : '' }}"
-                                                    href="?group_status=All">All</a>
+                                                    href="?group_status=All">Tất cả</a>
                                             </li>
                                             @foreach ($groupStatuses as $groupStatus)
                                                 <li class="nav-item">
@@ -73,11 +73,11 @@
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                             data-bs-target="#filterModal">
-                                            <i class="mdi mdi-filter-menu fs-5"></i> Filter Menu
+                                            <i class="mdi mdi-filter-menu fs-5"></i>  Menu lọc
                                         </button>
                                     </div>
                                     <div class="col-md-1">
-                                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                                        <button type="submit" class="btn btn-primary w-100">Lọc</button>
                                     </div>
                                 </form>
                             </div>
@@ -87,15 +87,15 @@
                                 <table class="table table-striped" id="ordersTable">
                                     <thead>
                                         <tr>
-                                            <th>Number</th>
-                                            <th>Customer</th>
+                                            <th>Số</th>
+                                            <th>Khách hàng</th>
                                             <th>Email</th>
-                                            <th>Status</th>
-                                            <th>Total</th>
-                                            <th>Shipping Cost</th>
-                                            <th>Payment Method</th>
-                                            <th>Created At</th>
-                                            <th>Actions</th>
+                                            <th>Trạng thái</th>
+                                            <th>Tổng</th>
+                                            <th>Chi phí vận chuyển</th>
+                                            <th>Phương thức thanh toán</th>
+                                            <th>Được tạo ra tại</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -126,9 +126,9 @@
                     <form id="filterForm" method="GET" action="{{ route('admin.orders.list') }}">
                         <!-- Group Status -->
                         <div class="mb-3">
-                            <label for="group_status" class="form-label">Group Status</label>
+                            <label for="group_status" class="form-label">Nhóm trạng thái</label>
                             <select name="group_status" class="form-control">
-                                <option value="">Select Group Status</option>
+                                <option value="">Chọn nhóm trạng thái</option>
                                 @foreach ($groupStatuses as $groupStatus)
                                     <option value="{{ $groupStatus }}"
                                         {{ request('group_status') == $groupStatus ? 'selected' : '' }}>
@@ -139,9 +139,9 @@
                         </div>
                         <!-- Specific Status -->
                         <div class="mb-3">
-                            <label for="status_id" class="form-label">Specific Status</label>
+                            <label for="status_id" class="form-label">Trạng thái cụ thể</label>
                             <select name="status_id" class="form-control">
-                                <option value="">Select Specific Status</option>
+                                <option value="">Chọn trạng thái cụ thể</option>
                                 @foreach ($statuses as $status)
                                     <option value="{{ $status->id }}"
                                         {{ request('status_id') == $status->id ? 'selected' : '' }}>
@@ -152,31 +152,31 @@
                         </div>
                         <!-- Search -->
                         <div class="mb-3">
-                            <label for="search" class="form-label">Search by code, name, email</label>
+                            <label for="search" class="form-label">Tìm kiếm theo mã, tên, email</label>
                             <input type="text" name="search" class="form-control" value="{{ request('search') }}"
                                 placeholder="Search by code, name, email">
                         </div>
                         <!-- Min Total -->
                         <div class="mb-3">
-                            <label for="min_total" class="form-label">Min Total</label>
+                            <label for="min_total" class="form-label">Tổng số tối thiểu</label>
                             <input type="number" name="min_total" class="form-control" value="{{ request('min_total') }}"
                                 placeholder="Min Total">
                         </div>
                         <!-- Max Total -->
                         <div class="mb-3">
-                            <label for="max_total" class="form-label">Max Total</label>
+                            <label for="max_total" class="form-label">Tổng số tối đa</label>
                             <input type="number" name="max_total" class="form-control"
                                 value="{{ request('max_total') }}" placeholder="Max Total">
                         </div>
                         <!-- Date From -->
                         <div class="mb-3">
-                            <label for="date_from" class="form-label">Date From</label>
+                            <label for="date_from" class="form-label">Từ ngày</label>
                             <input type="date" name="date_from" class="form-control"
                                 value="{{ request('date_from') }}">
                         </div>
                         <!-- Date To -->
                         <div class="mb-3">
-                            <label for="date_to" class="form-label">Date To</label>
+                            <label for="date_to" class="form-label">Đến ngày</label>
                             <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                         </div>
                         <!-- Clear Date Filters -->
@@ -186,18 +186,18 @@
                         </div>
                         <!-- Sort Order -->
                         <div class="mb-3">
-                            <label for="sort_order" class="form-label">Sort Order</label>
+                            <label for="sort_order" class="form-label">Thứ tự sắp xếp</label>
                             <select name="sort_order" class="form-control">
-                                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending
+                                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Giảm dần
                                 </option>
-                                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending
+                                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Tăng dần
                                 </option>
                             </select>
                         </div>
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                            <button type="button" class="btn btn-secondary" id="clearFilters">Clear</button>
+                            <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
+                            <button type="button" class="btn btn-secondary" id="clearFilters">Đặt lại</button>
                         </div>
                     </form>
                 </div>

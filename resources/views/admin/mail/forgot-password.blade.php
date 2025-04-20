@@ -1,23 +1,23 @@
 @extends('admin.mail.layouts.email')
 
-@section('title', 'Reset Your Password')
+@section('title', 'Đặt lại mật khẩu của bạn')
 
 @section('content')
-<h2>Hello! {{ $user->name }} </h2>
-<p>You are receiving this email because we received a password reset request for your account.</p>
+<h2>Xin chào! {{ $user->name }} </h2>
+<p>Bạn nhận được email này vì chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn</p>
 
 <div class="reset-section">
-    <p>Click the button below to reset your password:</p>
+    <p>Nhấn vào nút bên dưới để đặt lại mật khẩu của bạn:</p>
     <a href="{{ $resetLink }}" class="button">
-        <p style="color: white">Reset Password</p>
+        <p style="color: white">Đặt lại mật khẩu</p>
     </a>
 </div>
 
-<p>If you did not request a password reset, no further action is required.</p>
+<p>Nếu bạn không yêu cầu đặt lại mật khẩu, bạn không cần thực hiện thêm hành động nào nữa</p>
 
 <div class="additional-info">
-    <p>This password reset token will expire in 10 minutes.</p>
-    <p>If you're having trouble clicking the button, copy and paste this URL into your browser:</p>
+    <p>Mã thông báo đặt lại mật khẩu này sẽ hết hạn sau 10 phút</p>
+    <p>Nếu bạn gặp sự cố khi nhấp vào nút, hãy sao chép và dán url này vào trình duyệt của bạn:</p>
     <p>{{ $resetLink }}</p>
 </div>
 @endsection

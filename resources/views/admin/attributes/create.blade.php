@@ -8,10 +8,10 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.attributes.index') }}" class="btn btn-secondary">
                             <i class="ri-arrow-left-line align-middle me-1"></i>
-                            Back to List
+                            Quay lại
                         </a>
                     </div>
-                    <h4 class="page-title">Create Attribute</h4>
+                    <h4 class="page-title">Thêm mới</h4>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                             {{-- Nhập tên --}}
 
                             <div class="mb-3">
-                                <label for="name" class="form-label">Name (Max 100 characters)</label>
+                                <label for="name" class="form-label">Tên (Max 100 characters)</label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name"
                                        placeholder="Enter attribute name (e.g., Color, Size)"value="{{ old('name') }}">
                                         
@@ -37,7 +37,7 @@
                             {{-- Nhập mô tả --}}
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
+                                <label for="description" class="form-label">Mô tả</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
                                     rows="3" placeholder="Enter attribute description">{{ old('description') }}</textarea>
                                 @error('description')
@@ -48,7 +48,7 @@
                             {{-- Chọn trạng thái --}}
 
                             <div class="mb-3">
-                                <label for="status" class="form-label">Status</label>
+                                <label for="status" class="form-label">Trạng thái</label>
                                 <select class=" @error('status') is-invalid @enderror form-select"
                                     aria-label="Default select example" id="" name="status">
                                     <option selected>Open this select menu</option>
@@ -61,7 +61,7 @@
                                 @enderror
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Create Attribute</button>
+                            <button type="submit" class="btn btn-primary">Thêm</button>
                         </form>
                     </div>
                 </div>

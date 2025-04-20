@@ -22,14 +22,14 @@
                         <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Name</th>
-                                    <th>Code</th>
-                                    <th>Type</th>
-                                    <th>Discount Amount</th>
-                                    <th>Min Amount</th>
-                                    <th>Max Discount</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Tên </th>
+                                    <th>Mã </th>
+                                    <th>Loại</th>
+                                    <th>Giá trị giảm giá</th>
+                                    <th>Số tiền tối thiểu</th>
+                                    <th>Số tiền tối đa</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -48,29 +48,29 @@
                                     <span class="badge bg-success">{{$voucher->status}}</span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.vouchers.editVoucher', $voucher->id) }}" class="btn btn-warning ">Edit</a>
-                                        <a href="{{ route('admin.vouchers.detailVoucher', $voucher->id) }}" class="btn btn-info ">Detail</a>
+                                        <a href="{{ route('admin.vouchers.editVoucher', $voucher->id) }}" class="btn btn-warning ">Sửa</a>
+                                        <a href="{{ route('admin.vouchers.detailVoucher', $voucher->id) }}" class="btn btn-info ">Chi tiết</a>
                                         <form action="{{ route('admin.vouchers.deleteVoucher', $voucher->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this voucher?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                            <button type="submit" class="btn btn-danger">Xóa</button>
                                         </form>
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         <tfoot>
-                            <tr>
+                        <tr>
                                     <th>STT</th>
-                                    <th>Name</th>
-                                    <th>Code</th>
-                                    <th>Type</th>
-                                    <th>Discount Amount</th>
-                                    <th>Min Amount</th>
-                                    <th>Max Discount</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                            </tr>
+                                    <th>Tên </th>
+                                    <th>Mã </th>
+                                    <th>Loại</th>
+                                    <th>Giá trị giảm giá</th>
+                                    <th>Số tiền tối thiểu</th>
+                                    <th>Số tiền tối đa</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
                         </tfoot>
                     </table>
                 </div> <!-- end card body-->

@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="mt-4">
 
-                        <h1 class="text-center">IMAGE</h1>
+                        <h1 class="text-center">Thêm ảnh</h1>
 
                         @if (session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>

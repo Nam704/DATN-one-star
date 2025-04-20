@@ -6,15 +6,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">Fixed Header</h4>
+                    <h4 class="header-title">Quản lý danh mục</h4>
 
 
                     <a href="{{ route('admin.categories.addCategory') }}" type="button" class="btn btn-sm btn-primary">
-                        Add new
-                        category</a>
+                        Thêm mới</a>
 
                         <a href="{{ route('admin.categories.trash') }}" type="button" class="btn btn-sm btn-success">
-                                        <i class="fas fa-trash-alt"></i>Deleted category
+                                        <i class="fas fa-trash-alt"></i>Danh sách xóa
                                     </a> 
 
                 </div>
@@ -26,10 +25,10 @@
                         <thead>
                             <tr>
                                 <th>Stt</th>
-                                <th>Name</th>
-                                <td>Parent</td>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Tên</th>
+                                <td>Danh mục cha</td>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
 
@@ -42,14 +41,14 @@
                                 <td>{{$category->status}}</td>
                                 <td>
                                     <a href="{{route('admin.categories.editCategory',$category->id)}}">
-                                        <button type="button" class="btn btn-secondary btn-warning">Edit</button>
+                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
                                     </a> |
                                     <form action="{{route('admin.categories.deleteCategory',$category->id)}}"
                                         class="d-inline" method="POST"
                                         onclick="return confirm('Bạn có muốn xóa không?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-secondary btn-danger ">Delete</button>
+                                        <button type="submit" class="btn btn-secondary btn-danger ">Xóa</button>
                                     </form>
                                 </td>
                             </tr>
@@ -60,10 +59,10 @@
                         <tfoot>
                             <tr>
                                 <th>Stt</th>
-                                <th>Name</th>
-                                <td>Parent</td>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Tên</th>
+                                <td>Danh mục cha</td>
+                                <th>Trạng thái</th>
+                                <th>Hành dộng</th>
                             </tr>
                         </tfoot>
                     </table>

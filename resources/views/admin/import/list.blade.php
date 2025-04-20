@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">List Supplier</h4>
+                    <h4 class="header-title">Danh sách nhà cung cấp</h4>
 
                     <div>
                         @if (session('success'))
@@ -29,16 +29,16 @@
 
                     </div>
                     <a href="{{route('admin.imports.getFormAdd') }}" type="button" class="btn btn-sm btn-primary">
-                        Add new import
+                        Thêm mới
                     </a>
-                    <a href="{{ route('admin.export.exportSamplefile') }}" class="btn btn-sm btn-primary">Get Sample
-                        file</a>
+                    <a href="{{ route('admin.export.exportSamplefile') }}" class="btn btn-sm btn-primary">
+                        Tải tệp mới</a>
                     <div class="row mt-2">
                         <form class="col-6 d-flex" action="{{ route('admin.imports.upload') }}" method="POST"
                             enctype="multipart/form-data">
                             @csrf
                             <input type="file" name="file" required class="form-control">
-                            <button type="submit" class=" ms-1 btn btn-primary">Import</button>
+                            <button type="submit" class=" ms-1 btn btn-primary">Nhập</button>
                         </form>
                     </div>
 
@@ -52,8 +52,8 @@
                         @if (Route::is('admin.imports.listPending') && $imports->count() > 0 && Auth::user()->role->name
                         ==
                         'admin')
-                        <button type="submit" class="btn btn-success mt-2" id="acceppt_select">Accept Selected</button>
-                        <button type="submit" class="btn btn-danger mt-2" id="reject_select">Reject Selected</button>
+                        <button type="submit" class="btn btn-success mt-2" id="acceppt_select">Chấp nhận</button>
+                        <button type="submit" class="btn btn-danger mt-2" id="reject_select">Từ chối</button>
                         @endif
 
                         <table id="fixed-header-datatable"
@@ -61,13 +61,13 @@
                             <thead>
                                 <tr>
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>Name</th>
-                                    {{-- <th>Name supplier</th> --}}
-                                    <th>Status</th>
-                                    <th>Import date</th>
-                                    <th>Total amount</th>
-                                    <th>Detail</th>
-                                    <th>Action</th>
+                                    <th>Tên</th>
+                                    {{-- <th>Tên nhà cung cấp</th> --}}
+                                    <th>Trạng thái</th>
+                                    <th>Ngày nhập</th>
+                                    <th>Tổng số lượng</th>
+                                    <th>Chi tiết</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
 
@@ -84,7 +84,7 @@
                                     <td>
                                         <a href="{{ route('admin.imports.detail',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye"></i> Detail
+                                            <i class="fas fa-eye"></i> Chi tiết
                                         </a>
 
                                     </td>
@@ -95,16 +95,16 @@
                                         <a href="{{route('admin.imports.edit',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i>
-                                            Edit
+                                            Sửa
                                         </a>
                                         @if ($import->status == 'pending')
                                         <a href="{{ route('admin.imports.accept',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
                                             <i class="fas fa-trash"></i>
-                                            Accept
+                                           Chấp nhận
                                         </a>
                                         <a href="{{ route('admin.imports.reject',['id'=>$import->id]) }}"
-                                            class="btn btn-danger btn-sm">Reject</a>
+                                            class="btn btn-danger btn-sm">Từ chối</a>
                                         @endif
                                         @endif
                                         @if (Route::is('admin.imports.listPending') && Auth::user()->role->name
@@ -112,7 +112,7 @@
                                         <a href="{{route('admin.imports.edit',['id'=>$import->id]) }}"
                                             class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i>
-                                            Edit
+                                            Sửa
                                         </a>
 
                                         @endif
@@ -124,13 +124,13 @@
                             <tfoot>
                                 <tr>
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>Name</th>
-                                    {{-- <th>Name supplier</th> --}}
-                                    <th>Status</th>
-                                    <th>Import date</th>
-                                    <th>Total amount</th>
-                                    <th>Detail</th>
-                                    <th>Action</th>
+                                    <th>Tên</th>
+                                    {{-- <th>Tên nhà cung cấp</th> --}}
+                                    <th>Trạng thái</th>
+                                    <th>Ngày nhập</th>
+                                    <th>Tổng số lượng</th>
+                                    <th>Chi tiết</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </tfoot>
                         </table>

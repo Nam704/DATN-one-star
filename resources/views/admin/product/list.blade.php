@@ -6,12 +6,11 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="header-title">List Product</h4>
-                    <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Add new
-                        product</a>
+                    <h4 class="header-title">Danh sách sản phẩm</h4>
+                    <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Thêm sản phẩm</a>
 
                     <form class="form-control mt-2" action="{{ route('admin.excels.createProduct') }}" method="POST"
-                        enctype="multipart/form-data">
+                        enctype="multipart/form-data">  
                         @csrf
                         <div class="row container">
                             <div class="col-3">
@@ -28,7 +27,7 @@
                             </div>
                             <div class="col-3 align-content-end">
                                 <a href="{{ route('admin.products.exportCreateExcel') }}" type="button"
-                                    class="btn btn-primary">Get Sample file</a>
+                                    class="btn btn-primary">Lấy tệp file</a>
                             </div>
 
 
@@ -47,14 +46,14 @@
                         <thead>
                             <tr>
 
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Ảnh</th>
+                                <th>Thương hiệu</th>
+                                <th>Danh mục</th>
+                                <th>Số lượng</th>
 
-                                <th>Price</th>
-                                <th>Action</th>
+                                <th>Giá</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
 
@@ -72,14 +71,14 @@
 
                                 <td>
                                     <a href="{{ route('admin.products.edit',$product->id) }}">
-                                        <button type="button" class="btn btn-secondary btn-warning">Edit</button>
+                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
                                     </a>
                                     <button type="submit"
-                                        class="btn btn-secondary btn-danger delete-product">Lock</button>
+                                        class="btn btn-secondary btn-danger delete-product">Khóa</button>
                                     <a href="{{ route('admin.products.detail',$product->id) }}"><button
-                                            class="btn btn-info">Detail</button></a>
+                                            class="btn btn-info">Chi tiết</button></a>
                                     <a href="{{ route('admin.products.stas',$product->id) }}"><button
-                                            class="btn btn-primary">stas</button></a>
+                                            class="btn btn-primary">Thống kê</button></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -89,14 +88,14 @@
                         <tfoot>
                             <tr>
 
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Ảnh</th>
+                                <th>Thương hiệu</th>
+                                <th>Danh mục</th>
+                                <th>Số lượng</th>
 
-                                <th>Price</th>
-                                <th>Action</th>
+                                <th>Giá</th>
+                                <th>Hành động</th>
                             </tr>
                         </tfoot>
                     </table>

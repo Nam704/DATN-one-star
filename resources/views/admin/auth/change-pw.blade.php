@@ -30,7 +30,7 @@
 <form action="{{ route('auth.resetPassword') }}" method="POST">
     @csrf
     <div class="mb-3">
-        <label for="emailaddress" class="form-label">Email address</label>
+        <label for="emailaddress" class="form-label">Địa chỉ email</label>
         <input class="form-control" type="email" name="email" id="emailaddress" required="" readonly
             value="{{ $password_reset->email }}">
     </div>
@@ -39,19 +39,19 @@
             value="{{ $token }}">
     </div>
     <div class="mb-3">
-        <label for="new_password" class="form-label">Password</label>
+        <label for="new_password" class="form-label">Mật khẩu</label>
         <input class="form-control" type="password" name="new_password" required="" id="new_password"
             placeholder="Enter your new password" value="{{ old('new_password') }}">
     </div>
     <div class="mb-3">
-        <label for="re_password" class="form-label">Re_password</label>
+        <label for="re_password" class="form-label">Mật khẩu mới</label>
         <input class="form-control" type="password" name="re_password" required="" id="re_password"
             placeholder="Enter your new password" value="{{ old('re_password') }}">
     </div>
 
     <div class="mb-0 text-start">
         <button class="btn btn-soft-primary w-100" type="submit"><i class="ri-loop-left-line me-1 fw-bold"></i>
-            <span class="fw-bold">Reset Password</span> </button>
+            <span class="fw-bold">Đặt lại mật khẩu</span> </button>
     </div>
 </form>
 @endsection
@@ -59,12 +59,12 @@
 @section('bottom-content')
 <div class="row">
     <div class="  col-12 text-center d-flex align-items-center justify-content-center">
-        <p class="ms-1 text-dark-emphasis ">Back To <a href="{{ route('auth.getFormLogin') }}"
-                class="text-dark fw-bold ms-1 link-offset-3 text-decoration-underline"><b>Log In</b></a></p>
-        <p class="ms-1 text-dark-emphasis">Don't have an account? <a href="{{ route('auth.getFormRegister') }}"
-                class="text-dark fw-bold ms-1 link-offset-3 text-decoration-underline"><b>Sign Up</b></a></p>
-        <p class="ms-1 text-dark-emphasis">Back To <a href="{{ route('auth.getFormForgotPassword') }}"
-                class="text-dark fw-bold ms-1 link-offset-3 text-decoration-underline"><b>Forgot Password</b></a></p>
+        <p class="ms-1 text-dark-emphasis ">Quay lại <a href="{{ route('auth.getFormLogin') }}"
+                class="text-dark fw-bold ms-1 link-offset-3 text-decoration-underline"><b>Đăng nhập</b></a></p>
+        <p class="ms-1 text-dark-emphasis">Bạn có tài khoản chưa <a href="{{ route('auth.getFormRegister') }}"
+                class="text-dark fw-bold ms-1 link-offset-3 text-decoration-underline"><b>Đăng ký</b></a></p>
+        <p class="ms-1 text-dark-emphasis">Quay lại <a href="{{ route('auth.getFormForgotPassword') }}"
+                class="text-dark fw-bold ms-1 link-offset-3 text-decoration-underline"><b>Quên mật khẩu</b></a></p>
 
 
     </div>

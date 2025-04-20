@@ -10,5 +10,5 @@
     <blockquote>{{ $contact->reply }}</blockquote>
     <p>Trân trọng,<br>Hệ thống quản lý</p>
 
-    {{-- <a href="{{ route('shop.products') }}" class="button">Continue Shopping</a> --}}
+    {{-- <a href="{{ route('shop.products') }}" class="button">Tiếp tục mua sắm</a> --}}
 @endsection

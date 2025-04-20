@@ -7,10 +7,10 @@
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item"><a href="javascript: void(0);">Velonic</a></li>
                     <li class="breadcrumb-item"><a href="javascript: void(0);">Forms</a></li>
-                    <li class="breadcrumb-item active">Form Elements</li>
+                    <li class="breadcrumb-item active">Thêm mới</li>
                 </ol>
             </div>
-            <h4 class="page-title">Form Elements</h4>
+            <h4 class="page-title">Thêm mới</h4>
         </div>
     </div>
 </div>
@@ -21,7 +21,7 @@
         <div class="card">
             <div class="card-header">
                 <a href="{{route('admin.imports.listApproved') }}" type="button" class="btn btn-sm btn-primary">
-                    Back to list
+                    Quay lại
                 </a>
             </div>
             <div class="card-body">
@@ -34,10 +34,10 @@
                                 <div class="col-lg-12">
                                     <div class="row">
                                         <div class="mb-3 col-md-3">
-                                            <label for="simpleinput" class="form-label">Suppliers</label>
+                                            <label for="simpleinput" class="form-label">Nhà cung cấp</label>
 
                                             <select name="supplier" class="form-select" id="supplier-name">
-                                                <option value="" {{ old('supplier') ? 'selected' : '' }}>Suppliers
+                                                <option value="" {{ old('supplier') ? 'selected' : '' }}>Nhà cung cấp
                                                 </option>
                                                 @foreach ($suppliers as $supplier)
                                                 <option value="{{ $supplier->id }}" {{ old('supplier') ? 'selected' : ''
@@ -51,7 +51,7 @@
 
                                         </div>
                                         <div class="mb-3 col-md-3">
-                                            <label for="simpleinput" class="form-label">Import name</label>
+                                            <label for="simpleinput" class="form-label">Tên</label>
                                             <input type="text" id="import-name" name="name" value="{{ old('name') }}"
                                                 class="form-control" readonly>
                                             @error('name')
@@ -59,18 +59,18 @@
                                             @enderror
                                         </div>
                                         <div class="mb-3 col-md-3">
-                                            <label for="example-select" class="form-label">Import date</label>
+                                            <label for="example-select" class="form-label">Ngày nhập</label>
                                             <input type="date" class="form-control" id="import-date" name="import_date"
                                                 readonly>
 
                                         </div>
                                         <div class="mb-3 col-md-3">
-                                            <label for="total-amount" class="form-label">Total Amount</label>
+                                            <label for="total-amount" class="form-label">Tổng số lượng</label>
                                             <input type="number" id="total-amount" name="total_amount"
                                                 class="form-control" step="0.01" readonly>
                                         </div>
                                         <div class="mb-3 col-md-12">
-                                            <label for="note" class="form-label">Note</label>
+                                            <label for="note" class="form-label">Ghi chú</label>
                                             <textarea id="note" name="note" class="form-control"></textarea>
                                         </div>
                                     </div>
@@ -79,7 +79,7 @@
                                 <div class="col-lg-12">
                                     <!-- Thêm chi tiết nhập hàng -->
                                     <div id="import-details-container">
-                                        <h5>Import Details</h5>
+                                        <h5>Chi tiết</h5>
                                         <div class="product-rows-container">
                                             <!-- Each product row will be dynamically added here -->
                                         </div>
@@ -89,7 +89,7 @@
                                     </button>
 
                                     <div class="mb-3 d-grid ">
-                                        <button type="submit" id="btn-submit" class="btn btn-lg btn-success">Add new
+                                        <button type="submit" id="btn-submit" class="btn btn-lg btn-success">Thêm mới
                                         </button>
                                     </div>
                                 </div>

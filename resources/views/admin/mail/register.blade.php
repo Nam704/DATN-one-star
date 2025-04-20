@@ -1,23 +1,23 @@
 @extends('admin.mail.layouts.email')
 
-@section('title', 'Welcome to Our Store!')
+@section('title', 'Chào mừng bạn đến của hàng của chúng tôi!')
 
 @section('content')
-<h2>Hello {{ $userData->name }}!</h2>
-<p>Thank you for creating an account with us. Here are your account details:</p>
+<h2>Xin chào {{ $userData->name }}!</h2>
+<p>Cảm ơn bạn đã tạo tài khoản với chúng tôi. Sau đây là thông tin chi tiết về tài khoản của bạn:</p>
 
 <div class="account-details">
-    <p><strong>Username:</strong> {{ $userData->name }}</p>
+    <p><strong>Tên đăng nhập:</strong> {{ $userData->name }}</p>
     <p><strong>Email:</strong> {{ $userData->email }}</p>
 </div>
 
-<p>You can now:</p>
+<p>Bây giờ bạn có thể:</p>
 <ul>
-    <li>Browse our extensive product catalog</li>
-    <li>Save items to your wishlist</li>
-    <li>Track your orders</li>
-    <li>Get exclusive offers</li>
+    <li>Duyệt danh mục sản phẩm phong phú của chúng tôi</li>
+    <li>Lưu các mục vào danh sách mong muốn của bạn</li>
+    <li>Theo dõi đơn hàng của bạn</li>
+    <li>Nhận ưu đãi độc quyền</li>
 </ul>
 
-<a href="{{ route('auth.getFormLogin') }}" class="button">Login to Your Account</a>
+<a href="{{ route('auth.getFormLogin') }}" class="button">Đăng nhập vào tài khoản của bạn</a>
 @endsection

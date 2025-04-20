@@ -7,10 +7,10 @@
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item"><a href="javascript: void(0);">Velonic</a></li>
                     <li class="breadcrumb-item"><a href="javascript: void(0);">Forms</a></li>
-                    <li class="breadcrumb-item active">Form Elements</li>
+                    <li class="breadcrumb-item active">Thêm nhà cung cấp</li>
                 </ol>
             </div>
-            <h4 class="page-title">Form Elements</h4>
+            <h4 class="page-title">Thêm nhà cung cấp</h4>
         </div>
     </div>
 </div>
@@ -21,7 +21,7 @@
         <div class="card">
             <div class="card-header">
                 <a href="{{route('admin.suppliers.list') }}" type="button" class="btn btn-sm btn-primary">
-                    Back to list
+                    Quay lại
                 </a>
             </div>
             <div class="card-body">
@@ -33,7 +33,7 @@
                             <div class="row">
                                 <div class="col-lg-4">
                                     <div class="mb-3">
-                                        <label for="simpleinput" class="form-label">Name</label>
+                                        <label for="simpleinput" class="form-label">Tên</label>
                                         <input type="text" id="simpleinput" name="name" value="{{ old('name') }}"
                                             class="form-control">
                                         @error('name')
@@ -41,7 +41,7 @@
                                         @enderror
                                     </div>
                                     <div class="mb-3">
-                                        <label for="example-select" class="form-label">Status</label>
+                                        <label for="example-select" class="form-label">Trạng thái</label>
                                         <select class="form-select" name="status" id="example-select">
                                             <option value="active" {{ old('status')=='active' ? 'selected' : '' }}>
                                                 Active</option>
@@ -51,7 +51,7 @@
 
                                     </div>
                                     <div class="mb-3">
-                                        <label for="simpleinput" class="form-label">Phone</label>
+                                        <label for="simpleinput" class="form-label">Số điện thoại</label>
                                         <input type="text" id="simpleinput" name="phone" value="{{ old('phone') }}"
                                             class="form-control">
                                         @error('phone')
@@ -64,7 +64,7 @@
 
 
                                     <div class="mb-3">
-                                        <label for="simpleinput" class="form-label">Address</label>
+                                        <label for="simpleinput" class="form-label">Địa chỉ</label>
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <select name="province" class="form-select" id="province">
@@ -104,7 +104,7 @@
                                         @enderror
                                     </div>
                                     <div class="mb-3 d-grid ">
-                                        <button type="submit" class="btn btn-lg btn-success">Add new </button>
+                                        <button type="submit" class="btn btn-lg btn-success">Thêm mới </button>
                                     </div>
                                 </div>
                             </div>
