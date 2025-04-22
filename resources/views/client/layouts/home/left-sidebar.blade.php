@@ -38,7 +38,7 @@
                         <div class="slider_content">
                             <h2>Top Quality</h2>
                             <h1>Aftermarket Turbocharger Specialist</h1>
-                            <a class="button" href="shop.html">shopping now</a>
+                            <a class="button" href="{{route('client.shop')}}">shopping now</a>
                         </div>
 
                     </div>

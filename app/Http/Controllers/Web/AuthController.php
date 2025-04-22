@@ -102,7 +102,7 @@ class AuthController extends Controller
                 $user = Auth::user();
 
                 //khóa tk
-                if ($user->is_lock === 'inactive') {
+                if ($user->is_lock === 1) {
                     Auth::logout();
                     return redirect()->route('auth.getFormLogin')->withErrors([
                         'email' => 'Tài khoản của bạn đã bị khóa.'

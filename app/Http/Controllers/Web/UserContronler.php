@@ -63,7 +63,7 @@ class UserContronler extends Controller
             ->whereHas('role', function ($query) {
                 $query->where('name', 'employee');
             })
-            ->where('is_lock', '!=', 'inactive')
+            ->where('is_lock', '!=', 1)
             ->get();
 
         return view('admin.user.listemployee', compact('users'));
@@ -76,7 +76,7 @@ class UserContronler extends Controller
             ->whereHas('role', function ($query) {
                 $query->where('name', 'user'); // Đảm bảo không có khoảng trắng dư
             })
-            ->where('is_lock', '!=', 'inactive')
+            ->where('is_lock', '!=', 1)
             ->get();
 
         // Trả về view với danh sách người dùng
@@ -85,7 +85,7 @@ class UserContronler extends Controller
     public function listtkkhoa()
     {
 
-        $listTaiKhoan = User::where('is_lock', 'inactive')->get(); // Lọc các tài khoản bị khóa
+        $listTaiKhoan = User::where('is_lock', 1)->get(); // Lọc các tài khoản bị khóa
         return view('admin.user.listtkkhoa', compact('listTaiKhoan'));
     }
 
@@ -193,7 +193,7 @@ class UserContronler extends Controller
                 'id_role' => $request->id_role,
                 'profile_image' => $profileImagePath,
                 'status' => 'active',
-                'is_lock' => 'active',
+                'is_lock' => 0,
             ]);
 
             $user->address()->create([
@@ -216,7 +216,7 @@ class UserContronler extends Controller
                 'id_role' => $request->id_role,
                 'profile_image' => $profileImagePath,
                 'status' => 'active',
-                'is_lock' => 'active',
+                'is_lock' => 0,
             ]);
 
             $user->address()->create([
@@ -328,7 +328,7 @@ class UserContronler extends Controller
             'district_id' => 'required|exists:districts,id',
             'ward_id' => 'required|exists:wards,id',
             'address_detail' => 'nullable|string|max:255',
-            'id_role' => 'required|exists:roles,id',
+            'id_role' => 'nullable|exists:roles,id',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
         ], [
             'name.required' => 'Vui lòng nhập tên người dùng.',
@@ -391,10 +391,10 @@ class UserContronler extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => $request->password ? Hash::make($request->password) : $user->password,
-            'id_role' => $request->id_role,
+            'id_role' => $user->id_role,
             'profile_image' => $profileImagePath ?? $user->profile_image,
             'status' => 'active',
-            'is_lock' => 'active',
+            'is_lock' => 0,
         ]);
 
         // Kiểm tra nếu người dùng có địa chỉ
@@ -446,12 +446,12 @@ class UserContronler extends Controller
             if ($targetRole === 'admin') {
                 return redirect()->back()->with('error', 'Admin không thể khóa Admin khác.');
             } elseif ($targetRole === 'employee') {
-                $user->is_lock = 'inactive';
+                $user->is_lock = 1;
                 $user->status = 'inactive';
                 $user->save();
                 return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Nhân viên.');
             } elseif ($targetRole === 'user') {
-                $user->is_lock = 'inactive';
+                $user->is_lock = 1;
                 $user->status = 'inactive';
                 $user->save();
                 return redirect()->route('admin.users.listtkkhoa')->with('success', 'Đã khóa tài khoản Người dùng.');
@@ -469,7 +469,7 @@ class UserContronler extends Controller
 
             if ($targetRole === 'user') {
                 // Khóa trực tiếp tài khoản user
-                $user->is_lock = 'inactive';
+                $user->is_lock = 1;
                 $user->status = 'inactive';
                 $user->save();
 
@@ -497,7 +497,7 @@ class UserContronler extends Controller
                 return redirect()->back()->with('error', 'Admin không thể mở khóa tài khoản Admin khác.');
             }
 
-            $user->is_lock = 'active';
+            $user->is_lock = 0;
             $user->status = 'active';
             $user->save();
 
@@ -510,7 +510,7 @@ class UserContronler extends Controller
 
         if ($currentRole === 'employee') {
             if ($targetRole === 'user') {
-                $user->is_lock = 'active';
+                $user->is_lock = 0;
                 $user->status = 'active';
                 $user->save();
 

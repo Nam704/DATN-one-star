@@ -58,7 +58,7 @@
                         </div>
                         <div class="form-group mt-2">
                             <label for="password" class="font-weight-bold">Mật khẩu :</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Nhập mật khẩu" >
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Nhập mật khẩu">
                             @error('password')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -143,13 +143,14 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label class="font-weight-bold">Chọn quyền hạn:</label>
-                            <select class="form-control" id="id_role" name="id_role">
+                            <select class="form-control" id="id_role" name="id_role" style="pointer-events: none; background-color: #e9ecef;">
                                 @foreach ($roles as $role)
                                 <option value="{{ $role->id }}" {{ old('id_role', $user->id_role) == $role->id ? 'selected' : '' }}>
                                     {{ $role->name }}
                                 </option>
                                 @endforeach
                             </select>
+
                             @error('id_role')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror

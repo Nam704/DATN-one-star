@@ -31,6 +31,7 @@ class PermissionSeeder extends Seeder
         $modules = [
             'users',
             'statistics',
+            'banners',
             'products',
             'categories',
             'orders',
@@ -117,6 +118,7 @@ class PermissionSeeder extends Seeder
                 'view-brands',
                 'dashboard-access',
                 'view-reports',
+                'view-banners'
             ])->get();
 
             $employeeRole->permissions()->attach($employeePermissions->pluck('id')->toArray());

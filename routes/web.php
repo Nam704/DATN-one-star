@@ -40,6 +40,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 use App\Http\Controllers\Web\AddressController;
+use App\Http\Controllers\Web\BannerController;
 use App\Http\Controllers\Web\ChatController;
 use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\ProductDashboardController;
@@ -124,12 +125,12 @@ Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(f
 Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
     function () {
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
-            Route::get('list', 'list')->name('list');
-            Route::post('update-list', 'update');
-            Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus');
-            Route::get('detail/{id}', 'detail')->name('detail');
-            Route::post('accept-all', 'acceptAll')->name('acceptAll');
-            Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation');
+            Route::get('list', 'list')->name('list')->middleware('permission:view-orders');
+            Route::post('update-list', 'update')->middleware('permission:edit-orders');
+            Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus')->middleware('permission:edit-orders');;
+            Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-orders');;
+            Route::post('accept-all', 'acceptAll')->name('acceptAll')->middleware('permission:edit-orders');;
+            Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation')->middleware('permission:edit-orders');;
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
@@ -246,6 +247,19 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-contacts');
         });
 
+        //banner
+
+        Route::prefix('banner')->name('banner.')->controller(BannerController::class)->group(function () {
+            Route::get('list',  'list')->name('list')->middleware('permission:view-banners');
+            Route::get('create',  'create')->name('create')->middleware('permission:create-banners');
+            Route::post('store',  'store')->name('store')->middleware('permission:create-banners');
+            Route::get('edit/{id}',  'edit')->name('edit')->middleware('permission:edit-banners');
+            Route::put('update/{id}',  'update')->name('update')->middleware('permission:edit-banners');
+            Route::delete('delete/{id}',  'delete')->name('delete')->middleware('permission:delete-banners');
+            Route::get('detail/{id}',  'detail')->name('detail')->middleware('permission:view-banners');
+        });
+
+        //sản phẩm
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
             Route::get('/create',  'create')->name('create')->middleware('permission:create-products'); // Hiển thị form thêm sản phẩm
             Route::post('/store',  'store')->name('store')->middleware('permission:create-products');

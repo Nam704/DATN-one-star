@@ -242,6 +242,30 @@
             </li>
             @endif
 
+            {{-- Banner --}}
+            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-banners'))
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
+                    aria-controls="sidebarPagesAuth" class="side-nav-link">
+                    <i class="mdi mdi-image"></i>
+                    <span>Banner</span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPagesAuth">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ route('admin.banner.list') }}">Danh sách</a>
+                        </li>
+                        @if(auth()->user()->hasPermission('create-banners'))
+                                <li>
+                                    <a href="{{ route('admin.banner.create') }}">Thêm mới</a>
+                                </li>
+                            @endif
+                    </ul>
+                </div>
+            </li>
+            @endif
+
             @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-products'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"

@@ -12,7 +12,7 @@
                                 <i class="ri-add-line align-middle me-1"></i>
                                 Thêm tài khoản
                             </a>
-                            <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.users.listtkkhoa') }}" class="btn btn-secondary">
                                 <i class="ri-delete-bin-line align-middle me-1"></i>
                                 Tài khoản khóa
                             </a>
