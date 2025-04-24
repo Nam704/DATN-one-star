@@ -86,6 +86,8 @@ class OrderController extends Controller
         try {
             $result = $this->retryPaymentService->retryPayment($orderId);
             if ($result['success']) {
+                $data = $result['data'];
+                $redirectUrl = $data['redirectUrl'];
                 return redirect()->back()->with('success', $result['message']);
             }
             return redirect()->back()->with('error', $result['message']);
