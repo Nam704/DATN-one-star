@@ -88,7 +88,8 @@ class OrderController extends Controller
             if ($result['success']) {
                 $data = $result['data'];
                 $redirectUrl = $data['redirectUrl'];
-                return redirect()->back()->with('success', $result['message']);
+                Log::info('url', $redirectUrl);
+                // return redirect()->back()->with('success', $result['message']);
             }
             return redirect()->back()->with('error', $result['message']);
         } catch (\Exception $e) {
