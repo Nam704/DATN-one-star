@@ -12,6 +12,11 @@
                                 {{ session('error') }}
                             </div>
                         @endif
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
 
                         <!-- Tab điều hướng nằm ngang -->
                         <ul role="tablist" class="nav nav-tabs mb-3" id="nav-tab">

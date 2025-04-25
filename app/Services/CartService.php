@@ -12,42 +12,49 @@ use Illuminate\Support\Collection;
 
 class CartService
 {
-    /**
-     * Lấy giỏ hàng hiện tại (tự động xử lý cho cả session và database)
-     */
     public function getCart(): Collection|array
     {
         return Auth::check()
             ? $this->getDatabaseCart(Auth::id())
             : $this->getSessionCart();
     }
+
     public function store()
     {
-        $cart = Cart::created(
+        $cart = Cart::create(
             [
                 'id_user' => Auth::id(),
             ]
         );
     }
-    /**
-     * Thêm sản phẩm vào giỏ hàng
-     */
+
     public function addToCart(int $variantId, int $quantity = 1): array
     {
         $variant = Product_variant::findOrFail($variantId);
+
+        if ($variant->quantity < $quantity) {
+            return [
+                'error' => 'Sản phẩm không đủ số lượng trong kho. Còn lại: ' . $variant->quantity
+            ];
+        }
 
         return Auth::check()
             ? $this->addToDatabaseCart(Auth::id(), $variant, $quantity)
             : $this->addToSessionCart($variant, $quantity);
     }
 
-    /**
-     * Cập nhật số lượng sản phẩm
-     */
     public function updateCart(int $variantId, int $quantity): array
     {
         if ($quantity < 1) {
             return ['error' => 'Số lượng phải lớn hơn 0'];
+        }
+
+        $variant = Product_variant::findOrFail($variantId);
+
+        if ($variant->quantity < $quantity) {
+            return [
+                'error' => 'Số lượng yêu cầu vượt quá tồn kho. Còn lại: ' . $variant->quantity
+            ];
         }
 
         return Auth::check()
@@ -55,9 +62,6 @@ class CartService
             : $this->updateSessionCart($variantId, $quantity);
     }
 
-    /**
-     * Xóa sản phẩm khỏi giỏ hàng
-     */
     public function removeFromCart(int $variantId): array
     {
         return Auth::check()
@@ -65,9 +69,6 @@ class CartService
             : $this->removeFromSessionCart($variantId);
     }
 
-    /**
-     * Xóa toàn bộ giỏ hàng
-     */
     public function clearCart(): array
     {
         return Auth::check()
@@ -75,9 +76,6 @@ class CartService
             : $this->clearSessionCart();
     }
 
-    /**
-     * Đồng bộ giỏ hàng từ session vào database khi đăng nhập
-     */
     public function syncCartOnLogin(int $userId): void
     {
         $sessionCart = $this->getSessionCart();
@@ -91,12 +89,11 @@ class CartService
         });
     }
 
-    // ============ Các phương thức xử lý database ============
     private function getDatabaseCart(int $userId): Collection
     {
         return Cart::firstOrCreate(['id_user' => $userId])
             ->details()
-            ->with(['variant.images', 'variant.product', 'variant.attributeValues']) // Thêm eager loading cho images
+            ->with(['variant.images', 'variant.product', 'variant.attributeValues'])
             ->get()
             ->map(function ($item) {
                 return [
@@ -104,7 +101,7 @@ class CartService
                     'sku' => $item->variant->sku,
                     'price' => $item->variant->price,
                     'quantity' => $item->quantity,
-                    'image' => $item->variant->images->url ?? null, // Lấy URL từ quan hệ images
+                    'image' => $item->variant->images->url ?? null,
                     'name' => $item->variant->product->name,
                     'values' => $item->variant->attributeValues->map(function ($attr) {
                         return [
@@ -118,17 +115,22 @@ class CartService
 
     private function addToDatabaseCart(int $userId, Product_variant $variant, int $quantity): array
     {
-        $result = DB::transaction(function () use ($userId, $variant, $quantity) {
+        return DB::transaction(function () use ($userId, $variant, $quantity) {
             $cart = Cart::firstOrCreate(['id_user' => $userId]);
 
-            // Kiểm tra xem bản ghi đã tồn tại chưa
             $cartDetail = $cart->details()->where('id_variant', $variant->id)->first();
+            $currentQuantity = $cartDetail ? $cartDetail->quantity : 0;
+            $newQuantity = $currentQuantity + $quantity;
+
+            if ($variant->quantity < $newQuantity) {
+                return [
+                    'error' => 'Số lượng yêu cầu vượt quá tồn kho. Còn lại: ' . $variant->quantity
+                ];
+            }
 
             if ($cartDetail) {
-                // Nếu bản ghi tồn tại, tăng quantity
                 $cart->details()->where('id_variant', $variant->id)->increment('quantity', $quantity);
             } else {
-                // Nếu bản ghi không tồn tại, tạo mới với quantity = $quantity
                 $cart->details()->create([
                     'id_variant' => $variant->id,
                     'quantity' => $quantity,
@@ -137,8 +139,6 @@ class CartService
 
             return ['success' => 'Đã thêm vào giỏ hàng'];
         });
-
-        return $result;
     }
 
     private function updateDatabaseCart(int $userId, int $variantId, int $quantity): array
@@ -169,7 +169,6 @@ class CartService
         return ['success' => 'Đã xóa giỏ hàng'];
     }
 
-    // ============ Các phương thức xử lý session ============
     private function getSessionCart(): array
     {
         return Session::get('cart', []);

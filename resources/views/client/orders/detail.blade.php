@@ -147,11 +147,12 @@
                             // echo $canRetry['message'];
                         @endphp
                         @if ($canRetry['success'])
-                            <form action="{{ route('client.orders.retryPayment', $order->id) }}" method="POST"
+                            {{-- <form action="{{ route('client.orders.retryPayment', $order->id) }}" method="POST"
                                 class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-warning mb-2">Thanh toán lại</button>
-                            </form>
+                                @csrf --}}
+                            <button type="submit" class="btn btn-warning mb-2" id="retry-payment"
+                                data-id="{{ $order->id }}">Thanh toán lại</button>
+                            {{-- </form> --}}
                         @elseif (
                             !$canRetry['success'] &&
                                 in_array($orderDetails['order_status']['name'], [
@@ -194,4 +195,7 @@
         </div>
     </div>
 
+@endsection
+@section('scripts')
+    @vite('resources/js/client/orderDetail.js')
 @endsection

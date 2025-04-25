@@ -9,22 +9,35 @@ $(document).ready(function () {
     window.Echo.private(`notifications.${user.id}`).listen(
         "OrderNotification",
         (event) => {
-            // Cập nhật trạng thái đơn hàng trong bảng
-            console.log(event.order);
-            const orderId = event.order.id; // ID của đơn hàng nhận từ sự kiện
-            const orderStatus = event.status; // Trạng thái đơn hàng nhận từ sự kiện
+            // Log để kiểm tra dữ liệu từ sự kiện
+            console.log("Order event:", event.order);
 
-            // Tìm đơn hàng trong bảng và cập nhật trạng thái
+            const orderId = event.order.id; // ID của đơn hàng
+            const orderStatus = event.status; // Trạng thái đơn hàng từ sự kiện
+
+            // Tìm hàng trong bảng bằng id
             const orderRow = document.getElementById(`order-${orderId}`);
             if (orderRow) {
-                const statusCell = orderRow.querySelector(".status");
+                const statusCell = orderRow.querySelector(".status"); // Tìm thẻ <span class="status">
                 if (statusCell) {
-                    statusCell.textContent = orderStatus; // Cập nhật trạng thái đơn hàng
+                    // Cập nhật nội dung trạng thái
+                    statusCell.textContent = orderStatus;
+
+                    // Cập nhật class của badge dựa trên trạng thái (tùy chọn)
+                    if (orderStatus === "Delivered") {
+                        statusCell.className = "status badge bg-success";
+                    } else if (orderStatus === "Cancelled") {
+                        statusCell.className = "status badge bg-danger";
+                    } else {
+                        statusCell.className = "status badge bg-warning";
+                    }
                 }
+            } else {
+                console.warn(`Không tìm thấy hàng với id: order-${orderId}`);
             }
 
-            // Hiển thị thông báo cho người dùng
-            // alert(event.message);
+            // Hiển thị thông báo (nếu cần)
+            // GlobalUtils.showNotification(event.message);
         }
     );
 

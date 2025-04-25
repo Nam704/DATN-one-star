@@ -95,12 +95,12 @@
             </thead>
             <tbody>
                 @foreach ($orders as $order)
-                    <tr>
+                    <tr id="order-{{ $order->id }}"> <!-- Thêm id cho hàng -->
                         <td>{{ $order->code }}</td>
                         <td>{{ json_decode($order->user_data, true)['name'] ?? 'N/A' }}</td>
                         <td>
                             <span
-                                class="badge {{ $order->orderStatus->group_status == 'Delivered' ? 'bg-success' : ($order->orderStatus->group_status == 'Cancelled' ? 'bg-danger' : 'bg-warning') }}">
+                                class="status badge {{ $order->orderStatus->group_status == 'Delivered' ? 'bg-success' : ($order->orderStatus->group_status == 'Cancelled' ? 'bg-danger' : 'bg-warning') }}">
                                 {{ $order->orderStatus->name ?? 'N/A' }}
                             </span>
                         </td>
