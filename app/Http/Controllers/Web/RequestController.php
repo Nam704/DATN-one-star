@@ -188,6 +188,46 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho thương hiệu.");
         }
     }
+    protected function processCategory(string $action, RequestModel $pendingRequest)
+    {
+        $payload = $pendingRequest->payload;
+        // Nếu id_parent không tồn tại hoặc null, mặc định gán 0
+        if (!isset($payload['id_parent']) || $payload['id_parent'] === null) {
+            $payload['id_parent'] = 0;
+        }
 
-   
+        switch ($action) {
+            case 'create':
+                $payload['status'] = 'active';
+                Category::create($payload);
+                break;
+
+            case 'update':
+                if ($pendingRequest->model_id) {
+                    $category = Category::findOrFail($pendingRequest->model_id);
+                    $payload['status'] = 'active';
+                    $category->update($payload);
+                }
+                break;
+
+            case 'delete':
+                if ($pendingRequest->model_id) {
+                    Category::findOrFail($pendingRequest->model_id)->delete();
+                }
+                break;
+
+            case 'restore':
+                if ($pendingRequest->model_id) {
+                    $category = Category::withTrashed()->findOrFail($pendingRequest->model_id);
+                    if ($category->trashed()) {
+                        $category->restore();
+                    }
+                }
+                break;
+
+            default:
+                throw new \Exception("Hành động '{$action}' không hợp lệ cho danh mục.");
+        }
+    }
+
 }
