@@ -54,13 +54,15 @@
                                                         class="btn btn-sm btn-primary">
                                                         <i class="ri-pencil-line"></i>
                                                     </a>
-                                                    <button type="button"
-                                                        class="btn btn-sm {{ $attribute->status === 'active' ? 'btn-success' : 'btn-danger' }} toggle-status"
-                                                        data-id="{{ $attribute->id }}"
-                                                        data-status="{{ $attribute->status }}">
-                                                        <i
-                                                            class="ri-lock{{ $attribute->status === 'active' ? '-unlock' : '' }}-line"></i>
-                                                    </button>
+                                                    @if (auth()->check() && auth()->user()->isAdmin())
+                                                        <button type="button"
+                                                            class="btn btn-sm {{ $attribute->status === 'active' ? 'btn-success' : 'btn-danger' }} toggle-status"
+                                                            data-id="{{ $attribute->id }}"
+                                                            data-status="{{ $attribute->status }}">
+                                                            <i
+                                                                class="ri-lock{{ $attribute->status === 'active' ? '-unlock' : '' }}-line"></i>
+                                                        </button>
+                                                    @endif
                                                     <button type="button" class="btn btn-sm btn-danger delete-attribute"
                                                         data-id="{{ $attribute->id }}">
                                                         <i class="ri-delete-bin-line"></i>

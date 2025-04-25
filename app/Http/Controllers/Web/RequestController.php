@@ -229,5 +229,40 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho danh mục.");
         }
     }
+    protected function processAttribute(string $action, RequestModel $pendingRequest)
+    {
+        $payload = $pendingRequest->payload;
+        switch ($action) {
+            case 'create':
+                $payload['status'] = 'active';
+                Attribute::create($payload);
+                break;
 
+            case 'update':
+                if ($pendingRequest->model_id) {
+                    $attribute = Attribute::findOrFail($pendingRequest->model_id);
+                    $payload['status'] = 'active';
+                    $attribute->update($payload);
+                }
+                break;
+
+            case 'delete':
+                if ($pendingRequest->model_id) {
+                    Attribute::findOrFail($pendingRequest->model_id)->delete();
+                }
+                break;
+
+            case 'restore':
+                if ($pendingRequest->model_id) {
+                    $attribute = Attribute::withTrashed()->findOrFail($pendingRequest->model_id);
+                    if ($attribute->trashed()) {
+                        $attribute->restore();
+                    }
+                }
+                break;
+
+            default:
+                throw new \Exception("Hành động '{$action}' không hợp lệ cho thuộc tính.");
+        }
+    }
 }
