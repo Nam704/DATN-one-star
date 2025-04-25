@@ -11,7 +11,7 @@
                             <div class="col-12">
                                 <div class="page-title-box">
                                     <h4 class="page-title">Danh sách giá trị thuộc tính đã xóa</h4>
-                                    <a href="{{ route('admin.attribute_values.index') }}" style="margin-bottom: 20px" class="btn btn-warning">
+                                    <a href="{{ route('admin.attribute_values.list') }}" style="margin-bottom: 20px" class="btn btn-warning">
                                         Quay lại danh sách
                                     </a>
                                 </div>
@@ -40,7 +40,7 @@
                             </thead>
 
                             <tbody>
-                                @foreach ($trash_attributes_value as $key => $value)
+                                @foreach ($trashed as $key => $value)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
                                         <td>{{ $value->attribute->name }}</td>

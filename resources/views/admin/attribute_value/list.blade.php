@@ -10,7 +10,7 @@
                             <div class="col-12">
                                 <div class="page-title-box">
                                     <div class="page-title-right">
-                                        <a href="{{ route('admin.attribute_values.create') }}" class="btn btn-primary">
+                                        <a href="{{ route('admin.attribute_values.add') }}" class="btn btn-primary">
                                             <i class="ri-add-line align-middle me-1"></i>
                                             Thêm giá trị
                                         </a>
@@ -70,14 +70,16 @@
                                                             class="ri-pencil-line"></i></a>
                                                 </div>
                                                 <div class="formform">
-                                                    <form action="{{ route('admin.attribute_values.destroy', $value->id) }}"
+                                                    <form class="delete-form"
+                                                        action="{{ route('admin.attribute_values.destroy', $value->id) }}"
                                                         method="POST">
                                                         @csrf
                                                         @method('delete')
                                                         <button type="submit"
                                                             onclick="return confirm('Bạn có muốn xóa không?')"
-                                                            class="btn btn-danger m-1"><i
-                                                                class="ri-delete-bin-line"></i></button>
+                                                            class="btn btn-danger m-1">
+                                                            <i class="ri-delete-bin-line"></i>
+                                                        </button>
                                                     </form>
                                                 </div>
                                             </div>

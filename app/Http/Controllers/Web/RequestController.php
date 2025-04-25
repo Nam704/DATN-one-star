@@ -265,4 +265,48 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho thuộc tính.");
         }
     }
+
+    protected function processAttributeValue(string $action, RequestModel $pendingRequest)
+    {
+        $payload = $pendingRequest->payload;
+        switch ($action) {
+            case 'create':
+                $payload['status'] = 'active';
+                Attribute_value::create($payload);
+                break;
+
+            case 'update':
+                if ($pendingRequest->model_id) {
+                    $attributeValue = Attribute_value::findOrFail($pendingRequest->model_id);
+                    $attributeValue->update($payload);
+                }
+                break;
+
+            case 'delete':
+                if ($pendingRequest->model_id) {
+                    Attribute_value::findOrFail($pendingRequest->model_id)->delete();
+                }
+                break;
+
+            case 'restore':
+                if ($pendingRequest->model_id) {
+                    $attributeValue = Attribute_value::withTrashed()->findOrFail($pendingRequest->model_id);
+                    if ($attributeValue->trashed()) {
+                        $attributeValue->restore();
+                    }
+                }
+                break;
+
+            case 'toggle_status':
+                if ($pendingRequest->model_id) {
+                    $attributeValue = Attribute_value::findOrFail($pendingRequest->model_id);
+                    $newStatus = $payload['status'] ?? ($attributeValue->status === 'active' ? 'inactive' : 'active');
+                    $attributeValue->update(['status' => $newStatus]);
+                }
+                break;
+
+            default:
+                throw new \Exception("Hành động '{$action}' không hợp lệ cho giá trị thuộc tính.");
+        }
+    }
 }
