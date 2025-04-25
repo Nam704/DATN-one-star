@@ -23,6 +23,25 @@
                         @if ($requests->isEmpty())
                             <p class="text-muted">Không có yêu cầu nào đang chờ phê duyệt.</p>
                         @else
+                            @php
+                                // Nhãn hiển thị cho các trường
+                                $labels = [
+                                    'id' => 'ID',
+                                    'name' => 'Tên',
+                                    'parent_name' => 'Danh mục cha',
+                                    'status' => 'Trạng thái',
+                                    'attribute_name' => 'Thuộc tính', // Nhãn cho attribute_name
+                                    'value' => 'Giá trị thuộc tính',
+                                    'description' => 'Mô tả',
+                                    // Blog fields
+                                    'category_name' => 'Chuyên mục',
+                                    'title' => 'Tiêu đề',
+                                    'slug' => 'Slug',
+                                    'content' => 'Nội dung',
+                                    'thumbnail' => 'Ảnh đại diện',
+                                    'published_at' => 'Ngày đăng',
+                                ];
+                            @endphp
                             <form action="{{ route('admin.requests.approve') }}" method="POST">
                                 @csrf
                                 <div class="table-responsive">
@@ -31,101 +50,86 @@
                                             <tr>
                                                 <th><input type="checkbox" id="select-all" class="form-check-input"></th>
                                                 <th>Loại</th>
-                                                <th>Dữ liệu cũ</th>
-                                                <th>Thay đổi</th> {{-- Chỉ 1 cột tổng --}}
+                                                <th>Trạng thái</th>
+                                                <th>Chi tiết</th>
                                                 <th>Hành động</th>
                                                 <th>Người yêu cầu</th>
                                                 <th>Thời gian yêu cầu</th>
-
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @php
-                                                // Nhãn hiển thị cho các trường
-                                                $labels = [
-                                                    'id' => 'ID',
-                                                    'name' => 'Tên',
-                                                    'id_parent' => 'Danh mục cha',
-                                                    'status' => 'Trạng thái',
-                                                    'attribute_name' => 'Thuộc tính',
-                                                    'value' => 'Giá trị thuộc tính',
-                                                ];
-                                            @endphp
-                                            @foreach ($requests as $request)
-                                                @php
-                                                    $orig = $request->original_data ?? [];
-                                                    $new = $request->payload_data ?? [];
-
-                                                    if ($request->model_type === 'attribute_value') {
-                                                        $fields = ['attribute_name', 'value', 'status'];
-                                                    } else {
-                                                        $fields = [];
-                                                        if (isset($new['id'])) {
-                                                            $fields[] = 'id';
-                                                        }
-                                                        $fields[] = 'name';
-                                                        if ($request->model_type === 'category') {
-                                                            $fields[] = 'id_parent';
-                                                        }
-                                                        $fields[] = 'status';
-                                                    }
-                                                @endphp
-
+                                            @foreach ($requests as $req)
                                                 <tr>
+                                                    <td><input type="checkbox" name="request_ids[]" value="{{ $req->id }}" class="form-check-input"></td>
+                                                    <td>{{ ucfirst($req->model_type) }}</td>
+                                                    <td>{{ ucfirst($req->status) }}</td>
                                                     <td>
-                                                        <input type="checkbox" name="request_ids[]"
-                                                            value="{{ $request->id }}" class="form-check-input">
-                                                    </td>
-                                                    <td>{{ ucfirst($request->model_type) }}</td>
+                                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal{{ $req->id }}">
+                                                            Xem
+                                                        </button>
 
-                                                    <td>
-                                                        <ul class="mb-0 pl-3">
-                                                            @foreach ($fields as $field)
-                                                                <li>
-                                                                    <strong>{{ $labels[$field] ?? $field }}:</strong>
-                                                                    @if ($field === 'id_parent')
-                                                                        {{ data_get($orig, 'parent_name', '—') }}
-                                                                    @elseif ($field === 'attribute_name')
-                                                                        {{ data_get($orig, 'attribute_name', '—') }}
-                                                                    @else
-                                                                        {{ data_get($orig, $field, '—') }}
-                                                                    @endif
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
+                                                        <!-- Detail Modal -->
+                                                        <div class="modal fade" id="detailModal{{ $req->id }}" tabindex="-1">
+                                                            <div class="modal-dialog modal-lg">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Chi tiết yêu cầu #{{ $req->id }}</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="row">
+                                                                            <div class="col-md-6">
+                                                                                <h6>Dữ liệu cũ</h6>
+                                                                                <ul>
+                                                                                    @foreach($req->original_data as $key => $value)
+                                                                                        <li>
+                                                                                            <strong>{{ $labels[$key] ?? ucfirst(str_replace('_', ' ', $key)) }}:</strong>
+                                                                                            @if(is_array($value))
+                                                                                                {{ implode(', ', $value) }}
+                                                                                            @else
+                                                                                                {{ $value ?? '—' }}
+                                                                                            @endif
+                                                                                        </li>
+                                                                                    @endforeach
+                                                                                </ul>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <h6>Dữ liệu mới</h6>
+                                                                                <ul>
+                                                                                    @foreach($req->payload_data as $key => $value)
+                                                                                        @if($key !== 'id_parent' && $key !== 'id_attribute') <!-- Bỏ qua id_parent và id_attribute -->
+                                                                                            <li>
+                                                                                                <strong>{{ $labels[$key] ?? ucfirst(str_replace('_', ' ', $key)) }}:</strong>
+                                                                                                @if(is_array($value))
+                                                                                                    {{ implode(', ', $value) }}
+                                                                                                @else
+                                                                                                    {{ $value ?? '—' }}
+                                                                                                @endif
+                                                                                            </li>
+                                                                                        @endif
+                                                                                    @endforeach
+                                                                                </ul>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </td>
-
-                                                    <td>
-                                                        <ul class="mb-0 pl-3">
-                                                            @foreach ($fields as $field)
-                                                                <li>
-                                                                    <strong>{{ $labels[$field] ?? $field }}:</strong>
-                                                                    @if ($field === 'id_parent')
-                                                                        {{ data_get($new, 'parent_name', '—') }}
-                                                                    @elseif ($field === 'attribute_name')
-                                                                        {{ data_get($new, 'attribute_name', '—') }}
-                                                                    @else
-                                                                        {{ data_get($new, $field, '—') }}
-                                                                    @endif
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    </td>
-
-                                                    <td>{{ ucfirst($request->action) }}</td>
-                                                    <td>{{ $request->employee->name ?? 'Không xác định' }}</td>
-                                                    <td>{{ $request->created_at->format('d/m/Y H:i') }}</td>
+                                                    <td>{{ ucfirst($req->action) }}</td>
+                                                    <td>{{ $req->employee->name ?? 'Không xác định' }}</td>
+                                                    <td>{{ $req->created_at->format('d/m/Y H:i') }}</td>
                                                 </tr>
                                             @endforeach
-
                                         </tbody>
-
                                     </table>
                                 </div>
 
                                 <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary" id="approve-btn" disabled>Phê duyệt Đã
-                                        chọn</button>
+                                    <button type="submit" class="btn btn-primary" id="approve-btn" disabled>Phê duyệt đã chọn</button>
                                     <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Hủy</a>
                                 </div>
                             </form>
@@ -144,19 +148,14 @@
                 const approveBtn = document.getElementById('approve-btn');
 
                 selectAll.addEventListener('change', function() {
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
-                    });
-                    updateApproveButton();
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                    toggleButton();
                 });
 
-                checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', updateApproveButton);
-                });
+                checkboxes.forEach(cb => cb.addEventListener('change', toggleButton));
 
-                function updateApproveButton() {
-                    const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-                    approveBtn.disabled = !anyChecked;
+                function toggleButton() {
+                    approveBtn.disabled = !Array.from(checkboxes).some(cb => cb.checked);
                 }
             });
         </script>

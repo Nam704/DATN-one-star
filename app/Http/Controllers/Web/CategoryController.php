@@ -39,8 +39,8 @@ class CategoryController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'create',
-                'model_type'  => 'category',
+                'action'      => 'thêm danh mục',
+                'model_type'  => 'danh mục',
                 'payload'     => $data,
                 'status'      => 'pending',
             ]);
@@ -108,8 +108,8 @@ class CategoryController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'update',
-                'model_type'  => 'category',
+                'action'      => 'cập nhật danh mục',
+                'model_type'  => 'danh mục',
                 'model_id'    => $category->id,
                 'payload'     => $validated,
                 'status'      => 'pending',
@@ -168,8 +168,8 @@ class CategoryController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'delete',
-                'model_type'  => 'category',
+                'action'      => 'xóa danh mục',
+                'model_type'  => 'danh mục',
                 'model_id'    => $category->id,
                 'payload'     => [
                     'name'      => $category->name,
@@ -213,8 +213,8 @@ class CategoryController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'restore',
-                'model_type'  => 'category',
+                'action'      => 'khôi phục danh mục',
+                'model_type'  => 'danh mục',
                 'model_id'    => $category->id,
                 'payload'     => [
                     'name'      => $category->name,

@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Attribute;
 use App\Models\Blog;
+use App\Models\CategoryBlog;
 use App\Models\RequestModel;
 use App\Services\BlogService;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ use Illuminate\Support\Str;
 
 class RequestController extends Controller
 {
-    protected $blogService;       // ← dòng mới
+    protected $blogService;
 
     public function __construct(BlogService $blogService)
     {
@@ -30,66 +31,89 @@ class RequestController extends Controller
         }
 
         $requests = RequestModel::where('status', 'pending')
-        ->with('employee')
-        ->latest()
-        ->get()
-        ->map(function ($req) {
-            $original = [];
-            if ($req->model_id) {
-                $class = '\\App\\Models\\' . Str::studly($req->model_type);
-                if (class_exists($class)) {
-                    $instance = $class::withTrashed()->find($req->model_id);
-                    if ($instance) {
-                        $original = $instance->toArray();
+            ->with('employee')
+            ->latest()
+            ->get()
+            ->map(function ($req) {
+                $original = [];
+                if ($req->model_id) {
+                    $class = '\\App\\Models\\' . Str::studly($req->model_type);
+                    if (class_exists($class)) {
+                        $instance = $class::withTrashed()->find($req->model_id);
+                        if ($instance) {
+                            $original = $instance->toArray();
+                        }
                     }
                 }
-            }
 
-            $payload = $req->payload;
+                $payload = $req->payload;
 
-            //Xử lý attribute_value
-            if ($req->model_type === 'attribute_value') {
-                // original: thêm tên attribute
-                if (!empty($original['id_attribute'])) {
-                    $attr = Attribute::withTrashed()
-                              ->find($original['id_attribute']);
-                    $original['attribute_name'] = $attr->name ?? null;
-                } else {
-                    $original['attribute_name'] = null;
+                // Xử lý blog
+                if ($req->model_type === 'blog') {
+                    // original: thêm tên chuyên mục
+                    if (!empty($original['category_id'])) {
+                        $cat = CategoryBlog::withTrashed()
+                            ->find($original['category_id']);
+                        $original['category_name'] = $cat->name ?? null;
+                    } else {
+                        $original['category_name'] = null;
+                    }
+
+                    // payload: thêm tên chuyên mục
+                    if (!empty($payload['category_id'])) {
+                        $cat2 = CategoryBlog::withTrashed()
+                            ->find($payload['category_id']);
+                        $payload['category_name'] = $cat2->name ?? null;
+                    } else {
+                        $payload['category_name'] = null;
+                    }
+                    $payload['slug'] = $payload['slug']     ?? $original['slug']       ?? null;
+                    $payload['published_at'] = $payload['published_at']
+                        ?? $original['published_at'] ?? null;
+                }
+                //Xử lý attribute_value
+                if ($req->model_type === 'attribute_value') {
+                    // original: thêm tên attribute
+                    if (!empty($original['id_attribute'])) {
+                        $attr = Attribute::withTrashed()
+                            ->find($original['id_attribute']);
+                        $original['attribute_name'] = $attr->name ?? null;
+                    } else {
+                        $original['attribute_name'] = null;
+                    }
+
+                    // payload: thêm tên attribute
+                    if (!empty($payload['id_attribute'])) {
+                        $attr2 = Attribute::withTrashed()
+                            ->find($payload['id_attribute']);
+                        $payload['attribute_name'] = $attr2->name ?? null;
+                    } else {
+                        $payload['attribute_name'] = null;
+                    }
                 }
 
-                // payload: thêm tên attribute
-                if (!empty($payload['id_attribute'])) {
-                    $attr2 = Attribute::withTrashed()
-                               ->find($payload['id_attribute']);
-                    $payload['attribute_name'] = $attr2->name ?? null;
-                } else {
-                    $payload['attribute_name'] = null;
+                // Xử lý category
+                if ($req->model_type === 'category') {
+                    // parent cũ (original_data) nếu cần
+                    if (!empty($original['id_parent'])) {
+                        $p = Category::withTrashed()->find($original['id_parent']);
+                        $original['parent_name'] = $p ? $p->name : null;
+                        $req->setAttribute('original_data', $original);
+                    }
+                    // parent mới (payload)
+                    if (!empty($payload['id_parent']) && $payload['id_parent'] !== 0) {
+                        $p2 = Category::withTrashed()->find($payload['id_parent']);
+                        $payload['parent_name'] = $p2 ? $p2->name : null;
+                    } else {
+                        $payload['parent_name'] = null;
+                    }
                 }
-            }
 
-            // Xử lý category
-            if ($req->model_type === 'category') {
-                // parent cũ (original_data) nếu cần
-                if (!empty($original['id_parent'])) {
-                    $p = Category::withTrashed()->find($original['id_parent']);
-                    $original['parent_name'] = $p ? $p->name : null;
-                    $req->setAttribute('original_data', $original);
-                }
-                // parent mới (payload)
-                if (!empty($payload['id_parent']) && $payload['id_parent'] !== 0) {
-                    $p2 = Category::withTrashed()->find($payload['id_parent']);
-                    $payload['parent_name'] = $p2 ? $p2->name : null;
-                } else {
-                    $payload['parent_name'] = null;
-                }
-            }
+                $req->setAttribute('original_data', $original);
+                $req->setAttribute('payload_data',  $payload);
 
-            $req->setAttribute('original_data', $original);
-            $req->setAttribute('payload_data',  $payload);
-
-            return $req;
-        });
+                return $req;
+            });
 
 
         return view('admin.approve.index', compact('requests'));

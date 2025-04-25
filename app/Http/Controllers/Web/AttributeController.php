@@ -46,8 +46,8 @@ class AttributeController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'create',
-                'model_type'  => 'attribute',
+                'action'      => 'thêm thuộc tính',
+                'model_type'  => 'Thuộc tính',
                 'payload'     => $validated,
                 'status'      => 'pending',
             ]);
@@ -88,8 +88,8 @@ class AttributeController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'update',
-                'model_type'  => 'attribute',
+                'action'      => 'cập nhật thuộc tính',
+                'model_type'  => 'Thuộc tính',
                 'model_id'    => $attribute->id,
                 'payload'     => $validated,
                 'status'      => 'pending',
@@ -113,8 +113,8 @@ class AttributeController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'delete',
-                'model_type'  => 'attribute',
+                'action'      => 'xóa thuộc tính',
+                'model_type'  => 'Thuộc tính',
                 'model_id'    => $attribute->id,
                 'payload'     => ['name'=>$attribute->name,'description'=>$attribute->description,'status'=>$attribute->status],
                 'status'      => 'pending',
@@ -143,8 +143,8 @@ class AttributeController extends Controller
     if (auth()->user()->isEmployee()) {
         RequestModel::create([
             'employee_id' => auth()->id(),
-            'action'      => 'restore',
-            'model_type'  => 'attribute',
+            'action'      => 'khôi phục thuộc tính',
+            'model_type'  => 'Thuộc tính',
             'model_id'    => $attribute->id,
             'payload'     => ['name' => $attribute->name, 'description' => $attribute->description, 'status' => $attribute->status],
             'status'      => 'pending',
@@ -180,8 +180,8 @@ class AttributeController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'update',
-                'model_type'  => 'attribute',
+                'action'      => 'thay đổi trạng thái thuộc tính',
+                'model_type'  => 'Thuộc tính',
                 'model_id'    => $attribute->id,
                 'payload'     => ['status'=>$attribute->status],
                 'status'      => 'pending',

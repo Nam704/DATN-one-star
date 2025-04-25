@@ -65,8 +65,8 @@ class BrandController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'create',
-                'model_type'  => 'brand',
+                'action'      => 'thêm thương hiệu',
+                'model_type'  => 'thương hiệu',
                 'payload'     => $validated,
                 'status'      => 'pending',
             ]);
@@ -89,8 +89,8 @@ class BrandController extends Controller
         if ($user->isEmployee()) {
             RequestModel::create([
                 'employee_id' => $user->id,
-                'action'      => 'delete',
-                'model_type'  => 'brand',
+                'action'      => 'xóa thương hiệu',
+                'model_type'  => 'thương hiệu',
                 'model_id'    => $brand->id,
                 'payload'     => [
                     'name' => $brand->name,
@@ -146,8 +146,8 @@ class BrandController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action'      => 'restore',
-                'model_type'  => 'brand',
+                'action'      => 'khôi phục thương hiệu',
+                'model_type'  => 'thương hiệu',
                 'model_id'    => $brand->id,
                 'payload'     => [
                     'name' => $brand->name,
@@ -269,8 +269,8 @@ class BrandController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action' => 'update',
-                'model_type' => 'brand',
+                'action' => 'cập nhật thương hiệu',
+                'model_type' => 'thương hiệu',
                 'model_id' => $brand->id,
                 'payload' => $validated,
                 'status' => 'pending',
@@ -279,7 +279,7 @@ class BrandController extends Controller
             ]);
 
             return redirect()->route('admin.brands.index')
-                ->with('success', 'Yêu cầu chỉnh sửa thương hiệu đã được gửi, chờ admin phê duyệt.');
+                ->with('success', 'Yêu cầu cập nhật thương hiệu đã được gửi, chờ admin phê duyệt.');
         }
 
         // Nếu không phải admin hoặc nhân viên, từ chối

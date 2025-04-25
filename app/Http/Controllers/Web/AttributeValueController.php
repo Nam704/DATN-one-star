@@ -53,8 +53,8 @@ class AttributeValueController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action' => 'create',
-                'model_type' => 'attribute_value',
+                'action' => 'tạo giá trị thuộc tính',
+                'model_type' => 'giá trị thuộc tính',
                 'payload' => $validated,
                 'status' => 'pending',
             ]);
@@ -104,8 +104,8 @@ class AttributeValueController extends Controller
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
-                'action' => 'update',
-                'model_type' => 'attribute value',
+                'action' => 'thay đổi giá trị thuộc tính',
+                'model_type' => 'giá trị thuộc tính',
                 'model_id' => $valueModel->id,
                 'payload' => $validated,
                 'status' => 'pending',
@@ -132,8 +132,8 @@ class AttributeValueController extends Controller
             if (auth()->user()->isEmployee()) {
                 RequestModel::create([
                     'employee_id' => auth()->id(),
-                    'action' => 'delete',
-                    'model_type' => 'attribute value',
+                    'action' => 'xóa giá trị thuộc tính',
+                    'model_type' => 'giá trị thuộc tính',
                     'model_id' => $valueModel->id,
                     'payload' => [
                         'value' => $valueModel->value,
@@ -174,8 +174,8 @@ class AttributeValueController extends Controller
             if (auth()->user()->isEmployee()) {
                 RequestModel::create([
                     'employee_id' => auth()->id(),
-                    'action' => 'restore',
-                    'model_type' => 'attribute value',
+                    'action' => 'khôi phục giá trị thuộc tính',
+                    'model_type' => 'giá trị thuộc tính',
                     'model_id' => $valueModel->id,
                     'payload' => [
                         'value' => $valueModel->value,
@@ -234,8 +234,8 @@ class AttributeValueController extends Controller
             if (auth()->user()->isEmployee()) {
                 RequestModel::create([
                     'employee_id' => auth()->id(),
-                    'action' => 'toggle_status',
-                    'model_type' => 'attribute value',
+                    'action' => 'thay đổi trạng thái thuộc tính',
+                    'model_type' => 'giá trị thuộc tính',
                     'model_id' => $valueModel->id,
                     'payload' => [
                         'value' => $valueModel->value,

@@ -25,26 +25,34 @@ class BlogService
      * Xử lý và định dạng dữ liệu bài viết từ request
      */
     public function processBlogData(Request $request)
-    {
-        $formattedData = [
-            '_token' => $request->input('_token'),
-            'title' => $request->input('title'),
-            'slug' => Str::slug($request->input('title')),
-            'content' => $request->input('content'),
-            'category_id' => $request->input('category_id'),
-            'tags' => $request->input('name', []), // Lấy danh sách tag (nếu có)
-            'thumbnail' => $request->file('thumbnail'),
-            'status' => $request->input('status', 'published'),
-            'published_at' => $request->input('status') === 'published' ? now() : null, // Lưu ngày giờ nếu là published
-        ];
-
-        // Nếu có ảnh bài viết, tải lên và lấy đường dẫn
-        if ($request->hasFile('thumbnail')) {
-            $formattedData['thumbnail'] = $this->uploadImage($request->file('thumbnail'), 'blogs/thumbnails');
-        }
-
-        return $formattedData;
+{
+    // 1. Đọc slug input, fallback về slugify title
+    $slug = $request->input('slug');
+    if (empty($slug)) {
+        $slug = Str::slug($request->input('title'));
     }
+
+    // 2. Đọc published_at input, fallback về now() nếu status = published
+    $publishedAt = $request->input('published_at');
+    if (empty($publishedAt) && $request->input('status') === 'published') {
+        $publishedAt = now()->toDateTimeString();
+    }
+
+    return [
+        '_token'       => $request->input('_token'),
+        'title'        => $request->input('title'),
+        'slug'         => $slug,
+        'content'      => $request->input('content'),
+        'category_id'  => $request->input('category_id'),
+        'tags'         => $request->input('tags', []),
+        'thumbnail'    => $request->hasFile('thumbnail')
+                            ? $this->uploadImage($request->file('thumbnail'), 'blogs/thumbnails')
+                            : null,
+        'status'       => $request->input('status', 'draft'),
+        'published_at' => $publishedAt,
+    ];
+}
+
 
     /**
      * Tạo sản phẩm và lưu dữ liệu vào database

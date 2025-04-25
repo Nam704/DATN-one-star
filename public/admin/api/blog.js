@@ -225,16 +225,22 @@ $(document).ready(function () {
                     },
                     success: function (response) {
                         if (response.success) {
-                            Swal.fire("Đã xóa!", response.message, "success");
-                            $(`button[data-id="${blogId}"]`).closest("tr").remove();
+                            // nếu là yêu cầu chờ phê duyệt
+                            const isPendingMessage = response.message.includes("chờ admin")
+                                || response.message.includes("đã được gửi");
+                            const title = isPendingMessage
+                                ? "Yêu cầu đã gửi"
+                                : "Đã xóa thành công";
+
+                            Swal.fire(title, response.message, "success");
+                            // nếu thực sự xóa luôn (admin) thì remove row
+                            if (!isPendingMessage) {
+                                $(`button[data-id="${blogId}"]`).closest("tr").remove();
+                            }
                         } else {
                             Swal.fire("Lỗi!", response.message, "error");
                         }
                     },
-                    error: function (xhr) {
-                        console.log(xhr.responseText);
-                        Swal.fire("Lỗi!", "Không thể xóa bài viết.", "error");
-                    }
                 });
             }
         });
@@ -257,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 cancelButtonText: "Hủy"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/admin/blogs/${blogId}/restore`, { 
+                    fetch(`/admin/blogs/${blogId}/restore`, {
                         method: "POST",
                         headers: {
                             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
