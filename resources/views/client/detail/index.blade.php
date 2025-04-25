@@ -54,7 +54,7 @@
                                     <li><a href="#"><i class="fa fa-star"></i></a></li>
                                     <li><a href="#"><i class="fa fa-star"></i></a></li>
                                     <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                    <li class="review"><a href="#"> (customer review ) </a></li>
+                                    <li class="review"><a href="#"> (đánh giá của khách hàng ) </a></li>
                                 </ul>
 
                             </div>
@@ -100,24 +100,18 @@
 
                             </div>
                             <div class="product_variant quantity mt-3">
-                                <label>Quantity</label>
-                                <input min="1" max="1" value="1" type="number" class="quantity-to-cart">
-                                <label>Stock: <a href="#" class="stock">{{ $product->quantity }}</a></label>
-                                <button class="button" id="add-to-cart">Add to cart</button>
+                                <label >Số lượng</label>
+                                <input min="1" max="1" value="1" type="number" class="quantity-to-cart me-2">
+                                <label>Còn: <a href="#" class="stock">{{ $product->quantity }}</a></label>
+                                <button class="button" id="add-to-cart">Thêm vào giỏ hàng</button>
 
                             </div>
                             <div class=" product_d_action">
                                 <ul>
-                                    <li><a href="#" title="Add to wishlist">+ Add to Wishlist</a></li>
-                                    <li><a href="#" title="Add to wishlist">+ Compare</a></li>
+                                    <li>Danh mục: {{ $product->category->name }}</li>
+                                    <li>Thương hiệu:{{ $product->brand->name }}</li>
                                 </ul>
                             </div>
-                            <div class="product_meta">
-                                <span>Category: <a href="#">{{ $product->category->name }}</a></span>
-                                <span>Brand: <a href="#">{{ $product->brand->name }}</a></span>
-
-                            </div>
-
                         </form>
                         <div class="priduct_social">
 

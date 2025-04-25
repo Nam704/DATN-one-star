@@ -3,7 +3,7 @@
 @section('content')
     <section class="main_content_area">
         <div class="container">
-            {{-- <a href="{{ route('client.orders.check') }}">Check order</a> --}}
+            {{-- <a href="{{ route('client.orders.check') }}">Kiểm tra đơn hàng</a> --}}
             <div class="account_dashboard">
                 <div class="row">
                     <div class="col-12">
@@ -16,18 +16,18 @@
                         <!-- Tab điều hướng nằm ngang -->
                         <ul role="tablist" class="nav nav-tabs mb-3" id="nav-tab">
                             <li class="nav-item">
-                                <a href="#orders" data-toggle="tab" class="nav-link active">Orders</a>
+                                <a href="#orders" data-toggle="tab" class="nav-link active">Đơn hàng</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#address" data-toggle="tab" class="nav-link">Addresses</a>
+                                <a href="#address" data-toggle="tab" class="nav-link">Địa chỉ</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#account-details" data-toggle="tab" class="nav-link">Account details</a>
+                                <a href="#account-details" data-toggle="tab" class="nav-link">Chi tiết tài khoản</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#" class="nav-link"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    Logout
+                                    Đăng xuất
                                 </a>
                             </li>
                             <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"

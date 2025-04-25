@@ -7,15 +7,15 @@
                         <ul class="nav" role="tablist" id="nav-tab">
                             <li>
                                 <a class="active" data-toggle="tab" href="#info" role="tab" aria-controls="info"
-                                    aria-selected="false">Description</a>
+                                    aria-selected="false">Mô tả</a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#sheet" role="tab" aria-controls="sheet"
-                                    aria-selected="false">Specification</a>
+                                    aria-selected="false">Thông số kĩ thuật</a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
-                                    aria-selected="false">Reviews (1)</a>
+                                    aria-selected="false">Đánh giá</a>
                             </li>
                         </ul>
                     </div>
@@ -141,7 +141,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="section_title">
-                    <h2><span><strong>Related</strong> Products</span></h2>
+                    <h2><span>Sản phẩm liên quan</span></h2>
                 </div>
                 <div class="product_carousel product_column5 owl-carousel">
                     @if ($relatedProducts->count() > 0)

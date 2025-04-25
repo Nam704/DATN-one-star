@@ -1,7 +1,7 @@
 <div class="mini_cart">
     <div class="cart_close">
         <div class="cart_text">
-            <h3>Cart</h3>
+            <h3>Giỏ hàng</h3>
         </div>
         <div class="mini_cart_close">
             <a href="javascript:void(0)"><i class="ion-android-close"></i></a>
@@ -14,14 +14,14 @@
     <div class="mini_cart_table">
 
         <div class="cart_total mt-10">
-            <span>Total:</span>
+            <span>Tổng:</span>
             <span class="price cart-total"></span>
         </div>
     </div>
 
     <div class="mini_cart_footer">
         <div class="cart_button">
-            <a href="{{ route('client.carts.viewCart') }}">View cart</a>
+            <a href="{{ route('client.carts.viewCart') }}">Xem giỏ hàng</a>
         </div>
 
     </div>

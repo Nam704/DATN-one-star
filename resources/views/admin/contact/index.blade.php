@@ -5,13 +5,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <div class="page-title-right">
-                        <a href="{{ route('admin.blogs.trash') }}" class="btn btn-secondary me-2">
-                            <i class="ri-delete-bin-line align-middle me-1"></i>
-                            Trash
-                        </a>
-                    </div>
-                    <h4 class="page-title">Contact Management</h4>
+                    <h4 class="page-title">Danh sách liên hệ</h4>
                 </div>
             </div>
         </div>
@@ -51,16 +45,10 @@
                                             <div class="btn-group">
                                                 <a href="{{ route('admin.contacts.show', $value->id) }}">
                                                     <button type="button"
-                                                        class="btn btn-secondary btn-sm btn-warning me-1"><i
-                                                            class="mdi mdi-eye"></i></button>
+                                                        class="btn btn-secondary btn-sm btn-warning me-1">Chi tiết</button>
                                                 </a>
                                                 <a href="{{ route('admin.contacts.edit', $value->id) }}"><button
-                                                        class="btn btn-sm btn-success me-1"><i
-                                                            class="mdi mdi-comment-edit-outline"></i></button></a>
-                                                <button class="btn btn-sm btn-danger delete-btn"
-                                                    data-id="{{ $value->id }}">
-                                                    <i class="mdi mdi-trash-can"></i>
-                                                </button>
+                                                        class="btn btn-sm btn-success me-1">Phản hổi</button></a>
                                             </div>
                                         </td>
                                     </tr>

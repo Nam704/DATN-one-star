@@ -39,6 +39,7 @@ class ContactController extends Controller
 
         // Gửi email phản hồi
         Mail::to($contact->email)->send(new ContactReplyMail($contact));
+        $contact->delete();
 
         return redirect()->route('admin.contacts.index')->with('success', 'Đã gửi phản hồi!');
     }

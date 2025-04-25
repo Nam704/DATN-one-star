@@ -7,22 +7,22 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6">
                         <div class="billing_details">
-                            <h3>Billing Details</h3>
+                            <h3>Chi tiết hóa đơn</h3>
                             <div class="row">
                                 <div class="col-lg-12 mb-20">
-                                    <label> Name <span>*</span></label>
+                                    <label> Tên <span>*</span></label>
                                     <input id="name_user" name="name" value="{{ $user->name }}" type="text">
                                 </div>
                                 <div class="col-lg-6 mb-20">
-                                    <label>Phone<span>*</span></label>
+                                    <label>Số điện thoại<span>*</span></label>
                                     <input id="phone" name="phone" type="text" value="{{ $user->phone ?? '' }}">
                                 </div>
                                 <div class="col-lg-6 mb-20">
-                                    <label> Email Address <span>*</span></label>
+                                    <label> Địa chỉ email <span>*</span></label>
                                     <input id="email" name="email" type="text" value="{{ $user->email }}">
                                 </div>
                                 <div class="col-12 mb-20" id="address" data-id="{{ $id_address }}">
-                                    <label>Street address <span>*</span></label>
+                                    <label>Địa chỉ đường phố <span>*</span></label>
                                     <div class="row mb-2">
                                         <div class="col-md-4">
                                             <select name="province" class="form-select" id="province"></select>
@@ -39,23 +39,23 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="order-notes">
-                                        <label for="order_note">Order Notes</label>
-                                        <textarea id="order_note" name="order_note" placeholder="Notes about your order, e.g. special notes for delivery."></textarea>
+                                        <label for="order_note">Ghi chú đơn hàng</label>
+                                        <textarea id="order_note" name="order_note" placeholder="Ghi chú về đơn hàng của bạn, ví dụ: ghi chú đặc biệt cho việc giao hàng."></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="coupon_detail mt-3">
-                            <h3>COUPON DETAILS</h3>
+                            <h3>Chi tiết phiếu giảm giá</h3>
                             <div class="card mb-4">
                                 @if (!empty($data['coupon']))
                                     <div class="card-body">
-                                        <p><strong>Applied Coupon:</strong> {{ $data['coupon'] }}</p>
-                                        <p><strong>Discount:</strong> {{ number_format($discount, 0, ',', '.') }} ₫</p>
+                                        <p><strong>Mã giảm giá đã áp dụng:</strong> {{ $data['coupon'] }}</p>
+                                        <p><strong>Giảm giá:</strong> {{ number_format($discount, 0, ',', '.') }} ₫</p>
                                     </div>
                                 @else
                                     <div class="card-body">
-                                        <p>No coupon applied.</p>
+                                        <p>Không có phiếu giảm giá nào được áp dụng..</p>
                                     </div>
                                 @endif
                             </div>
@@ -63,13 +63,13 @@
                     </div>
                     <div class="col-lg-6 col-md-6">
 
-                        <h3>Your order</h3>
+                        <h3>Đơn hàng của bạn</h3>
                         <div class="order_table table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Total</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Tổng</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -97,15 +97,15 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th>Cart Subtotal</th>
+                                        <th>Tổng phụ giỏ hàng</th>
                                         <td>{{ number_format($cartSubtotal, 0, ',', '.') }} ₫</td>
                                     </tr>
                                     <tr>
-                                        <th>Discount</th>
+                                        <th>Giảm giá</th>
                                         <td><strong>{{ number_format($discount, 0, ',', '.') }} ₫</strong></td>
                                     </tr>
                                     <tr class="order_total">
-                                        <th>Order Total</th>
+                                        <th>Tổng đơn hàng</th>
                                         <td><strong>{{ number_format($orderTotal, 0, ',', '.') }} ₫</strong></td>
                                     </tr>
                                 </tfoot>
@@ -115,7 +115,7 @@
                             <div class="panel-default">
                                 <div class="payment_cod">
                                     <input type="radio" id="COD" name="payment_method" value="COD" required />
-                                    <label for="COD">COD</label>
+                                    <label for="COD">Tiền mặt</label>
                                 </div>
                                 <div class="payment_vnpay">
                                     <input id="VNPAY" type="radio" name="payment_method" value="VNPAY" required />

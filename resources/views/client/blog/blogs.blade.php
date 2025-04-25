@@ -9,7 +9,7 @@
                 <div class="col-12">
                     <div class="breadcrumb_content">
                         <ul>
-                            <li><a href="index.html">Trang chủ</a></li>
+                            <li><a href="{{route('client.home')}}">Trang chủ</a></li>
                             <li>Blogs</li>
                         </ul>
                     </div>
@@ -45,7 +45,7 @@
                             </div>
                         </div>
                         <div class="widget_list widget_post">
-                            <h3>Recent Posts</h3>
+                            <h3>Bài viết gần đây</h3>
                             @foreach ($recent_blogs as $recent_blog)
                                 <div class="post_wrapper">
                                     <div class="post_thumb">
@@ -73,7 +73,7 @@
                                     <h3><a href="{{ route('client.blog.show', $blog->id) }}">{{$blog->title}}</a></h3>
                                     <div class="blog_meta">
                                         <span class="post_date"><i class="fa-calendar fa me-1"></i>{{$blog->published_at}}</span>
-                                        <span class="author"><i class="fa fa-user-circle"></i> Posts by : admin</span>
+                                        <span class="author"><i class="fa fa-user-circle"></i> Bài viết bởi : admin</span>
                                         <span class="category">
                                             <i class="fa fa-folder-open"></i>
                                             <a href="{{ route('client.blog.show', $blog->id) }}">{{$blog->category->name}}</a>
@@ -88,122 +88,6 @@
                                 </div>
                             </div>
                         @endforeach
-
-                        <div class="single_blog">
-                            <div class="blog_thumb">
-                                <a href="blog-details.html"><img src="assets/img/blog/blog7.jpg" alt=""></a>
-                            </div>
-                            <div class="blog_content">
-                                <h3><a href="blog-details.html">Post with Gallery</a></h3>
-                                <div class="blog_meta">
-                                    <span class="post_date"><i class="fa-calendar fa"></i> Februaey 02, 2019</span>
-                                    <span class="author"><i class="fa fa-user-circle"></i> Posts by : admin</span>
-                                    <span class="category">
-                                        <i class="fa fa-folder-open"></i>
-                                        <a href="#">Fashion</a>
-                                    </span>
-                                </div>
-                                <div class="blog_desc">
-                                    <p>Donec vitae hendrerit arcu, sit amet faucibus nisl. Cras pretium arcu ex. Aenean
-                                        posuere libero eu augue </p>
-                                </div>
-                                <div class="readmore_button">
-                                    <a href="blog-details.html">read more</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="single_blog">
-                            <div class="blog_thumb">
-                                <a href="blog-details.html"><img src="assets/img/blog/blog8.jpg" alt=""></a>
-                            </div>
-                            <div class="blog_content">
-                                <h3><a href="blog-details.html">Post with Audio</a></h3>
-                                <div class="blog_meta">
-                                    <span class="post_date"><i class="fa-calendar fa"></i> Februaey 02, 2019</span>
-                                    <span class="author"><i class="fa fa-user-circle"></i> Posts by : admin</span>
-                                    <span class="category">
-                                        <i class="fa fa-folder-open"></i>
-                                        <a href="#">Fashion</a>
-                                    </span>
-                                </div>
-                                <div class="blog_desc">
-                                    <p>Donec vitae hendrerit arcu, sit amet faucibus nisl. Cras pretium arcu ex. Aenean
-                                        posuere libero eu augue </p>
-                                </div>
-                                <div class="readmore_button">
-                                    <a href="blog-details.html">read more</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="single_blog">
-                            <div class="blog_thumb">
-                                <a href="blog-details.html"><img src="assets/img/blog/blog9.jpg" alt=""></a>
-                            </div>
-                            <div class="blog_content">
-                                <h3><a href="blog-details.html">Post with Video</a></h3>
-                                <div class="blog_meta">
-                                    <span class="post_date"><i class="fa-calendar fa"></i> Februaey 02, 2019</span>
-                                    <span class="author"><i class="fa fa-user-circle"></i> Posts by : admin</span>
-                                    <span class="category">
-                                        <i class="fa fa-folder-open"></i>
-                                        <a href="#">Fashion</a>
-                                    </span>
-                                </div>
-                                <div class="blog_desc">
-                                    <p>Donec vitae hendrerit arcu, sit amet faucibus nisl. Cras pretium arcu ex. Aenean
-                                        posuere libero eu augue </p>
-                                </div>
-                                <div class="readmore_button">
-                                    <a href="blog-details.html">read more</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="single_blog">
-                            <div class="blog_thumb">
-                                <a href="blog-details.html"><img src="assets/img/blog/blog7.jpg" alt=""></a>
-                            </div>
-                            <div class="blog_content">
-                                <h3><a href="blog-details.html">Maecenas ultricies</a></h3>
-                                <div class="blog_meta">
-                                    <span class="post_date"><i class="fa-calendar fa"></i> Februaey 02, 2019</span>
-                                    <span class="author"><i class="fa fa-user-circle"></i> Posts by : admin</span>
-                                    <span class="category">
-                                        <i class="fa fa-folder-open"></i>
-                                        <a href="#">Fashion</a>
-                                    </span>
-                                </div>
-                                <div class="blog_desc">
-                                    <p>Donec vitae hendrerit arcu, sit amet faucibus nisl. Cras pretium arcu ex. Aenean
-                                        posuere libero eu augue </p>
-                                </div>
-                                <div class="readmore_button">
-                                    <a href="blog-details.html">read more</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="single_blog">
-                            <div class="blog_thumb">
-                                <a href="blog-details.html"><img src="assets/img/blog/blog8.jpg" alt=""></a>
-                            </div>
-                            <div class="blog_content">
-                                <h3><a href="blog-details.html">Etiam magna</a></h3>
-                                <div class="blog_meta">
-                                    <span class="post_date"><i class="fa-calendar fa"></i> Februaey 02, 2019</span>
-                                    <span class="author"><i class="fa fa-user-circle"></i> Posts by : admin</span>
-                                    <span class="category">
-                                        <i class="fa fa-folder-open"></i>
-                                        <a href="#">Fashion</a>
-                                    </span>
-                                </div>
-                                <div class="blog_desc">
-                                    <p>Donec vitae hendrerit arcu, sit amet faucibus nisl. Cras pretium arcu ex. Aenean
-                                        posuere libero eu augue </p>
-                                </div>
-                                <div class="readmore_button">
-                                    <a href="blog-details.html">read more</a>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 

@@ -4,7 +4,7 @@
             <div class="col-lg-3 col-md-12">
                 <div class="categories_menu">
                     <div class="categories_title">
-                        <h2 class="categori_toggle">Browse categories</h2>
+                        <h2 class="categori_toggle">Danh mục sản phẩm</h2>
                     </div>
                     <div class="categories_menu_toggle">
                         <ul>

@@ -19,14 +19,14 @@
 
                                             <i class="ion-ios-arrow-down"></i></a>
                                         <ul class="dropdown_links">
-                                            <li><a href="{{ route('client.checkout.index') }}">Checkout </a></li>
-                                            <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
-                                            <li><a href="{{ route('client.carts.viewCart') }}">Shopping Cart</a></li>
+                                            <li><a href="{{ route('client.checkout.index') }}">Thanh toán </a></li>
+                                            <li><a href="{{ route('client.user.myAccount') }}">Tải khoản của tôi </a></li>
+                                            <li><a href="{{ route('client.carts.viewCart') }}">Giỏ hàng</a></li>
 
                                             <li class="nav-item">
                                                 <a href="#" class="nav-link"
                                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                                    Logout
+                                                    Đăng xuất
                                                 </a>
                                             </li>
 
@@ -39,19 +39,19 @@
                                     </li>
                                 @else
                                     <li class="top_links"><a href="#">
-                                            My Account
+                                            Tài khoản
                                             <i class="ion-ios-arrow-down"></i></a>
                                         <ul class="dropdown_links">
 
-                                            <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
-
+                                            <li><a href="{{ route('auth.getFormLogin') }}">Đăng nhập</a></li>
+                                            <li><a href="{{ route('auth.getFormRegister') }}">Đăng ký</a></li>
                                         </ul>
                                     </li>
                                 @endif
 
                                 <li class="language"><a href="#"><img
                                             src=" {{ asset('client/assets/img/logo/language.png') }}"
-                                            alt="">en-gb<i class="ion-ios-arrow-down"></i></a>
+                                            alt="">english<i class="ion-ios-arrow-down"></i></a>
                                     <ul class="dropdown_language">
                                         <li><a href="#"><img
                                                     src=" {{ asset('client/assets/img/logo/language.png') }}"
@@ -60,7 +60,7 @@
 
                                     </ul>
                                 </li>
-                                <li class="currency"><a href="#">$ VNĐ<i class="ion-ios-arrow-down"></i></a>
+                                <li class="currency"><a href="#">VNĐ<i class="ion-ios-arrow-down"></i></a>
 
                                 </li>
 
@@ -100,7 +100,7 @@
                         <div class="middel_right_info">
 
                             <div class="mini_cart_wrapper">
-                                <a href="javascript:void(0)"><span class="lnr lnr-cart"></span>My Cart </a>
+                                <a href="javascript:void(0)"><span class="lnr lnr-cart"></span>Giỏ hàng </a>
                                 <span class="cart_quantity"></span>
 
                             </div>
@@ -120,20 +120,15 @@
     <!--header bottom satrt-->
     <div class="header_bottom sticky-header">
         <div class="container">
-            <div class="row align-items-center">
+            <div class="row align-items-center text-center">
                 <div class="col-12">
                     <div class="main_menu header_position">
                         <nav>
                             <ul>
-                                <li><a href="index.html">home<i class="fa fa-angle-down"></i></a>
-                                    <ul class="sub_menu">
-                                        <li><a href="index.html">Home 1</a></li>
-                                        <li class="home7new"><a href="index-7.html">Home 7</a><span>new</span>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a href="{{ route('client.blog.index') }}">Blogs</a></li>
-                                <li><a href="{{ route('client.contact.index') }}">Contact Us</a></li>
+                                <li><a href="{{route('client.home')}}">Trang chủ</a></li>
+                                <li><a href="{{ route('client.shop') }}">Sản phẩm</a></li>
+                                <li><a href="{{ route('client.blog.index') }}">Tin tức</a></li>
+                                <li><a href="{{ route('client.contact.index') }}">Liên hệ với chúng tôi</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -162,13 +157,13 @@
 
                     <div class="top_right text-end">
                         <ul>
-                            <li class="top_links"><a href="#"><i class="ion-android-person"></i> My Account<i
+                            <li class="top_links"><a href="#"><i class="ion-android-person"></i> Tài khoản của tôi<i
                                         class="ion-ios-arrow-down"></i></a>
                                 <ul class="dropdown_links">
-                                    <li><a href="checkout.html">Checkout </a></li>
-                                    <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
-                                    <li><a href="cart.html">Shopping Cart</a></li>
-                                    <li><a href="wishlist.html">Wishlist</a></li>
+                                    <li><a href="checkout.html">Thanh toán </a></li>
+                                    <li><a href="{{ route('client.user.myAccount') }}">Tài khoản của tôi </a></li>
+                                    <li><a href="cart.html">Giỏ hàng</a></li>
+                                    <li><a href="wishlist.html">Danh sách mong muốn</a></li>
                                 </ul>
                             </li>
                             <li class="language"><a href="#"><img

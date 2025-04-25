@@ -1,12 +1,12 @@
 <div class="tab-pane fade show active" id="orders">
-    <h3>Orders > List</h3>
+    <h3>Đơn hàng</h3>
 
     <!-- Summary Metrics -->
     <div class="summary row mb-4">
         <div class="col-md-4">
             <div class="card bg-dark text-white">
                 <div class="card-body">
-                    <h5>Total Orders</h5>
+                    <h5>Tổng đơn hàng</h5>
                     <p>{{ $totalOrders }}</p>
                 </div>
             </div>
@@ -14,7 +14,7 @@
         <div class="col-md-4">
             <div class="card bg-dark text-white">
                 <div class="card-body">
-                    <h5>Open Orders</h5>
+                    <h5>Đơn chưa hoàn thành</h5>
                     <p>{{ $openOrders }}</p>
                 </div>
             </div>
@@ -22,7 +22,7 @@
         <div class="col-md-4">
             <div class="card bg-dark text-white">
                 <div class="card-body">
-                    <h5>Average Price</h5>
+                    <h5>Giá trung bình</h5>
                     <p>{{ number_format($averagePrice, 2) }}</p>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
                         <a class="nav-link {{ request('status') == 'All' || !request('status') ? 'active' : '' }}"
-                            href="?status=All">All</a>
+                            href="?status=All">Tất cả</a>
                     </li>
                     @foreach ($groupStatuses as $groupStatus)
                         <li class="nav-item">
@@ -53,7 +53,7 @@
             <!-- Advanced Filters -->
             <div class="col-md-3">
                 <select name="group_status" class="form-control">
-                    <option value="">Group Status</option>
+                    <option value="">Nhóm trạng thái</option>
                     @foreach ($groupStatuses as $groupStatus)
                         <option value="{{ $groupStatus }}"
                             {{ request('group_status') == $groupStatus ? 'selected' : '' }}>
@@ -63,19 +63,19 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <input type="text" name="search" class="form-control" placeholder="Search by code or name"
+                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm theo mã hoặc tên"
                     value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
-                <input type="number" name="min_total" class="form-control" placeholder="Min Total"
+                <input type="number" name="min_total" class="form-control" placeholder="Tổng tối thiểu"
                     value="{{ request('min_total') }}">
             </div>
             <div class="col-md-2">
-                <input type="number" name="max_total" class="form-control" placeholder="Max Total"
+                <input type="number" name="max_total" class="form-control" placeholder="Tổng tối đa"
                     value="{{ request('max_total') }}">
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <button type="submit" class="btn btn-primary w-100">Lọc</button>
             </div>
         </form>
     </div>
@@ -85,12 +85,12 @@
         <table class="table table-light table-striped">
             <thead>
                 <tr>
-                    <th>Number</th>
-                    <th>Customer</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th>Time</th>
-                    <th>Actions</th>
+                    <th>Stt</th>
+                    <th>Khách hàng</th>
+                    <th>Trạng thái</th>
+                    <th>Tổng</th>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>

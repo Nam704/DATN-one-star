@@ -1,5 +1,21 @@
 @extends('client.layouts.home.layout')
 @section('content')
+
+<div class="breadcrumbs_area">
+        <div class="container">
+            <div class="row" style="margin-top: -20px">
+                <div class="col-12">
+                    <div class="breadcrumb_content">
+                        <ul>
+                            <li><a href="{{route('client.home')}}">Trang chủ</a></li>
+                            <li>Shop</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="shop_area shop_reverse">
         <div class="container">
             <div class="row">
@@ -32,7 +48,7 @@
                                     <!-- Bộ lọc theo danh mục -->
                                     <div class="widget_list widget_categories">
                                         <div id="categories">
-                                            <h2>Categories</h2>
+                                            <h2>z</h2>
                                             <ul>
                                                 @foreach ($categories as $category)
                                                     <li>
