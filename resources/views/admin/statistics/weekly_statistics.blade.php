@@ -101,6 +101,44 @@
 
             </div>
         </div>
+        <!-- Row: Biểu đồ Lý Do Bị Hủy và TOP 20 Sản Phẩm Bị Hủy -->
+        <div class="row">
+            <!-- Cột trái: Biểu đồ cột Lý Do Bị Hủy Đơn -->
+            <div class="col-md-6">
+                <!-- Container với chiều cao cố định -->
+                <div class="card mb-4" style="height:450px;">
+                    <div class="card-body" style="position: relative; height: 100%;">
+                        <h5 class="header-title mb-3">Biểu Đồ Lý Do Bị Hủy Đơn</h5>
+                        <!-- Canvas có chiều cao chiếm 100% của container -->
+                        <canvas id="cancelReasonsChart" style="height:100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Danh sách TOP 20 Sản Phẩm Bị Hủy Nhiều Nhất -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="header-title mb-3">TOP 20 Sản Phẩm Bị Hủy Nhiều Nhất</h5>
+                        @if ($cancelledProducts->isNotEmpty())
+                            <ul class="list-group">
+                                @foreach ($cancelledProducts as $index => $product)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ $index + 1 }}. {{ $product->product_name }}
+                                        <span class="badge bg-primary rounded-pill">
+                                            {{ number_format($product->total_cancelled) }}
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-center text-muted">Không có dữ liệu sản phẩm bị hủy cho khoảng thời gian này.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Bảng Top 20 Sản Phẩm Bán Chạy Trong Tuần -->
         <div class="card mb-4">
             <div class="card-body">
@@ -194,33 +232,27 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- Nạp Chart.js từ CDN cho biểu đồ Chart.js -->
+@push('styles')
+    <x-admin.data-table-styles />
+@endpush
+
+@push('scripts')
+    <!-- Nạp Chart.js từ CDN và Plugin Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Lấy dữ liệu thống kê từ controller (đảm bảo có dữ liệu 7 ngày)
-        // Dữ liệu thống kê từ controller
+        // BIỂU ĐỒ: Thống kê tổng số đơn và doanh thu theo ngày
         var weeklyData = {!! json_encode($dailyStats) !!};
-        var labels = weeklyData.map(function(item) {
-            return item.order_date;
-        });
-        var totalOrdersData = weeklyData.map(function(item) {
-            return item.total_orders;
-        });
-        var deliveredData = weeklyData.map(function(item) {
-            return item.delivered_orders;
-        });
-        var cancelledData = weeklyData.map(function(item) {
-            return item.cancelled_orders;
-        });
-        var revenueData = weeklyData.map(function(item) {
-            return item.day_revenue;
-        });
+        var labels = weeklyData.map(item => item.order_date);
+        var totalOrdersData = weeklyData.map(item => item.total_orders);
+        var deliveredData = weeklyData.map(item => item.delivered_orders);
+        var cancelledData = weeklyData.map(item => item.cancelled_orders);
+        var revenueData = weeklyData.map(item => item.day_revenue);
 
-        // Cấu hình biểu đồ Chart.js
-        var ctx = document.getElementById('weeklyChart').getContext('2d');
-        var weeklyChart = new Chart(ctx, {
+        var ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+        var weeklyChart = new Chart(ctxWeekly, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -283,78 +315,112 @@
                 }
             }
         });
-        document.getElementById('downloadPNG').addEventListener('click', function() {
-            // Lấy data URL của canvas (mã hóa hình ảnh PNG)
-            var url = document.getElementById('weeklyChart').toDataURL("image/png");
 
-            // Tạo phần tử <a> tạm thời và kích hoạt download
+        // Xử lý download biểu đồ dưới dạng PNG
+        document.getElementById('downloadPNG').addEventListener('click', function() {
+            var url = document.getElementById('weeklyChart').toDataURL("image/png");
             var a = document.createElement('a');
             a.href = url;
-            a.download = 'weekly_chart.png'; // Tên file tải về
+            a.download = 'weekly_chart.png';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
         });
+
+        // Xử lý download dữ liệu biểu đồ dưới dạng Excel
         document.getElementById('downloadExcel').addEventListener('click', function() {
-    // Hàng dữ liệu: dòng tóm tắt tổng doanh thu, dòng trống và tiêu đề bảng
-    var ws_data = [
-        ["Tổng Doanh Thu Tuần", "{{ number_format($totalRevenue, 0) }} đ"],
-        [], // Dòng trống để phân cách
-        ["Ngày", "Tổng Đơn Hàng", "Đơn Hàng Thành Công", "Đơn Hàng Bị Hủy", "Doanh Thu (Delivered)"]
-    ];
+            var ws_data = [
+                ["Tổng Doanh Thu Tuần", "{{ number_format($totalRevenue, 0) }} đ"],
+                [],
+                ["Ngày", "Tổng Đơn Hàng", "Đơn Hàng Thành Công", "Đơn Hàng Bị Hủy", "Doanh Thu (Delivered)"]
+            ];
+            for (var i = 0; i < weeklyData.length; i++) {
+                ws_data.push([
+                    weeklyData[i].order_date,
+                    weeklyData[i].total_orders,
+                    weeklyData[i].delivered_orders,
+                    weeklyData[i].cancelled_orders,
+                    weeklyData[i].day_revenue
+                ]);
+            }
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(ws_data);
+            ws['!cols'] = [{
+                    wch: 20
+                },
+                {
+                    wch: 15
+                },
+                {
+                    wch: 20
+                },
+                {
+                    wch: 20
+                },
+                {
+                    wch: 20
+                }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws, "Chart Data");
+            var wbout = XLSX.write(wb, {
+                bookType: 'xlsx',
+                type: 'array'
+            });
+            var blob = new Blob([wbout], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'chart_data.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
 
-    // Thêm dữ liệu chi tiết theo từng ngày
-    for (var i = 0; i < weeklyData.length; i++) {
-        ws_data.push([
-            weeklyData[i].order_date,
-            weeklyData[i].total_orders,
-            weeklyData[i].delivered_orders,
-            weeklyData[i].cancelled_orders,
-            weeklyData[i].day_revenue
-        ]);
-    }
+        // BIỂU ĐỒ: Lý Do Bị Hủy Đơn
+        var cancellationLabels = {!! json_encode($canceledReasons->pluck('reason')) !!};
+        var cancellationValues = {!! json_encode($canceledReasons->pluck('total')) !!};
 
-    // Tạo workbook mới và chuyển dữ liệu thành worksheet
-    var wb = XLSX.utils.book_new();
-    var ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-    // Đặt chiều rộng cột (wch: width character) để file Excel trông đẹp hơn
-    ws['!cols'] = [
-        { wch: 20 }, // Cột "Ngày"
-        { wch: 15 }, // Cột "Tổng Đơn Hàng"
-        { wch: 20 }, // Cột "Đơn Hàng Thành Công"
-        { wch: 20 }, // Cột "Đơn Hàng Bị Hủy"
-        { wch: 20 }  // Cột "Doanh Thu (Delivered)"
-    ];
-
-    // Gắn worksheet vào workbook
-    XLSX.utils.book_append_sheet(wb, ws, "Chart Data");
-
-    // Xuất workbook thành định dạng array buffer
-    var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    var blob = new Blob([wbout], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-
-    // Tạo URL từ Blob và kích hoạt download
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'chart_data.xlsx';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-});
-
+        var ctxCancel = document.getElementById('cancelReasonsChart').getContext('2d');
+        var cancelReasonsChart = new Chart(ctxCancel, {
+            type: 'bar',
+            data: {
+                labels: cancellationLabels,
+                datasets: [{
+                    label: 'Số Lượng Đơn Bị Hủy',
+                    data: cancellationValues,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Số Lượng'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Lý Do'
+                        },
+                        ticks: {
+                            // Nếu nhãn dài hoặc nhiều có thể xoay nhãn để tránh tràn
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                }
+            }
+        });
     </script>
-
-@endsection
-
-@push('styles')
-    <x-admin.data-table-styles />
-@endpush
-
-@push('scripts')
-    <x-admin.data-table-scripts />
 @endpush
