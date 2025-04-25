@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Client\ContactController;
+use App\Http\Controllers\Web\AttributeValueController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -206,6 +207,18 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-attributes');
             Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-attributes');
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-attributes');
+        });
+        Route::prefix('attribute_values')->controller(AttributeValueController::class)->name('attribute_values.')->group(function () {
+            Route::get('/', 'list')->name('list');
+            Route::get('/add', 'add')->name('add');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::get('/trash', 'trash')->name('trash');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
         });
 
         // Brands Routes

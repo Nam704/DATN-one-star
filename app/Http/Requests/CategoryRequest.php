@@ -17,6 +17,7 @@ class CategoryRequest extends FormRequest
         return [
             'name' => 'required|max:255|unique:categories,name' .$categoryID,
             'status' => 'required',
+            'id_parent' => 'nullable|integer|exists:categories,id',
         ];
     }
 
@@ -27,6 +28,8 @@ class CategoryRequest extends FormRequest
             'name.max' => 'Tên quá dài',
             'name.unique' => 'Danh mục này đã tồn tại',
             'status.required' => 'Không được bỏ trống',
+            'id_parent.integer' => 'Danh mục cha không hợp lệ',
+            'id_parent.exists' => 'Danh mục cha không tồn tại',
         ];
     }
 }

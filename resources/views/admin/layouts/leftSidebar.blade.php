@@ -95,6 +95,9 @@
                                     <a href="{{ route('admin.attributes.index') }}">Thuộc tính</a>
                                 </li>
                             @endif
+                                <li>
+                                    <a href="{{ route('admin.attribute_values.list') }}">Thuộc tính giá trị</a>
+                                </li>
                             @if (auth()->user()->hasPermission('view-brands'))
                                 <li>
                                     <a href="{{ route('admin.brands.index') }}">Thương hiệu</a>
@@ -172,6 +175,9 @@
                                 </li>
                                 <li>
                                     <a href="{{ route('admin.permissions.check') }}">Kiểm tra quyền</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.requests.index')  }}">Phê duyệt</a>
                                 </li>
                             @endif
                         </ul>

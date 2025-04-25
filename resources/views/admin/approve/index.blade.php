@@ -40,59 +40,84 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            @php
+                                                // Nhãn hiển thị cho các trường
+                                                $labels = [
+                                                    'id' => 'ID',
+                                                    'name' => 'Tên',
+                                                    'id_parent' => 'Danh mục cha',
+                                                    'status' => 'Trạng thái',
+                                                    'attribute_name' => 'Thuộc tính',
+                                                    'value' => 'Giá trị thuộc tính',
+                                                ];
+                                            @endphp
                                             @foreach ($requests as $request)
+                                                @php
+                                                    $orig = $request->original_data ?? [];
+                                                    $new = $request->payload_data ?? [];
+
+                                                    if ($request->model_type === 'attribute_value') {
+                                                        $fields = ['attribute_name', 'value', 'status'];
+                                                    } else {
+                                                        $fields = [];
+                                                        if (isset($new['id'])) {
+                                                            $fields[] = 'id';
+                                                        }
+                                                        $fields[] = 'name';
+                                                        if ($request->model_type === 'category') {
+                                                            $fields[] = 'id_parent';
+                                                        }
+                                                        $fields[] = 'status';
+                                                    }
+                                                @endphp
+
                                                 <tr>
-                                                    <td><input type="checkbox" name="request_ids[]"
-                                                            value="{{ $request->id }}" class="form-check-input"></td>
-                                                    <td>{{ ucfirst($request->model_type) }}</td>
-                                                    {{-- Cột Dữ liệu cũ --}}
                                                     <td>
-                                                        @if (empty($request->original))
-                                                            <span class="text-muted">—</span>
-                                                        @else
-                                                            <ul class="mb-0 pl-3">
-                                                                @foreach ($request->payload as $key => $newValue)
-                                                                    @php
-                                                                        $oldValue = data_get($request->original, $key);
-                                                                    @endphp
-
-                                                                    <li>
-                                                                        <strong>{{ $key }}:</strong>
-                                                                        @if ($oldValue !== null && $oldValue != $newValue)
-                                                                            <span>{{ $oldValue }}</span>
-                                                                        @elseif ($oldValue !== null)
-                                                                            <span
-                                                                                class="text-muted">{{ $oldValue }}</span>
-                                                                        @else
-                                                                            <span class="text-muted">N/A</span>
-                                                                        @endif
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        @endif
+                                                        <input type="checkbox" name="request_ids[]"
+                                                            value="{{ $request->id }}" class="form-check-input">
                                                     </td>
+                                                    <td>{{ ucfirst($request->model_type) }}</td>
 
-                                                    {{-- Cột Dữ liệu mới --}}
                                                     <td>
                                                         <ul class="mb-0 pl-3">
-                                                            @foreach ($request->payload as $key => $newValue)
+                                                            @foreach ($fields as $field)
                                                                 <li>
-                                                                    <strong>{{ $key }}:</strong>
-                                                                    @if (is_array($newValue))
-                                                                        <span>{{ json_encode($newValue) }}</span>
+                                                                    <strong>{{ $labels[$field] ?? $field }}:</strong>
+                                                                    @if ($field === 'id_parent')
+                                                                        {{ data_get($orig, 'parent_name', '—') }}
+                                                                    @elseif ($field === 'attribute_name')
+                                                                        {{ data_get($orig, 'attribute_name', '—') }}
                                                                     @else
-                                                                        <span>{{ $newValue }}</span>
+                                                                        {{ data_get($orig, $field, '—') }}
                                                                     @endif
                                                                 </li>
                                                             @endforeach
                                                         </ul>
                                                     </td>
+
+                                                    <td>
+                                                        <ul class="mb-0 pl-3">
+                                                            @foreach ($fields as $field)
+                                                                <li>
+                                                                    <strong>{{ $labels[$field] ?? $field }}:</strong>
+                                                                    @if ($field === 'id_parent')
+                                                                        {{ data_get($new, 'parent_name', '—') }}
+                                                                    @elseif ($field === 'attribute_name')
+                                                                        {{ data_get($new, 'attribute_name', '—') }}
+                                                                    @else
+                                                                        {{ data_get($new, $field, '—') }}
+                                                                    @endif
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </td>
+
                                                     <td>{{ ucfirst($request->action) }}</td>
                                                     <td>{{ $request->employee->name ?? 'Không xác định' }}</td>
                                                     <td>{{ $request->created_at->format('d/m/Y H:i') }}</td>
-
                                                 </tr>
                                             @endforeach
+
                                         </tbody>
 
                                     </table>

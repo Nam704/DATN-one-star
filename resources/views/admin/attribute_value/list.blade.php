@@ -108,6 +108,5 @@
 @endpush
 
 @push('scripts')
-    <x-admin.data-table-scripts />
     <script src="{{ asset('admin/api/attributes_value.js') }}"></script>
 @endpush

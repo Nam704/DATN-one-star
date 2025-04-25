@@ -25,37 +25,43 @@ class BrandController extends Controller
 
     public function create()
     {
-        return view('admin.brands.create');
+        $brands = Brand::all();
+        return view('admin.brands.create', compact('brands'));
     }
 
-    public function store(HttpRequest $request)
+    public function store(Request $request)
     {
-        // Validate incoming data
+        // 1. Validate dữ liệu đầu vào
         $validated = $request->validate([
-            'name'   => [
+            'name'        => [
                 'required',
                 'max:50',
                 'unique:brands,name',
                 'regex:/^[\p{L}\s]+$/u',
                 'string'
             ],
-            'status' => 'required|in:active,inactive'
+            'status'      => 'required|in:active,inactive',
+            'description' => 'nullable|string|max:255',
         ], [
-            'name.required' => 'The brand name must not be empty',
-            'name.max'      => 'The brand name must not exceed 50 characters',
-            'name.unique'   => 'This brand name already exists',
-            'name.regex'    => 'Only letters are allowed in the name',
-            'status.required' => 'Please select a status'
+            'name.required'    => 'Tên thương hiệu không được để trống.',
+            'name.max'         => 'Tên thương hiệu không được vượt quá 50 ký tự.',
+            'name.unique'      => 'Tên thương hiệu này đã tồn tại.',
+            'name.regex'       => 'Tên thương hiệu chỉ được chứa chữ cái và khoảng trắng.',
+            'name.string'      => 'Tên thương hiệu phải là chuỗi ký tự.',
+            'status.required'  => 'Vui lòng chọn trạng thái.',
+            'status.in'        => 'Trạng thái không hợp lệ.',
+            'description.string' => 'Mô tả phải là chuỗi ký tự.',
+            'description.max'    => 'Mô tả không được vượt quá 255 ký tự.',
         ]);
 
-        // If user is admin, create brand immediately
+        // 2. Nếu là Admin: phê duyệt ngay, lưu vào bảng brands
         if (auth()->user()->isAdmin()) {
             Brand::create($validated);
             return redirect()->route('admin.brands.index')
-                ->with('success', 'Brand created successfully');
+                ->with('success', 'Tạo thương hiệu thành công!');
         }
 
-        // If user is employee, store a pending request
+        // 3. Nếu là Employee: lưu yêu cầu chờ Admin phê duyệt
         if (auth()->user()->isEmployee()) {
             RequestModel::create([
                 'employee_id' => auth()->id(),
@@ -65,12 +71,12 @@ class BrandController extends Controller
                 'status'      => 'pending',
             ]);
             return redirect()->route('admin.brands.index')
-                ->with('info', 'Your request has been sent and is awaiting admin approval.');
+                ->with('info', 'Yêu cầu tạo thương hiệu đã được gửi, vui lòng chờ Admin phê duyệt.');
         }
 
-        // If neither admin nor employee, forbid
+        // 4. Các vai trò khác: không có quyền
         return redirect()->route('admin.brands.index')
-            ->with('error', 'Bạn không có quyền thực hiện hành động này.');
+            ->with('error', 'Bạn không có quyền thực hiện thao tác này.');
     }
 
     public function destroy($id)
@@ -241,13 +247,15 @@ class BrandController extends Controller
                 'string',
                 Rule::unique('brands')->ignore($id)
             ],
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'description' => 'nullable|string|max:255',
         ], [
             'name.required' => 'Tên thương hiệu không được để trống',
             'name.max' => 'Tên thương hiệu không được vượt quá 50 ký tự',
             'name.regex' => 'Tên thương hiệu chỉ được chứa chữ cái và khoảng trắng',
             'name.unique' => 'Tên thương hiệu này đã tồn tại',
-            'status.required' => 'Vui lòng chọn trạng thái'
+            'status.required' => 'Vui lòng chọn trạng thái',
+            'description.max' => 'Mô tả không được vượt quá 255 ký tự'
         ]);
 
         // Nếu là admin, cập nhật ngay

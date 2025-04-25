@@ -45,8 +45,21 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <input name="status" value="active" type="hidden">
+                                            <label for="status">Trạng thái</label>
+                                            <select name="status" id="status" class="form-control">
+                                                <option value="active" {{ request()->old('status', 'active') == 'active' ? 'selected' : '' }}>
+                                                    Đang hoạt động
+                                                </option>
+                                                <option value="inactive" {{ request()->old('status') == 'inactive' ? 'selected' : '' }}>
+                                                    Ngừng hoạt động
+                                                </option>
+
+                                            </select>
+                                            @error('status')
+                                                <p class="text-danger">{{ $message }}</p>
+                                            @enderror
                                         </div>
+
 
                                         <div class="form-group">
                                             <input name="updated_at" value="{{ now() }}" type="hidden">

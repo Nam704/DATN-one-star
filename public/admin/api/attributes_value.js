@@ -1,8 +1,5 @@
-
-
 $(document).ready(function () {
-    // Khởi tạo DataTable
-    const table = $('#fixed-header-datatable').DataTable({
+    $('#fixed-header-datatable').DataTable({
         responsive: true,
         fixedHeader: true,
         autoWidth: false

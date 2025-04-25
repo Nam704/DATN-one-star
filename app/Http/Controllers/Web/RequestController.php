@@ -30,30 +30,67 @@ class RequestController extends Controller
         }
 
         $requests = RequestModel::where('status', 'pending')
-            ->with('employee')
-            ->latest()
-            ->get()
-            ->map(function ($req) {
-                // Mặc định original là mảng rỗng
-                $original = [];
-
-                // Nếu có model_id (update/delete/restore), lấy bản ghi gốc
-                if ($req->model_id) {
-                    $class = '\\App\\Models\\' . Str::studly($req->model_type);
-                    if (class_exists($class)) {
-                        // Với soft-deleted cần withTrashed nếu muốn so sánh cả bản đã xoá
-                        $instance = $class::withTrashed()->find($req->model_id);
-                        if ($instance) {
-                            $original = $instance->toArray();
-                        }
+        ->with('employee')
+        ->latest()
+        ->get()
+        ->map(function ($req) {
+            $original = [];
+            if ($req->model_id) {
+                $class = '\\App\\Models\\' . Str::studly($req->model_type);
+                if (class_exists($class)) {
+                    $instance = $class::withTrashed()->find($req->model_id);
+                    if ($instance) {
+                        $original = $instance->toArray();
                     }
                 }
+            }
 
-                // Gán thêm thuộc tính original vào mỗi request
-                $req->original = $original;
+            $payload = $req->payload;
 
-                return $req;
-            });
+            //Xử lý attribute_value
+            if ($req->model_type === 'attribute_value') {
+                // original: thêm tên attribute
+                if (!empty($original['id_attribute'])) {
+                    $attr = Attribute::withTrashed()
+                              ->find($original['id_attribute']);
+                    $original['attribute_name'] = $attr->name ?? null;
+                } else {
+                    $original['attribute_name'] = null;
+                }
+
+                // payload: thêm tên attribute
+                if (!empty($payload['id_attribute'])) {
+                    $attr2 = Attribute::withTrashed()
+                               ->find($payload['id_attribute']);
+                    $payload['attribute_name'] = $attr2->name ?? null;
+                } else {
+                    $payload['attribute_name'] = null;
+                }
+            }
+
+            // Xử lý category
+            if ($req->model_type === 'category') {
+                // parent cũ (original_data) nếu cần
+                if (!empty($original['id_parent'])) {
+                    $p = Category::withTrashed()->find($original['id_parent']);
+                    $original['parent_name'] = $p ? $p->name : null;
+                    $req->setAttribute('original_data', $original);
+                }
+                // parent mới (payload)
+                if (!empty($payload['id_parent']) && $payload['id_parent'] !== 0) {
+                    $p2 = Category::withTrashed()->find($payload['id_parent']);
+                    $payload['parent_name'] = $p2 ? $p2->name : null;
+                } else {
+                    $payload['parent_name'] = null;
+                }
+            }
+
+            $req->setAttribute('original_data', $original);
+            $req->setAttribute('payload_data',  $payload);
+
+            return $req;
+        });
+
 
         return view('admin.approve.index', compact('requests'));
     }
@@ -192,6 +229,7 @@ class RequestController extends Controller
     protected function processCategory(string $action, RequestModel $pendingRequest)
     {
         $payload = $pendingRequest->payload;
+
         // Nếu id_parent không tồn tại hoặc null, mặc định gán 0
         if (!isset($payload['id_parent']) || $payload['id_parent'] === null) {
             $payload['id_parent'] = 0;
@@ -199,15 +237,26 @@ class RequestController extends Controller
 
         switch ($action) {
             case 'create':
+                // lúc tạo mới thì mặc định active
                 $payload['status'] = 'active';
                 Category::create($payload);
                 break;
 
             case 'update':
+                // update đúng payload, không ép status
                 if ($pendingRequest->model_id) {
                     $category = Category::findOrFail($pendingRequest->model_id);
-                    $payload['status'] = 'active';
                     $category->update($payload);
+                }
+                break;
+
+            case 'toggle_status':
+                // riêng xử lý bật/tắt trạng thái
+                if ($pendingRequest->model_id) {
+                    $category = Category::findOrFail($pendingRequest->model_id);
+                    $newStatus = $payload['status']
+                        ?? ($category->status === 'active' ? 'inactive' : 'active');
+                    $category->update(['status' => $newStatus]);
                 }
                 break;
 
@@ -231,20 +280,33 @@ class RequestController extends Controller
         }
     }
 
+
     protected function processAttribute(string $action, RequestModel $pendingRequest)
     {
         $payload = $pendingRequest->payload;
+
         switch ($action) {
             case 'create':
+                // luôn khởi tạo active
                 $payload['status'] = 'active';
                 Attribute::create($payload);
                 break;
 
             case 'update':
+                // chỉ update đúng payload, không ép status
                 if ($pendingRequest->model_id) {
                     $attribute = Attribute::findOrFail($pendingRequest->model_id);
-                    $payload['status'] = 'active';
                     $attribute->update($payload);
+                }
+                break;
+
+            case 'toggle_status':
+                // xử lý bật / tắt riêng
+                if ($pendingRequest->model_id) {
+                    $attribute = Attribute::findOrFail($pendingRequest->model_id);
+                    $newStatus = $payload['status']
+                        ?? ($attribute->status === 'active' ? 'inactive' : 'active');
+                    $attribute->update(['status' => $newStatus]);
                 }
                 break;
 
@@ -267,6 +329,7 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho thuộc tính.");
         }
     }
+
     protected function processAttributeValue(string $action, RequestModel $pendingRequest)
     {
         $payload = $pendingRequest->payload;
