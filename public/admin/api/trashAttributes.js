@@ -1,11 +1,11 @@
 $(document).ready(function() {
-    // CSRF Token setup
+    // Thiết lập CSRF Token
     const token = $('meta[name="csrf-token"]').attr('content');
 
-    // Restore functionality
+    // Chức năng khôi phục thuộc tính
     $('.restore-attribute').click(function() {
         const id = $(this).data('id');
-        if (confirm('Are you sure you want to restore this attribute?')) {
+        if (confirm('Bạn có chắc chắn muốn khôi phục thuộc tính này không?')) {
             $.ajax({
                 url: `/admin/attributes/${id}/restore`,
                 type: 'POST',
@@ -14,21 +14,25 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert('Attribute restored successfully');
-                        location.reload();
+                        alert(response.message);
+                        if (response.action === 'restored') {
+                            location.reload();
+                        }
+                    } else {
+                        alert(response.message || 'Bạn không có quyền thực hiện hành động này.');
                     }
                 },
                 error: function() {
-                    alert('Failed to restore attribute');
+                    alert('Khôi phục thuộc tính thất bại');
                 }
             });
         }
     });
 
-    // Force Delete functionality
+    // Chức năng xóa vĩnh viễn thuộc tính
     $('.force-delete-attribute').click(function() {
         const id = $(this).data('id');
-        if (confirm('Are you sure you want to permanently delete this attribute?')) {
+        if (confirm('Bạn có chắc chắn muốn xóa vĩnh viễn thuộc tính này không?')) {
             $.ajax({
                 url: `/admin/attributes/${id}/force-delete`,
                 type: 'DELETE',
@@ -37,12 +41,14 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert('Attribute permanently deleted');
+                        alert(response.message);
                         location.reload();
+                    } else {
+                        alert(response.message || 'Chỉ quản trị viên mới có quyền xóa vĩnh viễn.');
                     }
                 },
                 error: function() {
-                    alert('Failed to delete attribute permanently');
+                    alert('Xóa vĩnh viễn thuộc tính thất bại');
                 }
             });
         }

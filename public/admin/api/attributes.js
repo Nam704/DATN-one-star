@@ -5,7 +5,7 @@ $(document).ready(function() {
     // Delete attribute functionality
     $('.delete-attribute').click(function() {
         const id = $(this).data('id');
-        if (confirm('Are you sure you want to delete this attribute?')) {
+        if (confirm('Bạn có chắc chắn muốn xóa thuộc tính này không?')) {
             $.ajax({
                 url: `/admin/attributes/${id}`,
                 type: 'DELETE',
@@ -14,12 +14,16 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert('Attribute deleted successfully');
-                        location.reload();
+                        alert(response.message);
+                        if (response.action === 'deleted') {
+                            location.reload();
+                        }
+                    } else {
+                        alert(response.message || 'Không có quyền thực hiện hành động này');
                     }
                 },
                 error: function() {
-                    alert('Failed to delete attribute');
+                    alert('Xóa thuộc tính thất bại');
                 }
             });
         }
@@ -39,23 +43,25 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (response.success) {
-                    const newStatus = response.newStatus;
-                    
-                    if (newStatus === 'active') {
-                        button.html('<i class="ri-lock-unlock-line"></i>');
-                        button.removeClass('btn-danger').addClass('btn-success');
-                        statusBadge.removeClass('bg-danger').addClass('bg-success').text('Active');
-                    } else {
-                        button.html('<i class="ri-lock-line"></i>');
-                        button.removeClass('btn-success').addClass('btn-danger');
-                        statusBadge.removeClass('bg-success').addClass('bg-danger').text('Inactive');
+                    alert(response.message);
+                    if (response.action === 'updated') {
+                        const newStatus = response.newStatus;
+                        if (newStatus === 'active') {
+                            button.html('<i class="ri-lock-unlock-line"></i>');
+                            button.removeClass('btn-danger').addClass('btn-success');
+                            statusBadge.removeClass('bg-danger').addClass('bg-success').text('Kích hoạt');
+                        } else {
+                            button.html('<i class="ri-lock-line"></i>');
+                            button.removeClass('btn-success').addClass('btn-danger');
+                            statusBadge.removeClass('bg-success').addClass('bg-danger').text('Không kích hoạt');
+                        }
                     }
-                    
-                    alert('Status updated successfully');
+                } else {
+                    alert(response.message || 'Không có quyền thực hiện hành động này');
                 }
             },
             error: function() {
-                alert('Failed to update status');
+                alert('Cập nhật trạng thái thất bại');
             }
         });
     });
