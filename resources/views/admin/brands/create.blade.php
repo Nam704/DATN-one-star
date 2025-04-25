@@ -25,27 +25,34 @@
                             {{-- Name input --}}
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name (Max 100 characters)</label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name"
-                                       placeholder="Enter brand name" value="{{ old('name') }}">
-                                        
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror     
-                            </div>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                    id="name" name="name" placeholder="Enter brand name"
+                                    value="{{ old('name') }}">
 
-                            {{-- Status selection --}}
-                            <div class="mb-3">
-                                <label for="status" class="form-label">Status</label>
-                                <select class="@error('status') is-invalid @enderror form-select"
-                                    aria-label="Default select example" id="" name="status">
-                                    <option selected>Open this select menu</option>
-                                    <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                                @error('status')
+                                @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            {{-- Status selection --}}
+                            @if (auth()->user()->isAdmin())
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select name="status" class="form-select @error('status') is-invalid @enderror">
+                                        <option value="" disabled selected>– Chọn trạng thái –</option>
+                                        <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active
+                                        </option>
+                                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
+                                        </option>
+                                    </select>
+                                    @error('status')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @else
+                                <input type="hidden" name="status" value="inactive">
+                            @endif
+
 
                             <button type="submit" class="btn btn-primary">Create Brand</button>
                         </form>
@@ -57,9 +64,9 @@
 @endsection
 
 @push('styles')
-<x-admin.data-table-styles />
+    <x-admin.data-table-styles />
 @endpush
 
 @push('scripts')
-<x-admin.data-table-scripts />
+    <x-admin.data-table-scripts />
 @endpush

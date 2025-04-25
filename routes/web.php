@@ -14,6 +14,7 @@ use App\Http\Controllers\Web\GoogleController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ImportController;
 use App\Http\Controllers\Web\MailController;
+use App\Http\Controllers\Web\RequestController;
 use App\Http\Controllers\Web\StatisticController;
 use App\Http\Controllers\Web\SupplierController;
 use App\Http\Controllers\Web\UserContronler;
@@ -127,7 +128,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('/', 'index')->name('index')->middleware('role:admin');
             Route::post('approve', 'approve')->name('approve')->middleware('role:admin');
         });
-        
+
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
             Route::get('list', 'list')->name('list');
             Route::post('update-list', 'update');
