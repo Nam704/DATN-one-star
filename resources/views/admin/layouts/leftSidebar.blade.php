@@ -56,7 +56,7 @@
             </li>
             @endif
 
-            @if(auth()->check() && auth()->user()->hasPermission('view-users'))
+             @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-users'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
                     aria-controls="sidebarPagesAuth" class="side-nav-link">

@@ -302,8 +302,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
 
             // Biểu đồ thống kê
-            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user');
-            Route::get('/charts', 'charts')->name('charts');
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-statistics');
+            Route::get('/charts', 'charts')->name('charts')->middleware('permission:view-statistics');
             Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
             Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
             Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
