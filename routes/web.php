@@ -123,6 +123,11 @@ Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(f
 
 Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
     function () {
+        Route::prefix('requests')->name("requests.")->controller(RequestController::class)->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('role:admin');
+            Route::post('approve', 'approve')->name('approve')->middleware('role:admin');
+        });
+        
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
             Route::get('list', 'list')->name('list');
             Route::post('update-list', 'update');
