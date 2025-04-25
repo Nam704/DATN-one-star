@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\RequestModel;
 use Illuminate\Http\Request;
 use App\Models\Blog;
 use App\Models\Tag;
@@ -10,6 +11,7 @@ use App\Models\CategoryBlog;
 use App\Services\BlogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -33,13 +35,35 @@ class BlogController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $blog_data = $this->BlogService->createBlog($request);
-        // Lấy danh sách blog mới nhất
-        $blogs = Blog::latest()->get();
+{
+    // 1. Validate & format data (dùng service helper)
+    $formatted = $this->BlogService->processBlogData($request);
 
-        return view('admin.blog.index', compact('blogs'));
+    // 2. Nếu là admin → tạo ngay
+    if (auth()->user()->isAdmin()) {
+        $blog = $this->BlogService->createBlog($request);
+        return redirect()->route('admin.blog.index')
+                         ->with('success', 'Bài viết đã được tạo thành công.');
     }
+
+    // 3. Nếu là employee → tạo pending request
+    if (auth()->user()->isEmployee()) {
+        RequestModel::create([
+            'employee_id' => auth()->id(),
+            'action'      => 'create',
+            'model_type'  => 'blog',
+            'model_id'    => null,
+            'payload'     => $formatted,       // sẽ tự chuyển thành JSON
+            'status'      => 'pending',
+        ]);
+
+        return redirect()->route('admin.blogs.index')
+                         ->with('info', 'Yêu cầu tạo bài viết đã được gửi, chờ admin phê duyệt.');
+    }
+
+    abort(403, 'Bạn không có quyền thực hiện hành động này.');
+}
+
 
     public function show(string $id)
     {
@@ -57,27 +81,75 @@ class BlogController extends Controller
     }
 
     public function update(Request $request, string $id)
-    {
-        $blog = $this->BlogService->updateBlog($request, $id);
-        $blogs = Blog::latest()->get();
-        return view('admin.blog.index', compact('blogs'));
+{
+    $blog = Blog::findOrFail($id);
+    $formatted = $this->BlogService->processBlogData($request);
+
+    if (auth()->user()->isAdmin()) {
+        $this->BlogService->updateBlog($request, $id);
+        return redirect()->route('admin.blog.index')
+                         ->with('success', 'Bài viết đã được cập nhật thành công.');
     }
 
-    public function destroy($id)
-    {
-        try {
-            DB::beginTransaction();
+    if (auth()->user()->isEmployee()) {
+        RequestModel::create([
+            'employee_id' => auth()->id(),
+            'action'      => 'update',
+            'model_type'  => 'blog',
+            'model_id'    => $blog->id,
+            'payload'     => $formatted,
+            'status'      => 'pending',
+        ]);
 
-            $blog = Blog::findOrFail($id);
-            $blog->delete(); // Xóa mềm
-
-            DB::commit();
-            return response()->json(['success' => true, 'message' => 'Bài viết đã được xóa mềm!']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Lỗi khi xóa bài viết!', 'error' => $e->getMessage()]);
-        }
+        return redirect()->route('admin.blogs.index')
+                         ->with('info', 'Yêu cầu cập nhật bài viết đã được gửi, chờ admin phê duyệt.');
     }
+
+    abort(403);
+}
+
+
+public function destroy($id)
+{
+    $blog = Blog::findOrFail($id);
+
+    if (auth()->user()->isAdmin()) {
+        $blog->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Bài viết đã được xóa mềm thành công.'
+        ]);
+    }
+
+    if (auth()->user()->isEmployee()) {
+        RequestModel::create([
+            'employee_id' => auth()->id(),
+            'action'      => 'delete',
+            'model_type'  => 'blog',
+            'model_id'    => $blog->id,
+            'payload'     => [
+                'title'       => $blog->title,
+                'content'     => Str::limit($blog->content, 100),
+                'category_id' => $blog->category_id,
+                'tags'        => $blog->tags->pluck('id')->toArray(),
+                'thumbnail'   => $blog->thumbnail,
+                'status'      => $blog->status,
+            ],
+            'status'      => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Yêu cầu xóa bài viết đã được gửi, chờ admin phê duyệt.'
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Bạn không có quyền thực hiện hành động này.'
+    ], 403);
+}
+
 
     public function trash()
     {
@@ -87,13 +159,39 @@ class BlogController extends Controller
 
     public function restore($id)
 {
-    try {
-        $blog = Blog::onlyTrashed()->findOrFail($id); 
-        $blog->restore(); 
+    $blog = Blog::withTrashed()->findOrFail($id);
 
-        return response()->json(['success' => true, 'message' => 'Bài viết đã được khôi phục!']);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Lỗi khi khôi phục bài viết!']);
+    if (auth()->user()->isAdmin()) {
+        $blog->restore();
+        return response()->json([
+            'success' => true,
+            'message' => 'Bài viết đã được khôi phục thành công.'
+        ]);
     }
+
+    if (auth()->user()->isEmployee()) {
+        RequestModel::create([
+            'employee_id' => auth()->id(),
+            'action'      => 'restore',
+            'model_type'  => 'blog',
+            'model_id'    => $blog->id,
+            'payload'     => [
+                'title'     => $blog->title,
+                'status'    => $blog->status,
+            ],
+            'status'      => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Yêu cầu khôi phục bài viết đã được gửi, chờ admin phê duyệt.'
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Bạn không có quyền thực hiện hành động này.'
+    ], 403);
 }
+
 }

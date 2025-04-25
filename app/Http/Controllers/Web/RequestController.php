@@ -188,6 +188,7 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho thương hiệu.");
         }
     }
+
     protected function processCategory(string $action, RequestModel $pendingRequest)
     {
         $payload = $pendingRequest->payload;
@@ -229,6 +230,7 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho danh mục.");
         }
     }
+
     protected function processAttribute(string $action, RequestModel $pendingRequest)
     {
         $payload = $pendingRequest->payload;
@@ -265,7 +267,6 @@ class RequestController extends Controller
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho thuộc tính.");
         }
     }
-
     protected function processAttributeValue(string $action, RequestModel $pendingRequest)
     {
         $payload = $pendingRequest->payload;
@@ -307,6 +308,61 @@ class RequestController extends Controller
 
             default:
                 throw new \Exception("Hành động '{$action}' không hợp lệ cho giá trị thuộc tính.");
+        }
+    }
+    /**
+     * Xử lý các yêu cầu liên quan đến Blog
+     */
+    protected function processBlog(string $action, RequestModel $req)
+    {
+        $payload = (array) $req->payload;
+
+        switch ($action) {
+            case 'create':
+                // Tạo mới bài viết
+                $blog = Blog::create([
+                    'title'       => $payload['title'],
+                    'slug'        => $payload['slug'],
+                    'content'     => $payload['content'],
+                    'category_id' => $payload['category_id'],
+                    'thumbnail'   => $payload['thumbnail'] ?? null,
+                    'status'      => $payload['status'],
+                    'author_id'   => $req->employee_id,
+                ]);
+                // nếu có tags
+                if (!empty($payload['tags'])) {
+                    $blog->tags()->sync($payload['tags']);
+                }
+                break;
+
+            case 'update':
+                $blog = Blog::findOrFail($req->model_id);
+                $blog->update([
+                    'title'       => $payload['title'],
+                    'slug'        => $payload['slug'],
+                    'content'     => $payload['content'],
+                    'category_id' => $payload['category_id'],
+                    'thumbnail'   => $payload['thumbnail'] ?? $blog->thumbnail,
+                    'status'      => $payload['status'],
+                ]);
+                if (isset($payload['tags'])) {
+                    $blog->tags()->sync($payload['tags']);
+                }
+                break;
+
+            case 'delete':
+                Blog::findOrFail($req->model_id)->delete();
+                break;
+
+            case 'restore':
+                $b = Blog::withTrashed()->findOrFail($req->model_id);
+                if ($b->trashed()) {
+                    $b->restore();
+                }
+                break;
+
+            default:
+                throw new \Exception("Hành động '{$action}' không hợp lệ cho Blog.");
         }
     }
 }
