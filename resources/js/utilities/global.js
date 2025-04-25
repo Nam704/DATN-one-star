@@ -146,6 +146,7 @@ window.GlobalUtils = {
 
     // Cập nhật UI cho mini-cart (đã sửa lại)
     updateCartUI(cartItems) {
+        const $cart_quantity = $(".cart_quantity");
         const $cartContainer = $(".cart_items");
         $cartContainer.empty();
 
@@ -153,11 +154,12 @@ window.GlobalUtils = {
             $cartContainer.append(
                 "<p class='text-center'>Your cart is empty.</p>"
             );
+            $cart_quantity.text("0");
 
             $(".cart-total").text(GlobalUtils.formatPrice(0));
             return;
         }
-
+        $cart_quantity.text(cartItems.length);
         cartItems.forEach((item) => {
             if (!item.image || !item.name || !item.sku) {
                 console.warn(

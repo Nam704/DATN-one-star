@@ -99,10 +99,10 @@
                                 </div>
 
                             </div>
-                            <div class="product_variant quantity">
-                                <label>quantity</label>
+                            <div class="product_variant quantity mt-3">
+                                <label>Quantity</label>
                                 <input min="1" max="1" value="1" type="number" class="quantity-to-cart">
-                                <span>Stock: <a href="#" class="stock">{{ $product->quantity }}</a></span>
+                                <label>Stock: <a href="#" class="stock">{{ $product->quantity }}</a></label>
                                 <button class="button" id="add-to-cart">Add to cart</button>
 
                             </div>
@@ -120,21 +120,7 @@
 
                         </form>
                         <div class="priduct_social">
-                            <ul>
-                                <li><a class="facebook" href="#" title="facebook"><i class="fa fa-facebook"></i>
-                                        Like</a>
-                                </li>
-                                <li><a class="twitter" href="#" title="twitter"><i class="fa fa-twitter"></i>
-                                        tweet</a></li>
-                                <li><a class="pinterest" href="#" title="pinterest"><i class="fa fa-pinterest"></i>
-                                        save</a>
-                                </li>
-                                <li><a class="google-plus" href="#" title="google +"><i class="fa fa-google-plus"></i>
-                                        share</a></li>
-                                <li><a class="linkedin" href="#" title="linkedin"><i class="fa fa-linkedin"></i>
-                                        linked</a>
-                                </li>
-                            </ul>
+
                         </div>
 
                     </div>
@@ -150,5 +136,4 @@
 @endsection
 @section('scripts')
     @vite('resources/js/client/productDetail.js')
-    {{-- <script src="{{ asset('client/api/productDetail.js') }}"></script> --}}
 @endsection

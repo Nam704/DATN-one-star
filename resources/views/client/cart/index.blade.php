@@ -5,7 +5,6 @@
     <div class="content">
         <div class="shopping_cart_area mt-32">
             <div class="container">
-
                 <div class="row">
                     <div class="col-12">
                         <div class="table_desc">
@@ -42,32 +41,34 @@
                             <div class="coupon_code left">
                                 <h3>Coupon</h3>
                                 <div class="coupon_inner">
-                                    <p>Enter your coupon code if you have one.</p>
-                                    <input placeholder="Coupon code" id="coupon_code" type="text">
-                                    <button type="submit">Apply coupon</button>
+                                    <p>Xem các coupon khả dụng hoặc nhập mã coupon.</p>
+                                    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+                                        data-bs-target="#voucherModal">Xem Coupon</button>
+                                    <div class="input-group">
+                                        <input placeholder="Mã coupon" id="coupon_code" type="text" class="form-control">
+                                        <button type="submit" class="btn btn-success">Áp dụng Coupon</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6">
                             <div class="coupon_code right">
-                                <h3>Cart Totals</h3>
+                                <h3>Tổng giỏ hàng</h3>
                                 <div class="coupon_inner">
                                     <div class="cart_subtotal">
-                                        <p>Subtotal</p>
+                                        <p>Tạm tính</p>
                                         <p class="cart_amount subtotal"></p>
                                     </div>
-                                    <!-- Thêm hàng Discount -->
                                     <div class="cart_subtotal">
-                                        <p>Discount</p>
+                                        <p>Giảm giá</p>
                                         <p class="cart_amount discount">0 ₫</p>
                                     </div>
-
                                     <div class="cart_subtotal">
-                                        <p>Total</p>
+                                        <p>Tổng cộng</p>
                                         <p class="cart_amount total"></p>
                                     </div>
                                     <div class="checkout_btn">
-                                        <a href="#" id="checkout">Proceed to Checkout</a>
+                                        <a href="#" id="checkout">Tiến hành Thanh toán</a>
                                     </div>
                                 </div>
                             </div>
@@ -75,6 +76,49 @@
                     </div>
                 </div>
 
+                <!-- Voucher Modal -->
+                <div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="voucherModalLabel">Coupon Khả Dụng</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="voucherList" class="row">
+                                    <!-- Vouchers will be rendered here via JS -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Modal -->
+                <div class="modal fade" id="productsModal" tabindex="-1" aria-labelledby="productsModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="productsModalLabel">Sản Phẩm Áp Dụng</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <ul id="productList" class="list-group">
+                                    <!-- Products will be rendered here via JS -->
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -82,4 +126,6 @@
 
 @section('scripts')
     @vite('resources/js/client/cartDetail.js')
+    <!-- Bootstrap JS -->
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
 @endsection

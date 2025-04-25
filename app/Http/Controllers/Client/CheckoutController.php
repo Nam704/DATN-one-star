@@ -40,7 +40,7 @@ class CheckoutController extends Controller
                 ->with('error', 'Vui lòng đăng nhập để tiếp tục thanh toán!');
         }
 
-        $id_address = $user->address->id;
+        $id_address = $user->address->id ?? null;
         if (!$id_address) {
             return redirect()->route('client.user.myAccount')
                 ->with('error', 'Vui lòng thêm địa chỉ mặc định trước khi thanh toán!');
@@ -64,32 +64,7 @@ class CheckoutController extends Controller
 
         return view('client.checkout.index', compact('data', 'user', 'id_address', 'cartSubtotal', 'discount', 'orderTotal'));
     }
-    public function create_old(Request $request)
-    {
-        // Lấy dữ liệu từ request
-        $variants = $request->input('variants', []);
-        $coupon = $request->input('coupon');
 
-        // Kiểm tra dữ liệu
-        if (empty($variants)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không có sản phẩm nào được chọn để thanh toán!',
-            ], 400);
-        }
-
-        // Lưu dữ liệu vào session để sử dụng ở trang checkout
-        $request->session()->put('checkout_data', [
-            'variants' => $variants,
-            'coupon' => $coupon,
-        ]);
-
-        // Trả về URL để chuyển hướng
-        return response()->json([
-            'success' => true,
-            'redirectUrl' => route('client.checkout.index'),
-        ]);
-    }
     public function create(Request $request)
     {
         try {

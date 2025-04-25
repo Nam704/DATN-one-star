@@ -10,6 +10,8 @@ $(document).ready(() => {
     const $totalElement = $(".total");
     const $checkoutBtn = $("#checkout");
     const $couponCode = $("#coupon_code");
+    const $voucherList = $("#voucherList");
+    const $productList = $("#productList");
 
     let cartData = [];
     let couponApplied = false;
@@ -20,10 +22,154 @@ $(document).ready(() => {
         renderCart(cart);
     });
 
-    // Sự kiện áp dụng coupon
+    // Lấy danh sách voucher hợp lệ khi modal được mở
+    $("#voucherModal").on("show.bs.modal", function () {
+        axios
+            .get(`${GlobalUtils.baseUrl}/api/vouchers/valid`)
+            .then((response) => {
+                if (response.data.success) {
+                    renderVouchers(response.data.data);
+                } else {
+                    $voucherList.html(
+                        '<p class="text-center">Không có voucher nào hợp lệ.</p>'
+                    );
+                    GlobalUtils.showNotification(response.data.message, {
+                        backgroundColor: "#ff4444",
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching vouchers:", error);
+                $voucherList.html(
+                    '<p class="text-center">Lỗi khi tải danh sách voucher.</p>'
+                );
+                GlobalUtils.showNotification(
+                    "Không thể tải danh sách voucher",
+                    {
+                        backgroundColor: "#ff4444",
+                    }
+                );
+            });
+    });
+
+    // Hàm hiển thị danh sách voucher
+    function renderVouchers(vouchers) {
+        $voucherList.empty();
+        if (vouchers.length === 0) {
+            $voucherList.html(
+                '<p class="text-center">Không có voucher nào hợp lệ.</p>'
+            );
+            return;
+        }
+
+        vouchers.forEach((voucher) => {
+            const discountText =
+                voucher.type === "percentage"
+                    ? `${
+                          voucher.discount_amount
+                      }% (Tối đa ${GlobalUtils.formatPrice(
+                          voucher.max_discount_amount
+                      )})`
+                    : GlobalUtils.formatPrice(voucher.discount_amount);
+
+            const voucherHtml = `
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${voucher.name}</h5>
+                            <p class="card-text"><strong>Mã:</strong> ${
+                                voucher.code
+                            }</p>
+                            <p class="card-text"><strong>Hết hạn:</strong> ${new Date(
+                                voucher.end_date
+                            ).toLocaleString("vi-VN")}</p>
+                            <p class="card-text"><strong>Số lượng còn lại:</strong> ${
+                                voucher.quantity
+                            }</p>
+                            <p class="card-text"><strong>Đơn tối thiểu:</strong> ${GlobalUtils.formatPrice(
+                                voucher.min_amount
+                            )}</p>
+                            <p class="card-text"><strong>Giảm giá:</strong> ${discountText}</p>
+                            <button class="btn btn-info btn-view-products" data-code="${
+                                voucher.code
+                            }" data-bs-toggle="modal" data-bs-target="#productsModal">View Products</button>
+                            <button class="btn btn-success btn-apply-coupon" data-code="${
+                                voucher.code
+                            }">Apply Coupon</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $voucherList.append(voucherHtml);
+        });
+    }
+
+    // Sự kiện xem sản phẩm áp dụng
+    $voucherList.on("click", ".btn-view-products", function () {
+        const couponCode = $(this).data("code");
+        axios
+            .get(`${GlobalUtils.baseUrl}/api/vouchers/${couponCode}/products`)
+            .then((response) => {
+                if (response.data.success) {
+                    renderProducts(response.data.data);
+                } else {
+                    $productList.html(
+                        '<li class="list-group-item text-center">Không có sản phẩm nào áp dụng.</li>'
+                    );
+                    GlobalUtils.showNotification(response.data.message, {
+                        backgroundColor: "#ff4444",
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching products:", error);
+                $productList.html(
+                    '<li class="list-group-item text-center">Lỗi khi tải danh sách sản phẩm.</li>'
+                );
+                GlobalUtils.showNotification(
+                    "Không thể tải danh sách sản phẩm",
+                    {
+                        backgroundColor: "#ff4444",
+                    }
+                );
+            });
+    });
+
+    // Hàm hiển thị danh sách sản phẩm
+    function renderProducts(products) {
+        $productList.empty();
+        if (products.length === 0) {
+            $productList.html(
+                '<li class="list-group-item text-center">Không có sản phẩm nào áp dụng.</li>'
+            );
+            return;
+        }
+
+        products.forEach((product) => {
+            const productHtml = `
+                <li class="list-group-item">${product.name}</li>
+            `;
+            $productList.append(productHtml);
+        });
+    }
+
+    // Sự kiện áp dụng coupon từ modal
+    $voucherList.on("click", ".btn-apply-coupon", function () {
+        const couponCode = $(this).data("code");
+        $couponCode.val(couponCode);
+        $("#voucherModal").modal("hide");
+        applyCoupon(couponCode);
+    });
+
+    // Sự kiện áp dụng coupon từ input
     $("button[type='submit']").on("click", function (e) {
         e.preventDefault();
         const couponCode = $couponCode.val().trim();
+        applyCoupon(couponCode);
+    });
+
+    // Hàm chung để áp dụng coupon
+    function applyCoupon(couponCode) {
         const selectedItems = getSelectedItems();
         const variantIds = selectedItems.map((item) => item.id_variant);
         const subtotal = selectedItems.reduce(
@@ -48,7 +194,6 @@ $(document).ready(() => {
             return;
         }
 
-        // Gọi API để kiểm tra coupon
         axios
             .post(`${GlobalUtils.baseUrl}/api/coupon/apply`, {
                 coupon: couponCode,
@@ -79,7 +224,7 @@ $(document).ready(() => {
                     backgroundColor: "#ff4444",
                 });
             });
-    });
+    }
 
     // Hàm hiển thị giỏ hàng
     function renderCart(cart) {
@@ -99,7 +244,6 @@ $(document).ready(() => {
             const formattedPrice = GlobalUtils.formatPrice(item.price);
             const formattedTotal = GlobalUtils.formatPrice(totalPrice);
 
-            // Tạo chuỗi thuộc tính để hiển thị
             const attributes = item.values
                 .map((attr) => `${attr.attribute_name}: ${attr.value}`)
                 .join(", ");
@@ -196,7 +340,7 @@ $(document).ready(() => {
         GlobalUtils.updateCart(variantId, newQuantity, (cart) => {
             renderCart(cart);
             GlobalUtils.updateCartUI(cart);
-            couponApplied = false; // Reset coupon khi thay đổi giỏ hàng
+            couponApplied = false;
             appliedDiscount = 0;
             updateCartTotals(getSelectedItems(), 0);
         });
@@ -209,7 +353,7 @@ $(document).ready(() => {
         GlobalUtils.removeFromCart(variantId, (cart) => {
             renderCart(cart);
             GlobalUtils.updateCartUI(cart);
-            couponApplied = false; // Reset coupon khi thay đổi giỏ hàng
+            couponApplied = false;
             appliedDiscount = 0;
             updateCartTotals(getSelectedItems(), 0);
         });
@@ -227,15 +371,11 @@ $(document).ready(() => {
     });
 
     // Sự kiện checkout
-    // Sự kiện checkout
     $checkoutBtn.on("click", (e) => {
         e.preventDefault();
-
-        // Lấy dữ liệu
         const selectedItems = getSelectedItems();
         const couponCode = $couponCode.val().trim();
 
-        // Kiểm tra client-side
         if (selectedItems.length === 0) {
             GlobalUtils.showNotification(
                 "Vui lòng chọn ít nhất một sản phẩm để thanh toán!",
@@ -244,7 +384,6 @@ $(document).ready(() => {
             return;
         }
 
-        // Kiểm tra coupon nếu có (giả sử couponApplied là biến toàn cục)
         if (couponCode && !couponApplied) {
             GlobalUtils.showNotification(
                 "Coupon không hợp lệ, vui lòng kiểm tra lại!",
@@ -253,14 +392,12 @@ $(document).ready(() => {
             return;
         }
 
-        // Chuẩn bị dữ liệu gửi lên server
         const data = {
             variants: selectedItems,
             coupon: couponCode || null,
-            discount: appliedDiscount, // Giả sử appliedDiscount đã được tính trước
+            discount: appliedDiscount,
         };
 
-        // Gửi request tới server
         axios
             .post(`${GlobalUtils.baseUrl}/client/checkout`, data)
             .then((response) => {
@@ -268,13 +405,11 @@ $(document).ready(() => {
                     GlobalUtils.showNotification(
                         response.data.message ||
                             "Chuyển hướng đến trang thanh toán...",
-                        { backgroundColor: "#00C4B4" } // Màu xanh cho thành công
+                        { backgroundColor: "#00C4B4" }
                     );
                     window.location.href = response.data.redirectUrl;
                 } else {
-                    // Hiển thị lỗi từ server
                     if (response.data.errors) {
-                        // Lỗi validation, hiển thị từng lỗi
                         Object.values(response.data.errors).forEach(
                             (errorArray) => {
                                 errorArray.forEach((error) => {
@@ -285,7 +420,6 @@ $(document).ready(() => {
                             }
                         );
                     } else {
-                        // Lỗi khác (như số lượng không đủ)
                         GlobalUtils.showNotification(
                             response.data.message ||
                                 "Có lỗi xảy ra khi xử lý thanh toán",
@@ -296,14 +430,10 @@ $(document).ready(() => {
             })
             .catch((error) => {
                 console.error("Checkout error:", error);
-
-                // Xử lý lỗi HTTP
                 let errorMessage =
                     "Không thể tiến hành thanh toán. Vui lòng thử lại!";
                 if (error.response) {
-                    // Server trả về response với mã lỗi (422, 400, v.v.)
                     if (error.response.data.errors) {
-                        // Hiển thị lỗi validation
                         Object.values(error.response.data.errors).forEach(
                             (errorArray) => {
                                 errorArray.forEach((error) => {
@@ -314,11 +444,9 @@ $(document).ready(() => {
                             }
                         );
                     } else if (error.response.data.message) {
-                        // Hiển thị message từ server (như lỗi số lượng)
                         errorMessage = error.response.data.message;
                     }
                 } else if (error.request) {
-                    // Không nhận được response từ server
                     errorMessage =
                         "Không thể kết nối đến server. Vui lòng kiểm tra mạng!";
                 }

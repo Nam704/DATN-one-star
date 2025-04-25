@@ -23,13 +23,13 @@ class OrderController extends Controller
     protected $orderStatusService;
     protected $notificationService;
     protected $retryPaymentService;
+
     public function __construct(
         RetryPaymentService $retryPaymentService,
         OrderService $orderService,
         PaymentService $paymentService,
         NotificationService $notificationService,
         OrderStatusService $orderStatusService
-
     ) {
         $this->retryPaymentService = $retryPaymentService;
         $this->orderStatusService = $orderStatusService;
@@ -37,33 +37,24 @@ class OrderController extends Controller
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
     }
+
     public function store(Request $request)
     {
         try {
-            // Kiểm tra checkout_data trong session
             if (!session()->has('checkout_data')) {
                 throw new \Exception('Dữ liệu thanh toán không tồn tại hoặc đã hết hạn.');
             }
 
-            // Gọi OrderService::handleCreateOrder để tạo đơn hàng
             $response = $this->orderService->handleCreateOrder($request);
-
-            // Tùy chỉnh response nếu thành công
             if ($response->getStatusCode() === 201) {
-                $data = $response->getData(true); // Lấy dữ liệu dưới dạng mảng
-
-                // Kiểm tra cấu trúc $data['data'] trước khi truy cập
+                $data = $response->getData(true);
                 if (!isset($data['data']) || !is_array($data['data'])) {
                     throw new \Exception('Dữ liệu đơn hàng từ service không hợp lệ.');
                 }
-
                 return response()->json($data, 201);
             }
-
-            // Trả về response từ handleCreateOrder cho các trường hợp lỗi
             return $response;
         } catch (\Exception $e) {
-            // Ghi log chi tiết với stack trace
             Log::error('Error in order store', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -71,7 +62,6 @@ class OrderController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -84,63 +74,31 @@ class OrderController extends Controller
             ], 400);
         }
     }
+
     public function orders(Request $request)
     {
-        // Gọi service để tìm kiếm và lọc đơn hàng
         $data = $this->orderService->searchOrders($request);
-
-        // Trả về view với dữ liệu từ service
         return view('client.user.index', $data);
     }
-    // public function retryPayment(Request $request)
-    // {
-    //     $orderId = $request->input('order_id');
-    //     // Log::info($orderId);
-    //     $order = Order::find($orderId);
-    //     if (!$order) {
-    //         return response()->json(['message' => 'Order not found'], 404);
-    //     }
-    //     $result =   $this->retryPaymentService->retryPayment($orderId);
-    //     return response()->json($result);
-    // }
 
-    public function cancel(Request $request)
-    {
-        $order = $this->orderService->cancelOrder($request);
-        event(new OrderNotification($order));
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đã hủy đơn hàng',
-
-        ]);
-    }
-    function  check()
-    {
-        $data = [
-            'title' => 'New Order',
-            'message' => "New Order, vui lòng kiểm tra và xác nhận!",
-            'from_user_id' => null,
-            'to_user_id' => null,
-            'type' => 'orders',
-            'status' => 'unread',
-            'goto_id' => null,
-        ];
-        $this->notificationService->sendPrivate($data);
-    }
-    public function detailOrder($id)
-    {
-        $order = Order::findOrFail($id);
-        $orderDetails = $order->detailsOrder();
-        $orderService = app(\App\Services\OrderService::class); // Hoặc inject qua constructor
-        return view('client.orders.detail', compact('order', 'orderDetails', 'orderService'));
-    }
     public function retryPayment(Request $request, $orderId)
     {
         try {
-            $this->orderService->retryPayment($orderId);
-            return redirect()->back()->with('success', 'Thanh toán lại thành công.');
+            $result = $this->retryPaymentService->retryPayment($orderId);
+            if ($result['success']) {
+                $data = $result['data'];
+                $redirectUrl = $data['redirectUrl'];
+                Log::info('url', $redirectUrl);
+                // return redirect()->back()->with('success', $result['message']);
+            }
+            return redirect()->back()->with('error', $result['message']);
         } catch (\Exception $e) {
+            Log::error('Error in retryPayment', [
+                'message' => $e->getMessage(),
+                'order_id' => $orderId,
+                'user_id' => Auth::id(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
@@ -156,12 +114,35 @@ class OrderController extends Controller
             ]);
 
             $reasonId = $request->input('reason_id');
-            $this->orderService->cancelOrder($orderId, $reasonId);
+            $order = $this->orderService->cancelOrder($orderId, $reasonId);
+            event(new OrderNotification($order));
             return redirect()->back()->with('success', 'Yêu cầu hủy đơn hàng đã được gửi.');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function check()
+    {
+        $data = [
+            'title' => 'New Order',
+            'message' => "New Order, vui lòng kiểm tra và xác nhận!",
+            'from_user_id' => null,
+            'to_user_id' => null,
+            'type' => 'orders',
+            'status' => 'unread',
+            'goto_id' => null,
+        ];
+        $this->notificationService->sendPrivate($data);
+    }
+
+    public function detailOrder($id)
+    {
+        $order = Order::findOrFail($id);
+        $orderDetails = $order->detailsOrder();
+        $orderService = app(\App\Services\OrderService::class);
+        return view('client.orders.detail', compact('order', 'orderDetails', 'orderService'));
     }
 }

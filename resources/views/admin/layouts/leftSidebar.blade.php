@@ -1,11 +1,8 @@
 <div class="leftside-menu">
-
     <!-- Brand Logo Light -->
-    <a href="{{route('admin.dashboard')}}" class="logo logo-light">
+    <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
         <span class="logo-lg">
-            {{-- <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo"> --}}
-
-            <img src=" {{ asset('admin/assets/images/logo-3.png') }}" alt="logo"
+            <img src="{{ asset('admin/assets/images/logo-3.png') }}" alt="logo"
                 style="width: 190px; height: auto; margin-top: 10px;">
         </span>
         <span class="logo-sm">
@@ -14,7 +11,7 @@
     </a>
 
     <!-- Brand Logo Dark -->
-    <a href="index.html" class="logo logo-dark">
+    <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
         <span class="logo-lg">
             <img src="{{ asset('admin/assets/images/logo-dark.png') }}" alt="dark logo">
         </span>
@@ -25,8 +22,8 @@
 
     <!-- Sidebar -left -->
     <div class="h-100" id="leftside-menu-container" data-simplebar>
-        <!--- Sidemenu -->
         <ul class="side-nav">
+
 
             @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('dashboard-access'))
             <li class="side-nav-item">
@@ -110,65 +107,27 @@
             
 
 
-            @if(auth()->check() && auth()->user()->role->name === 'admin')
+            <!-- Bán hàng -->
+            @if (auth()->check() &&
+                    auth()->user() &&
+                    (auth()->user()->hasPermission('view-orders') || auth()->user()->hasPermission('view-vouchers')))
                 <li class="side-nav-item">
-                    <a data-bs-toggle="collapse" href="#sidebarRoles" aria-expanded="false" aria-controls="sidebarRoles"
+                    <a data-bs-toggle="collapse" href="#sidebarSales" aria-expanded="false" aria-controls="sidebarSales"
                         class="side-nav-link">
-                        <i class="ri-shield-user-line"></i>
-                        <span> Phân quyền </span>
+                        <i class="ri-shopping-cart-line"></i>
+                        <span> Bán hàng </span>
                         <span class="menu-arrow"></span>
                     </a>
-                    <div class="collapse" id="sidebarRoles">
+                    <div class="collapse" id="sidebarSales">
                         <ul class="side-nav-second-level">
-                            <li>
-                                <a href="{{ route('admin.roles.index') }}">Danh sách </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            @endif
-
-            {{-- Permission check menu - Chỉ dành cho admin --}}
-             {{-- @if(auth()->check() && auth()->user() && auth()->user()->role->name == 'admin') --}}
-             <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarPermissions" aria-expanded="false"
-                    aria-controls="sidebarPermissions" class="side-nav-link">
-                    <i class="ri-key-2-line"></i>
-                    <span> Kiểm tra quyền </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarPermissions">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.permissions.check') }}">Kiểm tra quyền</a>
-                        </li>
-                    </ul>
-                </div>
-            </li> 
-           {{-- @endif --}}
-
-           @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-imports'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarBaseUI" aria-expanded="false" aria-controls="sidebarBaseUI"
-                    class="side-nav-link">
-                    <i class="ri-briefcase-line"></i>
-                    <span> Nhập hàng </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarBaseUI">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.imports.listPending') }}">Danh sách chờ xử lý</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.imports.listApproved') }}">Danh sách được phê duyệt</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.imports.listRejected') }}">Danh sách bị từ chối</a>
-                        </li>
-                        @if(auth()->user()->hasPermission('create-imports'))
+                            @if (auth()->user()->hasPermission('view-orders'))
                                 <li>
-                                    <a href="{{ route('admin.imports.getFormAdd') }}">Create</a>
+                                    <a href="{{ route('admin.orders.list') }}">Đơn hàng</a>
+                                </li>
+                            @endif
+                            @if (auth()->user()->hasPermission('view-vouchers'))
+                                <li>
+                                    <a href="{{ route('admin.vouchers.listVoucher') }}">Mã giảm giá</a>
                                 </li>
                             @endif
                         </ul>
@@ -176,45 +135,75 @@
                 </li>
             @endif
 
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-suppliers'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false"
-                    aria-controls="sidebarExtendedUI" class="side-nav-link">
-                    <i class="ri-building-line"></i>
-                    <span> Nhà cung cấp </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarExtendedUI">
-                    <ul class="side-nav-second-level">
-                    @if(auth()->user()->hasPermission('create-suppliers'))
-                        <li>
-                            <a href="{{ route('admin.suppliers.list') }}">Danh sách</a>
-                        </li>
-                    @endif
-                    </ul>
-                </div>
-            </li>
-            @endif
-
-            {{-- blogs --}}
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-blogs'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false"
-                    aria-controls="sidebarThirdLevel" class="side-nav-link">
-                    <i class="mdi mdi-post"></i>
-                    <span> Tin tức </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarThirdLevel">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.blogs.index') }}">Danh sách</a>
-                        </li>
-                        @if(auth()->user()->hasPermission('create-blogs'))
+            <!-- Sản phẩm -->
+            @if (auth()->check() &&
+                    auth()->user() &&
+                    (auth()->user()->hasPermission('view-products') ||
+                        auth()->user()->hasPermission('view-categories') ||
+                        auth()->user()->hasPermission('view-attributes') ||
+                        auth()->user()->hasPermission('view-brands')))
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarProducts" aria-expanded="false"
+                        aria-controls="sidebarProducts" class="side-nav-link">
+                        <i class="ri-box-3-line"></i>
+                        <span> Sản phẩm </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarProducts">
+                        <ul class="side-nav-second-level">
+                            @if (auth()->user()->hasPermission('view-products'))
                                 <li>
-                                    <a href="{{ route('admin.blogs.create') }}">Thêm mới</a>
+                                    <a href="{{ route('admin.products.list') }}">Danh sách sản phẩm</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.product_audits.list') }}">Kho</a>
                                 </li>
                             @endif
+                            @if (auth()->user()->hasPermission('view-categories'))
+                                <li>
+                                    <a href="{{ route('admin.categories.listCategory') }}">Danh mục</a>
+                                </li>
+                            @endif
+                            @if (auth()->user()->hasPermission('view-attributes'))
+                                <li>
+                                    <a href="{{ route('admin.attributes.index') }}">Thuộc tính</a>
+                                </li>
+                            @endif
+                            @if (auth()->user()->hasPermission('view-brands'))
+                                <li>
+                                    <a href="{{ route('admin.brands.index') }}">Thương hiệu</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                </li>
+            @endif
+
+            <!-- Nhập hàng -->
+            @if (auth()->check() &&
+                    auth()->user() &&
+                    (auth()->user()->hasPermission('view-imports') || auth()->user()->hasPermission('view-suppliers')))
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarImports" aria-expanded="false"
+                        aria-controls="sidebarImports" class="side-nav-link">
+                        <i class="ri-briefcase-line"></i>
+                        <span> Nhập hàng </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarImports">
+                        <ul class="side-nav-second-level">
+                            @if (auth()->user()->hasPermission('view-imports'))
+                                <li>
+                                    <a href="{{ route('admin.imports.listPending') }}">Chờ xử lý</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.imports.listApproved') }}">Được phê duyệt</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.imports.listRejected') }}">Bị từ chối</a>
+                                </li>
+                            @endif
+
                     </ul>
                 </div>
             </li>
@@ -258,151 +247,104 @@
                                     <a href="{{ route('admin.banner.create') }}">Thêm mới</a>
                                 </li>
                             @endif
-                    </ul>
-                </div>
-            </li>
+                        </ul>
+                    </div>
+                </li>
             @endif
 
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-products'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarIcons" aria-expanded="false" aria-controls="sidebarIcons"
-                    class="side-nav-link">
-                    <i class="ri-store-line"></i>
-                    <span> Kho </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarIcons">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.product_audits.list') }}">Danh sách</a>
-                        </li>
-
-                    </ul>
-                </div>
-            </li>
-            @endif
-
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-brands'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarCharts" aria-expanded="false"
-                    aria-controls="sidebarCharts" class="side-nav-link">
-                    <i class="ri-price-tag-3-line"></i>
-                    <span> Thương hiệu </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarCharts">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.brands.index') }}">Danh sách</a>
-                        </li>
-                        @if(auth()->user()->hasPermission('create-brands'))
+            <!-- Người dùng -->
+            @if (auth()->check() &&
+                    auth()->user() &&
+                    (auth()->user()->hasPermission('view-users') || auth()->user()->role->name === 'admin'))
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarUsers" aria-expanded="false" aria-controls="sidebarUsers"
+                        class="side-nav-link">
+                        <i class="ri-group-2-line"></i>
+                        <span> Người dùng </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarUsers">
+                        <ul class="side-nav-second-level">
+                            @if (auth()->user()->hasPermission('view-users'))
                                 <li>
-                                    <a href="{{ route('admin.brands.create') }}">Thêm mới</a>
+                                    <a href="{{ route('admin.users.index') }}">Danh sách admin</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.listemployee') }}">Danh sách nhân viên</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.listuser') }}">Danh sách người dùng</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.listtkkhoa') }}">Tài khoản khóa</a>
                                 </li>
                             @endif
-
-                    </ul>
-                </div>
-            </li>
-            @endif
-
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-categories'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarForms" aria-expanded="false" aria-controls="sidebarForms"
-                    class="side-nav-link">
-                    <i class="ri-survey-line"></i>
-                    <span> Danh mục </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarForms">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.categories.listCategory') }}">Danh sách</a>
-                        </li>
-
-                        @if(auth()->user()->hasPermission('create-categories'))
+                            @if (auth()->user()->role->name === 'admin')
                                 <li>
-                                    <a href="{{ route('admin.categories.addCategory') }}">Thêm mới</a>
+                                    <a href="{{ route('admin.roles.index') }}">Phân quyền</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.permissions.check') }}">Kiểm tra quyền</a>
                                 </li>
                             @endif
-                    </ul>
-                </div>
-            </li>
+                        </ul>
+                    </div>
+                </li>
             @endif
 
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-attributes'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarTables" aria-expanded="false"
-                    aria-controls="sidebarTables" class="side-nav-link">
-                    <i class="ri-table-line"></i>
-                    <span> Thuộc tính</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarTables">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{ route('admin.attributes.index') }}">Danh sách</a>
-                        </li>
-
-                        @if(auth()->user()->hasPermission('create-attributes'))
+            <!-- Nội dung -->
+            @if (auth()->check() &&
+                    auth()->user() &&
+                    (auth()->user()->hasPermission('view-blogs') || auth()->user()->hasPermission('view-contacts')))
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarContent" aria-expanded="false"
+                        aria-controls="sidebarContent" class="side-nav-link">
+                        <i class="mdi mdi-post"></i>
+                        <span> Nội dung </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarContent">
+                        <ul class="side-nav-second-level">
+                            @if (auth()->user()->hasPermission('view-blogs'))
                                 <li>
-                                    <a href="{{ route('admin.attributes.create') }}">Thêm mới</a>
+                                    <a href="{{ route('admin.blogs.index') }}">Tin tức</a>
                                 </li>
                             @endif
-                    </ul>
-                </div>
-            </li>
-            @endif
-
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-statistics'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarMaps" aria-expanded="false" aria-controls="sidebarMaps"
-                    class="side-nav-link">
-                    <i class="ri-line-chart-line"></i>
-                    <span>Thông kê </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarMaps">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{route('admin.statistics.productStatistics')}}">Thống kê sản phẩm</a>
-                        </li>
-                        <li>
-                            <a href="{{route('admin.statistics.dailyStatistics')}}">Thống kê đơn hàng</a>
-                        </li>
-                        <li>
-                            <a href="{{route('admin.users.charts')}}">Thống kê Người dùng</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            @endif
-
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-vouchers'))
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarMultiLevel" aria-expanded="false"
-                    aria-controls="sidebarMultiLevel" class="side-nav-link">
-                    <i class="ri-ticket-2-line"></i>
-                    <span> Mã giảm giá </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarMultiLevel">
-                    <ul class="side-nav-second-level">
-                        <li>
-                            <a href="{{route('admin.vouchers.listVoucher')}}">Danh sách</a>
-                        </li>
-                        @if(auth()->user()->hasPermission('create-vouchers'))
+                            @if (auth()->user()->hasPermission('view-contacts'))
                                 <li>
-                                    <a href="{{route('admin.vouchers.addVoucher')}}">Thêm mới</a>
+                                    <a href="{{ route('admin.contacts.index') }}">Liên hệ</a>
                                 </li>
                             @endif
-                    </ul>
-                </div>
-            </li>
+                        </ul>
+                    </div>
+                </li>
+            @endif
+
+            <!-- Thống kê -->
+            @if (auth()->check() && auth()->user() && auth()->user()->hasPermission('view-statistics'))
+                <li class="side-nav-item">
+                    <a data-bs-toggle="collapse" href="#sidebarStatistics" aria-expanded="false"
+                        aria-controls="sidebarStatistics" class="side-nav-link">
+                        <i class="ri-line-chart-line"></i>
+                        <span> Thống kê </span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="sidebarStatistics">
+                        <ul class="side-nav-second-level">
+                            <li>
+                                <a href="{{ route('admin.statistics.productStatistics') }}">Thống kê sản phẩm</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.statistics.dailyStatistics') }}">Thống kê đơn hàng</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.charts') }}">Thống kê người dùng</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
             @endif
         </ul>
-        <!--- End Sidemenu -->
-
         <div class="clearfix"></div>
     </div>
 </div>

@@ -108,7 +108,7 @@ Route::prefix('auth/')->name('auth.')->group(function () {
 
 Route::prefix('auth/')->name('auth.')->middleware(['auth', 'check.lock'])->group(function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::get('logout', 'logout')->name('logout');
+        Route::post('logout', 'logout')->name('logout');
         Route::get('getProfileAdmin', 'getProfileAdmin')->name('getProfileAdmin');
     });
 });

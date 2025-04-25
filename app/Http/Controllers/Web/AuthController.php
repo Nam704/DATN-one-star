@@ -158,9 +158,21 @@ class AuthController extends Controller
 
         Register::dispatch($user);
 
+        // Đăng nhập ngay lập tức
         Auth::login($user);
         $this->cartService->store($user->id);
-        return redirect()->route('auth.login')->with('success', 'Registration successful! Please login.');
+
+        // Chuyển hướng dựa trên vai trò người dùng
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->isUser()) {
+            return redirect()->route('client.home');
+        } elseif ($user->isEmployee()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        // Trường hợp mặc định nếu không xác định được vai trò
+        return redirect()->route('auth.login')->with('success', 'Registration successful. Please login.');
     }
     function  getFormForgotPassword()
     {

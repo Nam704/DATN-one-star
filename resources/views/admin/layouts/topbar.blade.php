@@ -66,7 +66,6 @@
 
 
 
-
             <li class="dropdown notification-list">
                 <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
                     aria-haspopup="false" aria-expanded="false">
@@ -81,7 +80,6 @@
                                 <h6 class="m-0 fs-16 fw-semibold"> Notification</h6>
                             </div>
 
-
                             <div class="col-auto">
                                 <a href="javascript: void(0);" class="text-dark text-decoration-underline">
                                     <small>Clear All</small>
@@ -93,7 +91,6 @@
                     <div id="notification_simplebar" style="max-height: 300px; " data-simplebar>
                         <!-- Danh sách thông báo -->
                     </div>
-
 
                     <!-- All -->
                     @if (auth()->user())
@@ -139,7 +136,6 @@
                 </div>
             </li>
 
-
             <li class="d-none d-sm-inline-block">
                 <a class="nav-link" data-bs-toggle="offcanvas" href="#theme-settings-offcanvas">
                     <i class="ri-settings-3-line fs-22"></i>
@@ -157,7 +153,6 @@
                     role="button" aria-haspopup="false" aria-expanded="false">
                     <span class="account-user-avatar">
 
-
                         {{-- <img src="{{ asset('admin/assets/images/users/avatar-1.jpg') }}" alt="user-image"
                             width="32" class="rounded-circle"> --}}
                         @if (Auth::check())
@@ -166,7 +161,6 @@
                                 : asset('storage/avatars/default-avatar.png') }}"
                                 alt="Profile Image" width="32" class="rounded-circle">
                         @endif
-
 
                     </span>
                     <span class="d-lg-block d-none">
@@ -213,10 +207,16 @@
                     </a> --}}
 
                     <!-- item-->
-                    <a href="{{ route('auth.logout') }}" class="dropdown-item">
+                    <a href="" class="dropdown-item">
                         <i class="ri-logout-box-line fs-18 align-middle me-1"></i>
-                        <span>Logout</span>
+                        <span
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</span>
+
                     </a>
+                    <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
+                        style="display: none;">
+                        @csrf
+                    </form>
                 </div>
             </li>
         </ul>
