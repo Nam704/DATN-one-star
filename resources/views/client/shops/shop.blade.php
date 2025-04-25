@@ -70,8 +70,18 @@
                 <div class="col-lg-9 col-md-12">
                     {{-- product-list.blade.php --}}
                     <div class="shop_banner">
-                        <img src="assets/img/bg/banner8.jpg" alt="">
-                    </div>
+                    <div class="slider_area owl-carousel">
+                    @foreach($banners as $banner)
+                    <!-- <div class="single_slider d-flex align-items-center" > -->
+                        <div class="slider_content" style="background-image: url('{{ Storage::url($banner->image) }}');">
+                            <h2>{{ $banner->title }}</h2>
+                            <h1>{{ $banner->description }}</h1>
+                            <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                        </div>
+                    <!-- </div> -->
+                    @endforeach
+                </div>
+                </div>
                     <div class="shop_title">
                         <h1>shop</h1>
                     </div>

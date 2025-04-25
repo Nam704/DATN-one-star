@@ -40,24 +40,12 @@ class StatisticController extends Controller
             $end_date = Carbon::parse($request->input('end_date'))->endOfDay();
             $countData = [
                 "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
-                "revenue" => $this->order
-                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
-                    ->where('order_statuses.name', 'Delivered')  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
-                    ->whereBetween('orders.created_at', [$start_date, $end_date])
-                    ->sum('orders.total'),
-
-                "order" => $this->order
-                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
-                    ->where('order_statuses.name', 'Delivered')  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
-                    ->whereBetween('orders.created_at', [$start_date, $end_date])
-                    ->count(),
-                "user" => $this->user->whereBetween('created_at', [$start_date, $end_date])->count()
 
             ];
             $topProduct = [
                 "least_sold_products" => $this->product->least_sold_products($start_date, $end_date),
             ];
-            $low_stock_products = $this->product->low_stock_products($start_date, $end_date);
+            $low_stock_products = $this->product->low_stock_products();
             $categories_with_revenue = $this->category->categories_with_revenue($start_date, $end_date);
             $top_view_products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
             $top_comment_products = [

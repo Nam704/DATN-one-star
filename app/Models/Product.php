@@ -306,23 +306,27 @@ public function top_view_product()
   
   
   public function low_stock_products()
-{
-  $query = DB::table('products')
-      ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
-      ->select(
-          'products.id',
-          'products.name',
-          'products.image_primary',
-          DB::raw('SUM(product_variants.quantity) as total_quantity')
-      )
-      ->where('products.status', '=', 'active')
-      ->where('product_variants.status', '=', 'active')
-      ->groupBy('products.id', 'products.name', 'products.image_primary')
-      ->havingRaw('SUM(product_variants.quantity) < 10')
-      ->orderBy('total_quantity', 'asc');
-
-  return $query->get(); 
-}
+  {
+      $query = DB::table('products')
+          ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+          ->select(
+              'products.id',
+              'products.name',
+              'products.image_primary',
+              DB::raw('COALESCE(SUM(product_variants.quantity), 0) as total_quantity')
+          )
+          ->where('products.status', '=', 'active')
+          ->where(function ($q) {
+              $q->where('product_variants.status', '=', 'active')
+                ->orWhereNull('product_variants.status');
+          })
+          ->groupBy('products.id', 'products.name', 'products.image_primary')
+          ->havingRaw('COALESCE(SUM(product_variants.quantity), 0) < 10')
+          ->orderBy('total_quantity', 'asc');
+  
+      return $query->get();
+  }
+  
 
 
     // sản phẩm đã bán

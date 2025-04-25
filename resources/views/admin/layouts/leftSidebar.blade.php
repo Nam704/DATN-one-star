@@ -56,7 +56,7 @@
             </li>
             @endif
 
-            @if(auth()->check() && auth()->user() && auth()->user()->hasPermission('view-users'))
+            @if(auth()->check() && auth()->user()->hasPermission('view-users'))
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarPagesAuth" aria-expanded="false"
                     aria-controls="sidebarPagesAuth" class="side-nav-link">
@@ -66,12 +66,14 @@
                 </a>
                 <div class="collapse" id="sidebarPagesAuth">
                     <ul class="side-nav-second-level">
+                    @if(auth()->user()->role->name === 'admin')
                         <li>
                             <a href="{{ route('admin.users.index') }}">Danh sách admin</a>
                         </li>
                         <li>
                             <a href="{{ route('admin.users.listemployee') }}">Danh sách nhân viên</a>
                         </li>
+                    @endif
                         <li>
                             <a href="{{ route('admin.users.listuser') }}">Danh sách người dùng</a>
                         </li>
@@ -232,11 +234,6 @@
                         <li>
                             <a href="{{ route('admin.contacts.index') }}">Danh sách</a>
                         </li>
-                        @if(auth()->user()->hasPermission('create-contacts'))
-                                <li>
-                                    <a href="{{ route('admin.contacts.create') }}">Thêm mới</a>
-                                </li>
-                            @endif
                     </ul>
                 </div>
             </li>

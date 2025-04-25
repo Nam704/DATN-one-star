@@ -11,13 +11,13 @@
                             @foreach ($categories as $item)
                             @if ($item->id_parent == 0)
                             <li class="menu_item_children categorie_list"><a href="{{ route('client.shop', ['categories' => [$item->id]]) }}">
-                                {{ $item->name }} ({{ $item->min_price }}) <i class="fa fa-angle-right"></i>
-                            </a>
+                                    {{ $item->name }} ({{ $item->min_price }}) <i class="fa fa-angle-right"></i>
+                                </a>
                                 <ul class="categories_mega_menu">
                                     @foreach ($item->children as $child)
                                     <li class="menu_item_children"><a href="{{ route('client.shop', ['categories' => [$child->id]]) }}">
-                                        {{ $child->name }}
-                                    </a>
+                                            {{ $child->name }}
+                                        </a>
 
                                     </li>
                                     @endforeach
@@ -33,32 +33,22 @@
                 </div>
             </div>
             <div class="col-lg-9 col-md-12">
-                <div class="slider_area owl-carousel">
-                    <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/slider1.jpg">
-                        <div class="slider_content">
-                            <h2>Top Quality</h2>
-                            <h1>Aftermarket Turbocharger Specialist</h1>
-                            <a class="button" href="{{route('client.shop')}}">shopping now</a>
-                        </div>
 
-                    </div>
-                    <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/slider2.jpg">
-                        <div class="slider_content">
-                            <h2>Height - Quality</h2>
-                            <h1>The Parts Of shock Absorbers & Brake Kit</h1>
-                            <a class="button" href="shop.html">shopping now</a>
+                <div class="slider_area owl-carousel">
+                    @foreach($banners as $banner)
+                    <!-- <div class="single_slider d-flex align-items-center" > -->
+                        <div class="slider_content" style="background-image: url('{{ Storage::url($banner->image) }}');">
+                            <h2>{{ $banner->title }}</h2>
+                            <h1>{{ $banner->description }}</h1>
+                            <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
                         </div>
-                    </div>
-                    <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/slider3.jpg">
-                        <div class="slider_content">
-                            <h2>Engine Oils</h2>
-                            <h1>Top Quality Oil For Every Vehicle</h1>
-                            <a class="button" href="shop.html">shopping now</a>
-                        </div>
-                    </div>
+                    <!-- </div> -->
+                    @endforeach
                 </div>
+
             </div>
         </div>
     </div>
 
 </section>
+

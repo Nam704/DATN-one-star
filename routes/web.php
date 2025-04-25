@@ -235,8 +235,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         // Contact
         Route::prefix('contacts')->controller(AppContactController::class)->name('contacts.')->group(function () {
             Route::get('/', 'index')->name('index')->middleware('permission:view-contacts');
-            Route::get('/create', 'create')->name('create')->middleware('permission:create-contacts');
-            Route::post('/', 'store')->name('store')->middleware('permission:create-contacts');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
             Route::get('/{id}/show', 'show')->name('show')->middleware('permission:view-contacts');
             Route::get('/{id}/edit', 'edit')->name('edit')->middleware('permission:edit-contacts');
             Route::put('/{id}', 'update')->name('update')->middleware('permission:edit-contacts');
@@ -283,8 +283,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
         // Users
         Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
-            Route::get('/', 'index')->name('index')->middleware('permission:view-users');
-            Route::get('listemployee', 'listemployee')->name('listemployee')->middleware('permission:view-users');
+            Route::get('/', 'index')->name('index')->middleware('role:admin');
+            Route::get('listemployee', 'listemployee')->name('listemployee')->middleware('role:admin');
             Route::get('listuser', 'listuser')->name('listuser')->middleware('permission:view-users');
             Route::get('listtkkhoa', 'listtkkhoa')->name('listtkkhoa')->middleware('permission:view-users');
             Route::get('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-users');
@@ -298,16 +298,16 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-users');
             Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-users');
-            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-users');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-users');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
 
             // Biểu đồ thống kê
-            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-users');
-            Route::get('/charts', 'charts')->name('charts')->middleware('permission:view-reports');
-            Route::get('/getUserStats', 'getUserStats')->name('getUserStats')->middleware('permission:view-users');
-            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats')->middleware('permission:view-users');
-            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders')->middleware('permission:view-users');
-            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats')->middleware('permission:view-users');
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user');
+            Route::get('/charts', 'charts')->name('charts');
+            Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
+            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
+            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
+            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats');
         });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
