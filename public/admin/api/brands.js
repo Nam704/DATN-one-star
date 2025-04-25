@@ -1,11 +1,13 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+document.addEventListener("DOMContentLoaded", function () {
+    const token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
 
-    // Delete brand functionality
+    // Chức năng xóa thương hiệu
     document.querySelectorAll('.delete-brand').forEach(button => {
         button.addEventListener('click', function() {
             const id = this.dataset.id;
-            if (confirm('Are you sure you want to delete this brand?')) {
+            if (confirm('Bạn có chắc chắn muốn xóa thương hiệu này không?')) {
                 fetch(`/admin/brands/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -17,57 +19,73 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Brand deleted successfully');
+                        alert(data.message); // Sử dụng message từ server
                         location.reload();
+                    } else {
+                        alert(data.message || 'Xóa thương hiệu thất bại');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to delete brand');
+                    console.error('Lỗi:', error);
+                    alert('Xóa thương hiệu thất bại');
                 });
             }
         });
     });
 
-    // Toggle status functionality  
-    document.querySelectorAll('.toggle-status').forEach(button => {
-        button.addEventListener('click', function() {
+    // Chức năng thay đổi trạng thái
+    document.querySelectorAll(".toggle-status").forEach((button) => {
+        button.addEventListener("click", function () {
             const id = this.dataset.id;
-            const row = this.closest('tr');
-            
+            const row = this.closest("tr");
+
             fetch(`/admin/brands/${id}/toggle-status`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": token,
                 },
-                credentials: 'same-origin'
+                credentials: "same-origin",
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const statusBadge = row.querySelector('.badge');
-                    const icon = this.querySelector('i');
-                    
-                    if (data.newStatus === 'active') {
-                        this.classList.replace('btn-danger', 'btn-success');
-                        statusBadge.classList.replace('bg-danger', 'bg-success');
-                        statusBadge.textContent = 'Active';
-                        icon.classList.replace('ri-lock-line', 'ri-lock-unlock-line');
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        const statusBadge = row.querySelector(".badge");
+                        const icon = this.querySelector("i");
+
+                        if (data.newStatus === "active") {
+                            this.classList.replace("btn-danger", "btn-success");
+                            statusBadge.classList.replace(
+                                "bg-danger",
+                                "bg-success"
+                            );
+                            statusBadge.textContent = "Hoạt động";
+                            icon.classList.replace(
+                                "ri-lock-line",
+                                "ri-lock-unlock-line"
+                            );
+                        } else {
+                            this.classList.replace("btn-success", "btn-danger");
+                            statusBadge.classList.replace(
+                                "bg-success",
+                                "bg-danger"
+                            );
+                            statusBadge.textContent = "Không hoạt động";
+                            icon.classList.replace(
+                                "ri-lock-unlock-line",
+                                "ri-lock-line"
+                            );
+                        }
+
+                        alert(data.message || "Cập nhật trạng thái thành công");
                     } else {
-                        this.classList.replace('btn-success', 'btn-danger');
-                        statusBadge.classList.replace('bg-success', 'bg-danger');
-                        statusBadge.textContent = 'Inactive';
-                        icon.classList.replace('ri-lock-unlock-line', 'ri-lock-line');
+                        alert(data.message || "Cập nhật trạng thái thất bại");
                     }
-                    
-                    alert('Status updated successfully');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to update status');
-            });
+                })
+                .catch((error) => {
+                    console.error("Lỗi:", error);
+                    alert("Cập nhật trạng thái thất bại");
+                });
         });
     });
 });

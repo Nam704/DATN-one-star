@@ -6,12 +6,16 @@
             <div class="col-12">
                 <div class="page-title-box">
                     <div class="page-title-right">
-                        <a href="{{ route('admin.brands.index') }}" class="btn btn-secondary">
-                            <i class="ri-arrow-left-line align-middle me-1"></i>
-                            Back to List
+                        <a href="{{ route('admin.brands.create') }}" class="btn btn-primary">
+                            <i class="ri-add-line align-middle me-1"></i>
+                            Add Brand
+                        </a>
+                        <a href="{{ route('admin.brands.trash') }}" class="btn btn-warning me-2">
+                            <i class="ri-delete-bin-line align-middle me-1"></i>
+                            Trash
                         </a>
                     </div>
-                    <h4 class="page-title">Create Brand</h4>
+                    <h4 class="page-title">Brands Management</h4>
                 </div>
             </div>
         </div>
@@ -20,42 +24,55 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('admin.brands.store') }}" method="POST">
-                            @csrf
-                            {{-- Name input --}}
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Name (Max 100 characters)</label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                    id="name" name="name" placeholder="Enter brand name"
-                                    value="{{ old('name') }}">
-
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            {{-- Status selection --}}
-                            @if (auth()->user()->isAdmin())
-                                <div class="mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                        <option value="" disabled selected>– Chọn trạng thái –</option>
-                                        <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active
-                                        </option>
-                                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
-                                        </option>
-                                    </select>
-                                    @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            @else
-                                <input type="hidden" name="status" value="inactive">
-                            @endif
-
-
-                            <button type="submit" class="btn btn-primary">Create Brand</button>
-                        </form>
+                        <table id="fixed-header-database"
+                            class="table table-striped dt-responsive nowrap table-striped w-100">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($brands as $brand)
+                                    <tr>
+                                        <td>{{ $brand->id }}</td>
+                                        <td>{{ $brand->name }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ $brand->status === 'active' ? 'success' : 'danger' }}">
+                                                {{ ucfirst($brand->status) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                @if (!$brand->deleted_at)
+                                                    <a href="{{ route('admin.brands.edit', $brand->id) }}"
+                                                        class="btn btn-sm btn-primary">
+                                                        <i class="ri-pencil-line"></i>
+                                                    </a>
+                                                    @if (Auth::user()->isAdmin())
+                                                        <button type="button"
+                                                            class="btn btn-sm {{ $brand->status === 'active' ? 'btn-success' : 'btn-danger' }} toggle-status"
+                                                            data-id="{{ $brand->id }}"
+                                                            data-status="{{ $brand->status }}">
+                                                            <i
+                                                                class="ri-lock{{ $brand->status === 'active' ? '-unlock' : '' }}-line"></i>
+                                                        </button>
+                                                    @endif
+                                                    @if (Auth::user()->isAdmin() || Auth::user()->isEmployee())
+                                                        <button type="button" class="btn btn-sm btn-danger delete-brand"
+                                                            data-id="{{ $brand->id }}">
+                                                            <i class="ri-delete-bin-line"></i>
+                                                        </button>
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -69,4 +86,5 @@
 
 @push('scripts')
     <x-admin.data-table-scripts />
+    <script src="{{ asset('admin/api/brands.js') }}"></script>
 @endpush
