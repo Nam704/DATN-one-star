@@ -250,12 +250,15 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('/create',  'create')->name('create')->middleware('permission:create-products'); // Hiển thị form thêm sản phẩm
             Route::post('/store',  'store')->name('store')->middleware('permission:create-products');
             Route::get('/',  'list')->name('list')->middleware('permission:view-products');
+            Route::get('trash',  'trash')->name('trash')->middleware('permission:view-products');
             Route::get('/edit/{id}',  'edit')->name('edit')->middleware('permission:edit-products');
             Route::post('/update/{id}',  'update')->name('update')->middleware('permission:edit-products');
             Route::get('get-creat-product-sample-file', 'exportCreateExcel')->name('exportCreateExcel')->middleware('permission:create-products');
             Route::post('import-product', 'import')->name('importProduct')->middleware('permission:create-products');
             Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-products');
             Route::get('stas/{id}', 'stas')->name('stas')->middleware('permission:view-products');
+            Route::delete('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-products');
+            Route::post('opensp/{id}', 'opensp')->name('opensp')->middleware('permission:edit-products');
             Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail')->middleware('permission:view-products');
         });
 

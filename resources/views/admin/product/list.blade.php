@@ -72,14 +72,17 @@
 
                                 <td>
                                     <a href="{{ route('admin.products.edit',$product->id) }}">
-                                        <button type="button" class="btn btn-secondary btn-warning">Edit</button>
+                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
                                     </a>
-                                    <button type="submit"
-                                        class="btn btn-secondary btn-danger delete-product">Lock</button>
+                                    <form action="{{ route('admin.products.lock', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có muốn ngừng bán sản phẩm này không?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-secondary btn-danger">Ngừng bán</button>
+                                    </form>
                                     <a href="{{ route('admin.products.detail',$product->id) }}"><button
-                                            class="btn btn-info">Detail</button></a>
+                                            class="btn btn-info">Chi tiết</button></a>
                                     <a href="{{ route('admin.products.stas',$product->id) }}"><button
-                                            class="btn btn-primary">stas</button></a>
+                                            class="btn btn-primary">Thống kê</button></a>
                                 </td>
                             </tr>
                             @endforeach

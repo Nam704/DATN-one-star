@@ -7,65 +7,57 @@
                         <ul class="nav" role="tablist" id="nav-tab">
                             <li>
                                 <a class="active" data-toggle="tab" href="#info" role="tab" aria-controls="info"
-                                    aria-selected="false">Description</a>
+                                    aria-selected="false">Mô tả</a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#sheet" role="tab" aria-controls="sheet"
-                                    aria-selected="false">Specification</a>
+                                    aria-selected="false">Thông số kỹ thuật</a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
-                                    aria-selected="false">Reviews (1)</a>
+                                    aria-selected="false">Bình luận đánh giá</a>
                             </li>
                         </ul>
                     </div>
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="info" role="tabpanel">
-                            <div class="product_info_content">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam fringilla augue nec est
-                                    tristique auctor. Donec non est at libero vulputate rutrum. Morbi ornare lectus quis
-                                    justo gravida semper. Nulla tellus mi, vulputate adipiscing cursus eu, suscipit id
-                                    nulla.</p>
-                                <p>Pellentesque aliquet, sem eget laoreet ultrices, ipsum metus feugiat sem, quis
-                                    fermentum turpis eros eget velit. Donec ac tempus ante. Fusce ultricies massa massa.
-                                    Fusce aliquam, purus eget sagittis vulputate, sapien libero hendrerit est, sed
-                                    commodo augue nisi non neque. Lorem ipsum dolor sit amet, consectetur adipiscing
-                                    elit. Sed tempor, lorem et placerat vestibulum, metus nisi posuere nisl, in accumsan
-                                    elit odio quis mi. Cras neque metus, consequat et blandit et, luctus a nunc. Etiam
-                                    gravida vehicula tellus, in imperdiet ligula euismod eget.</p>
+                            <div class="product_info_content text-center">
+                                {!! $product->description !!}
                             </div>
                         </div>
+
                         <div class="tab-pane fade" id="sheet" role="tabpanel">
                             <div class="product_d_table">
-                                <form action="#">
-                                    <table>
-                                        <tbody>
-                                            <tr>
-                                                <td class="first_child">Compositions</td>
-                                                <td>Polyester</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="first_child">Styles</td>
-                                                <td>Girly</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="first_child">Properties</td>
-                                                <td>Short Dress</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </form>
-                            </div>
-                            <div class="product_info_content">
-                                <p>Fashion has been creating well-designed collections since 2010. The brand offers
-                                    feminine designs delivering stylish separates and statement dresses which have since
-                                    evolved into a full ready-to-wear collection in which every item is a vital part of
-                                    a woman's wardrobe. The result? Cool, easy, chic looks with youthful elegance and
-                                    unmistakable signature style. All the beautiful pieces are made in Italy and
-                                    manufactured with the greatest attention. Now Fashion extends to a range of
-                                    accessories including shoes, hats, belts and more!</p>
+                                <table class="table table-bordered text-center align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="first_child">Thuộc tính</th>
+                                            <th>Thông tin</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($product->attributes as $attribute)
+                                        @php
+                                        $allValues = [];
+                                        foreach ($attribute['values'] as $variants) {
+                                        foreach ($variants as $value) {
+                                        if (!in_array($value, $allValues)) {
+                                        $allValues[] = $value;
+                                        }
+                                        }
+                                        }
+                                        @endphp
+                                        <tr>
+                                            <td class="first_child">{{ $attribute['name'] }}</td>
+                                            <td>{{ implode(', ', $allValues) }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+
+
 
                         <div class="tab-pane fade" id="reviews" role="tabpanel">
                             <div class="reviews_wrapper">
@@ -145,60 +137,60 @@
                 </div>
                 <div class="product_carousel product_column5 owl-carousel">
                     @if ($relatedProducts->count() > 0)
-                        @foreach ($relatedProducts as $related)
-                            <div class="single_product">
-                                <div class="product_thumb">
-                                    <a class="primary_img" href="{{ route('client.products.detail', $related->id) }}">
-                                        <img src="{{ asset($related->image_primary) }}" alt="{{ $related->name }}">
+                    @foreach ($relatedProducts as $related)
+                    <div class="single_product">
+                        <div class="product_thumb">
+                            <a class="primary_img" href="{{ route('client.products.detail', $related->id) }}">
+                                <img src="{{ asset($related->image_primary) }}" alt="{{ $related->name }}">
+                            </a>
+                            @if ($related->image_secondary)
+                            <a class="secondary_img"
+                                href="{{ route('client.products.detail', $related->id) }}">
+                                <img src="{{ asset($related->image_secondary) }}"
+                                    alt="{{ $related->name }}">
+                            </a>
+                            @endif
+                        </div>
+                        <div class="product_content">
+                            <div class="product_name">
+                                <h3>
+                                    <a href="{{ route('client.products.detail', $related->id) }}">
+                                        {{ $related->name }}
                                     </a>
-                                    @if ($related->image_secondary)
-                                        <a class="secondary_img"
-                                            href="{{ route('client.products.detail', $related->id) }}">
-                                            <img src="{{ asset($related->image_secondary) }}"
-                                                alt="{{ $related->name }}">
-                                        </a>
-                                    @endif
-                                </div>
-                                <div class="product_content">
-                                    <div class="product_name">
-                                        <h3>
-                                            <a href="{{ route('client.products.detail', $related->id) }}">
-                                                {{ $related->name }}
-                                            </a>
-                                        </h3>
-                                    </div>
-                                    <div class="product_ratings">
-                                        <ul>
-                                            @php
-                                                // Giả sử có hàm đánh giá hoặc trường rating từ 0 đến 5
-                                                $rating = $related->rating ?? 0;
-                                            @endphp
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <li>
-                                                    <a href="#">
-                                                        <i
-                                                            class="ion-ios-star{{ $i <= $rating ? '' : '-outline' }}"></i>
-                                                    </a>
-                                                </li>
-                                            @endfor
-                                        </ul>
-                                    </div>
-                                    <div class="product_footer d-flex align-items-center">
-                                        @php
-                                            $prices = $related->getPriceRange();
-                                        @endphp
-                                        <div class="price_box">
-                                            <span class="current_price">
-                                                ${{ number_format($prices->min_price, 0) }}
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                </div>
+                                </h3>
                             </div>
-                        @endforeach
+                            <div class="product_ratings">
+                                <ul>
+                                    @php
+                                    // Giả sử có hàm đánh giá hoặc trường rating từ 0 đến 5
+                                    $rating = $related->rating ?? 0;
+                                    @endphp
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <li>
+                                        <a href="#">
+                                            <i
+                                                class="ion-ios-star{{ $i <= $rating ? '' : '-outline' }}"></i>
+                                        </a>
+                                        </li>
+                                        @endfor
+                                </ul>
+                            </div>
+                            <div class="product_footer d-flex align-items-center">
+                                @php
+                                $prices = $related->getPriceRange();
+                                @endphp
+                                <div class="price_box">
+                                    <span class="current_price">
+                                        ${{ number_format($prices->min_price, 0) }}
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
                     @else
-                        <p>Không có sản phẩm liên quan.</p>
+                    <p>Không có sản phẩm liên quan.</p>
                     @endif
                 </div>
             </div>
