@@ -937,14 +937,52 @@ class StatisticController extends Controller
 
         // Top 10 người mua nhiều nhất trong ngày (chỉ tính các đơn Delivered)
         $topCustomers = DB::table('orders')
-            ->select('id_user', 'user_name', DB::raw('SUM(total) as total_purchase'))
-            ->whereDate('created_at', $date)
-            ->where('id_order_status', $deliveredStatusId)
-            ->groupBy('id_user', 'user_name')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
+            ->select(
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
+            )
+            ->whereDate('orders.created_at', $date)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(10)
             ->get();
+        // Truy vấn tổng hợp lý do hủy đơn
+        $cancelReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select(
+                'order_cancellation_reasons.id as reason_id',
+                'order_cancellation_reasons.reason',
+                DB::raw('COUNT(order_cancellations.id) as total')
+            )
+            ->whereDate('orders.created_at', $date)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.id', 'order_cancellation_reasons.reason')
+            ->get();
 
+        // Truy vấn chi tiết sản phẩm bị hủy theo từng lý do
+        $cancelledProducts = DB::table('order_cancellations')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('order_details', 'orders.id', '=', 'order_details.id_order') // Sửa lại ở đây
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select(
+                'order_cancellation_reasons.id as reason_id',
+                'products.name as product_name',
+                DB::raw('SUM(order_details.quantity) as quantity')
+            )
+            ->whereDate('orders.created_at', $date)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.id', 'products.name')
+            ->get();
+
+
+        // Nhóm dữ liệu chi tiết theo reason_id
+        $cancelledProductsGrouped = $cancelledProducts->groupBy('reason_id');
         return view('admin.statistics.order_statistics', compact(
             'date',
             'totalOrders',
@@ -955,7 +993,10 @@ class StatisticController extends Controller
             'totalRevenue',
             'statistics',
             'productsSales',
-            'topCustomers'
+            'topCustomers',
+            'cancelReasons',
+            'cancelledProducts',
+            'cancelledProductsGrouped'
         ));
     }
 
@@ -1066,14 +1107,15 @@ class StatisticController extends Controller
 
         // 6. Top 20 khách hàng mua nhiều nhất trong khoảng thời gian (theo tổng giá trị mua hàng, chỉ Delivered)
         $topCustomers = DB::table('orders')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
             ->select(
-                'id_user',
-                'user_name',
-                DB::raw('SUM(total) as total_purchase')
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
             )
-            ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
-            ->groupBy('id_user', 'user_name')
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
             ->orderByDesc('total_purchase')
             ->limit(20)
             ->get();
@@ -1091,6 +1133,35 @@ class StatisticController extends Controller
 
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+        // Truy vấn thống kê lý do hủy đơn
+        $canceledReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select(
+                'order_cancellation_reasons.reason',
+                DB::raw('COUNT(order_cancellations.id) as total')
+            )
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.reason')
+            ->get();
+
+        // Truy vấn TOP 20 sản phẩm bị hủy nhiều nhất
+        $cancelledProducts = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select(
+                'products.name as product_name',
+                DB::raw('SUM(order_details.quantity) as total_cancelled')
+            )
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_cancelled')
+            ->limit(20)
+            ->get();
+
         return view('admin.statistics.weekly_statistics', compact(
             'startDate',
             'endDate',
@@ -1105,6 +1176,8 @@ class StatisticController extends Controller
             'totalSuccessfulOrders',
             'topCustomers',
             'customerProductsGrouped',
+            'canceledReasons',
+            'cancelledProducts'
         ));
     }
 
@@ -1205,16 +1278,17 @@ class StatisticController extends Controller
             ->get();
 
 
-        // 6. Top 20 người mua nhiều nhất (chi tiết theo Delivered)
+        // 6. Top 50 người mua nhiều nhất (chi tiết theo Delivered)
         $topCustomers = DB::table('orders')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
             ->select(
-                'id_user',
-                'user_name',
-                DB::raw('SUM(total) as total_purchase')
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
             )
-            ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
-            ->groupBy('id_user', 'user_name')
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
             ->orderByDesc('total_purchase')
             ->limit(50)
             ->get();
@@ -1232,6 +1306,30 @@ class StatisticController extends Controller
 
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+        // 7. Dữ liệu cho biểu đồ "Lý Do Bị Hủy"
+        $canceledReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select('order_cancellation_reasons.reason', DB::raw('COUNT(order_cancellations.id) as total'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.reason')
+            ->orderByDesc('total')
+            ->get();
+
+        // 8. Top 50 sản phẩm bị hủy
+        $cancelledProducts = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_cancelled'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_cancelled')
+            ->limit(50)
+            ->get();
+
         return view('admin.statistics.monthly_statistics', compact(
             'selectedMonth',
             'startOfMonth',
@@ -1246,7 +1344,9 @@ class StatisticController extends Controller
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',
-            'customerProductsGrouped'
+            'customerProductsGrouped',
+            'canceledReasons',
+            'cancelledProducts'
         ));
     }
 
@@ -1341,7 +1441,7 @@ class StatisticController extends Controller
             $monthlyStatsWithComparison[] = $data;
         }
 
-        // 5. Top 10 sản phẩm bán chạy trong năm (chỉ tính đơn Delivered)
+        // 5. Top 50 sản phẩm bán chạy trong năm (chỉ tính đơn Delivered)
         $productsSales = DB::table('order_details')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
@@ -1351,17 +1451,22 @@ class StatisticController extends Controller
             ->where('orders.id_order_status', $deliveredStatusId)
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
-            ->limit(10)
+            ->limit(50)
             ->get();
 
-        // 6. Top 20 người mua nhiều nhất trong năm (chỉ tính đơn Delivered)
+        // 6. Top 50 người mua nhiều nhất trong năm (chỉ tính đơn Delivered)
         $topCustomers = DB::table('orders')
-            ->select('id_user', 'user_name', DB::raw('SUM(total) as total_purchase'))
-            ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
-            ->groupBy('id_user', 'user_name')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
+            ->select(
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
+            )
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
             ->orderByDesc('total_purchase')
-            ->limit(20)
+            ->limit(50)
             ->get();
 
         // 7. Chi tiết sản phẩm mỗi khách hàng đã mua (chỉ tính các đơn Delivered)
@@ -1376,6 +1481,30 @@ class StatisticController extends Controller
             ->get();
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+        // 8. Lấy dữ liệu "Lý Do Bị Hủy" (sử dụng bảng order_cancellations và order_cancellation_reasons)
+        $canceledReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select('order_cancellation_reasons.reason', DB::raw('COUNT(order_cancellations.id) as total'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.reason')
+            ->orderByDesc('total')
+            ->get();
+
+        // 9. Top 50 Sản Phẩm Bị Hủy
+        $cancelledProducts = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_cancelled'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_cancelled')
+            ->limit(50)
+            ->get();
+
         return view('admin.statistics.yearly_statistics', compact(
             'selectedYear',
             'startOfYear',
@@ -1389,7 +1518,9 @@ class StatisticController extends Controller
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',
-            'customerProductsGrouped'
+            'customerProductsGrouped',
+            'canceledReasons',
+            'cancelledProducts'
         ));
     }
 }
