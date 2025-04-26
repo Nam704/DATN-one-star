@@ -36,24 +36,17 @@ class StatisticController extends Controller
     public function productStatistics(Request $request)
     {
         if (auth()->check()) {
-            $startDate = $request->input('start_date', now()->startOfDay()->toDateString());
-            $endDate = $request->input('end_date', now()->endOfDay()->toDateString());
+            $start_date = Carbon::parse($request->input('start_date'))->startOfDay();
+            $end_date = Carbon::parse($request->input('end_date'))->endOfDay();
             $countData = [
-                "product" => $this->product->whereBetween('created_at', [$startDate, $endDate])->count(),
-                "revenue" => $this->order->where('id_order_status', '4')
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->sum('total'),
-                "order" => $this->order->where('id_order_status', '4')
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->count(),
-                "user" => $this->user->whereBetween('created_at', [$startDate, $endDate])->count()
+                "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
 
             ];
             $topProduct = [
-                "least_sold_products" => $this->product->least_sold_products($startDate, $endDate),
+                "least_sold_products" => $this->product->least_sold_products($start_date, $end_date),
             ];
-            $low_stock_products = $this->product->low_stock_products($startDate, $endDate);
-            $categories_with_revenue = $this->category->categories_with_revenue();
+            $low_stock_products = $this->product->low_stock_products();
+            $categories_with_revenue = $this->category->categories_with_revenue($start_date, $end_date);
             $top_view_products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
             $top_comment_products = [
                 [
@@ -79,8 +72,8 @@ class StatisticController extends Controller
                 'categories_with_revenue',
                 'top_view_products',
                 'top_comment_products',
-                'startDate',
-                'endDate'
+                'start_date',
+                'end_date'
             ));
         } else {
             return redirect()->route('admin.statistics.productStatistics');
@@ -366,8 +359,12 @@ class StatisticController extends Controller
         $end_date   = $request->input('end_date');
 
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay()->toDateString();
-        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
+        $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
+        $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
+
+        // Đảm bảo cả hai ngày đều là đối tượng Carbon
+        $start_date = Carbon::parse($start_date)->startOfDay();
+        $end_date   = Carbon::parse($end_date)->endOfDay();
 
         // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
         $products = $this->product->least_sold_products($start_date, $end_date);
@@ -474,16 +471,8 @@ class StatisticController extends Controller
     }
     public function exportLowStockProducts(Request $request)
     {
-        // Lấy tham số ngày bắt đầu và kết thúc từ request
-        $start_date = $request->input('start_date');
-        $end_date   = $request->input('end_date');
-
-        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay()->toDateString();
-        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
-
-        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
-        $products = $this->product->low_stock_products($start_date, $end_date);
+        
+        $products = $this->product->low_stock_products();
 
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new Spreadsheet();
@@ -496,18 +485,6 @@ class StatisticController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(
             \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
         );
-
-        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
-        $displayStart = $start_date ? $start_date : 'Chưa chọn';
-        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
-        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
-        $sheet->mergeCells('A2:C2');
-        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
-        $sheet->mergeCells('D2:E2');
-        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A2:E2')->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Dòng 3 để tạo khoảng cách
         $sheet->mergeCells('A3:E3');
@@ -575,7 +552,7 @@ class StatisticController extends Controller
 
         // 5. Xuất file Excel
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $fileName = 'low_stock_products_' . $start_date . '_to_' . $end_date . '.xlsx';
+        $fileName = 'low_stock_products.xlsx';
 
         return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
@@ -592,18 +569,22 @@ class StatisticController extends Controller
         $end_date   = $request->input('end_date');
 
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay()->toDateString();
-        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
+        $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
+        $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
+
+        // Đảm bảo cả hai ngày đều là đối tượng Carbon
+        $start_date = Carbon::parse($start_date)->startOfDay();
+        $end_date   = Carbon::parse($end_date)->endOfDay();
 
         // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
-        $products = $this->product->least_sold_products($start_date, $end_date);
+        $categories = $this->category->categories_with_revenue($start_date, $end_date);
 
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // 1. Tiêu đề báo cáo (dòng 1)
-        $sheet->setCellValue('A1', 'Danh mục sản phẩm');
+        $sheet->setCellValue('A1', 'Sản phẩm theo danh mục');
         $sheet->mergeCells('A1:E1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(
@@ -627,9 +608,9 @@ class StatisticController extends Controller
 
         // 3. Header bảng (dòng 4)
         $sheet->setCellValue('A4', 'STT');
-        $sheet->setCellValue('B4', 'Tên Sản Phẩm');
-        $sheet->setCellValue('C4', 'Ảnh ');
-        $sheet->setCellValue('D4', 'Tổng Số Lượng');
+        $sheet->setCellValue('B4', 'Tên Danh Mục');
+        $sheet->setCellValue('C4', 'Tổng Sản Phẩm');
+        $sheet->setCellValue('D4', 'Tổng Doanh thu');
         $headerRange = 'A4:E4';
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
@@ -644,7 +625,7 @@ class StatisticController extends Controller
 
         // 4. Ghi dữ liệu (từ dòng 5)
         $row = 5;
-        if ($products->isEmpty()) {
+        if ($categories->isEmpty()) {
             $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
             $sheet->mergeCells('A5:E5');
             $sheet->getStyle('A5')->getAlignment()
@@ -652,30 +633,12 @@ class StatisticController extends Controller
                 ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         } else {
             $stt = 1;
-            foreach ($products as $product) {
+            foreach ($categories as $category) {
                 // STT và Tên sản phẩm
                 $sheet->setCellValue('A' . $row, $stt++);
-                $sheet->setCellValue('B' . $row, $product->name);
-                $sheet->setCellValue('D' . $row, $product->total_sold);
-
-                // Chèn ảnh vào cột C
-                $imagePath = public_path($product->image_primary);
-                if (file_exists($imagePath)) {
-                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                    $drawing->setPath($imagePath);
-                    $drawing->setName('Product Image');
-                    $drawing->setDescription('Product Image');
-                    $drawing->setCoordinates('C' . $row);
-                    $drawing->setWidth(50);
-                    $drawing->setHeight(50);
-                    // Điều chỉnh offset để ảnh nằm gần giữa ô
-                    $drawing->setOffsetX(10);
-                    $drawing->setOffsetY(5);
-                    $drawing->setWorksheet($sheet);
-                    $sheet->getRowDimension($row)->setRowHeight(60);
-                } else {
-                    $sheet->setCellValue('C' . $row, 'No image');
-                }
+                $sheet->setCellValue('B' . $row, $category->name);
+                $sheet->setCellValue('C' . $row, $category->total_products);
+                $sheet->setCellValue('D' . $row, number_format($category->total_revenue, 0, ',', '.') . ' VND');
 
                 // Căn giữa nội dung của hàng
                 $sheet->getStyle("A{$row}:D{$row}")

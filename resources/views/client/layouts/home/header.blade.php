@@ -122,18 +122,13 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-12">
-                    <div class="main_menu header_position">
+                    <div class="main_menu header_position text-center">
                         <nav>
                             <ul>
-                                <li><a href="index.html">home<i class="fa fa-angle-down"></i></a>
-                                    <ul class="sub_menu">
-                                        <li><a href="index.html">Home 1</a></li>
-                                        <li class="home7new"><a href="index-7.html">Home 7</a><span>new</span>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a href="{{ route('client.blog.index') }}">Blogs</a></li>
-                                <li><a href="{{ route('client.contact.index') }}">Contact Us</a></li>
+                                <li><a href="{{route('client.home')}}">Trang chủ</a></li>
+                                <li><a href="{{ route('client.shop') }}">Sản phẩm</a></li>
+                                <li><a href="{{ route('client.blog.index') }}">Tin tức</a></li>
+                                <li><a href="{{ route('client.contact.index') }}">Liên hệ với chúng tôi</a></li>
                             </ul>
                         </nav>
                     </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Banner;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Import_detail;
@@ -25,6 +26,18 @@ class ShopController extends Controller
 
         // Initialize the product query
         $productsQuery = Product::where('status', 'active');
+
+        $banners = Banner::where('status', 1)
+        ->where(function ($query) {
+            $query->whereNull('start_date')
+                  ->orWhere('start_date', '<=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('end_date')
+                  ->orWhere('end_date', '>=', now());
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         // Apply category filters if present
         // Lấy tham số 'categories' và ép thành mảng
@@ -75,7 +88,7 @@ class ShopController extends Controller
         });
 
         // Return view with data
-        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice'));
+        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice','banners'));
     }
 
     public function filter(Request $request)
