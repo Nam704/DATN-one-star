@@ -27,11 +27,22 @@ class DashboardController extends Controller
     public function dashboard()
     {
         if (auth()->check()) {
+            $start_date = Carbon::today()->startOfDay();
+            $end_date = Carbon::today()->endOfDay();
             $countData = [
-                "product" => $this->product->count(),
-                "revenue" => $this->order->where('id_order_status', '4')->sum('total'),
-                "order" => $this->order->where('id_order_status', '4')->count(),
-                "user" => $this->user->count()
+                "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
+                "revenue" => $this->order
+                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+                    ->where('order_statuses.name', 'Delivered')  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
+                    ->whereBetween('orders.created_at', [$start_date, $end_date])
+                    ->sum('orders.total'),
+
+                "order" => $this->order
+                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+                    ->where('order_statuses.name', 'Delivered')  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
+                    ->whereBetween('orders.created_at', [$start_date, $end_date])
+                    ->count(),
+                "user" => $this->user->whereBetween('created_at', [$start_date, $end_date])->count()
             ];
             return view('admin.index', compact(
                 'countData',

@@ -152,13 +152,15 @@
                     </a>
                     <div class="collapse" id="sidebarUsers">
                         <ul class="side-nav-second-level">
-                            @if (auth()->user()->hasPermission('view-users'))
+                               @if(auth()->user()->role->name === 'admin')
                                 <li>
                                     <a href="{{ route('admin.users.index') }}">Danh sách admin</a>
                                 </li>
                                 <li>
                                     <a href="{{ route('admin.users.listemployee') }}">Danh sách nhân viên</a>
                                 </li>
+                                @endif
+                                @if (auth()->user()->hasPermission('view-users'))
                                 <li>
                                     <a href="{{ route('admin.users.listuser') }}">Danh sách người dùng</a>
                                 </li>
@@ -182,7 +184,7 @@
             <!-- Nội dung -->
             @if (auth()->check() &&
                     auth()->user() &&
-                    (auth()->user()->hasPermission('view-blogs') || auth()->user()->hasPermission('view-contacts')))
+                    (auth()->user()->hasPermission('view-blogs') || auth()->user()->hasPermission('view-contacts') || auth()->user()->hasPermission('view-banners') ))
                 <li class="side-nav-item">
                     <a data-bs-toggle="collapse" href="#sidebarContent" aria-expanded="false"
                         aria-controls="sidebarContent" class="side-nav-link">
@@ -200,6 +202,11 @@
                             @if (auth()->user()->hasPermission('view-contacts'))
                                 <li>
                                     <a href="{{ route('admin.contacts.index') }}">Liên hệ</a>
+                                </li>
+                            @endif
+                            @if (auth()->user()->hasPermission('view-banners'))
+                                <li>
+                                    <a href="{{ route('admin.banner.list') }}">Banner</a>
                                 </li>
                             @endif
                         </ul>

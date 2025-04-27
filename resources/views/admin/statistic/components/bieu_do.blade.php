@@ -3,7 +3,7 @@
     <div class="col-xl-6"> 
         <div class="card shadow-lg border-0">
             <div class="card-header">
-                <h5 class="header-title mb-0">Top sale product</h5>
+                <h5 class="header-title mb-0">Top 10 sản phẩm bán chạy</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -12,16 +12,15 @@
                         <input type="date" id="toDate" class="form-control">
                     </div>
                     <div class="col">
-                        <button id="filterBtn" class="btn btn-success">Apply</button>
+                        <button id="filterBtn" class="btn btn-success">Lọc</button>
                     </div>
                     <div class="col">
-                        <button id="resetBtn" class="btn btn-success">Clear</button>
+                        <button id="resetBtn" class="btn btn-success">Xóa</button>
                     </div>
-                    <div class="col">
-                    <a id="exportLinkTop" href="{{ route('admin.statistics.exportTopSaleProducts') }}" class="btn btn-primary"><i class="ri-file-excel-2-line"></i>Export Excel</a>
-                    </div>
-
                 </div>
+                 <div class="col">
+                    <a id="exportLinkTop" href="{{ route('admin.statistics.exportTopSaleProducts') }}" class="btn btn-primary" style="margin-top: 10px;"><i class="ri-file-excel-2-line"></i>Xuất Excel</a>
+                    </div>
                 <div>
                     <canvas id="myChartTopProduct"></canvas>
                 </div>
@@ -33,7 +32,7 @@
     <div class="col-xl-6">
         <div class="card shadow-lg border-0">
             <div class="card-header">
-                <h5 class="header-title mb-0">Product Sold</h5>
+                <h5 class="header-title mb-0">Sản phẩm đã bán</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -42,16 +41,15 @@
                         <input type="date" id="toDateV2" class="form-control">
                     </div>
                     <div class="col">
-                        <button id="filterBtnV2" class="btn btn-success">Apply</button>
+                        <button id="filterBtnV2" class="btn btn-success">Lọc</button>
                     </div>
                     <div class="col">
-                        <button id="resetBtnV2" class="btn btn-success">Clear</button>
+                        <button id="resetBtnV2" class="btn btn-success">Xóa</button>
                     </div>
-                    <div class="col">
-                    <a id="exportLinkSold" href="{{ route('admin.statistics.exportproductSold') }}" class="btn btn-primary"><i class="ri-file-excel-2-line"></i>Export Excel</a>
-                    </div>
-
                 </div>
+                <div class="col">
+                    <a id="exportLinkSold" href="{{ route('admin.statistics.exportproductSold') }}" class="btn btn-primary" style="margin-top: 10px;"><i class="ri-file-excel-2-line"></i>Xuất Excel</a>
+                    </div>
                 <div>
                     <canvas id="myChartProductSold"></canvas>
                 </div>

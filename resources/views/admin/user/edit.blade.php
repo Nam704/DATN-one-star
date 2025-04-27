@@ -143,7 +143,7 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label class="font-weight-bold">Chọn quyền hạn:</label>
-                            <select class="form-control" id="id_role" name="id_role">
+                            <select class="form-control" id="id_role" name="id_role" disabled>
                                 @foreach ($roles as $role)
                                 <option value="{{ $role->id }}" {{ old('id_role', $user->id_role) == $role->id ? 'selected' : '' }}>
                                     {{ $role->name }}

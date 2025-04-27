@@ -40,6 +40,7 @@ use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 use App\Http\Controllers\Web\AddressController;
+use App\Http\Controllers\Web\BannerController;
 use App\Http\Controllers\Web\ChatController;
 use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\ProductDashboardController;
@@ -173,9 +174,9 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         );
         Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
             Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics')->middleware('permission:view-statistics');
-            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics')->middleware('permission:view-statistics');
-            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics')->middleware('permission:view-statistics');
-            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics')->middleware('permission:view-statistics');
+            Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics')->middleware('role:admin');
+            Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics')->middleware('role:admin');
+            Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics')->middleware('role:admin');
             Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics')->middleware('permission:view-statistics');
         });
 
@@ -233,6 +234,16 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-blogs');
         });
 
+        Route::prefix('banner')->name('banner.')->controller(BannerController::class)->group(function () {
+            Route::get('list',  'list')->name('list')->middleware('permission:view-banners');
+            Route::get('create',  'create')->name('create')->middleware('permission:create-banners');
+            Route::post('store',  'store')->name('store')->middleware('permission:create-banners');
+            Route::get('edit/{id}',  'edit')->name('edit')->middleware('permission:edit-banners');
+            Route::put('update/{id}',  'update')->name('update')->middleware('permission:edit-banners');
+            Route::delete('delete/{id}',  'delete')->name('delete')->middleware('permission:delete-banners');
+            Route::get('detail/{id}',  'detail')->name('detail')->middleware('permission:view-banners');
+        });
+
         // Contact
         Route::prefix('contacts')->controller(AppContactController::class)->name('contacts.')->group(function () {
             Route::get('/', 'index')->name('index')->middleware('permission:view-contacts');
@@ -268,10 +279,10 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('wards/{districtId}', 'getWards')->name('getWards');
         });
 
-        // Users
-        Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
-            Route::get('/', 'index')->name('index')->middleware('permission:view-users');
-            Route::get('listemployee', 'listemployee')->name('listemployee')->middleware('permission:view-users');
+         // Users
+         Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('role:admin');
+            Route::get('listemployee', 'listemployee')->name('listemployee')->middleware('role:admin');
             Route::get('listuser', 'listuser')->name('listuser')->middleware('permission:view-users');
             Route::get('listtkkhoa', 'listtkkhoa')->name('listtkkhoa')->middleware('permission:view-users');
             Route::get('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-users');
@@ -285,16 +296,16 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-users');
             Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-users');
-            Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-users');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-users');
+            Route::post('/{id}/restore', 'restore')->name('restore');
+            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
 
             // Biểu đồ thống kê
-            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-users');
-            Route::get('/charts', 'charts')->name('charts')->middleware('permission:view-reports');
-            Route::get('/getUserStats', 'getUserStats')->name('getUserStats')->middleware('permission:view-users');
-            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats')->middleware('permission:view-users');
-            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders')->middleware('permission:view-users');
-            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats')->middleware('permission:view-users');
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-statistics');
+            Route::get('/charts', 'charts')->name('charts')->middleware('permission:view-statistics');
+            Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
+            Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
+            Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');
+            Route::get('/order-status-stats/{id}', 'getOrderStatusStats')->name('getOrderStatusStats');
         });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(
