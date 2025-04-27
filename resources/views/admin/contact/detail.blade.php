@@ -8,10 +8,10 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.contacts.index') }}" class="btn btn-dark">
                             <i class="mdi mdi-arrow-left-thin"></i>
-                            Back
+                            Quay lại
                         </a>
                     </div>
-                    <h4 class="page-title">Contact Management</h4>
+                    <h4 class="page-title">Chi tiết liên hệ</h4>
                 </div>
             </div>
         </div>
@@ -26,7 +26,6 @@
                         </p>
                         <p>Nội dung : </p>
                         <p>{{ $contact->message }}</p>
-
                         <p>Phản hồi : </p>
                         <p>{{ $contact->reply }}</p>
 

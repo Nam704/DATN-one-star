@@ -54,10 +54,11 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $request->validate(
             [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255||unique:categories,name,' . $id,
             ],
             [
                 'name.required' => 'Tên danh mục không được trống',
+                'name.unique' => 'Tên danh mục không được trùngg',
                 'name.max' => 'Tên danh mục không quá 255 ký tự',
             ]
         );

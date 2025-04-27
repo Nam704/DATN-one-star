@@ -8,10 +8,10 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.blogs.index') }}" class="btn btn-dark">
                             <i class="ri-arrow-left-line align-middle me-1"></i>
-                            Back
+                            Quay lại
                         </a>
                     </div>
-                    <h4 class="page-title">Trash Blogs</h4>
+                    <h4 class="page-title">Danh sách xóa</h4>
                 </div>
             </div>
         </div>
@@ -52,11 +52,12 @@
                                 @endforeach
                             </tbody>
                             <tfoot>
-                                <tr>
+                            <tr>
                                     <th>STT</th>
                                     <th>Danh mục</th>
                                     <th>Tiêu đề</th>
-                                    <th>Tiêu đề</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Ngày xóa</th>
                                     <th>Hành động</th>
                                 </tr>
                             </tfoot>

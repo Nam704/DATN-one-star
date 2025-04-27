@@ -9,7 +9,7 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.contacts.index') }}" class="btn btn-dark">
                             <i class="mdi mdi-arrow-left-thin"></i>
-                            Back
+                            Quay lại
                         </a>
                     </div>
                     <h4 class="page-title">Trả lời liên hệ</h4>

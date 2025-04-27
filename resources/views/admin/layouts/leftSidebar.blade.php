@@ -82,6 +82,9 @@
                                     <a href="{{ route('admin.products.list') }}">Danh sách sản phẩm</a>
                                 </li>
                                 <li>
+                                    <a href="{{ route('admin.products.trash') }}">Sản phẩm ngừng bán</a>
+                                </li>
+                                <li>
                                     <a href="{{ route('admin.product_audits.list') }}">Kho</a>
                                 </li>
                             @endif

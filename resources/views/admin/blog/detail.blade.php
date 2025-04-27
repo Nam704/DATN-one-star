@@ -8,10 +8,10 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.blogs.index') }}" class="btn btn-dark">
                             <i class="mdi mdi-arrow-left-thin"></i>
-                            Back
+                            Quay lại
                         </a>
                     </div>
-                    <h4 class="page-title">Blog Management</h4>
+                    <h4 class="page-title">Chi tiết bài viết</h4>
                 </div>
             </div>
         </div>
