@@ -18,7 +18,12 @@ class ShopController extends Controller
         $categories = Category::where(function ($query) {
             $query->whereNull('id_parent')
                 ->orWhere('id_parent', 0);
-        })->with('children')->get();
+        })
+            ->where('status', 'active')
+            ->with(['children' => function ($q) {
+                $q->where('status', 'active');
+            }])
+            ->get();
         $brands = Brand::where('status', 'active')->get();
 
         // Determine the maximum price
@@ -28,16 +33,16 @@ class ShopController extends Controller
         $productsQuery = Product::where('status', 'active');
 
         $banners = Banner::where('status', 1)
-        ->where(function ($query) {
-            $query->whereNull('start_date')
-                  ->orWhere('start_date', '<=', now());
-        })
-        ->where(function ($query) {
-            $query->whereNull('end_date')
-                  ->orWhere('end_date', '>=', now());
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->where(function ($query) {
+                $query->whereNull('start_date')
+                    ->orWhere('start_date', '<=', now());
+            })
+            ->where(function ($query) {
+                $query->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now());
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Apply category filters if present
         // Lấy tham số 'categories' và ép thành mảng
@@ -95,7 +100,7 @@ class ShopController extends Controller
         });
 
         // Return view with data
-        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice','banners'));
+        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice', 'banners'));
     }
 
     public function filter(Request $request)
