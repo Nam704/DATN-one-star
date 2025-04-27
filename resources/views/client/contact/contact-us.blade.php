@@ -9,7 +9,9 @@
                 <div class="col-12">
                     <div class="breadcrumb_content">
                         <ul>
+
                             <li><a href="{{route('client.home')}}">Trang chủ</a></li>
+
                             <li>Liên hệ</li>
                         </ul>
                     </div>

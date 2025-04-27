@@ -31,12 +31,12 @@ class PermissionSeeder extends Seeder
         $modules = [
             'users',
             'statistics',
+            'banners',
             'products',
             'categories',
             'orders',
             'blogs',
             'vouchers',
-            'reports',
             'suppliers',
             'imports',
             'attributes',
@@ -62,7 +62,28 @@ class PermissionSeeder extends Seeder
                     'description' => 'Can view statistics',
                     'module' => $module,
                 ]);
-            } else {
+            }else if ($module === 'orders') {
+                // chỉ tạo quyền view và edit cho orders
+                foreach (['view', 'edit','delete'] as $action) {
+                    Permission::create([
+                        'name' => "$action-$module",
+                        'display_name' => ucfirst($action) . ' ' . ucfirst($module),
+                        'description' => 'Can ' . $action . ' ' . $module,
+                        'module' => $module,
+                    ]);
+                }
+            } else if ($module === 'contacts') {
+                // chỉ tạo quyền view và edit cho liên hệ
+                foreach (['view', 'edit','delete'] as $action) {
+                    Permission::create([
+                        'name' => "$action-$module",
+                        'display_name' => ucfirst($action) . ' ' . ucfirst($module),
+                        'description' => 'Can ' . $action . ' ' . $module,
+                        'module' => $module,
+                    ]);
+                }
+            } 
+            else {
                 foreach ($actions as $action) {
                     Permission::create([
                         'name' => "$action-$module",
@@ -108,7 +129,6 @@ class PermissionSeeder extends Seeder
         if ($employeeRole) {
             $employeePermissions = Permission::whereIn('name', [
                 'view-products',
-                'view-statistics',
                 'view-orders',
                 'view-categories',
                 'view-suppliers',
@@ -116,7 +136,7 @@ class PermissionSeeder extends Seeder
                 'view-attributes',
                 'view-brands',
                 'dashboard-access',
-                'view-reports',
+                'view-banners'
             ])->get();
 
             $employeeRole->permissions()->attach($employeePermissions->pluck('id')->toArray());

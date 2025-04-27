@@ -3,7 +3,6 @@
 @section('title', 'Tin công nghệ')
 
 @section('content')
-
 <style>
     .card img {
         transition: transform 0.4s ease;
@@ -29,6 +28,7 @@
                         <li><a href="{{ route('client.home') }}">Trang chủ</a></li>
                         <li>Tin tức</li>
                     </ul>
+
                 </div>
             </div>
         </div>
@@ -53,6 +53,7 @@
                             @endforeach
                         </ul>
                     </div>
+
 
                     <!-- Tag -->
                     <div class="widget_list widget_tag mb-4">
@@ -79,6 +80,7 @@
                                 <small class="text-muted">{{ $recent_blog->published_at }}</small>
                             </div>
                         </div>
+
                         @endforeach
                     </div>
 
@@ -97,6 +99,7 @@
                                     class="w-100 h-100 rounded-3 position-absolute top-0 start-0 img-hover"
                                     style="object-fit: cover; object-position: center; transition: transform 0.4s ease;">
                             </a>
+
 
                             <div class="card-body">
                                 <h5 class="card-title">
@@ -126,3 +129,4 @@
 </div>
 <!-- Blog Area End -->
 @endsection
+

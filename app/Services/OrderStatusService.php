@@ -62,7 +62,10 @@ class OrderStatusService
 
         $orderExpire = $this->orderExpire->create([
             'id_order' => $order->id,
-            'expires_at' => Carbon::now()->addMinutes(30),
+            'expires_at' => Carbon::now()->addMinutes(15),
+            // 'expires_at' => Carbon::now()->addSeconds(10),
+
+
         ]);
 
         ExpireOrder::dispatch($orderExpire->id)->delay($orderExpire->expires_at);
@@ -74,7 +77,7 @@ class OrderStatusService
         $paid = Order_status::where('name', 'Paid')->first();
         if (!$paid) throw new \Exception('Paid status not found');
 
-        $order->id_order_status = $paid->id;
+        $order->id_order_status = $paid->next_status_id;
         $order->payment_status = 'Paid';
         $order->save();
     }

@@ -86,10 +86,11 @@ class OrderController extends Controller
         try {
             $result = $this->retryPaymentService->retryPayment($orderId);
             if ($result['success']) {
-                $data = $result['data'];
+                $data = $result['paymentResult'];
                 $redirectUrl = $data['redirectUrl'];
-                Log::info('url', $redirectUrl);
+                Log::info('result', [$result]);
                 // return redirect()->back()->with('success', $result['message']);
+                return response()->json($data);
             }
             return redirect()->back()->with('error', $result['message']);
         } catch (\Exception $e) {

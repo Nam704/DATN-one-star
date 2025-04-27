@@ -36,24 +36,17 @@ class StatisticController extends Controller
     public function productStatistics(Request $request)
     {
         if (auth()->check()) {
-            $startDate = $request->input('start_date', now()->startOfDay()->toDateString());
-            $endDate = $request->input('end_date', now()->endOfDay()->toDateString());
+            $start_date = Carbon::parse($request->input('start_date'))->startOfDay();
+            $end_date = Carbon::parse($request->input('end_date'))->endOfDay();
             $countData = [
-                "product" => $this->product->whereBetween('created_at', [$startDate, $endDate])->count(),
-                "revenue" => $this->order->where('id_order_status', '4')
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->sum('total'),
-                "order" => $this->order->where('id_order_status', '4')
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->count(),
-                "user" => $this->user->whereBetween('created_at', [$startDate, $endDate])->count()
+                "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
 
             ];
             $topProduct = [
-                "least_sold_products" => $this->product->least_sold_products($startDate, $endDate),
+                "least_sold_products" => $this->product->least_sold_products($start_date, $end_date),
             ];
-            $low_stock_products = $this->product->low_stock_products($startDate, $endDate);
-            $categories_with_revenue = $this->category->categories_with_revenue();
+            $low_stock_products = $this->product->low_stock_products();
+            $categories_with_revenue = $this->category->categories_with_revenue($start_date, $end_date);
             $top_view_products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
             $top_comment_products = [
                 [
@@ -79,8 +72,8 @@ class StatisticController extends Controller
                 'categories_with_revenue',
                 'top_view_products',
                 'top_comment_products',
-                'startDate',
-                'endDate'
+                'start_date',
+                'end_date'
             ));
         } else {
             return redirect()->route('admin.statistics.productStatistics');
@@ -366,8 +359,12 @@ class StatisticController extends Controller
         $end_date   = $request->input('end_date');
 
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay()->toDateString();
-        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
+        $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
+        $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
+
+        // Đảm bảo cả hai ngày đều là đối tượng Carbon
+        $start_date = Carbon::parse($start_date)->startOfDay();
+        $end_date   = Carbon::parse($end_date)->endOfDay();
 
         // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
         $products = $this->product->least_sold_products($start_date, $end_date);
@@ -474,16 +471,8 @@ class StatisticController extends Controller
     }
     public function exportLowStockProducts(Request $request)
     {
-        // Lấy tham số ngày bắt đầu và kết thúc từ request
-        $start_date = $request->input('start_date');
-        $end_date   = $request->input('end_date');
-
-        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay()->toDateString();
-        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
-
-        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
-        $products = $this->product->low_stock_products($start_date, $end_date);
+        
+        $products = $this->product->low_stock_products();
 
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new Spreadsheet();
@@ -496,18 +485,6 @@ class StatisticController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(
             \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
         );
-
-        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
-        $displayStart = $start_date ? $start_date : 'Chưa chọn';
-        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
-        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
-        $sheet->mergeCells('A2:C2');
-        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
-        $sheet->mergeCells('D2:E2');
-        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A2:E2')->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Dòng 3 để tạo khoảng cách
         $sheet->mergeCells('A3:E3');
@@ -575,7 +552,7 @@ class StatisticController extends Controller
 
         // 5. Xuất file Excel
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $fileName = 'low_stock_products_' . $start_date . '_to_' . $end_date . '.xlsx';
+        $fileName = 'low_stock_products.xlsx';
 
         return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
@@ -592,18 +569,22 @@ class StatisticController extends Controller
         $end_date   = $request->input('end_date');
 
         // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
-        $start_date = $start_date ?: now()->startOfDay()->toDateString();
-        $end_date   = $end_date ?: now()->endOfDay()->toDateString();
+        $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
+        $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
+
+        // Đảm bảo cả hai ngày đều là đối tượng Carbon
+        $start_date = Carbon::parse($start_date)->startOfDay();
+        $end_date   = Carbon::parse($end_date)->endOfDay();
 
         // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
-        $products = $this->product->least_sold_products($start_date, $end_date);
+        $categories = $this->category->categories_with_revenue($start_date, $end_date);
 
         // Khởi tạo Spreadsheet và lấy sheet chính
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // 1. Tiêu đề báo cáo (dòng 1)
-        $sheet->setCellValue('A1', 'Danh mục sản phẩm');
+        $sheet->setCellValue('A1', 'Sản phẩm theo danh mục');
         $sheet->mergeCells('A1:E1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(
@@ -627,9 +608,9 @@ class StatisticController extends Controller
 
         // 3. Header bảng (dòng 4)
         $sheet->setCellValue('A4', 'STT');
-        $sheet->setCellValue('B4', 'Tên Sản Phẩm');
-        $sheet->setCellValue('C4', 'Ảnh ');
-        $sheet->setCellValue('D4', 'Tổng Số Lượng');
+        $sheet->setCellValue('B4', 'Tên Danh Mục');
+        $sheet->setCellValue('C4', 'Tổng Sản Phẩm');
+        $sheet->setCellValue('D4', 'Tổng Doanh thu');
         $headerRange = 'A4:E4';
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
@@ -644,7 +625,7 @@ class StatisticController extends Controller
 
         // 4. Ghi dữ liệu (từ dòng 5)
         $row = 5;
-        if ($products->isEmpty()) {
+        if ($categories->isEmpty()) {
             $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
             $sheet->mergeCells('A5:E5');
             $sheet->getStyle('A5')->getAlignment()
@@ -652,30 +633,12 @@ class StatisticController extends Controller
                 ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         } else {
             $stt = 1;
-            foreach ($products as $product) {
+            foreach ($categories as $category) {
                 // STT và Tên sản phẩm
                 $sheet->setCellValue('A' . $row, $stt++);
-                $sheet->setCellValue('B' . $row, $product->name);
-                $sheet->setCellValue('D' . $row, $product->total_sold);
-
-                // Chèn ảnh vào cột C
-                $imagePath = public_path($product->image_primary);
-                if (file_exists($imagePath)) {
-                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                    $drawing->setPath($imagePath);
-                    $drawing->setName('Product Image');
-                    $drawing->setDescription('Product Image');
-                    $drawing->setCoordinates('C' . $row);
-                    $drawing->setWidth(50);
-                    $drawing->setHeight(50);
-                    // Điều chỉnh offset để ảnh nằm gần giữa ô
-                    $drawing->setOffsetX(10);
-                    $drawing->setOffsetY(5);
-                    $drawing->setWorksheet($sheet);
-                    $sheet->getRowDimension($row)->setRowHeight(60);
-                } else {
-                    $sheet->setCellValue('C' . $row, 'No image');
-                }
+                $sheet->setCellValue('B' . $row, $category->name);
+                $sheet->setCellValue('C' . $row, $category->total_products);
+                $sheet->setCellValue('D' . $row, number_format($category->total_revenue, 0, ',', '.') . ' VND');
 
                 // Căn giữa nội dung của hàng
                 $sheet->getStyle("A{$row}:D{$row}")
@@ -937,14 +900,52 @@ class StatisticController extends Controller
 
         // Top 10 người mua nhiều nhất trong ngày (chỉ tính các đơn Delivered)
         $topCustomers = DB::table('orders')
-            ->select('id_user', 'user_name', DB::raw('SUM(total) as total_purchase'))
-            ->whereDate('created_at', $date)
-            ->where('id_order_status', $deliveredStatusId)
-            ->groupBy('id_user', 'user_name')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
+            ->select(
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
+            )
+            ->whereDate('orders.created_at', $date)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(10)
             ->get();
+        // Truy vấn tổng hợp lý do hủy đơn
+        $cancelReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select(
+                'order_cancellation_reasons.id as reason_id',
+                'order_cancellation_reasons.reason',
+                DB::raw('COUNT(order_cancellations.id) as total')
+            )
+            ->whereDate('orders.created_at', $date)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.id', 'order_cancellation_reasons.reason')
+            ->get();
 
+        // Truy vấn chi tiết sản phẩm bị hủy theo từng lý do
+        $cancelledProducts = DB::table('order_cancellations')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('order_details', 'orders.id', '=', 'order_details.id_order') // Sửa lại ở đây
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select(
+                'order_cancellation_reasons.id as reason_id',
+                'products.name as product_name',
+                DB::raw('SUM(order_details.quantity) as quantity')
+            )
+            ->whereDate('orders.created_at', $date)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.id', 'products.name')
+            ->get();
+
+
+        // Nhóm dữ liệu chi tiết theo reason_id
+        $cancelledProductsGrouped = $cancelledProducts->groupBy('reason_id');
         return view('admin.statistics.order_statistics', compact(
             'date',
             'totalOrders',
@@ -955,7 +956,10 @@ class StatisticController extends Controller
             'totalRevenue',
             'statistics',
             'productsSales',
-            'topCustomers'
+            'topCustomers',
+            'cancelReasons',
+            'cancelledProducts',
+            'cancelledProductsGrouped'
         ));
     }
 
@@ -1066,14 +1070,15 @@ class StatisticController extends Controller
 
         // 6. Top 20 khách hàng mua nhiều nhất trong khoảng thời gian (theo tổng giá trị mua hàng, chỉ Delivered)
         $topCustomers = DB::table('orders')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
             ->select(
-                'id_user',
-                'user_name',
-                DB::raw('SUM(total) as total_purchase')
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
             )
-            ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
-            ->groupBy('id_user', 'user_name')
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
             ->orderByDesc('total_purchase')
             ->limit(20)
             ->get();
@@ -1091,6 +1096,35 @@ class StatisticController extends Controller
 
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+        // Truy vấn thống kê lý do hủy đơn
+        $canceledReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select(
+                'order_cancellation_reasons.reason',
+                DB::raw('COUNT(order_cancellations.id) as total')
+            )
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.reason')
+            ->get();
+
+        // Truy vấn TOP 20 sản phẩm bị hủy nhiều nhất
+        $cancelledProducts = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select(
+                'products.name as product_name',
+                DB::raw('SUM(order_details.quantity) as total_cancelled')
+            )
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_cancelled')
+            ->limit(20)
+            ->get();
+
         return view('admin.statistics.weekly_statistics', compact(
             'startDate',
             'endDate',
@@ -1105,6 +1139,8 @@ class StatisticController extends Controller
             'totalSuccessfulOrders',
             'topCustomers',
             'customerProductsGrouped',
+            'canceledReasons',
+            'cancelledProducts'
         ));
     }
 
@@ -1205,16 +1241,17 @@ class StatisticController extends Controller
             ->get();
 
 
-        // 6. Top 20 người mua nhiều nhất (chi tiết theo Delivered)
+        // 6. Top 50 người mua nhiều nhất (chi tiết theo Delivered)
         $topCustomers = DB::table('orders')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
             ->select(
-                'id_user',
-                'user_name',
-                DB::raw('SUM(total) as total_purchase')
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
             )
-            ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId) // Chỉ lấy đơn đã giao hàng
-            ->groupBy('id_user', 'user_name')
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
             ->orderByDesc('total_purchase')
             ->limit(50)
             ->get();
@@ -1232,6 +1269,30 @@ class StatisticController extends Controller
 
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+        // 7. Dữ liệu cho biểu đồ "Lý Do Bị Hủy"
+        $canceledReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select('order_cancellation_reasons.reason', DB::raw('COUNT(order_cancellations.id) as total'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.reason')
+            ->orderByDesc('total')
+            ->get();
+
+        // 8. Top 50 sản phẩm bị hủy
+        $cancelledProducts = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_cancelled'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_cancelled')
+            ->limit(50)
+            ->get();
+
         return view('admin.statistics.monthly_statistics', compact(
             'selectedMonth',
             'startOfMonth',
@@ -1246,7 +1307,9 @@ class StatisticController extends Controller
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',
-            'customerProductsGrouped'
+            'customerProductsGrouped',
+            'canceledReasons',
+            'cancelledProducts'
         ));
     }
 
@@ -1341,7 +1404,7 @@ class StatisticController extends Controller
             $monthlyStatsWithComparison[] = $data;
         }
 
-        // 5. Top 10 sản phẩm bán chạy trong năm (chỉ tính đơn Delivered)
+        // 5. Top 50 sản phẩm bán chạy trong năm (chỉ tính đơn Delivered)
         $productsSales = DB::table('order_details')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
@@ -1351,17 +1414,22 @@ class StatisticController extends Controller
             ->where('orders.id_order_status', $deliveredStatusId)
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
-            ->limit(10)
+            ->limit(50)
             ->get();
 
-        // 6. Top 20 người mua nhiều nhất trong năm (chỉ tính đơn Delivered)
+        // 6. Top 50 người mua nhiều nhất trong năm (chỉ tính đơn Delivered)
         $topCustomers = DB::table('orders')
-            ->select('id_user', 'user_name', DB::raw('SUM(total) as total_purchase'))
-            ->whereBetween('created_at', $dateRange)
-            ->where('id_order_status', $deliveredStatusId)
-            ->groupBy('id_user', 'user_name')
+            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
+            ->select(
+                'orders.id_user',
+                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
+            )
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $deliveredStatusId)
+            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
             ->orderByDesc('total_purchase')
-            ->limit(20)
+            ->limit(50)
             ->get();
 
         // 7. Chi tiết sản phẩm mỗi khách hàng đã mua (chỉ tính các đơn Delivered)
@@ -1376,6 +1444,30 @@ class StatisticController extends Controller
             ->get();
         $customerProductsGrouped = $customerProducts->groupBy('id_user');
 
+        // 8. Lấy dữ liệu "Lý Do Bị Hủy" (sử dụng bảng order_cancellations và order_cancellation_reasons)
+        $canceledReasons = DB::table('order_cancellations')
+            ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
+            ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
+            ->select('order_cancellation_reasons.reason', DB::raw('COUNT(order_cancellations.id) as total'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('order_cancellation_reasons.reason')
+            ->orderByDesc('total')
+            ->get();
+
+        // 9. Top 50 Sản Phẩm Bị Hủy
+        $cancelledProducts = DB::table('order_details')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+            ->join('products', 'product_variants.id_product', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_cancelled'))
+            ->whereBetween('orders.created_at', $dateRange)
+            ->where('orders.id_order_status', $cancelledStatusId)
+            ->groupBy('products.name')
+            ->orderByDesc('total_cancelled')
+            ->limit(50)
+            ->get();
+
         return view('admin.statistics.yearly_statistics', compact(
             'selectedYear',
             'startOfYear',
@@ -1389,7 +1481,9 @@ class StatisticController extends Controller
             'productsSales',
             'totalSuccessfulOrders',
             'topCustomers',
-            'customerProductsGrouped'
+            'customerProductsGrouped',
+            'canceledReasons',
+            'cancelledProducts'
         ));
     }
 }

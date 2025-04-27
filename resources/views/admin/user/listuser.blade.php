@@ -10,11 +10,11 @@
                         <div class="page-title-right">
                             <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
                                 <i class="ri-add-line align-middle me-1"></i>
-                                Add User
+                                Thêm tài khoản
                             </a>
-                            <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.users.listtkkhoa') }}" class="btn btn-secondary ">
                                 <i class="ri-delete-bin-line align-middle me-1"></i>
-                                Trash
+                                Tài khoản khóa
                             </a>
                             <a class="btn btn-soft-info" href="{{ route('admin.users.charts') }}"> <i
                                     class="mdi mdi-chart-areaspline fs-18 me-1 lh-1"></i>Thống kê</a>

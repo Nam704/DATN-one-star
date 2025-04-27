@@ -47,7 +47,7 @@ class RetryPaymentService
             }
 
             // Kiểm tra trạng thái đơn hàng
-            $eligibleOrderStatuses = ['Payment Failed', 'Payment Expired', 'Payment Retry Requested'];
+            $eligibleOrderStatuses = ['Payment Failed', 'Payment Expired', 'Payment Retry Requested', 'Awaiting Payment'];
             if (!in_array($order->orderStatus->name, $eligibleOrderStatuses)) {
                 $message = "Đơn hàng {$order->code} không thể thanh toán lại do trạng thái không hợp lệ ({$order->orderStatus->name}).";
                 Log::info($message, $context);
@@ -155,11 +155,12 @@ class RetryPaymentService
                     $this->orderStatusService->markVNPAYPaid($order);
                     $message = "Thanh toán thành công cho đơn hàng {$order->code}.";
                     Log::info($message, $context);
+                    // Log::info("in retryPayment",$paymentResult);
                     $this->notifyClient($order, 'Thanh toán thành công', $message);
                     return [
                         'success' => true,
                         'message' => $message,
-                        'data' => $paymentResult,
+                        'paymentResult' => $paymentResult,
                     ];
                 } else {
                     $this->orderStatusService->markVNPAYFailed($order);

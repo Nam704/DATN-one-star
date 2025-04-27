@@ -10,6 +10,8 @@ export default defineConfig({
                 "resources/js/utilities/global.js",
                 "resources/js/client/cartDetail.js",
                 "resources/js/client/productDetail.js",
+                "resources/js/client/orderDetail.js",
+
                 "resources/js/client/checkout.js",
                 "resources/js/admin.order.js",
                 "resources/js/admin/listOrder.js",

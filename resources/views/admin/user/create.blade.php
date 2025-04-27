@@ -123,9 +123,11 @@
                                 <label class="font-weight-bold">Chọn quyền hạn:</label>
                                 <select class="form-control" id="id_role" name="id_role">
                                     @foreach ($roles as $role)
+                                    @if (Auth::user()->isAdmin() || $role->name == 'user') <!-- Admin có thể chọn tất cả, nhân viên chỉ có thể chọn "user" -->
                                     <option value="{{ $role->id }}" {{ old('id_role') == $role->id ? 'selected' : '' }}>
                                         {{ $role->name }}
                                     </option>
+                                    @endif
                                     @endforeach
                                 </select>
                                 @error('id_role')
@@ -135,13 +137,14 @@
                         </div>
                     </div>
 
+
                     <!-- User Image Section -->
                     <div class="card shadow mb-4">
                         <div class="card-header">
                             <h4 class="header-title" style="margin-bottom: -20px">Ảnh người dùng</h4>
                         </div>
                         <div class="card-body">
-                            <input name="profile_image" type="file" id="userImage" class="form-control mb-3" accept="image/*" value="{{old('profile_image')}}"> 
+                            <input name="profile_image" type="file" id="userImage" class="form-control mb-3" accept="image/*" value="{{old('profile_image')}}">
                             <div id="imagePreview" class="text-center"></div>
                         </div>
                     </div>

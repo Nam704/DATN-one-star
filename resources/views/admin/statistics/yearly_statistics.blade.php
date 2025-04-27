@@ -86,8 +86,42 @@
             </div>
         </div>
     </div>
+ <!-- Row: Biểu đồ Lý Do Bị Hủy & TOP 50 Sản Phẩm Bị Hủy -->
+ <div class="row mb-4">
+    <!-- Cột trái: Biểu đồ cột Lý Do Bị Hủy -->
+    <div class="col-md-6">
+        <div class="card mb-4" style="height:350px;">
+            <div class="card-body" style="height:100%; position: relative;">
+                <h5 class="header-title mb-3">Biểu Đồ Lý Do Bị Hủy</h5>
+                <canvas id="cancelReasonsChart" style="height:100%;"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Cột phải: TOP 50 Sản Phẩm Bị Hủy -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-body" style="max-height:350px; overflow-y:auto;">
+                <h5 class="header-title mb-0">TOP 50 Sản Phẩm Bị Hủy Trong Năm</h5>
+                @if ($cancelledProducts->isNotEmpty())
+                    <ul class="list-group mt-3">
+                        @foreach ($cancelledProducts as $index => $product)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ $index + 1 }}. {{ $product->product_name }}
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ number_format($product->total_cancelled) }}
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="mt-3 text-center text-muted">Không có dữ liệu sản phẩm bị hủy trong năm này.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
 
-    <!-- Bảng Top 10 Sản Phẩm Bán Chạy Trong Năm -->
+    <!-- Bảng Top 50 Sản Phẩm Bán Chạy Trong Năm -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="card-widgets">
@@ -96,7 +130,7 @@
                     <i class="ri-subtract-line"></i></a>
                 <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
             </div>
-            <h5 class="header-title mb-0">TOP 10 Sản Phẩm Bán Chạy Trong Năm</h5>
+            <h5 class="header-title mb-0">TOP 50 Sản Phẩm Bán Chạy Trong Năm</h5>
             <div id="top-products-collapse" class="collapse pt-3 show">
                 @if ($productsSales->isNotEmpty())
                     <ul class="list-group">
@@ -123,7 +157,7 @@
                     <i class="ri-subtract-line"></i></a>
                 <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
             </div>
-            <h5 class="header-title mb-0">TOP 20 Người Mua Nhiều Nhất Trong Năm</h5>
+            <h5 class="header-title mb-0">TOP 50 Người Mua Nhiều Nhất Trong Năm</h5>
             <div id="top-customers-collapse" class="collapse pt-3 show">
                 @if ($topCustomers->isNotEmpty())
                     @foreach ($topCustomers as $index => $customer)
@@ -169,24 +203,28 @@
     </div>
 </div>
 
-<!-- Nạp Chart.js và SheetJS (XLSX) từ CDN -->
+@endsection
+
+@push('styles')
+    <x-admin.data-table-styles />
+@endpush
+
+@push('scripts')
+   <!-- Nạp Chart.js và SheetJS (XLSX) từ CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Lấy dữ liệu thống kê theo năm từ biến $monthlyStatsWithComparison (đã được render từ Controller)
+    // Biểu đồ: Số Đơn Hàng & Doanh Thu Theo Tháng
     var yearlyDataRaw = {!! json_encode($monthlyStatsWithComparison) !!};
-    // Tạo label dạng "Tháng X"
     var labels = yearlyDataRaw.map(function(item) { return 'Tháng ' + item.month; });
     var totalOrdersData = yearlyDataRaw.map(function(item) { return item.total_orders; });
     var deliveredData = yearlyDataRaw.map(function(item) { return item.delivered_orders; });
     var cancelledData = yearlyDataRaw.map(function(item) { return item.cancelled_orders; });
     var revenueData = yearlyDataRaw.map(function(item) { return item.month_revenue; });
-    // Dữ liệu % tăng giảm (nếu có)
     var pctChangeData = yearlyDataRaw.map(function(item) {
         return item.pct_change !== null ? item.pct_change.toFixed(2) + '%' : 'N/A';
     });
 
-    // Cấu hình biểu đồ Chart.js cho thống kê theo năm
     var ctx = document.getElementById('yearlyChart').getContext('2d');
     var yearlyChart = new Chart(ctx, {
         type: 'bar',
@@ -255,7 +293,6 @@
         }
     });
 
-    // Sự kiện tải ảnh PNG của biểu đồ năm
     document.getElementById('downloadPNG').addEventListener('click', function() {
         var url = document.getElementById('yearlyChart').toDataURL("image/png");
         var a = document.createElement('a');
@@ -266,15 +303,12 @@
         document.body.removeChild(a);
     });
 
-    // Sự kiện tải file Excel với dữ liệu thống kê năm
     document.getElementById('downloadExcel').addEventListener('click', function() {
-        // Chuẩn bị dữ liệu Excel dạng mảng (AOA)
         var ws_data = [
             ["Tổng Doanh Thu Năm", "{{ number_format($totalRevenue, 0) }} đ"],
-            [], // Dòng trống phân cách
+            [],
             ["Tháng", "Tổng Đơn Hàng", "Đơn Hàng Thành Công", "Đơn Hàng Bị Hủy", "Doanh Thu (Delivered)"]
         ];
-        // Duyệt qua yearlyDataRaw để thêm dữ liệu từng tháng
         for (var i = 0; i < yearlyDataRaw.length; i++) {
             ws_data.push([
                 'Tháng ' + yearlyDataRaw[i].month,
@@ -284,10 +318,8 @@
                 yearlyDataRaw[i].month_revenue
             ]);
         }
-        // Tạo workbook và worksheet
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.aoa_to_sheet(ws_data);
-        // Đặt chiều rộng cột cơ bản
         ws['!cols'] = [
             { wch: 20 },
             { wch: 15 },
@@ -296,8 +328,6 @@
             { wch: 20 }
         ];
         XLSX.utils.book_append_sheet(wb, ws, "Yearly Data");
-
-        // Xuất workbook thành array buffer
         var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         var blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         var url = URL.createObjectURL(blob);
@@ -309,13 +339,42 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     });
+
+    // Biểu đồ: Lý Do Bị Hủy (dữ liệu từ $canceledReasons)
+    var cancellationLabels = {!! json_encode($canceledReasons->pluck('reason')) !!};
+    var cancellationValues = {!! json_encode($canceledReasons->pluck('total')) !!};
+
+    var ctxCancel = document.getElementById('cancelReasonsChart').getContext('2d');
+    var cancelReasonsChart = new Chart(ctxCancel, {
+        type: 'bar',
+        data: {
+            labels: cancellationLabels,
+            datasets: [{
+                label: 'Số Lượng Đơn Bị Hủy',
+                data: cancellationValues,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Số Lượng' }
+                },
+                x: {
+                    title: { display: true, text: 'Lý Do' },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
 </script>
-@endsection
-
-@push('styles')
-    <x-admin.data-table-styles />
-@endpush
-
-@push('scripts')
-    <x-admin.data-table-scripts />
 @endpush
