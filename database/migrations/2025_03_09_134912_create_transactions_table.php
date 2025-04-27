@@ -6,25 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->string('txn_ref')->unique();
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->string('txn_ref')->index(); // Bỏ unique, thêm index để tìm kiếm nhanh
             $table->decimal('amount', 15, 2);
             $table->string('status');
+            $table->string('payment_method')->nullable(); // Thêm để biết cổng thanh toán
             $table->timestamps();
         });
     }
 
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('transactions');
     }

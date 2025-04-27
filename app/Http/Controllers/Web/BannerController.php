@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class BannerController extends Controller
 {
-    public function list() {
+    public function list()
+    {
 
         $banners = Banner::all();
         return view('admin.banner.list')->with([
@@ -27,7 +28,7 @@ class BannerController extends Controller
         $request->validate([
             'title' => 'nullable|string|min:5|max:255',
             'description' => 'nullable|string|max:1000',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:4048',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ], [
@@ -70,12 +71,14 @@ class BannerController extends Controller
         return redirect()->route('admin.banner.list')->with('success', 'Thêm banner thành công!');
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $banner = Banner::findOrFail($id);
         return view('admin.banner.edit', compact('banner'));
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
 
         $request->validate([
             'title' => 'nullable|string|min:5|max:255',
@@ -100,51 +103,53 @@ class BannerController extends Controller
 
         $banner = Banner::findOrFail($id);
 
-    // Nếu có ảnh mới, thì xóa ảnh cũ và lưu ảnh mới
-    if ($request->hasFile('image')) {
-        $file = $request->file('image');
+        // Nếu có ảnh mới, thì xóa ảnh cũ và lưu ảnh mới
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
 
-        if ($file->isValid()) {
-            // Xóa ảnh cũ nếu tồn tại
-            if ($banner->image && Storage::disk('public')->exists($banner->image)) {
-                Storage::disk('public')->delete($banner->image);
+            if ($file->isValid()) {
+                // Xóa ảnh cũ nếu tồn tại
+                if ($banner->image && Storage::disk('public')->exists($banner->image)) {
+                    Storage::disk('public')->delete($banner->image);
+                }
+
+                // Lưu ảnh mới
+                $profileImagePath = $file->store('banner', 'public');
+                $banner->image = $profileImagePath;
+            } else {
+                return back()->withErrors(['image' => 'Ảnh không hợp lệ hoặc bị lỗi khi tải lên.'])->withInput();
             }
-
-            // Lưu ảnh mới
-            $profileImagePath = $file->store('banner', 'public');
-            $banner->image = $profileImagePath;
-        } else {
-            return back()->withErrors(['image' => 'Ảnh không hợp lệ hoặc bị lỗi khi tải lên.'])->withInput();
         }
-    }
-    $banner->update([
-        'title' => $request->title,
-        'description' => $request->description,
-        'status' => $request->status,
-        'start_date' => $request->start_date,
-        'end_date' => $request->end_date,
-        'image' => $banner->image, // Nếu có ảnh mới, dòng này đã được cập nhật ở trên
-    ]);
+        $banner->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => $request->status,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'image' => $banner->image, // Nếu có ảnh mới, dòng này đã được cập nhật ở trên
+        ]);
 
         return redirect()->route('admin.banner.list')->with('success', 'Sửa banner thành công!');
     }
-    public function detail($id) {
+    public function detail($id)
+    {
         $banner = Banner::findOrFail($id);
 
         return view('admin.banner.detail', compact('banner'));
     }
 
-    public function delete($id) {
+    public function delete($id)
+    {
         $banner = Banner::findOrFail($id);
 
         // Xóa ảnh cũ nếu có
         if ($banner->image && Storage::disk('public')->exists($banner->image)) {
             Storage::disk('public')->delete($banner->image);
         }
-    
+
         // Xóa bản ghi trong database
         $banner->delete();
-    
+
         return redirect()->route('admin.banner.list')->with('success', 'Xóa banner thành công!');
     }
 }

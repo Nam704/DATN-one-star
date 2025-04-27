@@ -1,10 +1,41 @@
-import "./bootstrap";
+import "./app.js";
 $(document).ready(function () {
     console.log("this is account details");
     var csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
+    const $retryPaymentBtn = $("#retry-payment");
 
+    $retryPaymentBtn.on("click", function (e) {
+        var orderId = $(this).data("id");
+        e.preventDefault();
+        GlobalUtils.showNotification("Đang xử lý thanh toán...");
+
+        axios
+            .post(
+                `${GlobalUtils.baseUrl}/client/orders/${orderId}/retry-payment`
+            )
+            .then((response) => {
+                const data = response.data;
+                if (data.success && data.code === "SUCCESS") {
+                    window.location.href = data.redirectUrl; // Chuyển hướng tới VNPAY nếu thành công
+                } else {
+                    // Hiển thị thông báo lỗi chi tiết
+                    GlobalUtils.showNotification(data.message, {
+                        backgroundColor: "#ff4444",
+                    });
+                }
+            })
+            .catch((error) => {
+                // Xử lý lỗi từ Axios (nếu server trả về 500 hoặc lỗi mạng)
+                const errorMessage =
+                    error.response?.data?.message ||
+                    "Lỗi không xác định khi kết nối server.";
+                GlobalUtils.showNotification(errorMessage, {
+                    backgroundColor: "#ff4444",
+                });
+            });
+    });
     // Lắng nghe sự kiện từ kênh riêng tư cho người dùng
     window.Echo.private(`notifications.${user.id}`).listen(
         "OrderNotification",

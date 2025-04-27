@@ -114,8 +114,8 @@
                                 $canRetry = $retryPaymentService->canRetryPayment($order->id);
                             @endphp
                             @if ($canRetry['success'])
-                                <a href="{{ route('client.orders.retryPayment', $order->id) }}"
-                                    class="btn btn-sm btn-warning">Thanh toán lại</a>
+                                <a href="" class="btn btn-sm btn-warning" data-id="{{ $order->id }}"
+                                    id="retry-payment">Thanh toán lại</a>
                             @endif
                         </td>
                     </tr>

@@ -87,12 +87,22 @@ class OrderController extends Controller
             $result = $this->retryPaymentService->retryPayment($orderId);
             if ($result['success']) {
                 $data = $result['paymentResult'];
-                $redirectUrl = $data['redirectUrl'];
-                Log::info('result', [$result]);
-                // return redirect()->back()->with('success', $result['message']);
-                return response()->json($data);
+                Log::info('Retry payment successful', ['order_id' => $orderId, 'result' => $result]);
+                return response()->json([
+                    'success' => true,
+                    'message' => $result['message'],
+                    'code' => $result['code'],
+                    'redirectUrl' => $data['redirectUrl'], // URL để chuyển hướng tới VNPAY
+                ], 200);
             }
-            return redirect()->back()->with('error', $result['message']);
+
+            // Trả về lỗi chi tiết nếu thất bại
+            Log::warning('Retry payment failed', ['order_id' => $orderId, 'result' => $result]);
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+                'code' => $result['code'],
+            ], 400);
         } catch (\Exception $e) {
             Log::error('Error in retryPayment', [
                 'message' => $e->getMessage(),
@@ -100,10 +110,13 @@ class OrderController extends Controller
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('error', $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi không xác định khi thử lại thanh toán: ' . $e->getMessage(),
+                'code' => 'UNKNOWN_ERROR',
+            ], 500);
         }
     }
-
     public function cancelOrder(Request $request, $orderId)
     {
         try {
@@ -125,19 +138,7 @@ class OrderController extends Controller
         }
     }
 
-    public function check()
-    {
-        $data = [
-            'title' => 'New Order',
-            'message' => "New Order, vui lòng kiểm tra và xác nhận!",
-            'from_user_id' => null,
-            'to_user_id' => null,
-            'type' => 'orders',
-            'status' => 'unread',
-            'goto_id' => null,
-        ];
-        $this->notificationService->sendPrivate($data);
-    }
+
 
     public function detailOrder($id)
     {
