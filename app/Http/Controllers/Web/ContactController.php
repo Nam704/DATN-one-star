@@ -29,7 +29,10 @@ class ContactController extends Controller
     public function update(Request $request, $id){
         $request->validate([
             'reply' => 'required',
-        ]);
+        ],
+    [
+        'reply.required'=> 'Không được để trống',
+    ]);
 
         $contact = Contact::findOrFail($id);
         $contact->update([
@@ -39,6 +42,7 @@ class ContactController extends Controller
 
         // Gửi email phản hồi
         Mail::to($contact->email)->send(new ContactReplyMail($contact));
+        $contact->delete();
 
         return redirect()->route('admin.contacts.index')->with('success', 'Đã gửi phản hồi!');
     }

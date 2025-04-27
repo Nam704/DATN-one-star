@@ -8,10 +8,10 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.contacts.index') }}" class="btn btn-dark">
                             <i class="mdi mdi-arrow-left-thin"></i>
-                            Back
+                            Quay lại
                         </a>
                     </div>
-                    <h4 class="page-title">Contact Management</h4>
+                    <h4 class="page-title">Chi tiết liên hệ</h4>
                 </div>
             </div>
         </div>
@@ -27,9 +27,6 @@
                         <p>Nội dung : </p>
                         <p>{{ $contact->message }}</p>
 
-                        <p>Phản hồi : </p>
-                        <p>{{ $contact->reply }}</p>
-
                         <Span>Trạng thái :
                             <span
                                 class="badge bg-{{ $contact->status === 'resolved' ? 'success' : ($contact->status === 'pending' ? 'warning' : 'danger') }}">
@@ -40,6 +37,8 @@
 
                 </div>
             </div>
+            <a href="{{ route('admin.contacts.edit', $contact->id) }}"><button
+            class="btn btn-sm btn-success me-1">Phản hổi</button></a>
         </div>
     </div>
 @endsection

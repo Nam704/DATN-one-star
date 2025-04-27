@@ -3,9 +3,17 @@
     <!-- Begin Page Content -->
     <div class="container-fluid">
         <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h4 class="mb-0 mt-4">Thêm bài viết</h4>
-        </div>
+        <div class="col-12">
+                <div class="page-title-box">
+                    <div class="page-title-right">
+                        <a href="{{ route('admin.blogs.index') }}" class="btn btn-dark">
+                            <i class="mdi mdi-arrow-left-thin"></i>
+                            Quay lại
+                        </a>
+                    </div>
+                    <h4 class="page-title">Thêm bài viết</h4>
+                </div>
+            </div>
         <div>
             <form id="blog-form" action="{{ route('admin.blogs.store') }}" method="post" enctype="multipart/form-data"
                 class="form">
@@ -76,8 +84,7 @@
                                         </div>
                                     </div>
 
-                                    <button type="button" id="show_add_category" class="btn btn-link">+ Add new
-                                        category</button>
+                                    <button type="button" id="show_add_category" class="btn btn-link">Thêm mới danh mục tin tức</button>
                                 </div>
                             </div>
                         </div>
@@ -104,7 +111,7 @@
                                 </div>
 
                                 <div class="form-group mt-3">
-                                    <label for="new_tag_name" class="font-weight-bold">Thêm thẻ tag mới:</label>
+                                    <label for="new_tag_name" class="font-weight-bold">Thêm thẻ tag mới</label>
 
                                     <div id="add-tag-section" style="display: none;">
                                         <input type="text" class="form-control mb-2" id="new_tag_name"
@@ -119,8 +126,7 @@
                                         </div>
                                     </div>
 
-                                    <button type="button" id="show_add_tag" class="btn btn-link">+ Add new
-                                        tag</button>
+                                    <button type="button" id="show_add_tag" class="btn btn-link">Thêm mới thẻ tag</button>
 
                                 </div>
                             </div>
@@ -135,6 +141,9 @@
                                 <input name="thumbnail" type="file" id="blogImage" class="form-control mb-3"
                                     accept="image/*">
                                 <div id="imagePreview" class="text-center"></div>
+                                @error('thumbnail')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                             </div>
                         </div>
                         <input type="hidden" name="status" id="status" value="published">
@@ -142,7 +151,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-warning mr-2" onclick="setStatus('draft')">Bản nháp</button>
+                   <button type="submit" class="btn btn-warning mr-2 me-2" onclick="setStatus('draft')">Bản nháp</button>
                     <button type="submit" class="btn btn-success mr-2" onclick="setStatus('published')">Thêm bài viết</button>
                 </div>
 

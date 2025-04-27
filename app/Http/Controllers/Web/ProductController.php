@@ -265,7 +265,7 @@ class ProductController extends Controller
 
         // Lấy danh sách đơn hàng liên quan đến biến thể này
         $orderDetails = Order_detail::where('id_variant', $variantId)
-            ->with(['order.user', 'order.orderStatus']) // Lấy thông tin đơn hàng, người dùng và trạng thái
+            ->with(['order.user', 'order.orderStatus','order.address']) // Lấy thông tin đơn hàng, người dùng và trạng thái
             ->get();
 
         // Nhóm đơn hàng theo người dùng
