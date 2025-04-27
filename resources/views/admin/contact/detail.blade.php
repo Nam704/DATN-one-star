@@ -26,6 +26,8 @@
                         </p>
                         <p>Nội dung : </p>
                         <p>{{ $contact->message }}</p>
+                        <p>Phản hồi : </p>
+                        <p>{{ $contact->reply }}</p>
 
                         <Span>Trạng thái :
                             <span
@@ -37,8 +39,6 @@
 
                 </div>
             </div>
-            <a href="{{ route('admin.contacts.edit', $contact->id) }}"><button
-            class="btn btn-sm btn-success me-1">Phản hổi</button></a>
         </div>
     </div>
 @endsection

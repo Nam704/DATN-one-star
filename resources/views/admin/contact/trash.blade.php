@@ -5,12 +5,12 @@
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
-            <div class="page-title-right">
-                <a href="{{ route('admin.contacts.trash') }}" type="button" class="btn btn-sm btn-success">
-                    <i class="fas fa-trash-alt"></i>Danh sách đã phản hồi
-                </a>
-            </div>
-            <h4 class="page-title">Danh sách liên hệ</h4>
+                <div class="page-title-right">
+                    <a href="{{ route('admin.contacts.index') }}" type="button" class="btn btn-sm btn-success">
+                        <i class="fas fa-trash-alt"></i>Quay lại
+                    </a>
+                </div>
+                <h4 class="page-title">Danh sách đã phản hồi</h4>
             </div>
         </div>
     </div>
@@ -33,7 +33,7 @@
                         </thead>
 
                         <tbody>
-                            @foreach ($contact as $key => $value)
+                            @foreach ($contacts as $key => $value)
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $value->name }}</td>
@@ -52,8 +52,13 @@
                                             <button type="button"
                                                 class="btn btn-secondary btn-sm btn-warning me-1">Chi tiết</button>
                                         </a>
-                                        <a href="{{ route('admin.contacts.edit', $value->id) }}"><button
-                                                class="btn btn-sm btn-success me-1">Phản hổi</button></a>
+                                        <form action="{{route('admin.contacts.delete',$value->id)}}"
+                                            class="d-inline" method="POST"
+                                            onclick="return confirm('Bạn có muốn xóa không?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-danger ">Xóa</button>
+                                        </form>
 
                                     </div>
                                 </td>

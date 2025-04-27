@@ -243,7 +243,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('permission:delete-contacts');
             Route::get('/trash', 'trash')->name('trash')->middleware('permission:view-contacts');
             Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-contacts');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete')->middleware('permission:delete-contacts');
+            Route::delete('delete/{id}', 'delete')->name('delete')->middleware('permission:delete-contacts');
         });
 
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {

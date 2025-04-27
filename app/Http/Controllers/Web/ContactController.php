@@ -12,9 +12,22 @@ class ContactController extends Controller
 {
     public function index()
     {
-        $contact = Contact::all();
-        return view('admin.contact.index', compact('contact'));
+        // Lọc các liên hệ có trạng thái 'pending'
+    $contact = Contact::where('status', 'pending')->get();
+
+    // Trả về view với dữ liệu đã lọc
+    return view('admin.contact.index', compact('contact'));
     }
+
+    public function trash()
+{
+    // Lấy tất cả các bản ghi đã bị xóa mềm
+    $contacts = Contact::where('status', 'resolved')->get();
+    
+    // Trả về view và truyền dữ liệu
+    return view('admin.contact.trash', compact('contacts'));
+}
+
 
     public function show($id){
         $contact = Contact::find($id);
@@ -42,8 +55,21 @@ class ContactController extends Controller
 
         // Gửi email phản hồi
         Mail::to($contact->email)->send(new ContactReplyMail($contact));
-        $contact->delete();
-
-        return redirect()->route('admin.contacts.index')->with('success', 'Đã gửi phản hồi!');
+  
+        return redirect()->route('admin.contacts.trash')->with('success', 'Đã gửi phản hồi!');
     }
+    public function delete($id)
+    {
+        // Tìm bản ghi trong bảng contact
+        $contact = Contact::find($id);
+    
+        if ($contact) {
+            $contact->delete();  // Xóa bản ghi trực tiếp khỏi cơ sở dữ liệu
+            return redirect()->route('admin.contacts.trash')->with('success', 'Liên hệ đã bị xóa.');
+        }
+    
+        return redirect()->route('admin.contacts.trash')->with('error', 'Liên hệ không tồn tại.');
+    }
+    
+
 }

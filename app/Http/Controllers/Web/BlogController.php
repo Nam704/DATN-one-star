@@ -145,6 +145,12 @@ class BlogController extends Controller
         $blog = Blog::onlyTrashed()->findOrFail($id); 
         $blog->restore(); 
 
+        // Sau khi restore, nếu trạng thái hiện tại là 'draft' thì đổi trạng thái
+        if ($blog->status === 'draft') {
+            $blog->status = 'published'; // hoặc 'published' tùy bạn muốn
+            $blog->save();
+        }
+
         return response()->json(['success' => true, 'message' => 'Bài viết đã được khôi phục!']);
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'message' => 'Lỗi khi khôi phục bài viết!']);
