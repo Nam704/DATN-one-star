@@ -21,6 +21,7 @@ class ImportProducts
     protected $productAuditService;
     protected $user;
     protected $notificationService;
+    protected $productService;
     public function __construct(
         ProductAuditService $productAuditService,
         ProductService $productService,

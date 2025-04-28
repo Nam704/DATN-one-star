@@ -72,21 +72,11 @@ Route::prefix('manager')->middleware(['auth', 'role:admin'])->group(function () 
     Route::post('/refunds/{refund}/process', [RefundController::class, 'finalProcess'])->name('manager.refunds.process');
 });
 
-// Route::get('/client/index', function () {
-//     return view('client.index');
-// });
-Route::get('/detail-product', function () {
-    return view('admin.product.detailBase');
-});
-Route::get('excel/read', [ExcelController::class, 'index']);
 
 
 
 
 
-Route::get('/make-password', function () {
-    return Hash::make('1234');
-});
 Route::prefix('auth/')->name('auth.')->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::get('login', 'getFormLogin')->name('getFormLogin');
@@ -116,8 +106,6 @@ Route::prefix('auth/')->name('auth.')->middleware(['auth', 'check.lock'])->group
 Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::post('/send-message', [ChatController::class, 'sendMessage']);
-    // Route::get('/', 'ChatController@index')->name('index');
-    // Route::post('/send', 'ChatController@sendMessage')->name('send');
 });
 
 
@@ -149,8 +137,6 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory')->middleware('permission:view-statistics');
             Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts')->middleware('permission:view-statistics');
             Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts')->middleware('permission:view-statistics');
-
-
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts')->middleware('permission:view-statistics');
             Route::get('productSold', 'productSold')->name('productSold')->middleware('permission:view-statistics');
             Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics')->middleware('permission:view-statistics');
@@ -337,31 +323,19 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
                 Route::get('add', 'getFormAdd')->name('getFormAdd')->middleware('permission:create-imports');
                 Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-imports');
                 Route::post('/upload', 'importExcel')->name('upload')->middleware('permission:create-imports');
-
                 Route::get('edit/{id}', 'getFormEdit')->name('getFormEdit')->middleware('permission:edit-imports');
                 Route::get('/list-approved', 'listApproved')->name('listApproved')->middleware('permission:view-imports');
                 Route::get('/list-pending', 'listPending')->name('listPending')->middleware('permission:view-imports');
                 Route::get('/list-rejected', 'listRejected')->name('listRejected')->middleware('permission:view-imports');
-
-                // Route::get('lockOrActive/{id}', 'lockOrActive')->name('lockOrActive');
                 Route::post('add', 'add')->name('add')->middleware('permission:create-imports');
                 Route::post('edit/{id}', 'edit')->name('edit')->middleware('permission:edit-imports');
                 Route::get('accept/{id}', 'accept')->name('accept')->middleware('role:admin');
                 Route::get('reject/{id}', 'reject')->name('reject')->middleware('role:admin');
-
                 Route::get('update-price/{id}', 'updatePrice')->name('updatePrice')->middleware('permission:edit-imports');
             }
         );
 
-        Route::prefix('images')->name('images.')->controller(ImageController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('store', 'store')->name('store');
-            Route::get('edit/{id}', 'edit')->name('edit');
-            Route::put('update/{id}', 'update')->name('update');
-            Route::get('destroy/{id}', 'destroy')->name('destroy');
-            Route::get('show/{id}', 'show')->name('show');
-        });
+
         Route::prefix('product_audits')->name('product_audits.')
             ->controller(ProductAuditController::class)->group(function () {
                 Route::get('list', 'list')->name('list')->middleware('permission:view-products');
@@ -446,7 +420,6 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/', 'create')->name('create');
                 Route::get('/show', 'index')->name('index');
                 Route::post('/store', 'store')->name('store');
-                // Route::post('/payment', 'payment')->name('payment');
             }
         );
         Route::prefix('orders')->controller(ClientOrderController::class)->name('orders.')->group(
@@ -454,8 +427,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detailOrder')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
-                // Route::post('/cancel', 'cancel')->name('cancel');
-                // Route::post('/retry-payment', 'retryPayment')->name('retryPayment');
+
                 Route::get('/',  'orders')->name('list');
                 Route::post('/{orderId}/retry-payment',  'retryPayment')->name('retryPayment');
                 Route::post('/{orderId}/cancel', 'cancelOrder')->name('cancelOrder');

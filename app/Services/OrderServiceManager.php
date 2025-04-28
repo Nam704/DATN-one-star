@@ -53,15 +53,7 @@ class OrderServiceManager
 
             $restriction->delete();
 
-            $this->notificationService->sendPrivate([
-                'title' => 'Tài khoản được mở khóa',
-                'message' => 'Tài khoản của bạn đã được mở khóa. Bạn có thể tiếp tục sử dụng dịch vụ.',
-                'from_user_id' => null,
-                'to_user_id' => $userId,
-                'type' => 'system',
-                'status' => 'unread',
-                'goto_id' => null,
-            ]);
+
 
             Log::info("Tài khoản ID {$userId} được mở khóa bởi admin ID: " . auth()->id());
 
@@ -148,15 +140,6 @@ class OrderServiceManager
                 });
 
                 $message = "Yêu cầu hủy đơn hàng {$order->code} đã được phê duyệt.";
-                $this->notificationService->sendPrivate([
-                    'title' => 'Yêu cầu hủy được phê duyệt',
-                    'message' => $message,
-                    'from_user_id' => null,
-                    'to_user_id' => $order->id_user,
-                    'type' => 'orders',
-                    'status' => 'unread',
-                    'goto_id' => $order->id,
-                ]);
             } elseif ($action === 'reject') {
                 if (empty($adminNote)) {
                     throw new \Exception('Ghi chú là bắt buộc khi từ chối hủy đơn.');
@@ -175,30 +158,12 @@ class OrderServiceManager
                 });
 
                 $message = "Yêu cầu hủy đơn hàng {$order->code} đã bị từ chối. Lý do: {$adminNote}";
-                $this->notificationService->sendPrivate([
-                    'title' => 'Yêu cầu hủy bị từ chối',
-                    'message' => $message,
-                    'from_user_id' => null,
-                    'to_user_id' => $order->id_user,
-                    'type' => 'orders',
-                    'status' => 'unread',
-                    'goto_id' => $order->id,
-                ]);
             } elseif ($action === 'review') {
                 $reviewStatusId = Order_status::where('name', 'Cancel Under Review')->value('id');
                 $order->update(['id_order_status' => $reviewStatusId]);
                 OrderCancellation::where('order_id', $order->id)->update(['status' => 'under_review']);
 
                 $message = "Yêu cầu hủy đơn hàng {$order->code} đang được xem xét lại.";
-                $this->notificationService->sendPrivate([
-                    'title' => 'Yêu cầu hủy được gửi để xem xét lại',
-                    'message' => $message,
-                    'from_user_id' => null,
-                    'to_user_id' => $order->id_user,
-                    'type' => 'orders',
-                    'status' => 'unread',
-                    'goto_id' => $order->id,
-                ]);
             } else {
                 throw new \Exception('Hành động không hợp lệ.');
             }

@@ -93,7 +93,7 @@ class RetryPaymentService
                     return [
                         'success' => false,
                         'message' => $check['message'],
-                        'code' => 'CANNOT_RETRY', // Thêm mã lỗi cụ thể
+                        'code' => 'CANNOT_RETRY',
                     ];
                 }
 
@@ -111,10 +111,11 @@ class RetryPaymentService
                     return [
                         'success' => false,
                         'message' => $message,
-                        'code' => 'MAX_ATTEMPTS_EXCEEDED', // Thêm mã lỗi cụ thể
+                        'code' => 'MAX_ATTEMPTS_EXCEEDED',
                     ];
                 }
 
+                // Cập nhật trạng thái thành Awaiting Payment
                 $awaitingPaymentStatus = Order_status::where('name', 'Awaiting Payment')->first();
                 if (!$awaitingPaymentStatus) {
                     throw new \Exception('Trạng thái Awaiting Payment không tồn tại.');
@@ -124,28 +125,26 @@ class RetryPaymentService
                 $order->increment('payment_attempts');
                 $order->save();
 
+                // Tạo URL thanh toán VNPAY
                 $paymentResult = $this->paymentService->vnpay_payment($order);
 
                 if ($paymentResult['code'] === '00') {
-                    $this->orderStatusService->markVNPAYPaid($order);
-                    $message = "Thanh toán thành công cho đơn hàng {$order->code}.";
+                    $message = "Yêu cầu thanh toán lại cho đơn hàng {$order->code} đã được khởi tạo.";
                     Log::info($message, $context);
-                    $this->notifyClient($order, 'Thanh toán thành công', $message);
                     return [
                         'success' => true,
                         'message' => $message,
                         'paymentResult' => $paymentResult,
-                        'code' => 'SUCCESS',
+                        'code' => 'PAYMENT_INITIATED',
                     ];
                 } else {
-                    $this->orderStatusService->markVNPAYFailed($order);
-                    $message = "Thanh toán thất bại cho đơn hàng {$order->code}: " . ($paymentResult['message'] ?? 'Lỗi không xác định');
+                    $message = "Không thể tạo yêu cầu thanh toán cho đơn hàng {$order->code}: " . ($paymentResult['message'] ?? 'Lỗi không xác định');
                     Log::warning($message, $context);
-                    $this->notifyClient($order, 'Thanh toán thất bại', $message);
+                    $this->notifyClient($order, 'Yêu cầu thanh toán thất bại', $message);
                     return [
                         'success' => false,
                         'message' => $message,
-                        'code' => 'PAYMENT_FAILED', // Thêm mã lỗi cụ thể
+                        'code' => 'PAYMENT_INITIATION_FAILED',
                     ];
                 }
             } catch (\Exception $e) {
@@ -159,7 +158,7 @@ class RetryPaymentService
                 return [
                     'success' => false,
                     'message' => $message,
-                    'code' => 'SYSTEM_ERROR', // Thêm mã lỗi cụ thể
+                    'code' => 'SYSTEM_ERROR',
                 ];
             }
         });
@@ -167,17 +166,8 @@ class RetryPaymentService
 
     protected function notifyClient($order, string $title, string $message)
     {
-        $notificationData = [
-            'title' => $title,
-            'message' => $message,
-            'from_user_id' => null,
-            'to_user_id' => $order ? $order->id_user : Auth::id(),
-            'type' => 'system',
-            'status' => 'unread',
-            'goto_id' => $order ? $order->id : null,
-        ];
+
         try {
-            $this->notificationService->sendPrivate($notificationData);
         } catch (\Exception $e) {
             Log::error("Lỗi khi gửi thông báo trong RetryPaymentService: {$e->getMessage()}", [
                 'order_id' => $order ? $order->id : null,

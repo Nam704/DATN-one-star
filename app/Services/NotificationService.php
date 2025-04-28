@@ -29,7 +29,7 @@ class NotificationService
             'message' => 'required|string|max:1000',
             'from_user_id' => 'nullable|integer|exists:users,id',
             'to_user_id' => 'nullable|integer|exists:users,id',
-            'type' => 'required|string|in:public,user,employee,admin,orders,system',
+            'type' => 'required|string',
             'status' => 'required|string|in:unread,read',
             'goto_id' => 'nullable',
         ], $additionalRules);

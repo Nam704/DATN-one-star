@@ -19,14 +19,14 @@
 
                                             <i class="ion-ios-arrow-down"></i></a>
                                         <ul class="dropdown_links">
-                                            <li><a href="{{ route('client.checkout.index') }}">Checkout </a></li>
-                                            <li><a href="{{ route('client.user.myAccount') }}">My Account </a></li>
-                                            <li><a href="{{ route('client.carts.viewCart') }}">Shopping Cart</a></li>
+                                            <li><a href="{{ route('client.checkout.index') }}">Thanh toán </a></li>
+                                            <li><a href="{{ route('client.user.myAccount') }}">Tài khoản </a></li>
+                                            <li><a href="{{ route('client.carts.viewCart') }}">Giỏ hàng</a></li>
 
                                             <li class="nav-item">
                                                 <a href="#" class="nav-link"
                                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                                    Logout
+                                                    Đăng xuất
                                                 </a>
                                             </li>
 
@@ -39,11 +39,11 @@
                                     </li>
                                 @else
                                     <li class="top_links"><a href="#">
-                                            My Account
+                                            Khách
                                             <i class="ion-ios-arrow-down"></i></a>
                                         <ul class="dropdown_links">
 
-                                            <li><a href="{{ route('auth.getFormLogin') }}">Login</a></li>
+                                            <li><a href="{{ route('auth.getFormLogin') }}">Đăng nhập</a></li>
 
                                         </ul>
                                     </li>
@@ -55,7 +55,7 @@
                                     <ul class="dropdown_language">
                                         <li><a href="#"><img
                                                     src=" {{ asset('client/assets/img/logo/language.png') }}"
-                                                    alt=""> English</a>
+                                                    alt=""> Tiếng Việt</a>
                                         </li>
 
                                     </ul>
@@ -100,7 +100,7 @@
                         <div class="middel_right_info">
 
                             <div class="mini_cart_wrapper">
-                                <a href="javascript:void(0)"><span class="lnr lnr-cart"></span>My Cart </a>
+                                <a href="javascript:void(0)"><span class="lnr lnr-cart"></span></a>
                                 <span class="cart_quantity"></span>
 
                             </div>
@@ -125,7 +125,7 @@
                     <div class="main_menu header_position text-center">
                         <nav>
                             <ul>
-                                <li><a href="{{route('client.home')}}">Trang chủ</a></li>
+                                <li><a href="{{ route('client.home') }}">Trang chủ</a></li>
                                 <li><a href="{{ route('client.shop') }}">Sản phẩm</a></li>
                                 <li><a href="{{ route('client.blog.index') }}">Tin tức</a></li>
                                 <li><a href="{{ route('client.contact.index') }}">Liên hệ với chúng tôi</a></li>
@@ -229,60 +229,62 @@
 <!--Offcanvas menu area end-->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(function(){
-  // URL cho AJAX dropdown
-  var dropdownUrl = "{{ route('client.search') }}";
+    $(function() {
+        // URL cho AJAX dropdown
+        var dropdownUrl = "{{ route('client.search') }}";
 
-  // Gợi ý realtime khi gõ
-  $('.search-input').on('keyup', function(){
-    var q    = $(this).val().trim();
-    var $res = $(this).closest('.search-container').find('.search-result');
+        // Gợi ý realtime khi gõ
+        $('.search-input').on('keyup', function() {
+            var q = $(this).val().trim();
+            var $res = $(this).closest('.search-container').find('.search-result');
 
-    if (q) {
-      $.get(dropdownUrl, { query: q })
-       .done(function(html){
-         $res.fadeIn().html(html);
-       });
-    } else {
-      $res.fadeOut().empty();
-    }
-  });
+            if (q) {
+                $.get(dropdownUrl, {
+                        query: q
+                    })
+                    .done(function(html) {
+                        $res.fadeIn().html(html);
+                    });
+            } else {
+                $res.fadeOut().empty();
+            }
+        });
 
-  // Ẩn dropdown khi click ngoài
-  $(document).on('click', function(e){
-    if (!$(e.target).closest('.search-container').length) {
-      $('.search-result').fadeOut();
-    }
-  });
+        // Ẩn dropdown khi click ngoài
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.search-container').length) {
+                $('.search-result').fadeOut();
+            }
+        });
 
-  // Click chọn item trong dropdown
-  $(document).on('click', '.search-result .dropdown-item a', function(e){
-    e.preventDefault();
+        // Click chọn item trong dropdown
+        $(document).on('click', '.search-result .dropdown-item a', function(e) {
+            e.preventDefault();
 
-    var $a       = $(this);
-    var type     = $a.data('type');    // "brand" hoặc "category"
-    var id       = $a.data('id');      // id của item
-    var $wrap    = $a.closest('.search-container');
-    var $input   = $wrap.find('.search-input');
-    var $result  = $wrap.find('.search-result');
+            var $a = $(this);
+            var type = $a.data('type'); // "brand" hoặc "category"
+            var id = $a.data('id'); // id của item
+            var $wrap = $a.closest('.search-container');
+            var $input = $wrap.find('.search-input');
+            var $result = $wrap.find('.search-result');
 
-    // 1) Đánh dấu checkbox tương ứng
-    if (type === 'brand') {
-      $('input.brand-filter[value="' + id + '"]').prop('checked', true);
-    } else if (type === 'category') {
-      $('input.category-filter[value="' + id + '"]').prop('checked', true);
-    }
+            // 1) Đánh dấu checkbox tương ứng
+            if (type === 'brand') {
+                $('input.brand-filter[value="' + id + '"]').prop('checked', true);
+            } else if (type === 'category') {
+                $('input.category-filter[value="' + id + '"]').prop('checked', true);
+            }
 
-    // 2) Xóa nội dung ô tìm kiếm
-    $input.val('');
+            // 2) Xóa nội dung ô tìm kiếm
+            $input.val('');
 
-    // 3) Ẩn dropdown
-    $result.fadeOut();
+            // 3) Ẩn dropdown
+            $result.fadeOut();
 
-    // 4) Gọi lại filter nếu có
-    if (typeof fetchFilteredProducts === 'function') {
-      fetchFilteredProducts();
-    }
-  });
-});
+            // 4) Gọi lại filter nếu có
+            if (typeof fetchFilteredProducts === 'function') {
+                fetchFilteredProducts();
+            }
+        });
+    });
 </script>

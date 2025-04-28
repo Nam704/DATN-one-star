@@ -278,16 +278,7 @@ class OrderService
                 'previous_status_id' => $currentStatusId,
             ]);
 
-            $dataNotification = [
-                'title' => 'Yêu cầu hủy đơn hàng',
-                'message' => "Đơn hàng {$order->code} đã yêu cầu hủy. Vui lòng kiểm tra!",
-                'from_user_id' => $order->id_user,
-                'to_user_id' => null,
-                'type' => 'orders',
-                'status' => 'unread',
-                'goto_id' => $order->id,
-            ];
-            $this->notificationService->sendPrivate($dataNotification);
+
 
             Cache::forget("user_cancel_count_{$user->id}");
             return $order;
@@ -318,15 +309,7 @@ class OrderService
             'expires_at' => now()->addHours(48),
         ]);
 
-        $this->notificationService->sendPrivate([
-            'title' => 'Tài khoản bị khóa',
-            'message' => 'Tài khoản của bạn đã bị khóa 48 giờ do vi phạm chính sách hủy đơn (quá 3 lần/ngày).',
-            'from_user_id' => null,
-            'to_user_id' => $userId,
-            'type' => 'system',
-            'status' => 'unread',
-            'goto_id' => null,
-        ]);
+
 
         Log::info("Tài khoản ID {$userId} bị khóa do hủy đơn quá giới hạn.");
     }

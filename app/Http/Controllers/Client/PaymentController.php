@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Transaction;
 use App\Services\NotificationService;
 use App\Services\OrderStatusService;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -26,14 +27,30 @@ class PaymentController extends Controller
     public function handleVnpayReturn(Request $request)
     {
         $txnRef = $request->get('vnp_TxnRef');
+        $vnp_SecureHash = $request->get('vnp_SecureHash');
+        $responseCode = $request->get('vnp_ResponseCode');
+
+        // Xác thực chữ ký VNPAY
+        $vnp_HashSecret = "1P0E4T01EMVDNJ0EIY4955QEHXK1IH27"; // Nên lưu trong config
+        $inputData = $request->except('vnp_SecureHash');
+        ksort($inputData);
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            $hashData .= ($hashData ? '&' : '') . urlencode($key) . '=' . urlencode($value);
+        }
+        $calculatedHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
 
         $order = Order::where('code', $txnRef)->first();
-
         if (!$order) {
             return redirect()->route('client.user.myAccount')->with('error', 'Đơn hàng không tồn tại.');
         }
 
-        $responseCode = $request->get('vnp_ResponseCode');
+        // Kiểm tra chữ ký để đảm bảo callback từ VNPAY
+        if ($calculatedHash !== $vnp_SecureHash) {
+            Log::error('Chữ ký VNPAY không hợp lệ', ['txn_ref' => $txnRef]);
+            $this->orderStatusService->markVNPAYFailed($order);
+            return redirect()->route('client.user.myAccount')->with('error', 'Giao dịch không hợp lệ.');
+        }
 
         // Ghi giao dịch vào bảng transactions
         Transaction::create([
@@ -44,11 +61,10 @@ class PaymentController extends Controller
             'payment_method' => 'VNPAY',
         ]);
 
+        // Xử lý kết quả thanh toán
         if ($responseCode == '00') {
             event(new OrderNotification($order));
             $this->orderStatusService->markVNPAYPaid($order);
-
-
 
             return redirect()->route('client.user.myAccount')->with('success', 'Thanh toán thành công!');
         } else {
