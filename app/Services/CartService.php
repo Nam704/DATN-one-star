@@ -94,6 +94,14 @@ class CartService
         return Cart::firstOrCreate(['id_user' => $userId])
             ->details()
             ->with(['variant.images', 'variant.product', 'variant.attributeValues'])
+            ->whereHas('variant', function ($query) {
+                $query->where('status', 'active') // Chỉ lấy biến thể active
+                    ->whereNull('deleted_at'); // Không bị xóa mềm
+            })
+            ->whereHas('variant.product', function ($query) {
+                $query->where('status', 'active') // Chỉ lấy sản phẩm active
+                    ->whereNull('deleted_at'); // Không bị xóa mềm
+            })
             ->get()
             ->map(function ($item) {
                 return [
@@ -171,7 +179,20 @@ class CartService
 
     private function getSessionCart(): array
     {
-        return Session::get('cart', []);
+        $cart = Session::get('cart', []);
+        $validCart = [];
+
+        foreach ($cart as $variantId => $item) {
+            $variant = Product_variant::with('product')->find($variantId);
+            if (
+                $variant && $variant->status === 'active' && !$variant->trashed() &&
+                $variant->product && $variant->product->status === 'active' && !$variant->product->trashed()
+            ) {
+                $validCart[$variantId] = $item;
+            }
+        }
+
+        return $validCart;
     }
 
     private function addToSessionCart(Product_variant $variant, int $quantity): array
