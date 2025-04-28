@@ -67,8 +67,9 @@
     @foreach($comments as $comment)
         <div class="reviews_comment_box">
             <div class="comment_thmb">  
-            <img src="{{ $comment->user->profile_image ? asset('storage/profile_image/' . $comment->user->profile_image) : asset('admin/assets/images/user-201.png') }}" 
-            alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+            <img src="{{ asset('storage/' . ($comment->user->profile_image ?? 'admin/assets/images/user-201.png')) }}" 
+    alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+
             </div>
             <div class="comment_text">
                 <div class="reviews_meta">
@@ -110,7 +111,7 @@
             </div>
 
             <div class="product_review_form">
-                <form action="{{ route('client.products.storecomment') }}" method="POST">
+                <form id="comment_form" method="POST">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="rating" id="rating_input" value="5"> {{-- Mặc định 5 sao --}}
@@ -141,6 +142,37 @@
                         }
                     });
                 });
+        // Script gửi form bằng Ajax
+                document.getElementById('comment_form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Chặn hành động mặc định
+
+            let formData = new FormData(this);
+
+            fetch('{{ route('client.products.storecomment') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Thông báo thành công
+                document.getElementById('comment_form').reset(); // Reset form
+                // Reset highlight sao về mặc định 5 sao
+                document.getElementById('rating_input').value = 5;
+                document.querySelectorAll('.star_rating_input i').forEach(function(s) {
+                    s.classList.remove('checked');
+                });
+                for (let i = 0; i < 5; i++) {
+                    document.querySelectorAll('.star_rating_input i')[i].classList.add('checked');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã có lỗi xảy ra, vui lòng thử lại.');
+            });
+        });
             </script>
 
             <style>
@@ -159,6 +191,7 @@
         @endauth
     </div>
 </div>
+
 
                     </div>
                 </div>

@@ -43,10 +43,10 @@ class ProductController extends Controller
             'product_id' => $request->product_id,
             'comment' => $request->comment,
             'rating' => $request->rating ?? 5,
-            'status' => 'pending', // Bình luận chờ duyệt
+            'status' => 'active', // Bình luận chờ duyệt
         ]);
 
-        return back()->with('success', 'Bình luận của bạn đã được gửi thành công, vui lòng chờ duyệt!');
+        return response()->json(['message' => 'Bình luận của bạn đã được gửi thành công!']);
     }
 
 
@@ -67,5 +67,5 @@ class ProductController extends Controller
             $related->max_price = $prices->max_price;
         }
         return view('client.detail.product-info', compact('product', 'relatedProducts'));
-    }
+    }   
 }

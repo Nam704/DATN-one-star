@@ -165,6 +165,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
             Route::get('topViewProducts', 'topViewProducts')->name('topViewProducts');
             Route::get('topLeastProducts', 'topLeastProducts')->name('topLeastProducts');
+            Route::get('lowStockProducts', 'lowStockProducts')->name('lowStockProducts');
         });
 
 
@@ -265,16 +266,16 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
        
         //comments
         Route::prefix('comments')->controller(WebCommentController::class)->name('comments.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('listapprove', 'listapprove')->name('listapprove');
-            Route::get('listreject', 'listreject')->name('listreject');
-            Route::get('listdelete', 'listdelete')->name('listdelete');
-            Route::post('approve/{id}', 'approve')->name('approve');
-            Route::post('reject/{id}', 'reject')->name('reject');
-            Route::get('show/{id}', 'show')->name('show');
-            Route::delete('destroy/{id}', 'destroy')->name('destroy');
-            Route::delete('delete/{id}', 'delete')->name('delete');
-            Route::post('restore/{id}', 'restore')->name('restore');
+            Route::get('/', 'index')->name('index')->middleware('permission:view-comments');
+            Route::get('listapprove', 'listapprove')->name('listapprove')->middleware('permission:view-comments');
+            Route::get('listreject', 'listreject')->name('listreject')->middleware('permission:view-comments');
+            Route::get('listdelete', 'listdelete')->name('listdelete')->middleware('permission:view-comments');
+            Route::post('approve/{id}', 'approve')->name('approve')->middleware('permission:edit-comments');
+            Route::post('reject/{id}', 'reject')->name('reject')->middleware('permission:edit-comments');
+            Route::get('show/{id}', 'show')->name('show')->middleware('permission:view-comments');
+            Route::delete('destroy/{id}', 'destroy')->name('destroy')->middleware('permission:delete-comments');
+            Route::delete('delete/{id}', 'delete')->name('delete')->middleware('permission:delete-comments');
+            Route::post('restore/{id}', 'restore')->name('restore')->middleware('permission:edit-comments');
         });
 
 

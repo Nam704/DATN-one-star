@@ -34,13 +34,12 @@ class DashboardController extends Controller
                 "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
                 "revenue" => $this->order
                     ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
-                    ->whereNotIn('order_statuses.name', ['Cancelled']) // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
+                    ->whereNotIn('order_statuses.name', ['Cancelled']) 
                     ->whereBetween('orders.created_at', [$start_date, $end_date])
                     ->sum('orders.total'),
 
                 "order" => $this->order
-                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
-                    ->whereNotIn('order_statuses.name', ['Cancelled'])  // Thay thế 'Delivered' bằng tên trạng thái bạn muốn
+                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  
                     ->whereBetween('orders.created_at', [$start_date, $end_date])
                     ->count(),
                     
