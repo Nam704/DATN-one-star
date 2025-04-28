@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
@@ -25,9 +26,29 @@ class ProductController extends Controller
             ->where('id', '!=', $product->id)
             ->limit(4)
             ->get();
-        // return $product;
-        return view('client.detail.index', compact('product', 'relatedProducts'));
+        $comments = Comment::with('user')->where('product_id', $id)->where('status', 'active')->get();
+        return view('client.detail.index', compact('product', 'relatedProducts','comments'));
     }
+
+    public function storecomment(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'comment' => 'required|string',
+            'rating' => 'nullable|integer|min:1|max:5',
+        ]);
+
+        Comment::create([
+            'user_id' => auth()->id(),
+            'product_id' => $request->product_id,
+            'comment' => $request->comment,
+            'rating' => $request->rating ?? 5,
+            'status' => 'active', // Bình luận chờ duyệt
+        ]);
+
+        return response()->json(['message' => 'Bình luận của bạn đã được gửi thành công!']);
+    }
+
 
     public function related($id)
     {
@@ -46,5 +67,5 @@ class ProductController extends Controller
             $related->max_price = $prices->max_price;
         }
         return view('client.detail.product-info', compact('product', 'relatedProducts'));
-    }
+    }   
 }

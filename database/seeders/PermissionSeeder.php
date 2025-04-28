@@ -72,7 +72,18 @@ class PermissionSeeder extends Seeder
                         'module' => $module,
                     ]);
                 }
-            } else if ($module === 'contacts') {
+            }
+            else if ($module === 'comments') {
+                // chỉ tạo quyền view và edit cho liên hệ
+                foreach (['view', 'edit','delete'] as $action) {
+                    Permission::create([
+                        'name' => "$action-$module",
+                        'display_name' => ucfirst($action) . ' ' . ucfirst($module),
+                        'description' => 'Can ' . $action . ' ' . $module,
+                        'module' => $module,
+                    ]);
+                }
+            }  else if ($module === 'contacts') {
                 // chỉ tạo quyền view và edit cho liên hệ
                 foreach (['view', 'edit','delete'] as $action) {
                     Permission::create([
