@@ -35,45 +35,11 @@ class BlogController extends Controller
     public function store(Request $request)
     {
         // Validate the input fields
-        $request->validate([
-            'title' => 'required|string|max:5000|unique:blogs,title',
-            'content' => 'required|string',
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-        ], [
-            'title.required' => 'Tiêu đề bài viết là bắt buộc.',
-            'title.string' => 'Tiêu đề bài viết phải là một chuỗi ký tự.',
-            'title.max' => 'Tiêu đề bài viết không được quá 5000 ký tự.',
-            'title.unique' => 'Tiêu đề bài viết đã tồn tại. Vui lòng chọn tiêu đề khác.',
-        
-            'content.required' => 'Nội dung bài viết là bắt buộc.',
-            'content.string' => 'Nội dung bài viết phải là một chuỗi ký tự.',
-    
-            'thumbnail.required' => 'Không được để trống ảnh',
-            'thumbnail.image' => 'Ảnh bài viết phải là một tệp hình ảnh.',
-            'thumbnail.mimes' => 'Ảnh bài viết phải có định dạng jpeg, png, jpg, gif, webp hoặc svg.',
-            'thumbnail.max' => 'Ảnh bài viết không được vượt quá 2MB.',
-        ]);
-    
-        // Handle image upload
-        $imagePath = null;
-        if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-
-            if ($file->isValid()) {
-                $imagePath = $file->store('blogs', 'public');
-            } else {
-                return back()->withErrors(['thumbnail' => 'Ảnh không hợp lệ hoặc bị lỗi khi tải lên.'])->withInput();
-            }
-        }
-    
-        // Create the blog using the service
-        $blog_data = $this->BlogService->createBlog($request, $imagePath);
-    
-        // Get the latest blogs
+        $blog_data = $this->BlogService->createBlog($request);
+        // Lấy danh sách blog mới nhất
         $blogs = Blog::latest()->get();
-    
-        // Redirect with success message
-        return redirect()->route('admin.blogs.index')->with('success', 'Bài viết đã được tạo thành công!');
+
+        return view('admin.blog.index', compact('blogs'));
     }
     
 
