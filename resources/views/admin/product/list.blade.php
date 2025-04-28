@@ -88,4 +88,37 @@
 @push('styles')
     <x-admin.data-table-styles />
 @endpush
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // Hiển thị/ẩn input quantity
+            $('#stock').on('change', function() {
+                if (this.value === 'quantity') {
+                    $('#quantity').show();
+                } else {
+                    $('#quantity').hide().val(''); // Ẩn và xóa giá trị khi không cần
+                }
+            });
 
+            // Bắt sự kiện click nút Apply Filter
+            $('#applyFilter').on('click', function(e) {
+                e.preventDefault();
+                var formData = $('#filterForm').serialize();
+                console.log('Form data:', formData); // Debug dữ liệu gửi đi
+
+                $.ajax({
+                    url: '{{ route('admin.products.filter') }}',
+                    method: 'GET',
+                    data: formData,
+                    success: function(html) {
+                        $('#fixed-header-datatable tbody').html(html);
+                        $('#filterModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX error:', xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+@endpush
