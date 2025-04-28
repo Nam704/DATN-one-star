@@ -271,7 +271,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-products');
             Route::get('stas/{id}', 'stas')->name('stas')->middleware('permission:view-products');
             Route::delete('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-products');
-            Route::post('opensp/{id}', 'opensp')->name('opensp')->middleware('permission:edit-products');
+            Route::post('open-product/{id}', 'openProduct')->name('openProduct')->middleware('permission:edit-products');
             Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail')->middleware('permission:view-products');
         });
 
@@ -282,8 +282,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('wards/{districtId}', 'getWards')->name('getWards');
         });
 
-         // Users
-         Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
+        // Users
+        Route::prefix('users')->controller(UserContronler::class)->name('users.')->group(function () {
             Route::get('/', 'index')->name('index')->middleware('role:admin');
             Route::get('listemployee', 'listemployee')->name('listemployee')->middleware('role:admin');
             Route::get('listuser', 'listuser')->name('listuser')->middleware('permission:view-users');

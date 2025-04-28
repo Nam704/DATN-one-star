@@ -335,11 +335,22 @@ class ProductController extends Controller
         $products = Product::onlyTrashed()->get();
         return view('admin.product.listlock', compact('products'));
     }
-    public function opensp($id)
+    public function openProduct($id)
     {
-        $products = Product::onlyTrashed()->findOrFail($id);
-        $products->restore();
+        $product = Product::onlyTrashed()->findOrFail($id);
 
-        return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục!');
+        DB::transaction(function () use ($product) {
+            // Khôi phục sản phẩm
+            $product->restore();
+            // Cập nhật trạng thái thành active
+            $product->status = 'active';
+            $product->save();
+
+            // (Tùy chọn) Khôi phục các biến thể liên quan nếu chúng cũng bị xóa mềm
+            $product->variants()->onlyTrashed()->restore();
+            $product->variants()->update(['status' => 'active']);
+        });
+
+        return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục và kích hoạt!');
     }
 }
