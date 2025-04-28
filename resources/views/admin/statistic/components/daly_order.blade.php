@@ -1,15 +1,15 @@
-<div class="col-lg-8">
-    <div class="card">
-        <div class="card-body">
+<div class="col-lg-8 d-flex">
+    <div class="card flex-fill">
+        <div class="card-body d-flex flex-column">
             <!-- Các icon điều khiển trên góc -->
-            <div class="card-widgets">
+            {{-- <div class="card-widgets">
                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                 <!-- Sử dụng collapse riêng với id riêng cho widget đơn hàng -->
                 <a data-bs-toggle="collapse" href="#dailystatus-collapse" role="button" aria-expanded="false" aria-controls="dailystatus-collapse">
                     <i class="ri-subtract-line"></i>
                 </a>
                 <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
-            </div>
+            </div> --}}
             <!-- Tiêu đề widget -->
             <h5 class="header-title mb-0">Đơn hàng theo trạng thái trong ngày (ngày {{ date('d/m/Y') }})</h5>
             <!-- Nội dung widget có thể collapse được -->
