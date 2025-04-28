@@ -471,7 +471,7 @@ class StatisticController extends Controller
     }
     public function exportLowStockProducts(Request $request)
     {
-        
+
         $products = $this->product->low_stock_products();
 
         // Khởi tạo Spreadsheet và lấy sheet chính
@@ -1071,14 +1071,14 @@ class StatisticController extends Controller
         // 6. Top 20 khách hàng mua nhiều nhất trong khoảng thời gian (theo tổng giá trị mua hàng, chỉ Delivered)
         $topCustomers = DB::table('orders')
             ->leftJoin('users', 'orders.id_user', '=', 'users.id')
-            ->select(
-                'orders.id_user',
-                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
-                DB::raw('SUM(orders.total) as total_purchase')
-            )
             ->whereBetween('orders.created_at', $dateRange)
             ->where('orders.id_order_status', $deliveredStatusId)
-            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
+            ->select(
+                'orders.id_user',
+                DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
+            )
+            ->groupBy('orders.id_user')
             ->orderByDesc('total_purchase')
             ->limit(20)
             ->get();
