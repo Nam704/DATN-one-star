@@ -83,7 +83,84 @@
 
 
 
-
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="filterForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filterModalLabel">Filter Products</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                @foreach ($categories as $c)
+                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <!-- Brand -->
+                        <div class="mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <select class="form-select" id="brand" name="brand">
+                                <option value="">All Brands</option>
+                                @foreach ($brands as $b)
+                                    <option value="{{ $b->id }}">{{ $b->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <!-- Stock -->
+                        <div class="mb-3">
+                            <label for="stock" class="form-label">Kho hàng</label>
+                            <select class="form-select" id="stock" name="stock">
+                                <option value="">Tất cả</option>
+                                <option value="in_stock">Còn hàng</option>
+                                <option value="out_of_stock">Hết hàng</option>
+                                <option value="low_stock">Sắp hết hàng</option>  {{-- mới --}}
+                                <option value="quantity">Số lượng cụ thể</option>
+                            </select>
+                            <input type="number" class="form-control mt-2" id="quantity" name="quantity"
+                                placeholder="Nhập số lượng" style="display: none;">
+                        </div>
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label class="form-label">Khoảng giá</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="number" class="form-control" name="min_price" placeholder="Giá tối thiểu">
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" name="max_price" placeholder="Giá tối đa">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Created At -->
+                        <div class="mb-3">
+                            <label class="form-label">Ngày tạo</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="date" class="form-control" name="created_from" placeholder="Từ ngày">
+                                </div>
+                                <div class="col">
+                                    <input type="date" class="form-control" name="created_to" placeholder="Đến ngày">
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Chỉ cần chọn một trong hai hoặc cả hai để lọc.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" id="applyFilter">Áp dụng bộ lọc</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('styles')
     <x-admin.data-table-styles />
