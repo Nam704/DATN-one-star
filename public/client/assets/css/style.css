@@ -8993,7 +8993,7 @@ textarea:-ms-input-placeholder {
 }
 
 .table-responsive table tbody tr td:last-child a {
-  color: #ffd54c;
+  /* color: #ffd54c; */
 }
 
 .table-responsive table tbody tr td:last-child a:hover {

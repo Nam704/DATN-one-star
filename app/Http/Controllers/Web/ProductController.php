@@ -265,7 +265,7 @@ class ProductController extends Controller
 
         // Lấy danh sách đơn hàng liên quan đến biến thể này
         $orderDetails = Order_detail::where('id_variant', $variantId)
-            ->with(['order.user', 'order.orderStatus']) // Lấy thông tin đơn hàng, người dùng và trạng thái
+            ->with(['order.user', 'order.orderStatus','order.address']) // Lấy thông tin đơn hàng, người dùng và trạng thái
             ->get();
 
         // Nhóm đơn hàng theo người dùng
@@ -313,4 +313,26 @@ class ProductController extends Controller
             'selectedStatus' => $selectedStatus // Trạng thái được chọn
         ]);
     }
+    public function lock($id)
+{
+    $product = Product::findOrFail($id);
+    $product->status = 'inactive';
+    $product->delete(); 
+    $product->save();
+
+    return redirect()->route('admin.products.list')->with('success', 'Ngừng bán sản phẩm ');
+}
+
+public function trash()
+{
+    $products = Product::onlyTrashed()->get();
+    return view('admin.product.listlock', compact('products'));
+}
+public function opensp($id)
+{
+    $products = Product::onlyTrashed()->findOrFail($id);
+    $products->restore();
+
+    return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục!');
+}
 }

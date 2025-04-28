@@ -12,67 +12,48 @@ use App\Services\OrderStatusService;
 
 class PaymentController extends Controller
 {
-    protected $orderService;
     protected $orderStatusService;
     protected $notificationService;
-    function __construct(
 
+    public function __construct(
         NotificationService $notificationService,
         OrderStatusService $orderStatusService
     ) {
         $this->orderStatusService = $orderStatusService;
         $this->notificationService = $notificationService;
     }
+
     public function handleVnpayReturn(Request $request)
     {
-        $orderCode = $request->get('vnp_TxnRef'); // Cắt bỏ timestamp, lấy ID đơn hàng
-        $order = Order::where('code', $orderCode)->first();
+        $txnRef = $request->get('vnp_TxnRef');
+
+        $order = Order::where('code', $txnRef)->first();
 
         if (!$order) {
-            // return redirect()->route('client.orders.index')->with('error', 'Đơn hàng không tồn tại.');
-            return 'Đơn hàng không tồn tại.';
+            return redirect()->route('client.user.myAccount')->with('error', 'Đơn hàng không tồn tại.');
         }
 
-        // Kiểm tra kết quả thanh toán
-        if ($request->get('vnp_ResponseCode') == '00') {
+        $responseCode = $request->get('vnp_ResponseCode');
 
+        // Ghi giao dịch vào bảng transactions
+        Transaction::create([
+            'order_id' => $order->id,
+            'txn_ref' => $txnRef,
+            'amount' => $order->total,
+            'status' => $responseCode,
+            'payment_method' => 'VNPAY',
+        ]);
+
+        if ($responseCode == '00') {
             event(new OrderNotification($order));
             $this->orderStatusService->markVNPAYPaid($order);
-            $dataNotification = [
-                'title' => 'Update Order Paid',
-                'message' => "Update Order Paid, vui lòng kiểm tra và xác nhận!",
-                'from_user_id' => $order->id_user,
-                'to_user_id' => null,
-                'type' => 'orders',
-                'status' => 'unread',
-                'goto_id' => $order->id,
-            ];
-            // dd($dataNotification);
-            $this->notificationService->sendPrivate($dataNotification);
-            Transaction::create(
-                [
-                    "txn_ref" => $request->get('vnp_TxnRef'),
-                    "amount" => $order->total,
-                    "status" => $request->get('vnp_ResponseCode'),
 
-                ]
 
-            );
 
             return redirect()->route('client.user.myAccount')->with('success', 'Thanh toán thành công!');
-            // return 'Thanh toán thành công!';
         } else {
             $this->orderStatusService->markVNPAYFailed($order);
-            Transaction::create(
-                [
-                    "txn_ref" => $request->get('vnp_TxnRef'),
-                    "amount" => $order->total,
-                    "status" => $request->get('vnp_ResponseCode'),
 
-                ]
-
-            );
-            // return 'Thanh toán thất bại, vui lòng thử lại.';
             return redirect()->route('client.user.myAccount')->with('error', 'Thanh toán thất bại, vui lòng thử lại.');
         }
     }

@@ -86,15 +86,15 @@
                 <div class="col-lg-9 col-md-6">
                     <div class="middel_right">
                         <div class="search-container mobile-search" style="position: relative;">
-                            <form action="#">
+                            <form action="{{ route('client.shop') }}" method="GET" class="search-form">
                                 <div class="search_box">
-                                    <input type="text" class="search-input"
-                                        placeholder="Search entire store here ..." autocomplete="off">
+                                    <input type="text" name="search" class="search-input"
+                                        placeholder="Search entire store here …" autocomplete="off">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>
                             <div class="search-result"
-                                style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
+                                style="position:absolute; top:100%; left:0; width:100%; z-index:1000;"></div>
                         </div>
 
                         <div class="middel_right_info">
@@ -199,15 +199,15 @@
                         </ul>
                     </div>
                     <div class="search-container mobile-search" style="position: relative;">
-                        <form action="#">
+                        <form action="{{ route('client.shop') }}" method="GET" class="search-form">
                             <div class="search_box">
-                                <input type="text" class="search-input" placeholder="Search entire store here ..."
-                                    autocomplete="off">
+                                <input type="text" name="search" class="search-input"
+                                    placeholder="Search entire store here …" autocomplete="off">
                                 <button type="submit"><i class="ion-ios-search-strong"></i></button>
                             </div>
                         </form>
                         <div class="search-result"
-                            style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000;"></div>
+                            style="position:absolute; top:100%; left:0; width:100%; z-index:1000;"></div>
                     </div>
                     <div id="menu" class="text-left ">
                         <ul class="offcanvas_main_menu">
@@ -229,34 +229,60 @@
 <!--Offcanvas menu area end-->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.search-input').on('keyup', function() {
-            var query = $(this).val();
-            // Tìm container chứa ô tìm kiếm hiện hành và phần kết quả tương ứng
-            var searchResultContainer = $(this).closest('.search-container').find('.search-result');
-            if (query != '') {
-                $.ajax({
-                    url: "{{ route('client.search') }}",
-                    type: "GET",
-                    data: {
-                        query: query
-                    },
-                    success: function(data) {
-                        searchResultContainer.fadeIn();
-                        searchResultContainer.html(data);
-                    }
-                });
-            } else {
-                searchResultContainer.fadeOut();
-                searchResultContainer.html("");
-            }
-        });
+$(function(){
+  // URL cho AJAX dropdown
+  var dropdownUrl = "{{ route('client.search') }}";
 
-        // Ẩn kết quả gợi ý khi click bên ngoài container search
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.search-container').length) {
-                $('.search-result').fadeOut();
-            }
-        });
-    });
+  // Gợi ý realtime khi gõ
+  $('.search-input').on('keyup', function(){
+    var q    = $(this).val().trim();
+    var $res = $(this).closest('.search-container').find('.search-result');
+
+    if (q) {
+      $.get(dropdownUrl, { query: q })
+       .done(function(html){
+         $res.fadeIn().html(html);
+       });
+    } else {
+      $res.fadeOut().empty();
+    }
+  });
+
+  // Ẩn dropdown khi click ngoài
+  $(document).on('click', function(e){
+    if (!$(e.target).closest('.search-container').length) {
+      $('.search-result').fadeOut();
+    }
+  });
+
+  // Click chọn item trong dropdown
+  $(document).on('click', '.search-result .dropdown-item a', function(e){
+    e.preventDefault();
+
+    var $a       = $(this);
+    var type     = $a.data('type');    // "brand" hoặc "category"
+    var id       = $a.data('id');      // id của item
+    var $wrap    = $a.closest('.search-container');
+    var $input   = $wrap.find('.search-input');
+    var $result  = $wrap.find('.search-result');
+
+    // 1) Đánh dấu checkbox tương ứng
+    if (type === 'brand') {
+      $('input.brand-filter[value="' + id + '"]').prop('checked', true);
+    } else if (type === 'category') {
+      $('input.category-filter[value="' + id + '"]').prop('checked', true);
+    }
+
+    // 2) Xóa nội dung ô tìm kiếm
+    $input.val('');
+
+    // 3) Ẩn dropdown
+    $result.fadeOut();
+
+    // 4) Gọi lại filter nếu có
+    if (typeof fetchFilteredProducts === 'function') {
+      fetchFilteredProducts();
+    }
+  });
+});
 </script>
