@@ -35,13 +35,17 @@ use Illuminate\Support\Facades\Mail;
 
 use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Web\ExcelController;
-use App\Http\Controllers\Client\AuthController  as ClientAuthController;;
+use App\Http\Controllers\Client\AuthController  as ClientAuthController;
+use App\Http\Controllers\Client\CommentController;
+
+;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 use App\Http\Controllers\Web\AddressController;
 use App\Http\Controllers\Web\BannerController;
 use App\Http\Controllers\Web\ChatController;
+use App\Http\Controllers\Web\CommentController as WebCommentController;
 use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\ProductDashboardController;
 use App\Http\Controllers\Web\RefundController;
@@ -147,6 +151,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
             Route::get('topViewProducts', 'topViewProducts')->name('topViewProducts');
             Route::get('topLeastProducts', 'topLeastProducts')->name('topLeastProducts');
+            Route::get('lowStockProducts', 'lowStockProducts')->name('lowStockProducts');
         });
 
 
@@ -244,6 +249,21 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-contacts');
             Route::delete('delete/{id}', 'delete')->name('delete')->middleware('permission:delete-contacts');
         });
+       
+        //comments
+        Route::prefix('comments')->controller(WebCommentController::class)->name('comments.')->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('permission:view-comments');
+            Route::get('listapprove', 'listapprove')->name('listapprove')->middleware('permission:view-comments');
+            Route::get('listreject', 'listreject')->name('listreject')->middleware('permission:view-comments');
+            Route::get('listdelete', 'listdelete')->name('listdelete')->middleware('permission:view-comments');
+            Route::post('approve/{id}', 'approve')->name('approve')->middleware('permission:edit-comments');
+            Route::post('reject/{id}', 'reject')->name('reject')->middleware('permission:edit-comments');
+            Route::get('show/{id}', 'show')->name('show')->middleware('permission:view-comments');
+            Route::delete('destroy/{id}', 'destroy')->name('destroy')->middleware('permission:delete-comments');
+            Route::delete('delete/{id}', 'delete')->name('delete')->middleware('permission:delete-comments');
+            Route::post('restore/{id}', 'restore')->name('restore')->middleware('permission:edit-comments');
+        });
+
 
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
             Route::get('/create',  'create')->name('create')->middleware('permission:create-products'); // Hiển thị form thêm sản phẩm
@@ -390,6 +410,8 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('products')->name('products.')->group(
             function () {
                 Route::get('detail/{id}', [ClientProductController::class, 'detail'])->name('detail');
+                Route::post('/store-comment', [ClientProductController::class, 'storecomment'])->name('storecomment');
+                Route::post('/store-comment/{id}', [ClientProductController::class, 'showProduct'])->name('showProduct');
                 Route::get('related/{id}', [ClientProductController::class, 'related'])->name('related');
             }
         );

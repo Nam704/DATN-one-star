@@ -115,7 +115,7 @@
                 <div class="breadcrumb_content">
                     <ul>
                         <li><a href="{{route('client.home')}}">Trang chủ</a></li>
-                        <li>Blogs</li>
+                        <li>Tin tức</li>
                     </ul>
                 </div>
             </div>

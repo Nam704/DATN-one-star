@@ -186,4 +186,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'id_user');
     }
+    public function comments()
+{
+    return $this->hasMany(Comment::class); //mới
+}
 }
