@@ -1,84 +1,80 @@
-<div class="col-lg-8">
-    <div class="card">
-        <div class="card-body">
-            <!-- Các icon điều khiển trên góc -->
-            <div class="card-widgets">
+<div class="col-lg-4 d-flex">
+    <div class="card flex-fill">
+        <div class="card-body d-flex flex-column">
+            <!-- Các icon widget tương tự -->
+            {{-- <div class="card-widgets">
                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                <!-- Sử dụng collapse riêng với id riêng cho widget đơn hàng -->
-                <a data-bs-toggle="collapse" href="#dailystatus-collapse" role="button" aria-expanded="false" aria-controls="dailystatus-collapse">
+                <a data-bs-toggle="collapse" href="#weekly-sales-collapse" role="button" aria-expanded="false" aria-controls="weekly-sales-collapse">
                     <i class="ri-subtract-line"></i>
                 </a>
                 <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
-            </div>
-            <!-- Tiêu đề widget -->
-            <h5 class="header-title mb-0">Đơn hàng theo trạng thái trong ngày (ngày {{ date('d/m/Y') }})</h5>
-            <!-- Nội dung widget có thể collapse được -->
-            <div id="dailystatus-collapse" class="collapse pt-3 show">
-                <!-- Vùng hiển thị biểu đồ bằng canvas của Chart.js -->
-                <canvas id="dailyStatusChart" width="200" height="100"></canvas>
-
-                <!-- Dòng summary bên dưới (tùy chọn): ví dụ hiển thị từng trạng thái và số đơn -->
-                <div class="row text-center mt-3" id="daily-stats-summary">
-                    <!-- Dữ liệu sẽ được render từ JS -->
+            </div> --}}
+            <!-- Tiêu đề hiển thị kèm tháng và năm hiện tại -->
+            <h5 class="header-title mb-0">Tổng đơn theo tuần (tháng {{ date('m/Y') }})</h5>
+            <div id="weekly-sales-collapse" class="collapse pt-3 show">
+                <div dir="ltr">
+                    <!-- Container cho biểu đồ, tương tự như yearly-sales-chart -->
+                    <div id="weekly-sales-chart" class="apex-charts" data-colors="#3bc0c3,#1a2942,#d1d7d973"></div>
+                </div>
+                <!-- Dòng summary bên dưới, sẽ hiển thị thông tin của từng tuần -->
+                <div class="row text-center" id="weekly-stats-summary">
+                    <!-- Các cột tóm tắt sẽ được inject qua JS -->
                 </div>
             </div>
-        </div>
-    </div>
+        </div> <!-- end card-body-->
+    </div> <!-- end card-->
 </div>
 
-<!-- Include Chart.js từ CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include ApexCharts nếu chưa có -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <script>
-    // Hàm render bảng tổng hợp dưới biểu đồ dựa trên dữ liệu trả về
-    function renderDailyStatsSummary(data) {
-        let summary = '';
-        data.forEach(item => {
-            summary += `
-                <div class="col">
-                    <p class="text-muted mt-2 mb-1">${item.status}</p>
-                    <h5 class="mb-0">${item.total} đơn</h5>
-                </div>
-            `;
-        });
-        document.getElementById('daily-stats-summary').innerHTML = summary;
+    function loadWeeklyChart() {
+        fetch("{{ route('admin.weeklyOrderStats') }}", {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Tách mảng labels (ví dụ "Tuần 1", "Tuần 2",…) và total đơn theo tuần
+                let labels = data.map(item => item.label);
+                let totals = data.map(item => item.total);
+
+                // Cấu hình và vẽ biểu đồ bar bằng ApexCharts
+                var options = {
+                    chart: {
+                        type: 'bar',
+                        height: 250
+                    },
+                    series: [{
+                        name: 'Số đơn hàng',
+                        data: totals
+                    }],
+                    xaxis: {
+                        categories: labels
+                    },
+                    colors: ['#3bc0c3']
+                };
+
+                var chart = new ApexCharts(document.querySelector("#weekly-sales-chart"), options);
+                chart.render();
+
+                // Render các cột summary tương tự phần Yearly Sales Report
+                let summaryHtml = '';
+                data.forEach(item => {
+                    summaryHtml += `
+                        <div class="col">
+                            <p class="text-muted mt-3 mb-2">${item.label}</p>
+                            <h4 class="mb-0">${item.total} đơn</h4>
+                        </div>
+                    `;
+                });
+                document.getElementById('weekly-stats-summary').innerHTML = summaryHtml;
+            })
+            .catch(error => console.error('Error:', error));
     }
 
-    // Gọi API để lấy dữ liệu đơn hàng trong ngày và vẽ biểu đồ
-    fetch("{{ route('admin.dailyStatistics_Dashboard') }}", {
-        headers: {
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Tách mảng label và total từ dữ liệu trả về
-        var statusLabels = data.map(item => item.status);
-        var statusValues = data.map(item => item.total);
-
-        // Vẽ biểu đồ với Chart.js
-        var ctx = document.getElementById('dailyStatusChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: statusLabels,
-                datasets: [{
-                    label: 'Số đơn hàng',
-                    data: statusValues,
-                    backgroundColor: '#3bc0c3'
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Render summary bên dưới biểu đồ
-        renderDailyStatsSummary(data);
-    })
-    .catch(error => console.error('Error fetching daily statistics:', error));
+    // Tải biểu đồ ngay khi trang load
+    document.addEventListener("DOMContentLoaded", loadWeeklyChart);
 </script>

@@ -1244,17 +1244,18 @@ class StatisticController extends Controller
         // 6. Top 50 người mua nhiều nhất (chi tiết theo Delivered)
         $topCustomers = DB::table('orders')
             ->leftJoin('users', 'orders.id_user', '=', 'users.id')
-            ->select(
-                'orders.id_user',
-                DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name"))) as user_name'),
-                DB::raw('SUM(orders.total) as total_purchase')
-            )
             ->whereBetween('orders.created_at', $dateRange)
             ->where('orders.id_order_status', $deliveredStatusId)
-            ->groupBy('orders.id_user', DB::raw('COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))'))
+            ->select(
+                'orders.id_user',
+                DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))) as user_name'),
+                DB::raw('SUM(orders.total) as total_purchase')
+            )
+            ->groupBy('orders.id_user')
             ->orderByDesc('total_purchase')
             ->limit(50)
             ->get();
+
         // 6. Top 50 người mua nhiều nhất (chỉ tính đơn Delivered)
         $topCustomers = DB::table('orders')
             ->leftJoin('users', 'orders.id_user', '=', 'users.id')
@@ -1263,7 +1264,7 @@ class StatisticController extends Controller
             ->select(
                 'orders.id_user',
                 // Dùng MAX() để tổng hợp COALESCE, khỏi phải đưa vào GROUP BY
-                DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))) as user_name'),
+                DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, ".user_name")))) as user_name'),
                 DB::raw('SUM(orders.total) as total_purchase')
             )
             ->groupBy('orders.id_user')      // giờ chỉ cần group theo id_user
