@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\Product_variant;
 use App\Services\ProductService;
 use App\Imports\CreateProductImport;
+use App\Models\Cart_details;
 use App\Models\Order_detail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -265,7 +266,7 @@ class ProductController extends Controller
 
         // Lấy danh sách đơn hàng liên quan đến biến thể này
         $orderDetails = Order_detail::where('id_variant', $variantId)
-            ->with(['order.user', 'order.orderStatus','order.address']) // Lấy thông tin đơn hàng, người dùng và trạng thái
+            ->with(['order.user', 'order.orderStatus', 'order.address']) // Lấy thông tin đơn hàng, người dùng và trạng thái
             ->get();
 
         // Nhóm đơn hàng theo người dùng
@@ -314,25 +315,42 @@ class ProductController extends Controller
         ]);
     }
     public function lock($id)
-{
-    $product = Product::findOrFail($id);
-    $product->status = 'inactive';
-    $product->delete(); 
-    $product->save();
+    {
+        $product = Product::findOrFail($id);
+        $product->status = 'inactive';
+        $product->delete(); // Xóa mềm sản phẩm
+        $product->save();
 
-    return redirect()->route('admin.products.list')->with('success', 'Ngừng bán sản phẩm ');
-}
+        // Xóa các mục trong giỏ hàng liên quan đến sản phẩm này
+        DB::transaction(function () use ($product) {
+            $variantIds = $product->variants()->pluck('id'); // Lấy danh sách id_variant của sản phẩm
+            Cart_details::whereIn('id_variant', $variantIds)->delete(); // Xóa các mục trong CartDetail
+        });
 
-public function trash()
-{
-    $products = Product::onlyTrashed()->get();
-    return view('admin.product.listlock', compact('products'));
-}
-public function opensp($id)
-{
-    $products = Product::onlyTrashed()->findOrFail($id);
-    $products->restore();
+        return redirect()->route('admin.products.list')->with('success', 'Ngừng bán sản phẩm và đã xóa khỏi giỏ hàng của người dùng');
+    }
 
-    return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục!');
-}
+    public function trash()
+    {
+        $products = Product::onlyTrashed()->get();
+        return view('admin.product.listlock', compact('products'));
+    }
+    public function openProduct($id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+
+        DB::transaction(function () use ($product) {
+            // Khôi phục sản phẩm
+            $product->restore();
+            // Cập nhật trạng thái thành active
+            $product->status = 'active';
+            $product->save();
+
+            // (Tùy chọn) Khôi phục các biến thể liên quan nếu chúng cũng bị xóa mềm
+            $product->variants()->onlyTrashed()->restore();
+            $product->variants()->update(['status' => 'active']);
+        });
+
+        return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục và kích hoạt!');
+    }
 }
