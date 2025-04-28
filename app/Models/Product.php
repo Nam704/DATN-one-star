@@ -75,6 +75,12 @@ class Product extends Model
     {
         return $this->hasMany(Product_albums::class, 'id_product');
     }
+
+    public function comments()
+{
+    return $this->hasMany(Comment::class);  // mới
+}
+
     public function getProductWithDetails()
     {
         return $this->load([
@@ -202,7 +208,7 @@ class Product extends Model
               ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
               ->join('orders', 'order_details.id_order', '=', 'orders.id')
               ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-              ->where('order_statuses.name', '=', 'Delivered')
+              ->whereNotIn('order_statuses.name', ['Cancelled'])
               ->whereBetween('orders.created_at', [$start_date, $end_date])
               ->select(
                   'products.id',
@@ -221,7 +227,7 @@ class Product extends Model
           ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
           ->join('orders', 'order_details.id_order', '=', 'orders.id')
           ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-          ->where('order_statuses.name', '=', 'Delivered')
+          ->whereNotIn('order_statuses.name', ['Cancelled'])
           ->select(
               'products.id',
               'products.name',

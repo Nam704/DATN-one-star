@@ -59,66 +59,107 @@
 
 
 
-                        <div class="tab-pane fade" id="reviews" role="tabpanel">
-                            <div class="reviews_wrapper">
-                                <h2>1 review for Donec eu furniture</h2>
-                                <div class="reviews_comment_box">
-                                    <div class="comment_thmb">
-                                        <img src="assets/img/blog/comment2.jpg" alt="">
-                                    </div>
-                                    <div class="comment_text">
-                                        <div class="reviews_meta">
-                                            <div class="star_rating">
-                                                <ul>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                                </ul>
-                                            </div>
-                                            <p><strong>admin </strong>- September 12, 2018</p>
-                                            <span>roadthemes</span>
-                                        </div>
-                                    </div>
+                        <div class="tab-pane fade" id="reviews" role="tabpanel"> 
+    <div class="reviews_wrapper">
 
-                                </div>
-                                <div class="comment_title">
-                                    <h2>Add a review </h2>
-                                    <p>Your email address will not be published. Required fields are marked </p>
-                                </div>
-                                <div class="product_ratting mb-10">
-                                    <h3>Your rating</h3>
-                                    <ul>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                    </ul>
-                                </div>
-                                <div class="product_review_form">
-                                    <form action="#">
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <label for="review_comment">Your review </label>
-                                                <textarea name="comment" id="review_comment"></textarea>
-                                            </div>
-                                            <div class="col-lg-6 col-md-6">
-                                                <label for="author">Name</label>
-                                                <input id="author" type="text">
+    @if($comments->count() > 0)
+    <h2>{{ $comments->count() }} đánh giá cho {{ $product->name }}</h2>
+    @foreach($comments as $comment)
+        <div class="reviews_comment_box">
+            <div class="comment_thmb">  
+            <img src="{{ $comment->user->profile_image ? asset('storage/profile_image/' . $comment->user->profile_image) : asset('admin/assets/images/user-201.png') }}" 
+            alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+            </div>
+            <div class="comment_text">
+                <div class="reviews_meta">
+                    <div class="star_rating">
+                        <ul>
+                            @for($i = 1; $i <= 5; $i++)
+                                <li>
+                                    <a href="#">
+                                        <i class="ion-ios-star{{ $i <= $comment->rating ? '' : '-outline' }}"></i>
+                                    </a>
+                                </li>
+                            @endfor
+                        </ul>
+                    </div>
+                    <p><strong>{{ $comment->user->name ?? 'Người dùng' }}</strong> - {{ $comment->created_at->format('d/m/Y') }}</p>
+                    <span>{{ $comment->comment }}</span>
+                </div>
+            </div>
+        </div>
+    @endforeach
+@else
+    <h2>Chưa có bình luận nào</h2>
+@endif
 
-                                            </div>
-                                            <div class="col-lg-6 col-md-6">
-                                                <label for="email">Email </label>
-                                                <input id="email" type="text">
-                                            </div>
-                                        </div>
-                                        <button type="submit">Submit</button>
-                                    </form>
-                                </div>
-                            </div>
+
+        {{-- Form gửi bình luận --}}
+        @auth
+            <div class="comment_title mt-4">
+                <h2>Thêm đánh giá của bạn</h2>
+            </div>
+
+            <div class="product_ratting mb-10">
+                <h3>Đánh giá của bạn</h3>
+                <ul class="star_rating_input">
+                    @for($i = 1; $i <= 5; $i++)
+                        <li><i class="fa fa-star" data-value="{{ $i }}"></i></li>
+                    @endfor
+                </ul>
+            </div>
+
+            <div class="product_review_form">
+                <form action="{{ route('client.products.storecomment') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="rating" id="rating_input" value="5"> {{-- Mặc định 5 sao --}}
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="review_comment">Nội dung bình luận</label>
+                            <textarea name="comment" id="review_comment" required></textarea>
                         </div>
+                    </div>
+                    <button type="submit">Gửi bình luận</button>
+                </form>
+            </div>
+
+            {{-- Script chọn số sao --}}
+            <script>
+                document.querySelectorAll('.star_rating_input i').forEach(function(star) {
+                    star.addEventListener('click', function() {
+                        let rating = this.getAttribute('data-value');
+                        document.getElementById('rating_input').value = rating;
+
+                        // Highlight lại các sao
+                        document.querySelectorAll('.star_rating_input i').forEach(function(s) {
+                            s.classList.remove('checked');
+                        });
+                        for (let i = 0; i < rating; i++) {
+                            document.querySelectorAll('.star_rating_input i')[i].classList.add('checked');
+                        }
+                    });
+                });
+            </script>
+
+            <style>
+                .star_rating_input i {
+                    font-size: 24px;
+                    color: #ddd;
+                    cursor: pointer;
+                }
+                .star_rating_input i.checked {
+                    color: #f5c518;
+                }
+            </style>
+
+        @else
+            <p>Vui lòng <a href="{{ route('auth.getFormLogin') }}">đăng nhập</a> để bình luận.</p>
+        @endauth
+    </div>
+</div>
+
                     </div>
                 </div>
             </div>
