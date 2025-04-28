@@ -51,6 +51,7 @@ class DashboardController extends Controller
                 ->value('id');
 
             // Top 10 users
+            // Top 10 users
             $topUsers = DB::table('orders')
                 ->leftJoin('users', 'orders.id_user', '=', 'users.id')
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
@@ -58,12 +59,15 @@ class DashboardController extends Controller
                 ->select(
                     'orders.id_user',
                     DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))) as user_name'),
+                    DB::raw('MAX(COALESCE(users.email, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.email")))) as email'),
+                    DB::raw('MAX(COALESCE(users.phone, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.phone")))) as phone'),
                     DB::raw('SUM(orders.total) as total_purchase')
                 )
                 ->groupBy('orders.id_user')
                 ->orderByDesc('total_purchase')
                 ->limit(10)
                 ->get();
+
 
             // Chi tiết sản phẩm
             $productRows = DB::table('orders')
@@ -81,9 +85,11 @@ class DashboardController extends Controller
                 $prods = $productRows[$u->id_user] ?? collect();
                 $list  = $prods->map(fn($r) => "{$r->product_name} ({$r->qty})")->implode(', ');
                 return [
-                    'user_name'      => $u->user_name,
+                    'user_name'       => $u->user_name,
+                    'email'           => $u->email ?: '-',
+                    'phone'           => $u->phone ?: '-',
                     'products_bought' => $list ?: '-',
-                    'total_purchase' => $u->total_purchase,
+                    'total_purchase'  => $u->total_purchase,
                 ];
             });
             return view('admin.index', compact(
