@@ -2,10 +2,8 @@
 
 namespace App\Events;
 
-use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -15,7 +13,8 @@ class AdminNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    protected $data;
+    public $data;
+
     public function __construct($data)
     {
         $this->data = $data;
@@ -27,16 +26,22 @@ class AdminNotification implements ShouldBroadcast
             new PrivateChannel('admin'),
         ];
     }
+
     public function broadcastWith()
     {
-        $from_user_name = User::where('id', $this->data['from_user_id'])->first()->name;
         return [
+            'id' => $this->data['id'] ?? null,
             'title' => $this->data['title'],
             'message' => $this->data['message'],
-            'from_user_id' => $this->data['from_user_id'],
-            'status' => $this->data['status'],
-            'created_at' => $this->data['created_at'],
-            'from_user_name' => $from_user_name,
+            'from_user_id' => $this->data['from_user_id'] ?? null,
+            'to_user_id' => $this->data['to_user_id'] ?? null,
+            'category' => $this->data['category'] ?? 'system',
+            'priority' => $this->data['priority'] ?? 'medium',
+            'status' => $this->data['status'] ?? 'unread',
+            'goto_id' => $this->data['goto_id'] ?? null,
+            'goto_route' => $this->data['goto_route'] ?? 'client.dashboard',
+            'expires_at' => $this->data['expires_at'] ?? null,
+            'created_at' => $this->data['created_at'] ?? now()->toDateTimeString(),
         ];
     }
 }

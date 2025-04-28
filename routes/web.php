@@ -36,9 +36,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Web\ExcelController;
 use App\Http\Controllers\Client\AuthController  as ClientAuthController;
-use App\Http\Controllers\Client\CommentController;
-
-;
+use App\Http\Controllers\Client\CommentController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
@@ -54,9 +52,7 @@ use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
-Route::get('/', function () {
-    return view('admin.index');
-});
+
 
 // Người dùng
 Route::middleware(['auth'])->group(function () {
@@ -249,7 +245,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('/{id}/restore', 'restore')->name('restore')->middleware('permission:edit-contacts');
             Route::delete('delete/{id}', 'delete')->name('delete')->middleware('permission:delete-contacts');
         });
-       
+
         //comments
         Route::prefix('comments')->controller(WebCommentController::class)->name('comments.')->group(function () {
             Route::get('/', 'index')->name('index')->middleware('permission:view-comments');
@@ -396,6 +392,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
 );
 Route::prefix('client')->name('client.')->group(
     function () {
+        Route::get('/index', [HomeController::class, 'index'])->name('home');
+
         Route::prefix('users')->controller(ClientAuthController::class)->name('user.')->group(
             function () {
                 Route::get('/my-account', 'myAccount')->name('myAccount');
@@ -416,7 +414,6 @@ Route::prefix('client')->name('client.')->group(
             }
         );
 
-        Route::get('/index', [HomeController::class, 'index'])->name('home');
         Route::controller(ShopController::class)->group(function () {
             Route::get('shop', 'shop')->name('shop');
             Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');

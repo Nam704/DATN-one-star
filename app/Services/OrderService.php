@@ -197,7 +197,42 @@ class OrderService
                     $voucher->quantity -= 1;
                     $voucher->save();
                 }
+                if ($order->id_user) {
+                    $this->notificationService->sendPrivate([
+                        'title' => 'Đơn hàng mới được tạo',
+                        'message' => "Đơn hàng #{$order->code} đã được tạo thành công. Vui lòng kiểm tra chi tiết.",
+                        'to_user_id' => $order->id_user,
+                        'type' => 'private',
+                        'category' => 'order',
+                        'priority' => 'medium',
+                        'goto_id' => $order->id,
+                        'goto_route' => 'client.order.detail',
+                        'expires_at' => now()->addDays(7),
+                    ]);
+                }
 
+                // Gửi thông báo đến admin và employee
+                $this->notificationService->sendAdmin([
+                    'title' => 'Đơn hàng mới',
+                    'message' => "Đơn hàng #{$order->code} vừa được tạo. Vui lòng kiểm tra và xử lý.",
+                    'type' => 'admin',
+                    'category' => 'order',
+                    'priority' => 'high',
+                    'goto_id' => $order->id,
+                    'goto_route' => 'admin.orders.detail',
+                    'expires_at' => now()->addDays(7),
+                ]);
+
+                $this->notificationService->sendEmployee([
+                    'title' => 'Đơn hàng mới',
+                    'message' => "Đơn hàng #{$order->code} vừa được tạo. Vui lòng kiểm tra và xử lý.",
+                    'type' => 'employee',
+                    'category' => 'order',
+                    'priority' => 'high',
+                    'goto_id' => $order->id,
+                    'goto_route' => 'employee.orders.detail',
+                    'expires_at' => now()->addDays(7),
+                ]);
                 session()->forget('checkout_data');
                 return $order;
             } catch (ValidationException $e) {
@@ -277,7 +312,28 @@ class OrderService
                 'status' => 'pending',
                 'previous_status_id' => $currentStatusId,
             ]);
+            $this->notificationService->sendPrivate([
+                'title' => 'Yêu cầu hủy đơn hàng',
+                'message' => "Yêu cầu hủy đơn hàng #{$order->code} đã được gửi. Đội ngũ sẽ xem xét trong vòng 24 giờ.",
+                'to_user_id' => $user->id,
+                'type' => 'private',
+                'category' => 'order',
+                'priority' => 'medium',
+                'goto_id' => $order->id,
+                'goto_route' => 'client.order.detail',
+                'expires_at' => now()->addDays(7),
+            ]);
 
+            $this->notificationService->sendAdmin([
+                'title' => 'Yêu cầu hủy đơn hàng mới',
+                'message' => "Đơn hàng #{$order->code} đã được yêu cầu hủy bởi khách hàng. Vui lòng xem xét.",
+                'type' => 'admin',
+                'category' => 'order',
+                'priority' => 'high',
+                'goto_id' => $order->id,
+                'goto_route' => 'admin.orders.detail',
+                'expires_at' => now()->addDays(7),
+            ]);
 
 
             Cache::forget("user_cancel_count_{$user->id}");

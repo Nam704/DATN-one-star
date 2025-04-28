@@ -15,6 +15,7 @@ export default defineConfig({
                 "resources/js/client/checkout.js",
                 "resources/js/admin.order.js",
                 "resources/js/admin/listOrder.js",
+                "resources/js/admin/notification.js",
 
                 "resources/js/public.js",
                 "resources/js/private.js",
