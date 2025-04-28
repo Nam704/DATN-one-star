@@ -61,7 +61,11 @@ class ProductController extends Controller
     {
 
         $products = $this->ProductService->list();
-        return view('admin.product.list', compact('products'));
+        $categories = Category::select('id', 'name')->where('status', 'Active')->get();
+        $brands     = Brand::select('id', 'name')->where('status', 'Active')->get();
+        // dd(compact('categories', 'brands'));
+
+        return view('admin.product.list', compact('products', 'categories', 'brands'));
     }
     public function import(Request $request)
     {
@@ -353,4 +357,5 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục và kích hoạt!');
     }
+   
 }

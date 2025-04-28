@@ -1,119 +1,91 @@
 @extends('admin.layouts.layout')
 @section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="header-title">List Product</h4>
+                        <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Add new
+                            product</a>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="header-title">List Product</h4>
-                    <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Add new
-                        product</a>
-
-                    <form class="form-control mt-2" action="{{ route('admin.excels.createProduct') }}" method="POST"
-                        enctype="multipart/form-data">
-                        @csrf
-                        <div class="row container">
-                            <div class="col-3">
-                                <label>Chọn file Excel:</label>
-                                <input type="file" class=" form-control" name="excel_file" required>
-                            </div>
-                            {{-- <div class="col-3">
+                        <form class="form-control mt-2" action="{{ route('admin.excels.createProduct') }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <div class="row container">
+                                <div class="col-3">
+                                    <label>Chọn file Excel:</label>
+                                    <input type="file" class=" form-control" name="excel_file" required>
+                                </div>
+                                {{-- <div class="col-3">
                                 <label>Chọn ảnh sản phẩm:</label>
                                 <input type="file" class="form-control" name="product_images[]" multiple required>
                             </div> --}}
-                            <div class="col-3 align-content-end">
+                                <div class="col-3 align-content-end">
 
-                                <button type="submit" class="btn btn-info">Nhập sản phẩm</button>
+                                    <button type="submit" class="btn btn-info">Nhập sản phẩm</button>
+                                </div>
+                                <div class="col-3 align-content-end">
+                                    <a href="{{ route('admin.products.exportCreateExcel') }}" type="button"
+                                        class="btn btn-primary">Get Sample file</a>
+                                </div>
                             </div>
-                            <div class="col-3 align-content-end">
-                                <a href="{{ route('admin.products.exportCreateExcel') }}" type="button"
-                                    class="btn btn-primary">Get Sample file</a>
-                            </div>
+                        </form>
+
+                        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+                            data-bs-target="#filterModal">
+                            <i class="mdi mdi-filter-menu fs-5"></i> Filter Menu
+                        </button>
+                    </div>
+
+                    <div class="card-body">
+
+                        <table id="fixed-header-datatable"
+                            class="table table-striped dt-responsive nowrap table-striped  w-100">
+                            <thead>
+                                <tr>
+
+                                    <th>Name</th>
+                                    <th>Image</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th>Quantity</th>
+
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @include('admin.product.product_table', ['products' => $products])
+
+
+                            </tbody>
+                            <tfoot>
+                                <tr>
+
+                                    <th>Name</th>
+                                    <th>Image</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th>Quantity</th>
+
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div> <!-- end card body-->
+                </div> <!-- end card -->
+            </div><!-- end col-->
+        </div> <!-- end row-->
+    </div>
 
 
 
-                        </div>
-
-                    </form>
-
-
-                </div>
-
-                <div class="card-body">
-
-                    <table id="fixed-header-datatable"
-                        class="table table-striped dt-responsive nowrap table-striped  w-100">
-                        <thead>
-                            <tr>
-
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
-
-                                <th>Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach ($products as $key => $product)
-                            <tr>
-
-                                <td>{{ $product->name }}</td>
-                                <td><img src="{{asset($product->image_primary) }}" alt="err" height="60px"></td>
-                                <td>{{ $product->brand->name }}</td>
-                                <td>{{$product->category->name }}</td>
-                                <td>{{ $product->total_quantity }}</td>
-
-                                <td>{{ $product->min_price }}-{{ $product->max_price }}</td>
-
-                                <td>
-                                    <a href="{{ route('admin.products.edit',$product->id) }}">
-                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
-                                    </a>
-                                    <form action="{{ route('admin.products.lock', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có muốn ngừng bán sản phẩm này không?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-secondary btn-danger">Ngừng bán</button>
-                                    </form>
-                                    <a href="{{ route('admin.products.detail',$product->id) }}"><button
-                                            class="btn btn-info">Chi tiết</button></a>
-                                    <a href="{{ route('admin.products.stas',$product->id) }}"><button
-                                            class="btn btn-primary">Thống kê</button></a>
-                                </td>
-                            </tr>
-                            @endforeach
-
-
-                        </tbody>
-                        <tfoot>
-                            <tr>
-
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
-
-                                <th>Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div> <!-- end card body-->
-            </div> <!-- end card -->
-        </div><!-- end col-->
-    </div> <!-- end row-->
-</div>
 
 @endsection
 @push('styles')
-<x-admin.data-table-styles />
+    <x-admin.data-table-styles />
 @endpush
 
-@push('scripts')
-<x-admin.data-table-scripts />
-@endpush
