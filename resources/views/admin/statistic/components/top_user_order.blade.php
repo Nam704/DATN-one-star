@@ -1,42 +1,35 @@
-<div class="col-lg-12 d-flex">
-    <div class="card flex-fill">
-        <div class="card-body d-flex flex-column">
-            <table id="dailyStatusTable" class="table table-bordered table-striped">
-                <thead>
+    <div class="col-lg-12 d-flex">
+      <div class="card flex-fill">
+        <div class="card-body">
+          <h5 class="header-title mb-4">Top 10 người mua nhiều nhất (hôm nay)</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Khách hàng</th>
+                  <th>Sản phẩm đã mua</th>
+                  <th>Tổng chi (VNĐ)</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse($userStats as $index => $user)
                   <tr>
-                    <th>Trạng thái</th>
-                    <th>Tổng đơn</th>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $user['user_name'] }}</td>
+                    <td style="max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                      {{ $user['products_bought'] ?: '-' }}
+                    </td>
+                    <td>{{ number_format($user['total_purchase'], 0, '.', ',') }}đ</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {{-- DataTables sẽ tự inject --}}
-                </tbody>
-              </table>
-
+                @empty
+                  <tr>
+                    <td colspan="4" class="text-center">Chưa có khách hàng nào</td>
+                  </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
         </div>
-    </div> <!-- end card-body-->
-</div> <!-- end card-->
-
-<script>
-    $(document).ready(function() {
-      $('#dailyStatusTable').DataTable({
-        processing: true,
-        serverSide: false,  // bên này data nhỏ nên không cần serverSide
-        ajax: {
-          url: "{{ route('admin.dailyStatistics_Dashboard') }}",
-          dataSrc: ''        // JSON trả về là 1 mảng, nên dùng ''
-        },
-        columns: [
-          { data: 'status', title: 'Trạng thái' },
-          { data: 'total',  title: 'Tổng đơn' }
-        ],
-        language: {
-          emptyTable: "Chưa có đơn hàng nào trong ngày",
-          paginate: {
-            previous: "<",
-            next: ">"
-          }
-        }
-      });
-    });
-    </script>
+      </div>
+    </div>

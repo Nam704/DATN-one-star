@@ -45,8 +45,50 @@ class DashboardController extends Controller
                     ->count(),
                 "user" => $this->user->whereBetween('created_at', [$start_date, $end_date])->count()
             ];
+            // 2. Tính topUserPurchases *tĩnh* (loại trừ Cancelled)
+            $cancelledStatusId = DB::table('order_statuses')
+                ->where('name', 'Cancelled')
+                ->value('id');
+
+            // Top 10 users
+            $topUsers = DB::table('orders')
+                ->leftJoin('users', 'orders.id_user', '=', 'users.id')
+                ->whereBetween('orders.created_at', [$start_date, $end_date])
+                ->where('orders.id_order_status', '!=', $cancelledStatusId)
+                ->select(
+                    'orders.id_user',
+                    DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))) as user_name'),
+                    DB::raw('SUM(orders.total) as total_purchase')
+                )
+                ->groupBy('orders.id_user')
+                ->orderByDesc('total_purchase')
+                ->limit(10)
+                ->get();
+
+            // Chi tiết sản phẩm
+            $productRows = DB::table('orders')
+                ->join('order_details', 'orders.id', '=', 'order_details.id_order')
+                ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
+                ->join('products', 'product_variants.id_product', '=', 'products.id')
+                ->whereBetween('orders.created_at', [$start_date, $end_date])
+                ->where('orders.id_order_status', '!=', $cancelledStatusId)
+                ->select('orders.id_user', 'products.name as product_name', DB::raw('SUM(order_details.quantity) as qty'))
+                ->groupBy('orders.id_user', 'products.name')
+                ->get()
+                ->groupBy('id_user');
+
+            $userStats = $topUsers->map(function ($u) use ($productRows) {
+                $prods = $productRows[$u->id_user] ?? collect();
+                $list  = $prods->map(fn($r) => "{$r->product_name} ({$r->qty})")->implode(', ');
+                return [
+                    'user_name'      => $u->user_name,
+                    'products_bought' => $list ?: '-',
+                    'total_purchase' => $u->total_purchase,
+                ];
+            });
             return view('admin.index', compact(
                 'countData',
+                'userStats',
             ));
         } else {
             return redirect()->route('auth.getFormLogin');
@@ -110,64 +152,5 @@ class DashboardController extends Controller
         }
 
         return response()->json($result);
-    }
-    public function topUserPurchases(Request $request)
-    {
-        // Lọc chỉ đơn Delivered trong ngày hôm nay (hoặc bạn có thể customize khoảng thời gian)
-        $start = Carbon::today()->startOfDay();
-        $end   = Carbon::today()->endOfDay();
-
-        $deliveredStatusId = DB::table('order_statuses')
-            ->where('name', 'Delivered')
-            ->value('id');
-
-        // 1. Lấy top 10 user theo tổng purchase
-        $topUsers = DB::table('orders')
-            ->leftJoin('users', 'orders.id_user', '=', 'users.id')
-            ->whereBetween('orders.created_at', [$start, $end])
-            ->where('orders.id_order_status', $deliveredStatusId)
-            ->select(
-                'orders.id_user',
-                // MAX() để tránh only_full_group_by
-                DB::raw('MAX(COALESCE(users.name, JSON_UNQUOTE(JSON_EXTRACT(orders.user_data, "$.user_name")))) as user_name'),
-                DB::raw('SUM(orders.total) as total_purchase')
-            )
-            ->groupBy('orders.id_user')
-            ->orderByDesc('total_purchase')
-            ->limit(10)
-            ->get();
-
-        // 2. Lấy chi tiết sản phẩm từng user
-        $productRows = DB::table('orders')
-            ->join('order_details', 'orders.id', '=', 'order_details.id_order')
-            ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
-            ->join('products', 'product_variants.id_product', '=', 'products.id')
-            ->whereBetween('orders.created_at', [$start, $end])
-            ->where('orders.id_order_status', $deliveredStatusId)
-            ->select(
-                'orders.id_user',
-                'products.name as product_name',
-                DB::raw('SUM(order_details.quantity) as qty')
-            )
-            ->groupBy('orders.id_user', 'products.name')
-            ->get()
-            ->groupBy('id_user'); // => Collection keyed by id_user
-
-        // 3. Kết hợp lại
-        $userStats = $topUsers->map(function($u) use($productRows) {
-            $prods = collect([]);
-            if (isset($productRows[$u->id_user])) {
-                $prods = $productRows[$u->id_user]
-                    ->map(fn($r) => "{$r->product_name} ({$r->qty})");
-            }
-            return [
-                'id_user'        => $u->id_user,
-                'user_name'      => $u->user_name,
-                'products_bought'=> $prods->implode(', '),
-                'total_purchase' => $u->total_purchase,
-            ];
-        });
-
-        return view('admin.statistics.top_users', compact('userStats'));
     }
 }
