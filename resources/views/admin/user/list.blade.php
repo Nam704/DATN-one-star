@@ -45,7 +45,7 @@
                                 <td>
                                     <img src="{{ $value->profile_image ? asset('storage/' . $value->profile_image) : asset('admin/assets/images/user-201.png') }}"
                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
-                                </td>   
+                                </td>
                                 <td>{{ $value->email }}</td>
                                 <td>{{ $value->role->name }}</td>
                                 <td>

@@ -82,7 +82,10 @@
         </div>
         <!-- end thống kê đơn hàng -->
 
-        
+        <div class="row">
+            @include('admin.statistic.components.top_user_order')
+        </div>
+
         <!-- end row -->
 
     </div>
