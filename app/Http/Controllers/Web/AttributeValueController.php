@@ -34,5 +34,38 @@ class AttributeValueController extends Controller
         return view('admin.attribute_value.add', compact('attributes'));
     }
 
-   
+    public function store(Request $request)
+    {
+        $request->validate([
+            'id_attribute' => 'required|exists:attributes,id',
+            'tags' => 'required|array|min:1',
+            'tags.*' => 'required|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $attributeId = $request->input('id_attribute');
+            $tags = $request->input('tags'); // mảng các giá trị
+
+            foreach ($tags as $tag) {
+                Attribute_value::create([
+                    'id_attribute' => $attributeId,
+                    'value' => trim($tag),
+                    'status' => 'active',
+                ]);
+            }
+
+            DB::commit();
+            return redirect()
+                ->route('admin.attribute_values.index')
+                ->with('message', 'Thêm giá trị thuộc tính thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('message_error', 'Có lỗi xảy ra khi thêm giá trị: ' . $e->getMessage());
+        }
+    }
+    
 }
