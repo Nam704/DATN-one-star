@@ -30,6 +30,7 @@ class CommentController extends Controller
         $comment = Comment::findOrFail($id);
         $comment->status = 'rejected';
         $comment->delete();
+        $comment->save();
         
         return back()->with('success', 'Đã xóa bình luận.');
     }
@@ -49,10 +50,10 @@ public function restore($id)
 {
     // Lấy bình luận đã xóa
     $comment = Comment::onlyTrashed()->findOrFail($id);
-    
+    $comment->status = 'active';
     // Khôi phục bình luận
     $comment->restore();
-
+   $comment->save();
     return redirect()->route('admin.comments.index')->with('success', 'Bình luận đã được hiện lại.');
 }
 
