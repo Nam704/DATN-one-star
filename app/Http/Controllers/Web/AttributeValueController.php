@@ -77,5 +77,31 @@ class AttributeValueController extends Controller
 
         return view('admin.attribute_value.update', compact('attributes_value', 'attributes'));
     }
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'id_attribute' => 'required|exists:attributes,id',
+            'value' => 'required|string|max:255',
+            'status_value' => 'required|in:active,inactive',
+        ]);
+
+        try {
+            $attributesValue = Attribute_value::findOrFail($id);
+            $attributesValue->update([
+                'id_attribute' => $request->input('id_attribute'),
+                'value' => trim($request->input('value')),
+                'status' => $request->input('status_value'),
+            ]);
+
+            return redirect()
+                ->route('admin.attribute_values.index')
+                ->with('message', 'Cập nhật giá trị thuộc tính thành công!');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('message_error', 'Có lỗi xảy ra khi cập nhật: ' . $e->getMessage());
+        }
+    }
    
 }
