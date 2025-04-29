@@ -103,5 +103,43 @@ class AttributeValueController extends Controller
                 ->with('message_error', 'Có lỗi xảy ra khi cập nhật: ' . $e->getMessage());
         }
     }
-   
+    public function destroy($id)
+    {
+        try {
+            $attributesValue = Attribute_value::findOrFail($id);
+            $attributesValue->delete();
+
+            return redirect()
+                ->route('admin.attribute_values.index')
+                ->with('message', 'Đã chuyển giá trị thuộc tính vào thùng rác.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('admin.attribute_values.index')
+                ->with('message_error', 'Xóa thất bại: ' . $e->getMessage());
+        }
+    }
+    public function trash()
+    {
+        $trash_attributes_value = Attribute_value::onlyTrashed()
+            ->with('attribute')
+            ->orderBy('deleted_at', 'desc')
+            ->get();
+
+        return view('admin.attribute_value.trash', compact('trash_attributes_value'));
+    }
+    public function restore($id)
+    {
+        try {
+            $attributesValue = Attribute_value::onlyTrashed()->findOrFail($id);
+            $attributesValue->restore();
+
+            return redirect()
+                ->route('admin.attribute_values.trash')
+                ->with('message', 'Khôi phục giá trị thuộc tính thành công!');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('admin.attribute_values.trash')
+                ->with('message_error', 'Khôi phục thất bại: ' . $e->getMessage());
+        }
+    }
 }
