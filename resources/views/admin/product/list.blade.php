@@ -5,65 +5,56 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                          <h4 class="card-title mb-2 mb-md-0">List Products</h4>
+                        <div
+                            class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                            <h4 class="card-title mb-2 mb-md-0">List Products</h4>
 
-                          <div class="d-flex flex-wrap align-items-center gap-2">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
 
-                            <!-- Add New Product -->
-                            <a href="{{ route('admin.products.create') }}"
-                               class="btn btn-primary btn-sm">
-                              <i class="mdi mdi-plus"></i> Add Product
-                            </a>
+                                <!-- Add New Product -->
+                                <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="mdi mdi-plus"></i> Add Product
+                                </a>
 
-                            <!-- Import/Export Group -->
-                            <div class="dropdown">
-                              <button class="btn btn-info btn-sm dropdown-toggle"
-                                      type="button" id="excelDropdown"
-                                      data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="mdi mdi-file-excel"></i> Excel
-                              </button>
-                              <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="excelDropdown" style="min-width: 250px;">
-                                <!-- Download sample -->
-                                <li class="mb-2">
-                                  <a href="{{ route('admin.products.exportCreateExcel') }}"
-                                     class="btn btn-outline-secondary w-100 btn-sm">
-                                    <i class="mdi mdi-download"></i> Download Sample
-                                  </a>
-                                </li>
-                                <!-- Import form -->
-                                <li>
-                                  <form action="{{ route('admin.products.importProduct') }}"
-                                        method="POST"
-                                        enctype="multipart/form-data"
-                                        class="d-flex flex-column gap-2">
-                                    @csrf
-                                    <label for="excel_file" class="form-label mb-0">Upload Excel</label>
-                                    <input type="file"
-                                           name="excel_file"
-                                           id="excel_file"
-                                           class="form-control form-control-sm"
-                                           accept=".xlsx,.xls"
-                                           required>
-                                    <button type="submit"
-                                            class="btn btn-success btn-sm mt-1">
-                                      <i class="mdi mdi-upload"></i> Import
+                                <!-- Import/Export Group -->
+                                <div class="dropdown">
+                                    <button class="btn btn-info btn-sm dropdown-toggle" type="button" id="excelDropdown"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="mdi mdi-file-excel"></i> Excel
                                     </button>
-                                  </form>
-                                </li>
-                              </ul>
-                            </div>
+                                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="excelDropdown"
+                                        style="min-width: 250px;">
+                                        <!-- Download sample -->
+                                        <li class="mb-2">
+                                            <a href="{{ route('admin.products.exportCreateExcel') }}"
+                                                class="btn btn-outline-secondary w-100 btn-sm">
+                                                <i class="mdi mdi-download"></i> Download Sample
+                                            </a>
+                                        </li>
+                                        <!-- Import form -->
+                                        <li>
+                                            <form action="{{ route('admin.products.importProduct') }}" method="POST"
+                                                enctype="multipart/form-data" class="d-flex flex-column gap-2">
+                                                @csrf
+                                                <label for="excel_file" class="form-label mb-0">Upload Excel</label>
+                                                <input type="file" name="excel_file" id="excel_file"
+                                                    class="form-control form-control-sm" accept=".xlsx,.xls" required>
+                                                <button type="submit" class="btn btn-success btn-sm mt-1">
+                                                    <i class="mdi mdi-upload"></i> Import
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
 
-                            <!-- Filter Modal Trigger -->
-                            <button type="button"
-                                    class="btn btn-outline-primary btn-sm"
-                                    data-bs-toggle="modal"
+                                <!-- Filter Modal Trigger -->
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#filterModal">
-                              <i class="mdi mdi-filter-menu"></i> Filter
-                            </button>
-                          </div>
+                                    <i class="mdi mdi-filter-menu"></i> Filter
+                                </button>
+                            </div>
                         </div>
-                      </div>
+                    </div>
 
 
                     <div class="card-body">
@@ -78,9 +69,8 @@
                                     <th>Brand</th>
                                     <th>Category</th>
                                     <th>Quantity</th>
-
-                                    <th>Price</th>
                                     <th>Views</th>
+                                    <th>Price</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -98,7 +88,7 @@
                                     <th>Brand</th>
                                     <th>Category</th>
                                     <th>Quantity</th>
-
+                                    <th>Views</th>
                                     <th>Price</th>
                                     <th>Action</th>
                                 </tr>
@@ -121,25 +111,28 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- Category -->
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Category</label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="">All Categories</option>
-                                @foreach ($categories as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <!-- Brand -->
-                        <div class="mb-3">
-                            <label for="brand" class="form-label">Brand</label>
-                            <select class="form-select" id="brand" name="brand">
-                                <option value="">All Brands</option>
-                                @foreach ($brands as $b)
-                                    <option value="{{ $b->id }}">{{ $b->name }}</option>
-                                @endforeach
-                            </select>
+                        <div class="mb-3 row">
+                            <!-- Category -->
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">All Categories</option>
+                                    @foreach ($categories as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Brand -->
+                            <div class="col-md-6">
+                                <label for="brand" class="form-label">Brand</label>
+                                <select class="form-select" id="brand" name="brand">
+                                    <option value="">All Brands</option>
+                                    @foreach ($brands as $b)
+                                        <option value="{{ $b->id }}">{{ $b->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <!-- Stock -->
                         <div class="mb-3">
@@ -148,22 +141,32 @@
                                 <option value="">Tất cả</option>
                                 <option value="in_stock">Còn hàng</option>
                                 <option value="out_of_stock">Hết hàng</option>
-                                <option value="low_stock">Sắp hết hàng</option>  {{-- mới --}}
+                                <option value="low_stock">Sắp hết hàng</option> {{-- mới --}}
                                 <option value="quantity">Số lượng cụ thể</option>
                             </select>
                             <input type="number" class="form-control mt-2" id="quantity" name="quantity"
                                 placeholder="Nhập số lượng" style="display: none;">
                         </div>
-
+                        <!-- Sort View -->
+                        <div class="mb-3">
+                            <label for="sort_view" class="form-label">Sắp xếp theo lượt xem</label>
+                            <select class="form-select" id="sort_view" name="sort_view">
+                                <option value="">Không sắp xếp</option>
+                                <option value="asc">Từ thấp đến cao</option>
+                                <option value="desc">Từ cao đến thấp</option>
+                            </select>
+                        </div>
                         <!-- Price -->
                         <div class="mb-3">
                             <label class="form-label">Khoảng giá</label>
                             <div class="row">
                                 <div class="col">
-                                    <input type="number" class="form-control" name="min_price" placeholder="Giá tối thiểu">
+                                    <input type="number" class="form-control" name="min_price"
+                                        placeholder="Giá tối thiểu">
                                 </div>
                                 <div class="col">
-                                    <input type="number" class="form-control" name="max_price" placeholder="Giá tối đa">
+                                    <input type="number" class="form-control" name="max_price"
+                                        placeholder="Giá tối đa">
                                 </div>
                             </div>
                         </div>
@@ -172,7 +175,8 @@
                             <label class="form-label">Ngày tạo</label>
                             <div class="row">
                                 <div class="col">
-                                    <input type="date" class="form-control" name="created_from" placeholder="Từ ngày">
+                                    <input type="date" class="form-control" name="created_from"
+                                        placeholder="Từ ngày">
                                 </div>
                                 <div class="col">
                                     <input type="date" class="form-control" name="created_to" placeholder="Đến ngày">

@@ -5,8 +5,8 @@
     <td>{{ $product->brand->name }}</td>
     <td>{{ $product->category->name }}</td>
     <td>{{ $product->total_quantity }}</td>
+    <td>{{ $product->view }}</td>
     <td>{{ $product->min_price }}-{{ $product->max_price }}</td>
-    <td>{{ $product->view}}</td>
     <td>
         <a href="{{ route('admin.products.edit', $product->id) }}">
             <button type="button" class="btn btn-secondary btn-warning"><i class="ri-pencil-line"></i></button>

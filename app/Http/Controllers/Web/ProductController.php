@@ -397,6 +397,22 @@ class ProductController extends Controller
             });
         }
 
+        // 1. Xóa hết orderBy cũ nếu có
+        $query->getQuery()->orders = null;
+
+        // 2. Apply order theo View nếu được chọn
+        if ($request->filled('sort_view')) {
+            if ($request->sort_view === 'asc') {
+                $query->orderBy('view', 'asc');
+            } elseif ($request->sort_view === 'desc') {
+                $query->orderBy('view', 'desc');
+            }
+        }
+
+        // 3. Nếu không có sort_view, mặc định sort theo id DESC
+        if (!$request->filled('sort_view')) {
+            $query->orderBy('id', 'desc');
+        }
         $from = $request->input('created_from');
         $to   = $request->input('created_to');
 

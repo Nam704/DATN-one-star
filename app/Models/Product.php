@@ -99,7 +99,7 @@ class Product extends Model
 
         ])->append('attributes')
             ->select('id', 'name', 'id_brand', 'id_category', 'description', 'image_primary', 'status');
-    }   
+    }
 
 //     public static function getProductWithDetails($id)
 // {
@@ -252,11 +252,11 @@ class Product extends Model
           'products.image_primary',
           DB::raw("
               COALESCE(SUM(
-                  CASE 
+                  CASE
                       WHEN order_statuses.name = 'Delivered'
                       " . ($start_date && $end_date ? " AND orders.created_at BETWEEN '$start_date' AND '$end_date'" : "") . "
-                      THEN order_details.quantity 
-                      ELSE 0 
+                      THEN order_details.quantity
+                      ELSE 0
                   END
               ), 0) as total_sold
           ")
@@ -307,9 +307,9 @@ public function top_view_product()
           ->limit(10)
           ->get();
   }
-  
-  
-  
+
+
+
   public function low_stock_products()
   {
       $query = DB::table('products')
@@ -328,10 +328,10 @@ public function top_view_product()
           ->groupBy('products.id', 'products.name', 'products.image_primary')
           ->havingRaw('COALESCE(SUM(product_variants.quantity), 0) < 10')
           ->orderBy('total_quantity', 'asc');
-  
+
       return $query->get();
   }
-  
+
 
 
     // sản phẩm đã bán
