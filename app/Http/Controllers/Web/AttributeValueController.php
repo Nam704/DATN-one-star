@@ -67,5 +67,15 @@ class AttributeValueController extends Controller
                 ->with('message_error', 'Có lỗi xảy ra khi thêm giá trị: ' . $e->getMessage());
         }
     }
-    
+    public function edit($id)
+    {
+        $attributes_value = Attribute_value::findOrFail($id);
+        $attributes = Attribute::select('id', 'name')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.attribute_value.update', compact('attributes_value', 'attributes'));
+    }
+   
 }
