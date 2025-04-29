@@ -1,14 +1,14 @@
-<div class="col-lg-4">
-    <div class="card">
-        <div class="card-body">
+<div class="col-lg-4 d-flex">
+    <div class="card flex-fill">
+        <div class="card-body d-flex flex-column">
             <!-- Các icon widget tương tự -->
-            <div class="card-widgets">
+            {{-- <div class="card-widgets">
                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                 <a data-bs-toggle="collapse" href="#weekly-sales-collapse" role="button" aria-expanded="false" aria-controls="weekly-sales-collapse">
                     <i class="ri-subtract-line"></i>
                 </a>
                 <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
-            </div>
+            </div> --}}
             <!-- Tiêu đề hiển thị kèm tháng và năm hiện tại -->
             <h5 class="header-title mb-0">Tổng đơn theo tuần (tháng {{ date('m/Y') }})</h5>
             <div id="weekly-sales-collapse" class="collapse pt-3 show">

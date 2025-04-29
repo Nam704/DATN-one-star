@@ -31,7 +31,7 @@ class AuthController extends Controller
     {
         $user = $this->userService->details();
         $addresses = $user ? $this->userService->getAddress($user) : collect([]);
-        $data = $this->orderService->searchOrders($request);
+        $data = $this->orderService->searchOrders($request, 10); // Gọi hàm searchOrders đã cập nhật
         $wardData = [];
         if ($addresses->count() > 0) {
             $wardIds = $addresses->pluck('id_ward')->filter()->unique()->toArray();
@@ -39,6 +39,10 @@ class AuthController extends Controller
             foreach ($wards as $ward) {
                 $wardData[$ward->id] = $ward;
             }
+        }
+        if (isset($data['errors'])) {
+            return view('client.user.index', compact('user', 'addresses', 'wardData'))
+                ->withErrors($data['errors']);
         }
         return view('client.user.index', compact('user', 'addresses', 'wardData'), $data);
     }

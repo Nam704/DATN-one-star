@@ -61,7 +61,11 @@ class ProductController extends Controller
     {
 
         $products = $this->ProductService->list();
-        return view('admin.product.list', compact('products'));
+        $categories = Category::select('id', 'name')->where('status', 'Active')->get();
+        $brands     = Brand::select('id', 'name')->where('status', 'Active')->get();
+        // dd(compact('categories', 'brands'));
+
+        return view('admin.product.list', compact('products', 'categories', 'brands'));
     }
     public function import(Request $request)
     {
@@ -365,5 +369,75 @@ class ProductController extends Controller
         });
 
         return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục và kích hoạt!');
+    }
+    public function filter(Request $request)
+    {
+        $query = (new Product)->listActive();
+
+        if ($request->filled('category')) {
+            $query->where('id_category', $request->category);
+        }
+
+        if ($request->filled('brand')) {
+            $query->where('id_brand', $request->brand);
+        }
+
+        if ($request->stock === 'in_stock') {
+            $query->having('total_quantity', '>', 0);
+        } elseif ($request->stock === 'out_of_stock') {
+            $query->having('total_quantity', '=', 0);
+        } elseif ($request->stock === 'low_stock') {
+            $query->having('total_quantity', '>', 0)
+                ->having('total_quantity', '<=', 10);
+        } elseif ($request->stock === 'quantity' && $request->filled('quantity')) {
+            $query->having('total_quantity', '=', (int)$request->quantity);
+        }
+        if ($request->filled('min_price') && $request->filled('max_price')) {
+            $min = $request->min_price;
+            $max = $request->max_price;
+            $query->whereHas('variants', function ($q) use ($min, $max) {
+                $q->whereBetween('price', [$min, $max]);
+            });
+        } elseif ($request->filled('min_price')) {
+            $min = $request->min_price;
+            $query->whereHas('variants', function ($q) use ($min) {
+                $q->where('price', '>=', $min);
+            });
+        } elseif ($request->filled('max_price')) {
+            $max = $request->max_price;
+            $query->whereHas('variants', function ($q) use ($max) {
+                $q->where('price', '<=', $max);
+            });
+        }
+
+        // 1. Xóa hết orderBy cũ nếu có
+        $query->getQuery()->orders = null;
+
+        // 2. Apply order theo View nếu được chọn
+        if ($request->filled('sort_view')) {
+            if ($request->sort_view === 'asc') {
+                $query->orderBy('view', 'asc');
+            } elseif ($request->sort_view === 'desc') {
+                $query->orderBy('view', 'desc');
+            }
+        }
+
+        // 3. Nếu không có sort_view, mặc định sort theo id DESC
+        if (!$request->filled('sort_view')) {
+            $query->orderBy('id', 'desc');
+        }
+        $from = $request->input('created_from');
+        $to   = $request->input('created_to');
+
+        if ($from) {
+            $query->whereDate('products.created_at', '>=', $from);
+        }
+        if ($to) {
+            $query->whereDate('products.created_at', '<=', $to);
+        }
+
+        $products = $query->get();
+
+        return view('admin.product.product_table', compact('products'))->render();
     }
 }

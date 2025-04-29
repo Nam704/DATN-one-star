@@ -1,119 +1,235 @@
 @extends('admin.layouts.layout')
 @section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div
+                            class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                            <h4 class="card-title mb-2 mb-md-0">List Products</h4>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="header-title">List Product</h4>
-                    <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Add new
-                        product</a>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
 
-                    <form class="form-control mt-2" action="{{ route('admin.excels.createProduct') }}" method="POST"
-                        enctype="multipart/form-data">
-                        @csrf
-                        <div class="row container">
-                            <div class="col-3">
-                                <label>Chọn file Excel:</label>
-                                <input type="file" class=" form-control" name="excel_file" required>
+                                <!-- Add New Product -->
+                                <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="mdi mdi-plus"></i> Add Product
+                                </a>
+
+                                <!-- Import/Export Group -->
+                                <div class="dropdown">
+                                    <button class="btn btn-info btn-sm dropdown-toggle" type="button" id="excelDropdown"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="mdi mdi-file-excel"></i> Excel
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="excelDropdown"
+                                        style="min-width: 250px;">
+                                        <!-- Download sample -->
+                                        <li class="mb-2">
+                                            <a href="{{ route('admin.products.exportCreateExcel') }}"
+                                                class="btn btn-outline-secondary w-100 btn-sm">
+                                                <i class="mdi mdi-download"></i> Download Sample
+                                            </a>
+                                        </li>
+                                        <!-- Import form -->
+                                        <li>
+                                            <form action="{{ route('admin.products.importProduct') }}" method="POST"
+                                                enctype="multipart/form-data" class="d-flex flex-column gap-2">
+                                                @csrf
+                                                <label for="excel_file" class="form-label mb-0">Upload Excel</label>
+                                                <input type="file" name="excel_file" id="excel_file"
+                                                    class="form-control form-control-sm" accept=".xlsx,.xls" required>
+                                                <button type="submit" class="btn btn-success btn-sm mt-1">
+                                                    <i class="mdi mdi-upload"></i> Import
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- Filter Modal Trigger -->
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#filterModal">
+                                    <i class="mdi mdi-filter-menu"></i> Filter
+                                </button>
                             </div>
-                            {{-- <div class="col-3">
-                                <label>Chọn ảnh sản phẩm:</label>
-                                <input type="file" class="form-control" name="product_images[]" multiple required>
-                            </div> --}}
-                            <div class="col-3 align-content-end">
-
-                                <button type="submit" class="btn btn-info">Nhập sản phẩm</button>
-                            </div>
-                            <div class="col-3 align-content-end">
-                                <a href="{{ route('admin.products.exportCreateExcel') }}" type="button"
-                                    class="btn btn-primary">Get Sample file</a>
-                            </div>
-
-
-
                         </div>
-
-                    </form>
-
-
-                </div>
-
-                <div class="card-body">
-
-                    <table id="fixed-header-datatable"
-                        class="table table-striped dt-responsive nowrap table-striped  w-100">
-                        <thead>
-                            <tr>
-
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
-
-                                <th>Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach ($products as $key => $product)
-                            <tr>
-
-                                <td>{{ $product->name }}</td>
-                                <td><img src="{{asset($product->image_primary) }}" alt="err" height="60px"></td>
-                                <td>{{ $product->brand->name }}</td>
-                                <td>{{$product->category->name }}</td>
-                                <td>{{ $product->total_quantity }}</td>
-
-                                <td>{{ $product->min_price }}-{{ $product->max_price }}</td>
-
-                                <td>
-                                    <a href="{{ route('admin.products.edit',$product->id) }}">
-                                        <button type="button" class="btn btn-secondary btn-warning">Sửa</button>
-                                    </a>
-                                    <form action="{{ route('admin.products.lock', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có muốn ngừng bán sản phẩm này không?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-secondary btn-danger">Ngừng bán</button>
-                                    </form>
-                                    <a href="{{ route('admin.products.detail',$product->id) }}"><button
-                                            class="btn btn-info">Chi tiết</button></a>
-                                    <a href="{{ route('admin.products.stas',$product->id) }}"><button
-                                            class="btn btn-primary">Thống kê</button></a>
-                                </td>
-                            </tr>
-                            @endforeach
+                    </div>
 
 
-                        </tbody>
-                        <tfoot>
-                            <tr>
+                    <div class="card-body">
 
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
+                        <table id="fixed-header-datatable"
+                            class="table table-striped dt-responsive nowrap table-striped  w-100">
+                            <thead>
+                                <tr>
 
-                                <th>Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div> <!-- end card body-->
-            </div> <!-- end card -->
-        </div><!-- end col-->
-    </div> <!-- end row-->
-</div>
+                                    <th>Name</th>
+                                    <th>Image</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th>Quantity</th>
+                                    <th>Views</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
 
+                            <tbody>
+                                @include('admin.product.product_table', ['products' => $products])
+
+
+                            </tbody>
+                            <tfoot>
+                                <tr>
+
+                                    <th>Name</th>
+                                    <th>Image</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th>Quantity</th>
+                                    <th>Views</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div> <!-- end card body-->
+                </div> <!-- end card -->
+            </div><!-- end col-->
+        </div> <!-- end row-->
+    </div>
+
+
+
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="filterForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filterModalLabel">Filter Products</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3 row">
+                            <!-- Category -->
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">All Categories</option>
+                                    @foreach ($categories as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Brand -->
+                            <div class="col-md-6">
+                                <label for="brand" class="form-label">Brand</label>
+                                <select class="form-select" id="brand" name="brand">
+                                    <option value="">All Brands</option>
+                                    @foreach ($brands as $b)
+                                        <option value="{{ $b->id }}">{{ $b->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Stock -->
+                        <div class="mb-3">
+                            <label for="stock" class="form-label">Kho hàng</label>
+                            <select class="form-select" id="stock" name="stock">
+                                <option value="">Tất cả</option>
+                                <option value="in_stock">Còn hàng</option>
+                                <option value="out_of_stock">Hết hàng</option>
+                                <option value="low_stock">Sắp hết hàng</option> {{-- mới --}}
+                                <option value="quantity">Số lượng cụ thể</option>
+                            </select>
+                            <input type="number" class="form-control mt-2" id="quantity" name="quantity"
+                                placeholder="Nhập số lượng" style="display: none;">
+                        </div>
+                        <!-- Sort View -->
+                        <div class="mb-3">
+                            <label for="sort_view" class="form-label">Sắp xếp theo lượt xem</label>
+                            <select class="form-select" id="sort_view" name="sort_view">
+                                <option value="">Không sắp xếp</option>
+                                <option value="asc">Từ thấp đến cao</option>
+                                <option value="desc">Từ cao đến thấp</option>
+                            </select>
+                        </div>
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label class="form-label">Khoảng giá</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="number" class="form-control" name="min_price"
+                                        placeholder="Giá tối thiểu">
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" name="max_price"
+                                        placeholder="Giá tối đa">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Created At -->
+                        <div class="mb-3">
+                            <label class="form-label">Ngày tạo</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="date" class="form-control" name="created_from"
+                                        placeholder="Từ ngày">
+                                </div>
+                                <div class="col">
+                                    <input type="date" class="form-control" name="created_to" placeholder="Đến ngày">
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Chỉ cần chọn một trong hai hoặc cả hai để lọc.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" id="applyFilter">Áp dụng bộ lọc</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('styles')
-<x-admin.data-table-styles />
+    <x-admin.data-table-styles />
 @endpush
-
 @push('scripts')
-<x-admin.data-table-scripts />
+    <script>
+        $(document).ready(function() {
+            // Hiển thị/ẩn input quantity
+            $('#stock').on('change', function() {
+                if (this.value === 'quantity') {
+                    $('#quantity').show();
+                } else {
+                    $('#quantity').hide().val(''); // Ẩn và xóa giá trị khi không cần
+                }
+            });
+
+            // Bắt sự kiện click nút Apply Filter
+            $('#applyFilter').on('click', function(e) {
+                e.preventDefault();
+                var formData = $('#filterForm').serialize();
+                console.log('Form data:', formData); // Debug dữ liệu gửi đi
+
+                $.ajax({
+                    url: '{{ route('admin.products.filter') }}',
+                    method: 'GET',
+                    data: formData,
+                    success: function(html) {
+                        $('#fixed-header-datatable tbody').html(html);
+                        $('#filterModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX error:', xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
 @endpush

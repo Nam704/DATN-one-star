@@ -8,6 +8,17 @@
                         <div class="card-header">
                             <h3>Orders > List</h3>
 
+                            <!-- Hiển thị thông báo lỗi nếu có -->
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <!-- Summary Metrics -->
                             <div class="summary row mb-1">
                                 <div class="col-md-3">
@@ -92,7 +103,7 @@
                                             <th>Email</th>
                                             <th>Status</th>
                                             <th>Total</th>
-                                            <th>Shipping Cost</th>
+                                            {{-- <th>Shipping Cost</th> --}}
                                             <th>Payment Method</th>
                                             <th>Created At</th>
                                             <th>Actions</th>
