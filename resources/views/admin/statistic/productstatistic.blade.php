@@ -28,7 +28,7 @@
         
         @include('admin.statistic.components.bieu_do')
         <form action="{{ route('admin.statistics.productStatistics') }}" method="GET" class="mb-3">
-    <div class="row">
+        <div class="row">
         <div class="col-md-4">
             <label for="start_date">Ngày bắt đầu</label>
             <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfDay()->toDateString()) }}" class="form-control">

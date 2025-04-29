@@ -68,6 +68,9 @@ class StatisticController extends Controller
     {
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        
+        $start_date = $start_date ? $start_date . ' 00:00:00' : null;
+        $end_date   = $end_date   ? $end_date   . ' 23:59:59' : null;
         $top_sale_products = $this->product->top_sale_products($start_date, $end_date);
         return response()->json($top_sale_products);
     }
@@ -77,6 +80,8 @@ class StatisticController extends Controller
     {
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        $start_date = $start_date ? $start_date . ' 00:00:00' : null;
+        $end_date   = $end_date   ? $end_date   . ' 23:59:59' : null;
         $top_sale_products = $this->product->productSold($start_date, $end_date);
         return response()->json($top_sale_products);
     }
