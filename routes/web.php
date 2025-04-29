@@ -275,6 +275,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-products');
             Route::post('open-product/{id}', 'openProduct')->name('openProduct')->middleware('permission:edit-products');
             Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail')->middleware('permission:view-products');
+            Route::get('/filter','filter')->name('filter');
         });
 
         //Address

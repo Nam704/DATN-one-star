@@ -5,38 +5,66 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="header-title">List Product</h4>
-                        <a href="{{ route('admin.products.create') }}" type="button" class="btn btn-sm btn-primary">Add new
-                            product</a>
+                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                          <h4 class="card-title mb-2 mb-md-0">List Products</h4>
 
-                        <form class="form-control mt-2" action="{{ route('admin.excels.createProduct') }}" method="POST"
-                            enctype="multipart/form-data">
-                            @csrf
-                            <div class="row container">
-                                <div class="col-3">
-                                    <label>Chọn file Excel:</label>
-                                    <input type="file" class=" form-control" name="excel_file" required>
-                                </div>
-                                {{-- <div class="col-3">
-                                <label>Chọn ảnh sản phẩm:</label>
-                                <input type="file" class="form-control" name="product_images[]" multiple required>
-                            </div> --}}
-                                <div class="col-3 align-content-end">
+                          <div class="d-flex flex-wrap align-items-center gap-2">
 
-                                    <button type="submit" class="btn btn-info">Nhập sản phẩm</button>
-                                </div>
-                                <div class="col-3 align-content-end">
-                                    <a href="{{ route('admin.products.exportCreateExcel') }}" type="button"
-                                        class="btn btn-primary">Get Sample file</a>
-                                </div>
+                            <!-- Add New Product -->
+                            <a href="{{ route('admin.products.create') }}"
+                               class="btn btn-primary btn-sm">
+                              <i class="mdi mdi-plus"></i> Add Product
+                            </a>
+
+                            <!-- Import/Export Group -->
+                            <div class="dropdown">
+                              <button class="btn btn-info btn-sm dropdown-toggle"
+                                      type="button" id="excelDropdown"
+                                      data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="mdi mdi-file-excel"></i> Excel
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="excelDropdown" style="min-width: 250px;">
+                                <!-- Download sample -->
+                                <li class="mb-2">
+                                  <a href="{{ route('admin.products.exportCreateExcel') }}"
+                                     class="btn btn-outline-secondary w-100 btn-sm">
+                                    <i class="mdi mdi-download"></i> Download Sample
+                                  </a>
+                                </li>
+                                <!-- Import form -->
+                                <li>
+                                  <form action="{{ route('admin.products.importProduct') }}"
+                                        method="POST"
+                                        enctype="multipart/form-data"
+                                        class="d-flex flex-column gap-2">
+                                    @csrf
+                                    <label for="excel_file" class="form-label mb-0">Upload Excel</label>
+                                    <input type="file"
+                                           name="excel_file"
+                                           id="excel_file"
+                                           class="form-control form-control-sm"
+                                           accept=".xlsx,.xls"
+                                           required>
+                                    <button type="submit"
+                                            class="btn btn-success btn-sm mt-1">
+                                      <i class="mdi mdi-upload"></i> Import
+                                    </button>
+                                  </form>
+                                </li>
+                              </ul>
                             </div>
-                        </form>
 
-                        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
-                            data-bs-target="#filterModal">
-                            <i class="mdi mdi-filter-menu fs-5"></i> Filter Menu
-                        </button>
-                    </div>
+                            <!-- Filter Modal Trigger -->
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#filterModal">
+                              <i class="mdi mdi-filter-menu"></i> Filter
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
 
                     <div class="card-body">
 
