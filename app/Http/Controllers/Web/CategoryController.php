@@ -138,12 +138,15 @@ class CategoryController extends Controller
 
             // Nếu không có sản phẩm nào trong danh mục con, xóa danh mục con trước
             foreach ($category->children as $child) {
-                $child->delete();
+                $category->status= 'inactive';
+                $child->delete();               
             }
         }
 
         // Xóa danh mục 
+        $category->status= 'inactive';
         $category->delete();
+        $category->save();
         return redirect()->route('admin.categories.listCategory')->with('success', 'Xóa danh mục thành công.');
     }
     public function trash()
@@ -155,7 +158,9 @@ class CategoryController extends Controller
     public function restoreCategory($id)
     {
         $category = Category::onlyTrashed()->findOrFail($id);
+        $category->status= 'active';
         $category->restore();
+        $category->save();
 
         return redirect()->route('admin.categories.listCategory')->with('success', 'Danh mục đã được khôi phục!');
     }

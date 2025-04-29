@@ -37,7 +37,6 @@
                                     <th>Nội dung</th>
                                     <th>Số sao</th>
                                     <th>Ngày bình luận</th>
-                                    <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -51,12 +50,11 @@
                                         <td>{{ Str::limit($comment->comment, 50) }}</td>
                                         <td>{{ $comment->rating }}</td>
                                         <td>{{ $comment->created_at->format('d/m/Y H:i') }}</td>
-                                        <td>{{ ucfirst($comment->status) }}</td>
                                         <td>
                                             <div class="btn-group">
-                                                <form action="{{ route('admin.comments.restore', $comment->id) }}" method="POST" class="d-inline me-1" onsubmit="return confirm('Bạn có muốn khôi phục không?');">
+                                                <form action="{{ route('admin.comments.restore', $comment->id) }}" method="POST" class="d-inline me-1" onsubmit="return confirm('Bạn có muốn hiện bình luận không?');">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-primary">Khôi phục</button>
+                                                    <button type="submit" class="btn btn-sm btn-primary">Hiện</button>
                                                 </form>
                                                 <form action="{{ route('admin.comments.delete', $comment->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Chắc chắn xóa bình luận này vĩnh viễn?');">
                                                     @csrf
@@ -76,7 +74,6 @@
                                     <th>Nội dung</th>
                                     <th>Số sao</th>
                                     <th>Ngày bình luận</th>
-                                    <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
                             </tfoot>

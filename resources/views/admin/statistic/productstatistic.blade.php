@@ -51,7 +51,7 @@
                             <div class="card-widgets">
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
-                            <h5 class="header-title mb-0">Top 10 sản phẩm bán tệ</h5>
+                            <h5 class="header-title mb-0">Sản phẩm bán tệ theo khoảng</h5>
                             <a href="{{ route('admin.statistics.exportLeastSoldProducts',request()->query()) }}" class="btn btn-primary" style="margin-top: 10px;">
                                    <i class="ri-file-excel-2-line"></i> Xuất Excel
                                 </a>
@@ -95,7 +95,52 @@
                             <div class="card-widgets">
                                 <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                             </div>
-                            <h5 class="header-title mb-0">Danh mục sản phẩm</h5>
+                            <h5 class="header-title mb-0"> Tổng Số lượt bình luận của sản phẩm theo khoảng</h5>
+                            <a href="{{ route('admin.statistics.exportTopCommentProducts', request()->query()) }}" class="btn btn-primary  " style="margin-top: 10px;">
+                                   <i class="ri-file-excel-2-line"></i> Export Excel
+                            </a>
+                        </div>
+                        <div id="yearly-sales-collapse" class="collapse show">
+                            <div class="table-responsive">
+                                <table class="table table-nowrap table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Stt</th>
+                                            <th>Tên sản phẩm</th>
+                                            <th>Ảnh</th>
+                                            <th>Tổng số lượt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($top_comment_products as $key => $product)
+                                            <tr>
+                                                <td>{{ $key + 1 }}</td>
+                                                <td>{{$product->name}}</td>
+                                                <td>
+                                                <img src="{{ asset($product->image_primary) }}"
+                                        alt="{{ $product->name }}" width="50">
+
+                                                </td>
+                                                <td>{{ number_format($product->total_comments) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- end card-->
+            </div> <!-- end col-->
+
+            <div class="col-xl-6">
+                <!-- Todo-->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="p-3">
+                            <div class="card-widgets">
+                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
+                            </div>
+                            <h5 class="header-title mb-0">Danh mục sản phẩm theo khoảng</h5>
                             <a href="{{ route('admin.statistics.exportProductsByCategory',request()->query() ) }}" class="btn btn-primary" style="margin-top: 10px;">
                                    <i class="ri-file-excel-2-line"></i> Xuất Excel
                             </a>
@@ -128,6 +173,49 @@
                 </div> <!-- end card-->
             </div> <!-- end col-->
 
+            <div class="col-xl-6">
+                <!-- Todo-->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="p-3">
+                            <div class="card-widgets">
+                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
+                            </div>
+                            <h5 class="header-title mb-0">Tổng Số lượng view theo sản phẩm</h5>
+                            <a href="{{ route('admin.statistics.exportTopViewProducts') }}" class="btn btn-primary  " style="margin-top: 10px;">
+                                   <i class="ri-file-excel-2-line"></i> Xuất Excel
+                            </a>
+                        </div>
+                        <div id="yearly-sales-collapse" class="collapse show">
+                            <div class="table-responsive">
+                                <table class="table table-nowrap table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Stt</th>
+                                            <th>Tên sản phẩm</th>
+                                            <th>Ảnh</th>
+                                            <th>Tổng số lượng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($top_view_products as $key => $product)
+                                            <tr>
+                                                <td>{{ $key + 1 }}</td>
+                                                <td>{{ $product->name }}</td>
+                                                <td>
+                                                    <img src="{{ asset( $product->image_primary) }}"
+                                                        alt="{{ $product->name }}" width="50">
+                                                </td>
+                                                <td>{{ number_format($product->view) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- end card-->
+            </div> <!-- end col-->
             <div class="col-xl-6">
                 <!-- Todo-->
                 <div class="card">
@@ -172,96 +260,7 @@
                 </div> <!-- end card-->
             </div> <!-- end col-->
 
-            <div class="col-xl-6">
-                <!-- Todo-->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="p-3">
-                            <div class="card-widgets">
-                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                            </div>
-                            <h5 class="header-title mb-0">Top 10 sản phẩm view cao nhất</h5>
-                            <a href="{{ route('admin.statistics.exportTopViewProducts') }}" class="btn btn-primary  " style="margin-top: 10px;">
-                                   <i class="ri-file-excel-2-line"></i> Xuất Excel
-                            </a>
-                        </div>
-                        <div id="yearly-sales-collapse" class="collapse show">
-                            <div class="table-responsive">
-                                <table class="table table-nowrap table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Stt</th>
-                                            <th>Tên sản phẩm</th>
-                                            <th>Ảnh</th>
-                                            <th>Tổng số lượng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($top_view_products as $key => $product)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $product->name }}</td>
-                                                <td>
-                                                    <img src="{{ asset( $product->image_primary) }}"
-                                                        alt="{{ $product->name }}" width="50">
-                                                </td>
-                                                <td>{{ number_format($product->view) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- end card-->
-            </div> <!-- end col-->
-
-            <div class="col-xl-6">
-                <!-- Todo-->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="p-3">
-                            <div class="card-widgets">
-                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                            </div>
-                            <h5 class="header-title mb-0">Top 10 sản phẩm bình luận nhiều nhất</h5>
-                            <a href="{{ route('admin.statistics.exportTopCommentProducts') }}" class="btn btn-primary  " style="margin-top: 10px;">
-                                   <i class="ri-file-excel-2-line"></i> Export Excel
-                            </a>
-                        </div>
-                        <div id="yearly-sales-collapse" class="collapse show">
-                            <div class="table-responsive">
-                                <table class="table table-nowrap table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Stt</th>
-                                            <th>Tên sản phẩm</th>
-                                            <th>Ảnh</th>
-                                            <th>Tổng số lượng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($top_comment_products as $key => $product)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $product['name'] }}</td>
-                                                <td>
-                                                    <img src="{{ asset( $product['image_primary']) }}"
-                                                        alt="{{ $product['name'] }}" width="50">
-                                                </td>
-                                                <td>{{ number_format($product['total_comments']) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- end card-->
-            </div> <!-- end col-->
         </div>
-
-        
         <!-- end row -->
 
     </div>

@@ -40,19 +40,6 @@
 
                         <h5>Ngày bình luận</h5>
                         <p>{{ $comment->created_at->format('d/m/Y H:i') }}</p>
-
-                        @if($comment->status === 'pending')
-                            <div class="btn-group">
-                                <form action="{{ route('admin.comments.approve', $comment->id) }}" method="POST" class="d-inline me-1" onclick="return confirm('Bạn có muốn duyệt không?')">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
-                                </form>
-                                <form action="{{ route('admin.comments.reject', $comment->id) }}" method="POST" class="d-inline" onclick="return confirm('Bạn có muốn từ chối    không?')">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-warning">Từ chối</button>
-                                </form>
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>
