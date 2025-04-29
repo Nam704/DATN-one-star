@@ -8,9 +8,10 @@
                         <tr>
                             <th>#</th>
                             <th>Khách hàng</th>
-                            <th>Liên hệ (Email / SĐT)</th>   {{-- <-- Gộp thành 1 cột --}}
+                            <th>Liên hệ (Email / SĐT)</th>
                             <th>Sản phẩm đã mua</th>
                             <th>Tổng chi (VNĐ)</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -19,13 +20,13 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $user['user_name'] }}</td>
                                 <td>
-                                    @if($user['email'] && $user['email'] != '-')
+                                    @if ($user['email'] && $user['email'] != '-')
                                         Email: {{ $user['email'] }}<br>
                                     @endif
-                                    @if($user['phone'] && $user['phone'] != '-')
+                                    @if ($user['phone'] && $user['phone'] != '-')
                                         Phone: {{ $user['phone'] }}
                                     @endif
-                                    @if(($user['email'] == '-' || !$user['email']) && ($user['phone'] == '-' || !$user['phone']))
+                                    @if (($user['email'] == '-' || !$user['email']) && ($user['phone'] == '-' || !$user['phone']))
                                         -
                                     @endif
                                 </td>
@@ -33,6 +34,12 @@
                                     {!! str_replace(', ', '<br>', $user['products_bought']) ?: '-' !!}
                                 </td>
                                 <td>{{ number_format($user['total_purchase'], 0, '.', ',') }}đ</td>
+                                <td>
+                                    <a href="{{ route('admin.orders.byUser', $user['id_user']) }}"
+                                        class="btn btn-sm btn-info">
+                                        Đơn hàng
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>

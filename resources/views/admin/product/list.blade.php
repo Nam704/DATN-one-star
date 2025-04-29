@@ -179,7 +179,9 @@
                                         placeholder="Từ ngày">
                                 </div>
                                 <div class="col">
-                                    <input type="date" class="form-control" name="created_to" placeholder="Đến ngày">
+                                    <input type="date" name="created_to" id="created_to" class="form-control"
+                                        value="{{ old('created_to') }}" max="{{ now()->toDateString() }}"
+                                    onchange="this.blur()">
                                 </div>
                             </div>
                             <small class="form-text text-muted">
@@ -232,4 +234,5 @@
             });
         });
     </script>
+    @vite(['resources/js/admin/listProduct.js'])
 @endpush

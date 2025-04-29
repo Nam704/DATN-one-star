@@ -154,4 +154,16 @@ class OrderController extends Controller
 
         return view('admin.order.detail', compact('order', 'orderDetails', 'orderService'));
     }
+    public function byUser($userId)
+    {
+        // Lấy tất cả order của user (bạn có thể apply thêm filter trạng thái nếu muốn)
+        $orders = Order::where('id_user', $userId)
+                       ->orderBy('created_at', 'desc')
+                       ->get();
+
+        // Lấy tên user để hiển thị tiêu đề
+        $userName = $orders->first()->user->name ?? 'Unknown';
+
+        return view('admin.order.by_user', compact('orders', 'userName'));
+    }
 }

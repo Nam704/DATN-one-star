@@ -119,6 +119,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('detail/{id}', 'detail')->name('detail');
             Route::post('accept-all', 'acceptAll')->name('acceptAll');
             Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation');
+            Route::get('user/{userId}', 'byUser')->name('byUser');
+
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
