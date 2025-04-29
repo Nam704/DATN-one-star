@@ -251,9 +251,11 @@ class UserContronler extends Controller
                 return redirect()->back()->with('error', 'Bạn không có quyền xem thông tin của admin khác.');
             }
 
-            $order = Order::where('id_user', $id)->with('orderDetails')->get();
-            return view('admin.user.detail', compact('user', 'order'));
+            $order = Order::where('id_user', $id)->with(['orderDetails', 'orderStatus'])->get();
+            return view('admin.user.detail', compact('user', 'order')); // thay đổi
         }
+
+        
 
         // Employee: chỉ được xem user thường
         if ($currentUser->role->name === 'employee') {
@@ -527,11 +529,10 @@ class UserContronler extends Controller
 
     public function chart_user($id)
     {
-        // tong chi tieu
-        $totalSpent = Order::where('id_user', $id)
-            ->where('payment_status', 'paid')
-            ->sum('total');
-
+            $totalSpent = Order::join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+            ->where('orders.id_user', $id)  // Lọc theo user
+            ->whereNotIn('order_statuses.name', ['Cancelled']) // Loại trừ trạng thái Hủy
+            ->sum('orders.total');
         // tong don hang
         $totalOrders = Order::where('id_user', $id)->count();
 
@@ -671,15 +672,17 @@ class UserContronler extends Controller
     }
 
     public function getOrderStatusStats($id)
-    {
-        $orderStats = Order::where('id_user', $id)
-            ->selectRaw("
-            SUM(CASE WHEN id_order_status = 5 THEN 1 ELSE 0 END) AS received_orders,
-            SUM(CASE WHEN id_order_status = 6 THEN 1 ELSE 0 END) AS returned_orders,
-            SUM(CASE WHEN id_order_status = 7 THEN 1 ELSE 0 END) AS cancelled_orders
+{
+    $orderStats = Order::where('id_user', $id)
+        ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // Tham gia với bảng order_statuses
+        ->selectRaw("
+            SUM(CASE WHEN order_statuses.name = 'Delivered' THEN 1 ELSE 0 END) AS delivered_orders,  -- Đơn đã giao
+            SUM(CASE WHEN order_statuses.name IN ('Return Requested', 'Return Under Review', 'Return Approved', 'Return Rejected', 'Refunded') THEN 1 ELSE 0 END) AS returned_orders,  -- Các trạng thái hoàn đơn
+            SUM(CASE WHEN order_statuses.name = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_orders    -- Đơn hủy
         ")
-            ->first();
+        ->first();
 
-        return response()->json($orderStats);
-    }
+    return response()->json($orderStats);
+}
+
 }

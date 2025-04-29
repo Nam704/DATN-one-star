@@ -64,50 +64,6 @@
         </div>
         <!-- end row -->
 
-        <div class="row">
-            <div class="col-xl-6">
-                <!-- Chat-->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="p-3">
-                            <div class="card-widgets">
-                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                                <a data-bs-toggle="collapse" href="#yearly-sales-collapse" role="button"
-                                    aria-expanded="false" aria-controls="yearly-sales-collapse"><i
-                                        class="ri-subtract-line"></i></a>
-                                <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
-                            </div>
-                            <h5 class="header-title mb-0">Đánh giá</h5>
-                        </div>
-
-
-                    </div>
-
-                </div> <!-- end card-->
-            </div> <!-- end col-->
-
-            <div class="col-xl-6">
-                <!-- Todo-->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="p-3">
-                            <div class="card-widgets">
-                                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
-                                <a data-bs-toggle="collapse" href="#yearly-sales-collapse" role="button"
-                                    aria-expanded="false" aria-controls="yearly-sales-collapse"><i
-                                        class="ri-subtract-line"></i></a>
-                                <a href="#" data-bs-toggle="remove"><i class="ri-close-line"></i></a>
-                            </div>
-                            <h5 class="header-title mb-0">Đánh giá</h5>
-                        </div>
-
-
-                    </div>
-                </div> <!-- end card-->
-            </div> <!-- end col-->
-        </div>
-        <!-- end row -->
-
     </div>
 @endsection
 
@@ -119,36 +75,42 @@
     <x-admin.data-table-scripts />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var userId = {{ $user->id }}; // Lấy ID user từ blade template
-            console.log('userId');
-            fetch("{{ route('admin.users.getOrderStatusStats', '') }}/" + userId)
-                .then(response => response.json())
-                .then(data => {
-                    var ctx = document.getElementById("orderStatusChart").getContext("2d");
+    document.addEventListener("DOMContentLoaded", function() {
+        var userId = {{ $user->id }}; // Lấy ID user từ blade template
+        console.log('userId');
+        fetch("{{ route('admin.users.getOrderStatusStats', '') }}/" + userId)
+            .then(response => response.json())
+            .then(data => {
+                // Kiểm tra xem dữ liệu trả về từ API có hợp lệ không
+                console.log(data); // Log ra để kiểm tra dữ liệu
 
-                    new Chart(ctx, {
-                        type: "pie",
-                        data: {
-                            labels: ["Đã nhận hàng", "Hoàn hàng", "Hủy đơn hàng"],
-                            datasets: [{
-                                data: [data.received_orders, data.returned_orders, data
-                                    .cancelled_orders
-                                ],
-                                backgroundColor: ["#36A2EB", "#FFCE56", "#FF6384"]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: "top"
-                                }
+                var ctx = document.getElementById("orderStatusChart").getContext("2d");
+
+                // Tạo biểu đồ pie với dữ liệu
+                new Chart(ctx, {
+                    type: "pie", // Biểu đồ hình tròn
+                    data: {
+                        labels: ["Đã nhận hàng", "Hoàn hàng", "Hủy đơn hàng"], // Các trạng thái đơn hàng
+                        datasets: [{
+                            data: [
+                                data.delivered_orders,    // Đơn đã nhận hàng
+                                data.returned_orders,     // Đơn hoàn hàng
+                                data.cancelled_orders     // Đơn hủy
+                            ], 
+                            backgroundColor: ["#36A2EB", "#FFCE56", "#FF6384"] // Màu sắc cho từng trạng thái
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: "top"
                             }
                         }
-                    });
-                })
-                .catch(error => console.error("Lỗi khi lấy dữ liệu:", error));
-        });
-    </script>
+                    }
+                });
+            })
+            .catch(error => console.error("Lỗi khi lấy dữ liệu:", error));
+    });
+</script>
 @endpush

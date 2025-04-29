@@ -123,7 +123,7 @@
                                                         <th>STT</th>
                                                         <th>Mã đơn hàng</th>
                                                         <th>Ngày đặt hàng</th>
-                                                        <th>Tổng đơn hàng</th>
+                                                        <th>Tổng tiền</th>
                                                         <th>Trạng thái</th>
                                                         <th>Hành động</th>
                                                     </tr>
@@ -137,41 +137,13 @@
                                                         <td>{{ $value->created_at->format('d/m/Y') }}</td>
                                                         <td>{{ $value->total }}</td>
                                                         <td>
-                                                            @php
-                                                            $statusMap = [
-                                                            1 => [
-                                                            'text' => 'Đang xử lý',
-                                                            'color' => 'text-bg-light',
-                                                            ],
-                                                            2 => [
-                                                            'text' => 'Đã xác nhận',
-                                                            'color' => 'bg-secondary text-light',
-                                                            ],
-                                                            3 => [
-                                                            'text' => 'Đang vận chuyển',
-                                                            'color' => 'bg-warning',
-                                                            ],
-                                                            4 => [
-                                                            'text' => 'Đã giao hàng',
-                                                            'color' => 'bg-primary',
-                                                            ],
-                                                            5 => [
-                                                            'text' => 'Đã nhận hàng',
-                                                            'color' => 'bg-success',
-                                                            ],
-                                                            6 => [
-                                                            'text' => 'Hoàn trả',
-                                                            'color' => 'bg-danger',
-                                                            ],
-                                                            ];
-                                                            @endphp
-                                                            <span
-                                                                class="badge rounded-pill {{ $statusMap[$value->id_order_status]['color'] }}">
-                                                                {{ $statusMap[$value->id_order_status]['text'] }}
+
+                                                            <span class="badge rounded-pill {{ $value->orderStatus->color ?? 'text-dark' }}">
+                                                                {{ $value->orderStatus->name ?? 'Không xác định' }}
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <a href="#">
+                                                            <a href="{{ route('admin.orders.detail', $value->id) }}">
                                                                 <button type="button"
                                                                     class="btn btn-secondary btn-sm btn-info me-1"><i
                                                                         class="mdi mdi-eye me-1"></i>Xem chi tiết</button>
@@ -187,7 +159,7 @@
                                                         <th>STT</th>
                                                         <th>Mã đơn hàng</th>
                                                         <th>Ngày đặt hàng</th>
-                                                        <th>Tổng đơn hàng</th>
+                                                        <th>Tổng tiền</th>
                                                         <th>Trạng thái</th>
                                                         <th>Hành động</th>
                                                     </tr>
@@ -197,6 +169,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>

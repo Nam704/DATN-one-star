@@ -30,7 +30,6 @@ class PermissionSeeder extends Seeder
         // Define modules (cập nhật đầy đủ các module từ routes)
         $modules = [
             'users',
-            'statistics',
             'banners',
             'products',
             'categories',

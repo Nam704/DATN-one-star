@@ -43,11 +43,11 @@
                         <td>{{ $order['order_id'] }}</td> <!-- Hiển thị ID đơn hàng -->
                         <td>{{ implode(', ', $order['statuses']) }}</td> <!-- Hiển thị trạng thái -->
                         <td>
-                            @if ($userData['address'])
-                            {{ $userData['address']->details($userData['address']->id_ward) }}
-                            @else
-                            Chưa có địa chỉ
-                            @endif
+                            
+                            {{ $userData['address']['address_detail'] }},
+                            {{ $userData['address']['ward'] }},
+                            {{ $userData['address']['district'] }},
+                            {{ $userData['address']['province'] }}
                         </td>
 
                     </tr>
