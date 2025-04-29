@@ -23,5 +23,16 @@ class AttributeValueController extends Controller
         return view('admin.attribute_value.list', compact('attributes_value'));
     }
 
-    
+    public function create()
+    {
+        // Lấy danh sách thuộc tính để chọn
+        $attributes = Attribute::select('id', 'name')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.attribute_value.add', compact('attributes'));
+    }
+
+   
 }
