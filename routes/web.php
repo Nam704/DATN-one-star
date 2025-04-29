@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Client\ContactController;
+use App\Http\Controllers\Web\AttributeValueController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -120,6 +121,17 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('accept-all', 'acceptAll')->name('acceptAll');
             Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation');
         });
+        Route::prefix('attribute_values')->name('attribute_values.')->controller(AttributeValueController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('{id}/edit', 'edit')->name('edit');
+            Route::put('{id}', 'update')->name('update');
+            Route::delete('{id}', 'destroy')->name('destroy');
+            Route::get('trash', 'trash')->name('trash');
+            Route::post('{id}/restore', 'restore')->name('restore');
+        });
+
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
             Route::get('order-status', [DashboardController::class, 'orderStatusStatistics'])->name('orderStatus');

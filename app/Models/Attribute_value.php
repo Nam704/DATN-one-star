@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Attribute_value extends Model
 {
 
-    use HasFactory;
+    use HasFactory , SoftDeletes;
+
     protected $fillable = [
         'id_attribute',
         'value',

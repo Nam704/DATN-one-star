@@ -98,6 +98,11 @@
                                     <a href="{{ route('admin.attributes.index') }}">Thuộc tính</a>
                                 </li>
                             @endif
+                            @if (auth()->user()->hasPermission('view-attributes-value'))
+                                <li>
+                                    <a href="{{ route('admin.attribute_values.index') }}">Giá trị thuộc tính</a>
+                                </li>
+                            @endif
                             @if (auth()->user()->hasPermission('view-brands'))
                                 <li>
                                     <a href="{{ route('admin.brands.index') }}">Thương hiệu</a>
