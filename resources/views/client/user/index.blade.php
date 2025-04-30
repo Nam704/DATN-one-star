@@ -21,13 +21,16 @@
                         <!-- Tab điều hướng nằm ngang -->
                         <ul role="tablist" class="nav nav-tabs mb-3" id="nav-tab">
                             <li class="nav-item">
-                                <a href="#orders" data-toggle="tab" class="nav-link active">Orders</a>
+                                <a href="#orders" data-toggle="tab" class="nav-link active">Đơn hàng</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#address" data-toggle="tab" class="nav-link">Addresses</a>
+                                <a href="#address" data-toggle="tab" class="nav-link">Địa chỉ</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#account-details" data-toggle="tab" class="nav-link">Account details</a>
+                                <a href="#account-details" data-toggle="tab" class="nav-link">Chi tiết tài khoản</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#voucher" data-toggle="tab" class="nav-link">Mã giảm giá</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#" class="nav-link"

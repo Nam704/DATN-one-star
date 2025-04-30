@@ -12,6 +12,10 @@ class CommentController extends Controller
     {
         
         $comments = Comment::where('status', 'active')
+        ->whereHas('product', function ($query) {
+            $query->where('status', 'active')
+                  ->whereNull('deleted_at'); // sản phẩm chưa bị xóa mềm
+        })
         ->with(['user', 'product']) 
         ->latest() 
         ->paginate(20); 
@@ -39,6 +43,10 @@ class CommentController extends Controller
 {
     // Lấy tất cả bình luận đã bị xóa (soft delete)
     $comments = Comment::onlyTrashed()
+    ->whereHas('product', function ($query) {
+        $query->where('status', 'active')
+              ->whereNull('deleted_at'); // sản phẩm chưa bị xóa mềm
+    })
         ->with(['user', 'product'])
         ->latest()
         ->paginate(20);

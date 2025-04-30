@@ -91,6 +91,7 @@
         {{-- Form gửi bình luận --}}
         @auth
             @php
+            
                 $hasCommented = $comments->where('user_id', auth()->id())->count() > 0;
             @endphp
 
@@ -153,6 +154,12 @@
     document.getElementById('comment_form')?.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        if (!{{ auth()->check() ? 'true' : 'false' }}) {
+        alert('Vui lòng đăng nhập để gửi bình luận.');
+        window.location.href = '{{ route('auth.getFormLogin') }}'; // Chuyển hướng đến trang đăng nhập
+        return;
+    }
+    
         let formData = new FormData(this);
 
         fetch('{{ route('client.products.storecomment') }}', {
@@ -165,7 +172,7 @@
         .then(response => response.json())
         .then(data => {
             alert(data.message);
-
+                 const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}'
             // Tạo HTML mới cho bình luận
             const newComment = `
                 <div class="reviews_comment_box">
@@ -181,7 +188,7 @@
                                     ).join('')}
                                 </ul>
                             </div>
-                            <p><strong>{{ auth()->user()->name }}</strong> - hôm nay</p>
+                            <p><strong>${userName}</strong> - hôm nay</p>
                             <span>${formData.get('comment')}</span>
                         </div>
                     </div>
@@ -201,7 +208,7 @@
             document.querySelector('.comment_title')?.remove();
 
             const note = document.createElement('p');
-            note.textContent = 'Bạn đã bình luận sản phẩm này.';
+            note.textContent = '';
             document.querySelector('.reviews_wrapper').appendChild(note);
         })
         .catch(error => {
