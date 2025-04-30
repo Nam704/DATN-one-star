@@ -3,6 +3,11 @@
     <div class="shop_area shop_reverse">
         <div class="container">
             <div class="row">
+                @php
+                    // Nếu controller đã pass mảng, sử dụng luôn; nếu không, fallback về request()->input(...)
+                    $selectedCategories = $selectedCategories ?? request()->input('categories', []);
+                    $selectedBrands = $selectedBrands ?? request()->input('brands', []);
+                @endphp
                 <!-- Sidebar: Bộ lọc -->
                 <div class="col-lg-3 col-md-12">
                     <aside class="sidebar_widget">
@@ -36,12 +41,15 @@
                                             <ul>
                                                 @foreach ($categories as $category)
                                                     <li>
-                                                        <input type="checkbox" name="categories[]" class="category-filter"
-                                                            value="{{ $category->id }}"
-                                                            @if (in_array($category->id, old('categories', []))) checked @endif>
-                                                        {{ $category->name }}
+                                                        <label>
+                                                            <input type="checkbox" name="categories[]"
+                                                                class="category-filter" value="{{ $category->id }}"
+                                                                {{ in_array($category->id, $selectedCategories) ? 'checked' : '' }}>
+                                                            {{ $category->name }}
+                                                        </label>
                                                     </li>
                                                 @endforeach
+
                                             </ul>
                                         </div>
                                     </div>
@@ -52,12 +60,15 @@
                                             <ul>
                                                 @foreach ($brands as $brand)
                                                     <li>
-                                                        <input type="checkbox" name="brands[]" class="brand-filter"
-                                                            value="{{ $brand->id }}"
-                                                            @if (in_array($brand->id, old('brands', []))) checked @endif>
-                                                        {{ $brand->name }}
+                                                        <label>
+                                                            <input type="checkbox" name="brands[]" class="brand-filter"
+                                                                value="{{ $brand->id }}"
+                                                                {{ in_array($brand->id, $selectedBrands) ? 'checked' : '' }}>
+                                                            {{ $brand->name }}
+                                                        </label>
                                                     </li>
                                                 @endforeach
+
                                             </ul>
                                         </div>
                                     </div>
@@ -70,17 +81,18 @@
                 <div class="col-lg-9 col-md-12">
                     {{-- product-list.blade.php --}}
                     <div class="shop_banner">
-                    <div class="slider_area owl-carousel">
-                    @foreach($banners as $banner)
-                    <!-- <div class="single_slider d-flex align-items-center" > -->
-                        <div class="slider_content" style="background-image: url('{{ Storage::url($banner->image) }}');">
-                            <h2>{{ $banner->title }}</h2>
-                            <h1>{{ $banner->description }}</h1>
-                            <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                        <div class="slider_area owl-carousel">
+                            @foreach ($banners as $banner)
+                                <!-- <div class="single_slider d-flex align-items-center" > -->
+                                <div class="slider_content"
+                                    style="background-image: url('{{ Storage::url($banner->image) }}');">
+                                    <h2>{{ $banner->title }}</h2>
+                                    <h1>{{ $banner->description }}</h1>
+                                    <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                                </div>
+                                <!-- </div> -->
+                            @endforeach
                         </div>
-                    <!-- </div> -->
-                    @endforeach
-                </div>
                     </div>
                     <div class="shop_title">
                         <h1>shop</h1>
@@ -259,4 +271,3 @@
         });
     });
 </script>
-
