@@ -8,12 +8,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="header-title">Danh sách bình luận</h4>
-
-
-                    <a href="{{ route('admin.comments.listapprove') }}" class="btn btn-primary btn-sm">Danh sách duyệt</a>
-
-                    <a href="{{ route('admin.comments.listreject') }}" class="btn btn-primary btn-sm">Danh sách từ chối</a>
-
+                    <a href="{{ route('admin.comments.listdelete') }}" class="btn btn-primary btn-sm">Danh sách xóa bình luận</a>
                 </div>
 
                 <div class="card-body">
@@ -27,7 +22,6 @@
                                     <th>Nội dung</th>
                                     <th>Số sao</th>
                                     <th>Ngày bình luận</th>
-                                    <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -41,16 +35,12 @@
                                         <td>{{ Str::limit($comment->comment, 50) }}</td>
                                         <td>{{ $comment->rating }}</td>
                                         <td>{{ $comment->created_at->format('d/m/Y H:i') }}</td>
-                                        <td>{{ ucfirst($comment->status) }}</td>
                                         <td>
                                             <div class="btn-group">
-                                                    <form action="{{ route('admin.comments.approve', $comment->id) }}" method="POST" class="d-inline me-1" onclick="return confirm('Bạn có duyệt không?')">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
-                                                    </form>
-                                                    <form action="{{ route('admin.comments.reject', $comment->id) }}" method="POST" class="d-inline" onclick="return confirm('Bạn có muốn từ chối không?')">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-warning me-1">Từ chối</button>
+                                                    <form action="{{ route('admin.comments.destroy', $comment->id) }}" method="POST" class="d-inline" onclick="return confirm('Bạn có muốn xóa bình luận không?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-warning me-1">Xóa</button>
                                                     </form>
                                                     <a href="{{ route('admin.comments.show', $comment->id) }}" class="btn btn-sm btn-info">Xem chi tiết</a>
 
@@ -72,7 +62,6 @@
                                     <th>Nội dung</th>
                                     <th>Số sao</th>
                                     <th>Ngày bình luận</th>
-                                    <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
                             </tfoot>

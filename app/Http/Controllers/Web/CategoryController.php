@@ -121,31 +121,40 @@ class CategoryController extends Controller
     public function deleteCategory($id)
     {
         $category = Category::findOrFail($id);
-
-        // Kiểm tra xem danh mục này có sản phẩm không
-        if ($category->products()->count() > 0) {
-            return redirect()->route('admin.categories.listCategory')->with('error', 'Không thể xóa danh mục vì vẫn còn sản phẩm.');
+    
+        // Kiểm tra xem danh mục này có sản phẩm chưa bị xóa vĩnh viễn không (kể cả soft delete)
+        if ($category->products()->withTrashed()->count() > 0) {
+            return redirect()->route('admin.categories.listCategory')
+                ->with('error', 'Không thể xóa danh mục vì vẫn còn sản phẩm.');
         }
-
+    
         // Kiểm tra xem danh mục này có danh mục con không
         if ($category->children()->count() > 0) {
-            // Kiểm tra nếu danh mục con có sản phẩm
             foreach ($category->children as $child) {
-                if ($child->products()->count() > 0) {
-                    return redirect()->route('admin.categories.listCategory')->with('error', 'Không thể xóa danh mục cha vì danh mục con vẫn còn sản phẩm.');
+                // Kiểm tra nếu danh mục con có sản phẩm chưa bị xóa vĩnh viễn
+                if ($child->products()->withTrashed()->count() > 0) {
+                    return redirect()->route('admin.categories.listCategory')
+                        ->with('error', 'Không thể xóa danh mục cha vì danh mục con vẫn còn sản phẩm .');
                 }
             }
-
-            // Nếu không có sản phẩm nào trong danh mục con, xóa danh mục con trước
+    
+            // Nếu danh mục con không còn sản phẩm, tiến hành xóa danh mục con
             foreach ($category->children as $child) {
-                $child->delete();
+                $child->status = 'inactive';
+                $child->save(); // Lưu trạng thái trước khi xóa mềm
+                $child->delete(); // Soft delete
             }
         }
-
-        // Xóa danh mục 
-        $category->delete();
-        return redirect()->route('admin.categories.listCategory')->with('success', 'Xóa danh mục thành công.');
+    
+        // Xóa danh mục chính
+        $category->status = 'inactive';
+        $category->save(); // Lưu trạng thái trước khi xóa mềm
+        $category->delete(); // Soft delete
+    
+        return redirect()->route('admin.categories.listCategory')
+            ->with('success', 'Xóa danh mục thành công.');
     }
+    
     public function trash()
     {
         $categories = Category::onlyTrashed()->get();
@@ -155,7 +164,9 @@ class CategoryController extends Controller
     public function restoreCategory($id)
     {
         $category = Category::onlyTrashed()->findOrFail($id);
+        $category->status= 'active';
         $category->restore();
+        $category->save();
 
         return redirect()->route('admin.categories.listCategory')->with('success', 'Danh mục đã được khôi phục!');
     }

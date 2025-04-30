@@ -37,7 +37,7 @@ class ProductDashboardController extends Controller
      {
          $start_date = $request->start_date;
          $end_date = $request->end_date;
-         $top_view_product = $this->product->top_view_product($start_date, $end_date);
+         $top_view_product = $this->product->top_view_product_today($start_date, $end_date);
          return response()->json($top_view_product);
      }
  

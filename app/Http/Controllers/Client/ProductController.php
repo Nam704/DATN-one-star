@@ -37,17 +37,30 @@ class ProductController extends Controller
             'comment' => 'required|string',
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
-
-        Comment::create([
+    
+        $existing = Comment::where('product_id', $request->product_id)
+            ->where('user_id', auth()->id())
+            ->first();
+    
+        if ($existing) {
+            return response()->json(['message' => 'Bạn đã bình luận sản phẩm này!'], 400);
+        }
+    
+        $comment = Comment::create([
             'user_id' => auth()->id(),
             'product_id' => $request->product_id,
             'comment' => $request->comment,
             'rating' => $request->rating ?? 5,
-            'status' => 'active', // Bình luận chờ duyệt
+            'status' => 'active',
         ]);
-
-        return response()->json(['message' => 'Bình luận của bạn đã được gửi thành công!']);
+    
+        return response()->json([
+            'message' => 'Bình luận của bạn đã được gửi thành công!',
+            'comment' => $comment->comment,
+            'rating' => $comment->rating
+        ]);
     }
+    
 
 
     public function related($id)

@@ -414,69 +414,209 @@ class OrderService
     public function searchOrders(Request $request, $perPage = 10)
     {
         $user = Auth::user();
+        if (!$user) {
+            throw new \Exception('User not authenticated.');
+        }
+
+        // Validator cho các tham số đầu vào
+        $validator = Validator::make($request->all(), [
+            'search' => 'nullable|string|max:255',
+            'group_status' => 'nullable|string',
+            'status_id' => 'nullable|integer|exists:order_statuses,id',
+            'min_total' => 'nullable|numeric|min:0',
+            'max_total' => 'nullable|numeric|min:0',
+            'min_shipping' => 'nullable|numeric|min:0',
+            'max_shipping' => 'nullable|numeric|min:0',
+            'date_from' => 'nullable|date|before_or_equal:date_to',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'sort_by' => 'nullable|string|in:created_at,total,code',
+            'sort_order' => 'nullable|string|in:asc,desc',
+        ]);
+
+        if ($validator->fails()) {
+            return ['errors' => $validator->errors()];
+        }
+
+        // Truy vấn chính cho danh sách đơn hàng
         $query = Order::where('id_user', $user->id)->with('orderStatus');
 
+        // Áp dụng bộ lọc tìm kiếm
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                    ->orWhere('user_data->name', 'like', "%{$search}%");
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.email')) LIKE ?", ["%{$search}%"]);
             });
         }
 
+        // Áp dụng bộ lọc group_status
         if ($request->filled('group_status') && $request->group_status !== 'All') {
             $query->whereHas('orderStatus', function ($q) use ($request) {
                 $q->where('group_status', $request->group_status);
             });
         }
 
-        if ($request->filled('min_total') && is_numeric($request->min_total)) {
-            $query->where('total', '>=', $request->min_total);
-        }
-        if ($request->filled('max_total') && is_numeric($request->max_total)) {
-            $query->where('total', '<=', $request->max_total);
+        // Áp dụng bộ lọc status_id
+        if ($request->filled('status_id')) {
+            $query->where('id_order_status', $request->status_id);
         }
 
-        if ($request->filled('min_shipping') && is_numeric($request->min_shipping)) {
+        // Áp dụng bộ lọc total và shipping
+        if ($request->filled('min_total')) {
+            $query->where('total', '>=', $request->min_total);
+        }
+        if ($request->filled('max_total')) {
+            $query->where('total', '<=', $request->max_total);
+        }
+        if ($request->filled('min_shipping')) {
             $query->where('shipping', '>=', $request->min_shipping);
         }
-        if ($request->filled('max_shipping') && is_numeric($request->max_shipping)) {
+        if ($request->filled('max_shipping')) {
             $query->where('shipping', '<=', $request->max_shipping);
         }
 
-        if ($request->filled('group_by')) {
-            $query->orderBy($request->group_by);
+        // Áp dụng bộ lọc thời gian
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $dateToEnd = Carbon::parse($dateTo)->endOfDay();
+            $query->whereBetween('created_at', [$dateFrom, $dateToEnd]);
+        } elseif ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $dateToEnd = Carbon::parse($dateTo)->endOfDay();
+            $query->whereDate('created_at', '<=', $dateToEnd);
         }
 
-        $totalOrders = Order::where('id_user', $user->id)->count();
-        $openOrders = Order::where('id_user', $user->id)
-            ->whereHas('orderStatus', function ($q) {
-                $q->whereIn('group_status', ['Awaiting Delivery', 'Shipping']);
-            })->count();
-        $averagePrice = Order::where('id_user', $user->id)->avg('total');
+        // Sắp xếp
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
 
-        $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
-        $groupStatuses = Order_status::select('group_status')
-            ->distinct()
-            ->whereNotNull('group_status')
-            ->pluck('group_status')
-            ->toArray();
+        // Tính toán các chỉ số dựa trên cùng bộ lọc
+        $metricQuery = Order::where('id_user', $user->id);
 
-        $groupStatusCounts = [];
-        foreach ($groupStatuses as $group) {
-            $groupStatusCounts[$group] = Order::where('id_user', $user->id)
-                ->whereHas('orderStatus', function ($q) use ($group) {
-                    $q->where('group_status', $group);
-                })->count();
+        // Áp dụng các bộ lọc tương tự cho metricQuery
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $metricQuery->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.email')) LIKE ?", ["%{$search}%"]);
+            });
         }
+        if ($request->filled('group_status') && $request->group_status !== 'All') {
+            $metricQuery->whereHas('orderStatus', function ($q) use ($request) {
+                $q->where('group_status', $request->group_status);
+            });
+        }
+        if ($request->filled('status_id')) {
+            $metricQuery->where('id_order_status', $request->status_id);
+        }
+        if ($request->filled('min_total')) {
+            $metricQuery->where('total', '>=', $request->min_total);
+        }
+        if ($request->filled('max_total')) {
+            $metricQuery->where('total', '<=', $request->max_total);
+        }
+        if ($request->filled('min_shipping')) {
+            $metricQuery->where('shipping', '>=', $request->min_shipping);
+        }
+        if ($request->filled('max_shipping')) {
+            $metricQuery->where('shipping', '<=', $request->max_shipping);
+        }
+        if ($dateFrom && $dateTo) {
+            $dateToEnd = Carbon::parse($dateTo)->endOfDay();
+            $metricQuery->whereBetween('created_at', [$dateFrom, $dateToEnd]);
+        } elseif ($dateFrom) {
+            $metricQuery->whereDate('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $dateToEnd = Carbon::parse($dateTo)->endOfDay();
+            $metricQuery->whereDate('created_at', '<=', $dateToEnd);
+        }
+
+        // Tính toán các chỉ số
+        $totalOrders = $metricQuery->count();
+        $openOrders = $metricQuery->whereHas('orderStatus', function ($q) {
+            $q->whereNotNull('next_status_id');
+        })->count();
+        $averagePrice = $metricQuery->avg('total') ?? 0;
+        $totalRevenue = $metricQuery->sum('total') ?? 0;
+
+        // Phân trang
+        $orders = $query->paginate($perPage);
+
+        // Cache danh sách group_status
+        $groupStatuses = Cache::remember('group_statuses', 60 * 60, function () {
+            return Order_status::select('group_status')
+                ->distinct()
+                ->whereNotNull('group_status')
+                ->pluck('group_status')
+                ->toArray();
+        });
+
+        // Cache số lượng đơn hàng theo group_status
+        $groupStatusCounts = Cache::remember('group_status_counts_' . md5(json_encode($request->only([
+            'search',
+            'group_status',
+            'status_id',
+            'min_total',
+            'max_total',
+            'min_shipping',
+            'max_shipping',
+            'date_from',
+            'date_to'
+        ]))), 60, function () use ($dateFrom, $dateTo, $groupStatuses, $request, $user) {
+            $counts = [];
+            $query = Order::selectRaw('order_statuses.group_status, COUNT(*) as count')
+                ->where('orders.id_user', $user->id)
+                ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id');
+
+            // Áp dụng bộ lọc thời gian
+            if ($dateFrom && $dateTo) {
+                $dateToEnd = Carbon::parse($dateTo)->endOfDay();
+                $query->whereBetween('orders.created_at', [$dateFrom, $dateToEnd]);
+            } elseif ($dateFrom) {
+                $query->whereDate('orders.created_at', '>=', $dateFrom);
+            } elseif ($dateTo) {
+                $dateToEnd = Carbon::parse($dateTo)->endOfDay();
+                $query->whereDate('orders.created_at', '<=', $dateToEnd);
+            }
+
+            // Áp dụng bộ lọc tìm kiếm
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
+                        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.email')) LIKE ?", ["%{$search}%"]);
+                });
+            }
+
+            $results = $query->groupBy('order_statuses.group_status')->get();
+
+            foreach ($groupStatuses as $group) {
+                $counts[$group] = $results->firstWhere('group_status', $group)->count ?? 0;
+            }
+
+            return $counts;
+        });
+
+        // Cache danh sách trạng thái
+        $statuses = Cache::remember('order_statuses', 60 * 60, function () {
+            return Order_status::select('id', 'name')->get();
+        });
 
         return compact(
             'orders',
             'totalOrders',
             'openOrders',
             'averagePrice',
+            'totalRevenue',
             'groupStatuses',
-            'groupStatusCounts'
+            'groupStatusCounts',
+            'statuses'
         );
     }
 

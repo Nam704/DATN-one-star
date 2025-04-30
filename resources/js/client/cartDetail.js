@@ -265,7 +265,7 @@ $(document).ready(() => {
                     </td>
                     <td class="product-price">${formattedPrice}</td>
                     <td class="product_quantity">
-                        <label>Quantity</label>
+                        
                         <input min="1" max="10" value="${item.quantity}" type="number" class="quantity-input">
                     </td>
                     <td class="product_total">${formattedTotal}</td>

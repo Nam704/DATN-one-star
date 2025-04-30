@@ -228,6 +228,7 @@ class OrderServiceManager
 
         $query = Order::with('orderStatus');
 
+        // Áp dụng bộ lọc tìm kiếm
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -237,23 +238,25 @@ class OrderServiceManager
             });
         }
 
+        // Áp dụng bộ lọc group_status
         if ($request->filled('group_status') && $request->group_status !== 'All') {
             $query->whereHas('orderStatus', function ($q) use ($request) {
                 $q->where('group_status', $request->group_status);
             });
         }
 
+        // Áp dụng bộ lọc status_id
         if ($request->filled('status_id')) {
             $query->where('id_order_status', $request->status_id);
         }
 
+        // Áp dụng bộ lọc total và shipping
         if ($request->filled('min_total')) {
             $query->where('total', '>=', $request->min_total);
         }
         if ($request->filled('max_total')) {
             $query->where('total', '<=', $request->max_total);
         }
-
         if ($request->filled('min_shipping')) {
             $query->where('shipping', '>=', $request->min_shipping);
         }
@@ -261,6 +264,7 @@ class OrderServiceManager
             $query->where('shipping', '<=', $request->max_shipping);
         }
 
+        // Áp dụng bộ lọc thời gian
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
         if ($dateFrom && $dateTo) {
@@ -273,11 +277,41 @@ class OrderServiceManager
             $query->whereDate('created_at', '<=', $dateToEnd);
         }
 
+        // Sắp xếp
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
+        // Tính toán các chỉ số dựa trên cùng bộ lọc
         $metricQuery = Order::query();
+
+        // Áp dụng bộ lọc group_status cho metricQuery
+        if ($request->filled('group_status') && $request->group_status !== 'All') {
+            $metricQuery->whereHas('orderStatus', function ($q) use ($request) {
+                $q->where('group_status', $request->group_status);
+            });
+        }
+
+        // Áp dụng bộ lọc status_id
+        if ($request->filled('status_id')) {
+            $metricQuery->where('id_order_status', $request->status_id);
+        }
+
+        // Áp dụng bộ lọc total và shipping
+        if ($request->filled('min_total')) {
+            $metricQuery->where('total', '>=', $request->min_total);
+        }
+        if ($request->filled('max_total')) {
+            $metricQuery->where('total', '<=', $request->max_total);
+        }
+        if ($request->filled('min_shipping')) {
+            $metricQuery->where('shipping', '>=', $request->min_shipping);
+        }
+        if ($request->filled('max_shipping')) {
+            $metricQuery->where('shipping', '<=', $request->max_shipping);
+        }
+
+        // Áp dụng bộ lọc thời gian
         if ($dateFrom && $dateTo) {
             $dateToEnd = Carbon::parse($dateTo)->endOfDay();
             $metricQuery->whereBetween('created_at', [$dateFrom, $dateToEnd]);
@@ -288,6 +322,7 @@ class OrderServiceManager
             $metricQuery->whereDate('created_at', '<=', $dateToEnd);
         }
 
+        // Tính toán các chỉ số
         $totalOrders = $metricQuery->count();
         $openOrders = $metricQuery->whereHas('orderStatus', function ($q) {
             $q->whereNotNull('next_status_id');
@@ -295,8 +330,10 @@ class OrderServiceManager
         $averagePrice = $metricQuery->avg('total') ?? 0;
         $totalRevenue = $metricQuery->sum('total') ?? 0;
 
+        // Phân trang
         $orders = $query->paginate($perPage);
 
+        // Cache danh sách group_status
         $groupStatuses = Cache::remember('group_statuses', 60 * 60, function () {
             return Order_status::select('group_status')
                 ->distinct()
@@ -305,11 +342,13 @@ class OrderServiceManager
                 ->toArray();
         });
 
-        $groupStatusCounts = Cache::remember('group_status_counts_' . md5(json_encode($request->all())), 60, function () use ($dateFrom, $dateTo, $groupStatuses) {
+        // Cache số lượng đơn hàng theo group_status
+        $groupStatusCounts = Cache::remember('group_status_counts_' . md5(json_encode($request->all())), 60, function () use ($dateFrom, $dateTo, $groupStatuses, $request) {
             $counts = [];
             $query = Order::selectRaw('order_statuses.group_status, COUNT(*) as count')
                 ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id');
 
+            // Áp dụng bộ lọc thời gian cho groupStatusCounts
             if ($dateFrom && $dateTo) {
                 $dateToEnd = Carbon::parse($dateTo)->endOfDay();
                 $query->whereBetween('orders.created_at', [$dateFrom, $dateToEnd]);
@@ -318,6 +357,16 @@ class OrderServiceManager
             } elseif ($dateTo) {
                 $dateToEnd = Carbon::parse($dateTo)->endOfDay();
                 $query->whereDate('orders.created_at', '<=', $dateToEnd);
+            }
+
+            // Áp dụng bộ lọc tìm kiếm
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
+                        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.email')) LIKE ?", ["%{$search}%"]);
+                });
             }
 
             $results = $query->groupBy('order_statuses.group_status')->get();
@@ -329,6 +378,7 @@ class OrderServiceManager
             return $counts;
         });
 
+        // Cache danh sách trạng thái
         $statuses = Cache::remember('order_statuses', 60 * 60, function () {
             return Order_status::select('id', 'name')->get();
         });

@@ -82,7 +82,7 @@ class Category extends Model
             -- Tổng doanh thu từ đơn hàng hoàn thành
             COALESCE(SUM(
                 CASE 
-                    WHEN order_statuses.name = "Delivered" AND orders.created_at BETWEEN ? AND ? 
+                     WHEN order_statuses.name != "Cancelled" AND orders.created_at BETWEEN ? AND ? 
                     THEN order_details.quantity * order_details.unit_price 
                     ELSE 0 
                 END

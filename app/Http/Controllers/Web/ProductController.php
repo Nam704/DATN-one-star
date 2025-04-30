@@ -284,10 +284,23 @@ class ProductController extends Controller
             $orderId = $orderDetail->order->id;
             $statusName = $orderDetail->order->orderStatus->name;
 
+             // Giải mã dữ liệu địa chỉ
+        $address = json_decode($orderDetail->order->address_data); // Giải mã dữ liệu JSON
+
+        // Lấy các trường địa chỉ
+        $province = $address->name_province ?? 'N/A';
+        $district = $address->name_district ?? 'N/A';
+        $ward = $address->name_ward ?? 'N/A';
+        $addressDetail = $address->address_detail ?? 'N/A';
             if (!isset($users[$userId])) {
                 $users[$userId] = [
                     'user' => $orderDetail->order->user,
-                    'address' => $orderDetail->order->address,
+                     'address' => [
+                    'province' => $province,
+                    'district' => $district,
+                    'ward' => $ward,
+                    'address_detail' => $addressDetail,
+                ],
                     'orders' => []
                 ];
             }

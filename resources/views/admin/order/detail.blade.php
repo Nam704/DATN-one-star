@@ -148,15 +148,15 @@
                                 <div class="form-group mb-2">
                                     <label for="action">Hành động:</label>
                                     <select name="action" id="action" class="form-control" required>
-                                        <option value="">Chọn hành động</option>
-                                        <option value="approve">Phê duyệt hủy</option>
-                                        <option value="reject">Từ chối hủy</option>
+                                        {{-- <option value="">Chọn hành động</option> --}}
+                                        <option value="approve" selected>Phê duyệt hủy</option>
+                                        {{-- <option value="reject">Từ chối hủy</option> --}}
                                     </select>
                                 </div>
-                                <div class="form-group mb-2">
+                                {{-- <div class="form-group mb-2">
                                     <label for="admin_note">Ghi chú (bắt buộc khi từ chối):</label>
                                     <textarea name="admin_note" id="admin_note" class="form-control"></textarea>
-                                </div>
+                                </div> --}}
                                 <button type="submit" class="btn btn-primary mb-2">Xử lý</button>
                             </form>
                         @endif

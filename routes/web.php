@@ -130,18 +130,18 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         });
 
         Route::prefix('statistics')->controller(StatisticController::class)->name('statistics.')->group(function () {
-            Route::get('product-statistic', 'productStatistics')->name('productStatistics')->middleware('permission:view-statistics');
-            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts')->middleware('permission:view-statistics');
-            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold')->middleware('permission:view-statistics');
-            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts')->middleware('permission:view-statistics');
-            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts')->middleware('permission:view-statistics');
-            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts')->middleware('permission:view-statistics');
-            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory')->middleware('permission:view-statistics');
-            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts')->middleware('permission:view-statistics');
-            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts')->middleware('permission:view-statistics');
-            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts')->middleware('permission:view-statistics');
-            Route::get('productSold', 'productSold')->name('productSold')->middleware('permission:view-statistics');
-            Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics')->middleware('permission:view-statistics');
+            Route::get('product-statistic', 'productStatistics')->name('productStatistics')->middleware('role:admin');
+            Route::get('exportTopSaleProducts', 'exportTopSaleProducts')->name('exportTopSaleProducts')->middleware('role:admin');
+            Route::get('exportproductSold', 'exportproductSold')->name('exportproductSold')->middleware('role:admin');
+            Route::get('exportTop10SaleProducts', 'exportTop10SaleProducts')->name('exportTop10SaleProducts')->middleware('role:admin');
+            Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts')->middleware('role:admin');
+            Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts')->middleware('role:admin');
+            Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory')->middleware('role:admin');
+            Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts')->middleware('role:admin');
+            Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts')->middleware('role:admin');
+            Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts')->middleware('role:admin');
+            Route::get('productSold', 'productSold')->name('productSold')->middleware('role:admin');
+            Route::get('categoryStatistics', 'categoryStatistics')->name('categoryStatistics')->middleware('role:admin');
         });
 
         Route::controller(ProductDashboardController::class)->group(function () {
@@ -162,11 +162,11 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             }
         );
         Route::prefix('statistics')->name('statistics.')->controller(StatisticController::class)->group(function () {
-            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics')->middleware('permission:view-statistics');
+            Route::get('/daily-statistics', 'dailyStatistics')->name('dailyStatistics')->middleware('role:admin');
             Route::get('/weekly-statistics', 'weeklyStatistics')->name('weeklyStatistics')->middleware('role:admin');
             Route::get('/monthly-statistics', 'monthlyStatistics')->name('monthlyStatistics')->middleware('role:admin');
             Route::get('/yearly-statistics', 'yearlyStatistics')->name('yearlyStatistics')->middleware('role:admin');
-            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics')->middleware('permission:view-statistics');
+            Route::get('/dashboard-statistics', 'dashboardStatistics')->name('dashboardStatistics')->middleware('role:admin');
         });
 
         Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
@@ -308,8 +308,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
 
             // Biểu đồ thống kê
-            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-statistics');
-            Route::get('/charts', 'charts')->name('charts')->middleware('permission:view-statistics');
+            Route::get('/{id}/chart_user', 'chart_user')->name('chart_user')->middleware('permission:view-users');
+            Route::get('/charts', 'charts')->name('charts')->middleware('role:admin');
             Route::get('/getUserStats', 'getUserStats')->name('getUserStats');
             Route::get('/location-stats', 'getUserLocationStats')->name('locationStats');
             Route::get('/top-spenders', 'getTopSpenders')->name('topSpenders');

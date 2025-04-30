@@ -1,6 +1,6 @@
 import "./app.js";
 $(document).ready(function () {
-    console.log("this is account details");
+    // console.log("this is account details");
     var csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");

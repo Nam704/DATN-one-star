@@ -59,139 +59,180 @@
 
 
 
-                        <div class="tab-pane fade" id="reviews" role="tabpanel"> 
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
     <div class="reviews_wrapper">
+        {{-- Hiển thị tổng số bình luận --}}
+        <h2 id="total_comments">{{ $comments->count() }} đánh giá cho {{ $product->name }}</h2>
 
-    @if($comments->count() > 0)
-    <h2>{{ $comments->count() }} đánh giá cho {{ $product->name }}</h2>
-    @foreach($comments as $comment)
-        <div class="reviews_comment_box">
-            <div class="comment_thmb">  
-            <img src="{{ asset('storage/' . ($comment->user->profile_image ?? 'admin/assets/images/user-201.png')) }}" 
-    alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
-
-            </div>
-            <div class="comment_text">
-                <div class="reviews_meta">
-                    <div class="star_rating">
-                        <ul>
-                            @for($i = 1; $i <= 5; $i++)
-                                <li>
-                                    <a href="#">
-                                        <i class="ion-ios-star{{ $i <= $comment->rating ? '' : '-outline' }}"></i>
-                                    </a>
-                                </li>
-                            @endfor
-                        </ul>
+        {{-- Danh sách bình luận --}}
+        <div id="comment_list">
+            @foreach($comments as $comment)
+                <div class="reviews_comment_box" id="comment_{{ $comment->id }}">
+                    <div class="comment_thmb">
+                        <img src="{{ asset('storage/' . ($comment->user->profile_image ?? 'admin/assets/images/user-201.png')) }}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
-                    <p><strong>{{ $comment->user->name ?? 'Người dùng' }}</strong> - {{ $comment->created_at->format('d/m/Y') }}</p>
-                    <span>{{ $comment->comment }}</span>
+                    <div class="comment_text">
+                        <div class="reviews_meta">
+                            <div class="star_rating">
+                                <ul>
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <li><i class="ion-ios-star{{ $i <= $comment->rating ? '' : '-outline' }}"></i></li>
+                                    @endfor
+                                </ul>
+                            </div>
+                            <p><strong>{{ $comment->user->name ?? 'Người dùng' }}</strong> - {{ $comment->created_at->format('d/m/Y') }}</p>
+                            <span>{{ $comment->comment }}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @endforeach
         </div>
-    @endforeach
-@else
-    <h2>Chưa có bình luận nào</h2>
-@endif
-
 
         {{-- Form gửi bình luận --}}
         @auth
-            <div class="comment_title mt-4">
-                <h2>Thêm đánh giá của bạn</h2>
-            </div>
+            @php
+                $hasCommented = $comments->where('user_id', auth()->id())->count() > 0;
+            @endphp
 
-            <div class="product_ratting mb-10">
-                <h3>Đánh giá của bạn</h3>
-                <ul class="star_rating_input">
-                    @for($i = 1; $i <= 5; $i++)
-                        <li><i class="fa fa-star" data-value="{{ $i }}"></i></li>
-                    @endfor
-                </ul>
-            </div>
+            @if (!$hasCommented)
+                <div class="comment_title mt-4">
+                    <h2>Thêm đánh giá và bình luậncủa bạn</h2>
+                </div>
 
-            <div class="product_review_form">
-                <form id="comment_form" method="POST">
-                    @csrf
-                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    <input type="hidden" name="rating" id="rating_input" value="5"> {{-- Mặc định 5 sao --}}
+                <div class="product_ratting mb-10">
+                    <h3>Đánh giá của bạn</h3>
+                    <ul class="star_rating_input">
+                        @for($i = 1; $i <= 5; $i++)
+                        <li><i class="fa fa-star{{ $i <= 5 ? ' checked' : '' }}" data-value="{{ $i }}"></i></li> <!-- Mặc định 5 sao được chọn -->
+                        @endfor
+                    </ul>
+                </div>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <label for="review_comment">Nội dung bình luận</label>
-                            <textarea name="comment" id="review_comment" required></textarea>
+                <div class="product_review_form">
+                    <form id="comment_form" method="POST">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="rating" id="rating_input" value="5">
+
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="review_comment">Nội dung bình luận</label>
+                                <textarea name="comment" id="review_comment" required></textarea>
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit">Gửi bình luận</button>
-                </form>
-            </div>
-
-            {{-- Script chọn số sao --}}
-            <script>
-                document.querySelectorAll('.star_rating_input i').forEach(function(star) {
-                    star.addEventListener('click', function() {
-                        let rating = this.getAttribute('data-value');
-                        document.getElementById('rating_input').value = rating;
-
-                        // Highlight lại các sao
-                        document.querySelectorAll('.star_rating_input i').forEach(function(s) {
-                            s.classList.remove('checked');
-                        });
-                        for (let i = 0; i < rating; i++) {
-                            document.querySelectorAll('.star_rating_input i')[i].classList.add('checked');
-                        }
-                    });
-                });
-        // Script gửi form bằng Ajax
-                document.getElementById('comment_form').addEventListener('submit', function(e) {
-            e.preventDefault(); // Chặn hành động mặc định
-
-            let formData = new FormData(this);
-
-            fetch('{{ route('client.products.storecomment') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message); // Thông báo thành công
-                document.getElementById('comment_form').reset(); // Reset form
-                // Reset highlight sao về mặc định 5 sao
-                document.getElementById('rating_input').value = 5;
-                document.querySelectorAll('.star_rating_input i').forEach(function(s) {
-                    s.classList.remove('checked');
-                });
-                for (let i = 0; i < 5; i++) {
-                    document.querySelectorAll('.star_rating_input i')[i].classList.add('checked');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã có lỗi xảy ra, vui lòng thử lại.');
-            });
-        });
-            </script>
-
-            <style>
-                .star_rating_input i {
-                    font-size: 24px;
-                    color: #ddd;
-                    cursor: pointer;
-                }
-                .star_rating_input i.checked {
-                    color: #f5c518;
-                }
-            </style>
-
+                        <button type="submit">Gửi bình luận</button>
+                    </form>
+                </div>
+            @else
+                <p class="mt-3"></p>
+            @endif
         @else
-            <p>Vui lòng <a href="{{ route('auth.getFormLogin') }}">đăng nhập</a> để bình luận.</p>
+            <p class="mt-3">Vui lòng <a href="{{ route('auth.getFormLogin') }}">đăng nhập</a> để bình luận.</p>
         @endauth
     </div>
 </div>
 
+{{-- Script --}}
+<script>
+    // Chọn số sao
+    document.querySelectorAll('.star_rating_input i').forEach(function(star) {
+        star.addEventListener('click', function() {
+            let rating = this.getAttribute('data-value');
+            document.getElementById('rating_input').value = rating;
+
+            document.querySelectorAll('.star_rating_input i').forEach(function(s) {
+                s.classList.remove('checked');
+            });
+            for (let i = 0; i < rating; i++) {
+                document.querySelectorAll('.star_rating_input i')[i].classList.add('checked');
+            }
+        });
+    });
+
+    // Gửi form bằng Ajax
+    document.getElementById('comment_form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        fetch('{{ route('client.products.storecomment') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+
+            // Tạo HTML mới cho bình luận
+            const newComment = `
+                <div class="reviews_comment_box">
+                    <div class="comment_thmb">
+                        <img src="{{ asset('storage/' . (auth()->user()->profile_image ?? 'admin/assets/images/user-201.png')) }}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+                    </div>
+                    <div class="comment_text">
+                        <div class="reviews_meta">
+                            <div class="star_rating">
+                                <ul>
+                                    ${[...Array(5)].map((_, i) =>
+                                        `<li><i class="ion-ios-star${i < formData.get('rating') ? '' : '-outline'}"></i></li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                            <p><strong>{{ auth()->user()->name }}</strong> - hôm nay</p>
+                            <span>${formData.get('comment')}</span>
+                        </div>
+                    </div>
+                </div>`;
+
+            // Thêm bình luận mới vào dưới cùng
+            document.getElementById('comment_list').insertAdjacentHTML('beforeend', newComment);
+
+            // Cập nhật số lượng
+            let totalElem = document.getElementById('total_comments');
+            let currentCount = parseInt(totalElem.textContent);
+            totalElem.textContent = (currentCount + 1) + ' đánh giá cho {{ $product->name }}';
+
+            // Ẩn form sau khi gửi thành công
+            document.querySelector('.product_review_form')?.remove();
+            document.querySelector('.product_ratting')?.remove();
+            document.querySelector('.comment_title')?.remove();
+
+            const note = document.createElement('p');
+            note.textContent = 'Bạn đã bình luận sản phẩm này.';
+            document.querySelector('.reviews_wrapper').appendChild(note);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã có lỗi xảy ra, vui lòng thử lại.');
+        });
+    });
+</script>
+
+<style>
+    .star_rating_input i {
+        font-size: 24px;
+        color: #ddd;
+        cursor: pointer;
+    }
+
+    .star_rating_input i.checked {
+        color: #f5c518 !important; /* vàng */
+    }
+
+    .star_rating ul li i,
+    .reviews_meta .ion-ios-star {
+        color: #f5c518 !important;
+    }
+
+    .reviews_meta .ion-ios-star-outline {
+        color: #ddd !important;
+    }
+</style>
+
+    
 
                     </div>
                 </div>
