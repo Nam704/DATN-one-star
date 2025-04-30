@@ -289,6 +289,40 @@
                     return;
                 }
 
-               
+                // --- 2. Server-side với AJAX ---
+                $.ajax({
+                    url: $('#filterForm').attr('action'),
+                    method: $('#filterForm').attr('method'), // bây giờ là GET
+                    data: $('#filterForm').serialize(),
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    success: function(html) {
+                        $('#fixed-header-datatable tbody').html(html);
+                        $('#filterModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422 && xhr.responseJSON?.errors) {
+                            // xử lý lỗi như trước
+                        } else {
+                            console.error('AJAX error:', xhr.status, xhr.responseText);
+                            alert('Đã có lỗi xảy ra, vui lòng thử lại sau.');
+                        }
+                    }
+                });
+
+
+
+            });
+            $('#resetFilter').on('click', function(e) {
+                e.preventDefault();
+                clearErrors();
+
+                $('#filterForm')[0].reset();
+
+                $('#quantity').hide();
+
+            });
+        });
     </script>
 @endpush
