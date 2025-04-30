@@ -1,6 +1,19 @@
 @extends('client.layouts.home.layout')
 @section('content')
-    
+    <style>
+        .btn-check:checked+.btn-outline-dark {
+            background-color: #0d6efd !important;
+            /* primary */
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-dark:hover {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+    </style>
     <div class="shop_area shop_reverse">
         <div class="container">
             <div class="row">
