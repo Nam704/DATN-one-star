@@ -202,3 +202,86 @@
 
 @endsection
 
+@section('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
+    <script>
+        // Cleave.js cho price
+        new Cleave('#min-price', {
+            numeral: true,
+            delimiter: '.',
+            numeralDecimalMark: ',',
+            numeralThousandsGroupStyle: 'thousand',
+            numeralDecimalScale: 0
+        });
+        new Cleave('#max-price', {
+            numeral: true,
+            delimiter: '.',
+            numeralDecimalMark: ',',
+            numeralThousandsGroupStyle: 'thousand',
+            numeralDecimalScale: 0
+        });
+
+        // Validate price
+        function validatePrices() {
+            let min = parseInt($('#min-price').val().replace(/\D/g, '')) || 0,
+                max = parseInt($('#max-price').val().replace(/\D/g, '')) || 0,
+                err = '';
+            if (max > 50000000) err = 'Giá cao không vượt quá 50.000.000';
+            else if (min > max) err = 'Giá thấp không vượt quá giá cao';
+            $('#price-error').text(err);
+            return !err;
+        }
+
+        // Gửi AJAX
+        function fetchFilteredProducts() {
+            if (!validatePrices()) return;
+            let p = new URLSearchParams();
+
+            // Categories
+            document.querySelectorAll('.category-filter').forEach(ch => {
+                if (ch.checked) p.append('categories[]', ch.value);
+            });
+            // Brands
+            document.querySelectorAll('.brand-filter').forEach(ch => {
+                if (ch.checked) p.append('brands[]', ch.value);
+            });
+            // Attributes
+            document.querySelectorAll('.attribute-filter').forEach(ch => {
+                if (ch.checked) p.append('attribute_values[]', ch.value);
+            });
+            // Price
+            let min = $('#min-price').val().replace(/\D/g, ''),
+                max = $('#max-price').val().replace(/\D/g, '');
+            if (min) p.append('min_price', min);
+            if (max) p.append('max_price', max);
+
+            // Sort
+            let s = $('#orderby').val();
+            if (s) p.append('orderby', s);
+
+            fetch(`{{ route('client.filter') }}?${p}`, {
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(json => {
+                    $('#product-list').html(json.products);
+                    $('#pagination').html(json.pagination);
+                });
+        }
+
+        $(function() {
+            // sự kiện filter
+            $('#min-price,#max-price').on('input', fetchFilteredProducts);
+            $('.category-filter,.brand-filter').on('change', fetchFilteredProducts);
+            $('#orderby').on('change', fetchFilteredProducts);
+
+            // modal Attributes -> Áp dụng
+            $('#applyAttributeFilter').on('click', () => {
+                bootstrap.Modal.getInstance($('#attributeModal')).hide();
+                fetchFilteredProducts();
+            });
+        });
+    </script>
+@endsection
