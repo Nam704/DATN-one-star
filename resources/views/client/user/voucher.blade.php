@@ -1,4 +1,4 @@
-<!-- <div class="tab-pane fade" id="voucher">
+<div class="tab-pane fade" id="voucher">
     <div class="container py-4">
         <h2 class="text-xl font-semibold mb-4">Voucher ưu đãi</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -32,4 +32,4 @@
             });
         }
     </script>
-</div> -->
+</div>
