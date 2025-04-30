@@ -191,7 +191,11 @@ class OrderService
                     $orderDetail->total = $inputVariant['price'] * $inputVariant['quantity'];
                     $orderDetail->save();
                 }
+                // **Thêm logic để cập nhật giỏ hàng**
+                $cartService = app(CartService::class); // Lấy instance của CartService
+                $cartService->updateCartAfterOrder($variants, auth()->id()); // Gọi phương thức mới
 
+                // ... (code còn lại: xử lý voucher, gửi thông báo, xóa session checkout_data)
                 if ($voucher && $discount > 0) {
                     $voucher->total_usage += 1;
                     $voucher->quantity -= 1;
