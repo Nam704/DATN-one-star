@@ -105,7 +105,7 @@
     <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="filterForm">
+                <form id="filterForm" action="{{ route('admin.products.filter') }}" method="GET">
                     <div class="modal-header">
                         <h5 class="modal-title" id="filterModalLabel">Filter Products</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -181,7 +181,7 @@
                                 <div class="col">
                                     <input type="date" name="created_to" id="created_to" class="form-control"
                                         value="{{ old('created_to') }}" max="{{ now()->toDateString() }}"
-                                    onchange="this.blur()">
+                                        onchange="this.blur()">
                                 </div>
                             </div>
                             <small class="form-text text-muted">
@@ -191,6 +191,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-outline-warning" id="resetFilter">Reset bộ lọc</button>
                         <button type="button" class="btn btn-primary" id="applyFilter">Áp dụng bộ lọc</button>
                     </div>
                 </form>
@@ -209,30 +210,85 @@
                 if (this.value === 'quantity') {
                     $('#quantity').show();
                 } else {
-                    $('#quantity').hide().val(''); // Ẩn và xóa giá trị khi không cần
+                    $('#quantity').hide().val('');
                 }
             });
 
-            // Bắt sự kiện click nút Apply Filter
-            $('#applyFilter').on('click', function(e) {
-                e.preventDefault();
-                var formData = $('#filterForm').serialize();
-                console.log('Form data:', formData); // Debug dữ liệu gửi đi
+            // Xóa hết các error trước khi chạy validate/lần AJAX mới
+            function clearErrors() {
+                $('.validation-error').remove();
+                $('.is-invalid').removeClass('is-invalid');
+                $('#filterModal .modal-body .alert').remove();
+            }
 
-                $.ajax({
-                    url: '{{ route('admin.products.filter') }}',
-                    method: 'GET',
-                    data: formData,
-                    success: function(html) {
-                        $('#fixed-header-datatable tbody').html(html);
-                        $('#filterModal').modal('hide');
-                    },
-                    error: function(xhr) {
-                        console.error('AJAX error:', xhr.responseText);
+            $('#applyFilter').on('click', function(e) {
+
+                e.preventDefault();
+                clearErrors();
+
+                // --- 1. Client-side validation ---
+                var errors = {};
+                var stock = $('#stock').val();
+                var quantity = $('#quantity').val().trim();
+                var minPrice = $('input[name="min_price"]').val().trim();
+                var maxPrice = $('input[name="max_price"]').val().trim();
+                var fromDate = $('input[name="created_from"]').val();
+                var toDate = $('input[name="created_to"]').val();
+                var sortView = $('#sort_view').val();
+                var today = new Date().toISOString().split('T')[0];
+
+                // 1. Validate quantity
+                if (stock === 'quantity') {
+                    if (!quantity) {
+                        errors.quantity = 'Bạn phải nhập số lượng khi chọn Số lượng cụ thể.';
+                    } else if (!/^\d+$/.test(quantity) || parseInt(quantity, 10) < 0) {
+                        errors.quantity = 'Số lượng phải là số nguyên từ 0 trở lên.';
                     }
-                });
-            });
-        });
+                }
+
+                // 2. Validate price range
+                if (minPrice && maxPrice) {
+                    var min = parseFloat(minPrice),
+                        max = parseFloat(maxPrice);
+                    if (isNaN(min) || isNaN(max)) {
+                        errors.max_price = 'Giá phải là số hợp lệ.';
+                    } else if (max < min) {
+                        errors.max_price = 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.';
+                    }
+                }
+
+                // 3. Validate date range
+                if (fromDate && toDate && toDate < fromDate) {
+                    errors.created_to = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.';
+                }
+                if (toDate && toDate > today) {
+                    errors.created_to = 'Ngày kết thúc không được lớn hơn hôm nay.';
+                }
+
+                // 4. Validate sort_view
+                if (sortView && !['asc', 'desc'].includes(sortView)) {
+                    errors.sort_view = 'Kiểu sắp xếp không hợp lệ.';
+                }
+
+                // Nếu có lỗi client, show và dừng
+                if (Object.keys(errors).length) {
+                    $('#filterModal .modal-body').prepend(
+                        '<div class="alert alert-danger validation-error">Vui lòng sửa các lỗi trước khi áp dụng bộ lọc:</div>'
+                    );
+                    $.each(errors, function(field, msg) {
+                        var $fld = $('[name="' + field + '"]');
+                        if (field === 'quantity') {
+                            $fld = $('#quantity');
+                        }
+                        if ($fld.length) {
+                            $fld.addClass('is-invalid');
+                            $('<small class="text-danger validation-error">' + msg + '</small>')
+                                .insertAfter($fld);
+                        }
+                    });
+                    return;
+                }
+
+               
     </script>
-    @vite(['resources/js/admin/listProduct.js'])
 @endpush
