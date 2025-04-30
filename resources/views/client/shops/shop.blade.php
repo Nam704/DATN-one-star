@@ -1,5 +1,6 @@
 @extends('client.layouts.home.layout')
 @section('content')
+    
     <div class="shop_area shop_reverse">
         <div class="container">
             <div class="row">
@@ -7,6 +8,7 @@
                     // Nếu controller đã pass mảng, sử dụng luôn; nếu không, fallback về request()->input(...)
                     $selectedCategories = $selectedCategories ?? request()->input('categories', []);
                     $selectedBrands = $selectedBrands ?? request()->input('brands', []);
+                    $selectedAttrs = request()->input('attribute_values', []);
                 @endphp
                 <!-- Sidebar: Bộ lọc -->
                 <div class="col-lg-3 col-md-12">
@@ -34,6 +36,11 @@
                             </div>
                             <div class="widget_list widget_categories" id="filters">
                                 <form id="filter-form" method="GET" action="{{ route('client.shop') }}">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#attributeModal">
+                                        <i class="mdi mdi-filter-menu"></i> Attributes
+                                    </button>
+
                                     <!-- Bộ lọc theo danh mục -->
                                     <div class="widget_list widget_categories">
                                         <div id="categories">
@@ -136,138 +143,49 @@
             </div>
         </div>
     </div>
+
+
+
+    {{-- --- Modal Attributes --- --}}
+    <div class="modal fade" id="attributeModal" tabindex="-1" aria-labelledby="attributeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-md">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title mb-0">
+                        <i class="mdi mdi-filter-menu"></i> Lọc theo thuộc tính
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    @php
+                        $selectedAttrs = is_array($selectedAttrs) ? $selectedAttrs : explode(',', $selectedAttrs);
+                    @endphp
+                    @forelse ($attributes as $attr)
+                        <div class="mb-4">
+                            <h6 class="fw-semibold text-dark">{{ $attr->name }}</h6>
+                            <div class="attribute-tags">
+                                @foreach ($attr->values as $val)
+                                    <input type="checkbox" class="btn-check attribute-filter"
+                                        value="{{ $val->id }}" id="attrval-{{ $val->id }}"
+                                        {{ in_array($val->id, $selectedAttrs) ? 'checked' : '' }}>
+                                    <label class="btn btn-outline-dark btn-sm rounded-pill me-1 mb-2"
+                                        for="attrval-{{ $val->id }}">
+                                        {{ $val->value }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted">Không có thuộc tính nào để lọc.</p>
+                    @endforelse
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="applyAttributeFilter">Áp dụng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
-@section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
-
-    <script>
-        // Sử dụng Cleave.js để định dạng số ngay khi nhập với onValueChanged callback
-        var cleaveMin = new Cleave('#min-price', {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand',
-            numeralDecimalMark: ',',
-            delimiter: '.',
-            onValueChanged: function(e) {
-                if (e.target.rawValue === '') {
-                    e.target.value = '';
-                }
-            }
-        });
-
-        var cleaveMax = new Cleave('#max-price', {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand',
-            numeralDecimalMark: ',',
-            delimiter: '.',
-            onValueChanged: function(e) {
-                if (e.target.rawValue === '') {
-                    e.target.value = '';
-                }
-            }
-        });
-
-        // Hàm kiểm tra và hiển thị thông báo lỗi nếu giá nhập không hợp lệ
-        function validatePrices() {
-            // Lấy giá trị chưa được định dạng (dạng số nguyên)
-            let minRaw = $('#min-price').val().replace(/\./g, '').replace(/,/g, '');
-            let maxRaw = $('#max-price').val().replace(/\./g, '').replace(/,/g, '');
-            let minPrice = minRaw === '' ? null : parseInt(minRaw);
-            let maxPrice = maxRaw === '' ? null : parseInt(maxRaw);
-            let errorMsg = '';
-
-            // Kiểm tra nếu Giá cao vượt quá 50.000.000
-            if (maxPrice !== null && maxPrice > 50000000) {
-                errorMsg = "Giá cao không được vượt quá 50.000.000";
-            }
-            // Kiểm tra nếu Giá thấp vượt quá Giá cao
-            else if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
-                errorMsg = "Giá thấp không thể vượt quá Giá cao";
-            }
-
-            $('#price-error').text(errorMsg);
-            return errorMsg === '';
-        }
-
-        // Hàm gửi dữ liệu lọc sản phẩm qua AJAX
-        function fetchFilteredProducts() {
-            if (!validatePrices()) {
-                return;
-            }
-            let params = new URLSearchParams();
-
-            // Lấy danh sách category được chọn
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('categories[]', el.value);
-                }
-            });
-            // Lấy danh sách brand được chọn
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('brands[]', el.value);
-                }
-            });
-
-            // Lấy giá trị khoảng giá từ input, loại bỏ dấu phân cách
-            let minPrice = $('#min-price').val().replace(/\./g, '').replace(/,/g, '');
-            let maxPrice = $('#max-price').val().replace(/\./g, '').replace(/,/g, '');
-            if (minPrice !== '') params.append('min_price', minPrice);
-            if (maxPrice !== '') params.append('max_price', maxPrice);
-
-            // Lấy giá trị sắp xếp nếu có
-            let sortEl = document.getElementById('orderby');
-            if (sortEl && sortEl.value) {
-                params.append('orderby', sortEl.value);
-            }
-
-            fetch('{{ route('client.filter') }}?' + params.toString())
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('product-list').innerHTML = data.products;
-                    document.getElementById('pagination').innerHTML = data.pagination;
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        $(document).ready(function() {
-            // Lắng nghe sự thay đổi của input, checkbox, dropdown
-            $('#min-price, #max-price').on('input', function() {
-                validatePrices();
-                fetchFilteredProducts();
-            });
-
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-
-            let sortSelect = document.getElementById('short');
-            if (sortSelect) {
-                sortSelect.addEventListener('change', fetchFilteredProducts);
-            }
-        });
-        document.getElementById('orderby').addEventListener('change', fetchFilteredProducts);
-    </script>
-@endsection
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const orderBySelect = document.getElementById("orderby");
-        const productList = document.getElementById("product-list");
-
-        orderBySelect.addEventListener("change", function() {
-            let products = Array.from(document.querySelectorAll(".pro"));
-
-            if (this.value === "price_asc") {
-                products.sort((a, b) => a.getAttribute("data-price") - b.getAttribute("data-price"));
-            } else if (this.value === "price_desc") {
-                products.sort((a, b) => b.getAttribute("data-price") - a.getAttribute("data-price"));
-            }
-
-            productList.innerHTML = "";
-            products.forEach(product => productList.appendChild(product));
-        });
-    });
-</script>

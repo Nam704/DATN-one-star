@@ -163,6 +163,16 @@ class ShopController extends Controller
         if (!empty($search)) {
             $productsQuery->where('name', 'like', '%' . $search . '%');
         }
+        //lọc atribute
+        $attrVals = $request->input('attribute_values', []);
+        if (!is_array($attrVals)) {
+            $attrVals = explode(',', $attrVals);
+        }
+        if (!empty($attrVals)) {
+            $productsQuery->whereHas('variants', function ($q) use ($attrVals) {
+                $q->whereHas('attributeValues', fn($q2) => $q2->whereIn('attribute_values.id', $attrVals));
+            });
+        }
 
         // Sắp xếp sản phẩm theo yêu cầu của người dùng
         switch ($orderBy) {
