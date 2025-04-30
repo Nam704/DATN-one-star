@@ -1,5 +1,7 @@
 @extends('client.layouts.home.layout')
 @section('content')
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/7.2.96/css/materialdesignicons.min.css">
+
     <style>
         .btn-check:checked+.btn-outline-dark {
             background-color: #0d6efd !important;
@@ -49,10 +51,12 @@
                             </div>
                             <div class="widget_list widget_categories" id="filters">
                                 <form id="filter-form" method="GET" action="{{ route('client.shop') }}">
-                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#attributeModal">
-                                        <i class="mdi mdi-filter-menu"></i> Attributes
-                                    </button>
+                                    <div class="d-grid mb-4">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                                data-bs-target="#attributeModal">
+                                            <i class="mdi mdi-filter-menu"></i> Lọc thuộc tính
+                                        </button>
+                                    </div>
 
                                     <!-- Bộ lọc theo danh mục -->
                                     <div class="widget_list widget_categories">
