@@ -47,31 +47,28 @@ class ShopController extends Controller
         // Apply category filters if present
         // Lấy tham số 'categories' và ép thành mảng
         $selectedCategories = $request->input('categories', []);
-        if (!is_array($selectedCategories)) {
-            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
-            $selectedCategories = explode(',', $selectedCategories);
-        }
+    if (!is_array($selectedCategories)) {
+        $selectedCategories = explode(',', $selectedCategories);
+    }
 
-        if (!empty($selectedCategories)) {
-            // Lấy danh sách các ID của danh mục được chọn và các danh mục con của nó
-            $allCategoryIds = Category::whereIn('id', $selectedCategories)
-                ->orWhereIn('id_parent', $selectedCategories)
-                ->pluck('id')
-                ->toArray();
+    $selectedBrands = $request->input('brands', []);
+    if (!is_array($selectedBrands)) {
+        $selectedBrands = explode(',', $selectedBrands);
+    }
 
-            $productsQuery->whereIn('id_category', $allCategoryIds);
-        }
+    // Áp filter lên productsQuery:
+    if (!empty($selectedCategories)) {
+        // ví dụ: lọc cả parent và children
+        $allCategoryIds = Category::whereIn('id', $selectedCategories)
+            ->orWhereIn('id_parent', $selectedCategories)
+            ->pluck('id')->toArray();
+        $productsQuery->whereIn('id_category', $allCategoryIds);
+    }
 
+    if (!empty($selectedBrands)) {
+        $productsQuery->whereIn('id_brand', $selectedBrands);
+    }
 
-        $selectedBrands = $request->input('brand', $request->input('brands', []));
-        if (!is_array($selectedBrands)) {
-            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
-            $selectedBrands = explode(',', $selectedBrands);
-        }
-
-        if (!empty($selectedBrands)) {
-            $productsQuery->whereIn('id_brand', $selectedBrands);
-        }
 
         // Apply price filter based on expected_price from import_details (nếu cần)
         if ($request->has('min_price') && $request->has('max_price')) {
