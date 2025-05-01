@@ -8,6 +8,7 @@ use App\Models\UserAddress;
 use App\Services\UserService;
 use App\Services\AddressService;
 use App\Services\OrderService;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -17,14 +18,18 @@ class AuthController extends Controller
     protected $userService;
     protected $addressService;
     protected $orderService;
+    protected $voucherService;
+    
     public function __construct(
         UserService $userService,
         AddressService $addressService,
-        OrderService $orderService
+        OrderService $orderService,
+        VoucherService $voucherService
     ) {
         $this->orderService = $orderService;
         $this->userService = $userService;
         $this->addressService = $addressService;
+        $this->voucherService = $voucherService;    
     }
 
     public function myAccount(Request $request)
@@ -57,11 +62,12 @@ class AuthController extends Controller
                 $wardData[$ward->id] = $ward;
             }
         }
+        $vouchers = $this->voucherService->getValidVouchers();
         if (isset($data['errors'])) {
-            return view('client.user.index', compact('user', 'addresses', 'wardData'))
+            return view('client.user.index', compact('user', 'addresses', 'wardData','vouchers'))
                 ->withErrors($data['errors']);
         }
-        return view('client.user.index', compact('user', 'addresses', 'wardData'), $data);
+        return view('client.user.index', compact('user', 'addresses', 'wardData','vouchers'), $data);
     }
 
     public function createAddress(Request $request)

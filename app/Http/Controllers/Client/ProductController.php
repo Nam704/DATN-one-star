@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\Order;
+use App\Models\Order_status;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
@@ -38,12 +40,13 @@ class ProductController extends Controller
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
     
+        // kiểm tra sản phẩm đã bình luận rồi
         $existing = Comment::where('product_id', $request->product_id)
             ->where('user_id', auth()->id())
             ->first();
     
         if ($existing) {
-            return response()->json(['message' => 'Bạn đã bình luận sản phẩm này!'], 400);
+            return response()->json(['message' => 'Cảm ơn bạn đã đánh giá và bình luận sản phẩm'], 400);
         }
     
         $comment = Comment::create([
@@ -55,7 +58,7 @@ class ProductController extends Controller
         ]);
     
         return response()->json([
-            'message' => 'Bình luận của bạn đã được gửi thành công!',
+            'message' => 'Cảm ơn bạn đã đánh giá và bình luận sản phẩm của chúng tôi!',
             'comment' => $comment->comment,
             'rating' => $comment->rating
         ]);
@@ -80,5 +83,6 @@ class ProductController extends Controller
             $related->max_price = $prices->max_price;
         }
         return view('client.detail.product-info', compact('product', 'relatedProducts'));
-    }   
+    }
+    
 }
