@@ -125,10 +125,10 @@
                         <div class="shop_toolbar_btn">
                             <button data-role="grid_3" type="button" class="active btn-grid-3" data-toggle="tooltip"
                                 title="3"></button>
-                            <button data-role="grid_4" type="button" class="btn-grid-4" data-toggle="tooltip"
+                            {{-- <button data-role="grid_4" type="button" class="btn-grid-4" data-toggle="tooltip"
                                 title="4"></button>
                             <button data-role="grid_list" type="button" class="btn-list" data-toggle="tooltip"
-                                title="List"></button>
+                                title="List"></button> --}}
                         </div>
                         <div class="niceselect_option2">
                             <div class="mb-3">
