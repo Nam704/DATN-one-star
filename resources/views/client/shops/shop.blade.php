@@ -61,7 +61,7 @@
                                     <!-- Bộ lọc theo danh mục -->
                                     <div class="widget_list widget_categories">
                                         <div id="categories">
-                                            <h2>Categories</h2>
+                                            <h2>Danh mục</h2>
                                             <ul>
                                                 @foreach ($categories as $category)
                                                     <li>
@@ -80,7 +80,7 @@
                                     <!-- Bộ lọc theo thương hiệu -->
                                     <div class="widget_list widget_categories">
                                         <div id="brands">
-                                            <h3>Brands</h3>
+                                            <h2>Thương hiệu</h2>
                                             <ul>
                                                 @foreach ($brands as $brand)
                                                     <li>
@@ -119,12 +119,12 @@
                         </div>
                     </div>
                     <div class="shop_title">
-                        <h1>shop</h1>
+                        <h1>Sản Phẩm</h1>
                     </div>
                     <div class="shop_toolbar_wrapper">
                         <div class="shop_toolbar_btn">
-                            <button data-role="grid_3" type="button" class="active btn-grid-3" data-toggle="tooltip"
-                                title="3"></button>
+                            {{-- <button data-role="grid_3" type="button" class="active btn-grid-3" data-toggle="tooltip"
+                                title="3"></button> --}}
                             {{-- <button data-role="grid_4" type="button" class="btn-grid-4" data-toggle="tooltip"
                                 title="4"></button>
                             <button data-role="grid_list" type="button" class="btn-list" data-toggle="tooltip"
@@ -145,7 +145,7 @@
 
 
                         <div class="page_amount">
-                            <p>Showing 1–9 of 21 results</p>
+                            {{-- <p>Showing 1–9 of 21 results</p> --}}
                         </div>
                     </div>
                     <div class="row shop_wrapper" id="product-list">
