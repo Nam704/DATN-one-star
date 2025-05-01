@@ -49,6 +49,7 @@
                             @include('client.user.orders')
                             @include('client.user.address')
                             @include('client.user.accountDetails')
+                            @include('client.user.voucher')
                         </div>
                     </div>
                 </div>

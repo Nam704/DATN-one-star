@@ -69,7 +69,10 @@
             @foreach($comments as $comment)
                 <div class="reviews_comment_box" id="comment_{{ $comment->id }}">
                     <div class="comment_thmb">
-                        <img src="{{ asset('storage/' . ($comment->user->profile_image ?? 'admin/assets/images/user-201.png')) }}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+                    <img 
+        src="{{ asset($comment->user->profile_image ? 'storage/' . $comment->user->profile_image : 'admin/assets/images/user-201.png') }}" 
+        alt="Avatar" 
+        style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
                     <div class="comment_text">
                         <div class="reviews_meta">
@@ -177,7 +180,8 @@
             const newComment = `
                 <div class="reviews_comment_box">
                     <div class="comment_thmb">
-                        <img src="{{ asset('storage/' . (auth()->user()->profile_image ?? 'admin/assets/images/user-201.png')) }}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+              <img  src="{{ asset(auth()->user()->profile_image ? 'storage/' . auth()->user()->profile_image : 'admin/assets/images/user-201.png') }}"  alt="Avatar" 
+                  style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
                     <div class="comment_text">
                         <div class="reviews_meta">

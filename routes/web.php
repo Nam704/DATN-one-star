@@ -424,10 +424,10 @@ Route::prefix('client')->name('client.')->group(
             Route::get('/order-status-stats', 'getOrderStatusStats')->name('getOrderStatusStats');
         });
 
-        // Route::prefix('vouchers')->controller(ClientVoucherController::class)->name('vouchers.')->group(function () {
-        //     Route::get('voucher',  'index')->name('index');
-        //     Route::get('detail/{id}',  'detail')->name('detail'); // mai fix nốt
-        // });
+        Route::prefix('vouchers')->controller(ClientVoucherController::class)->name('vouchers.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('detail/{id}',  'detail')->name('detail'); 
+        });
         
 
         Route::controller(ShopController::class)->group(function () {

@@ -13,7 +13,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="section_title">
-                        <h2><span> <strong>Sản phẩm</strong>của chúng tôi</span></h2>
+                        <h2><span> <strong>Sản phẩm theo danh mục</strong></span></h2>
                         <ul class="product_tab_button nav" role="tablist" id="nav-tab">
 
                             @foreach ($categories as $index => $item)
@@ -85,7 +85,7 @@
             <div class="row " style="margin-top: 40px;">
                 <div class="col-12">
                     <div class="section_title">
-                        <h2><span> <strong>Sản phẩm</strong>được đề xuất</span></h2>
+                        <h2><span> <strong>Sản phẩm được đề xuất</strong></span></h2>
                     </div>
                 </div>
             </div>

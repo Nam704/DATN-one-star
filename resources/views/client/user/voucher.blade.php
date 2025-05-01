@@ -1,35 +1,71 @@
-<div class="tab-pane fade" id="voucher">
-    <div class="container py-4">
-        <h2 class="text-xl font-semibold mb-4">Voucher ưu đãi</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach ($vouchers as $voucher)
-                <div class="p-4 border rounded shadow bg-white">
-                    <h3 class="text-lg font-bold">{{ $voucher->name }}</h3>
-                    <p class="text-sm text-gray-600 mb-2">{{ $voucher->description }}</p>
-                    <div class="mb-2">
-                        <strong>Mã:</strong>
-                        <span id="code-{{ $voucher->id }}">{{ $voucher->code }}</span>
-                        <button onclick="copyCode('{{ $voucher->id }}')" class="ml-2 px-2 py-1 bg-blue-500 text-white rounded text-sm">
-                            Copy
-                        </button>
-                    </div>
-                    <div class="text-sm text-gray-700 mb-2">
-                        Áp dụng: {{ $voucher->start_date }} - {{ $voucher->end_date }}
-                    </div>
-                    <a href="{{ route('client.vouchers.show', $voucher->id) }}" class="inline-block px-3 py-1 bg-gray-800 text-white text-sm rounded">
-                        Xem chi tiết
-                    </a>
-                </div>
-            @endforeach
-        </div>
-    </div>
+<!-- resources/views/client/user/vouchers.blade.php -->
 
-    <script>
-        function copyCode(id) {
-            const code = document.getElementById('code-' + id).textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                alert('Đã sao chép mã: ' + code);
-            });
-        }
-    </script>
+<div class="tab-pane fade" id="voucher">
+    <h3 class="text-xl font-semibold mb-4">Mã Giảm Giá</h3>
+
+    <!-- Danh sách mã giảm giá -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach ($vouchers as $voucher)
+            <div class="col">
+                <div class="card shadow-sm border-light rounded">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ $voucher['name'] }}</h5>
+                        <p class="card-text text-muted">{{ $voucher['description'] }}</p>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-success font-weight-bold">{{ $voucher['discount_amount'] }} ₫</span>
+                            <span class="text-muted">{{ $voucher['end_date'] }}</span>
+                        </div>
+
+                        <div class="mt-3">
+                            @if($voucher['quantity'] > 0)
+                                <button class="btn btn-primary w-100" onclick="copyCouponCode('{{ $voucher['code'] }}')">Sao chép mã</button>
+                            @else
+                                <button class="btn btn-secondary w-100" disabled>Hết hàng</button>
+                            @endif
+                        </div>
+
+                        <div class="mt-3">
+                            @if($voucher['quantity'] > 0)
+                                <button class="btn btn-info w-100" onclick="toggleDetails('{{ $voucher['code'] }}')">Xem chi tiết</button>
+                            @else
+                                <button class="btn btn-secondary w-100" disabled>Hết hạn</button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Modal chi tiết voucher -->
+                    <div id="voucher-details-{{ $voucher['code'] }}" class="card-footer d-none">
+                        <div class="text-muted mt-2">
+                            <p><strong>Miêu tả:</strong> {{ $voucher['description'] }}</p>
+                            <p><strong>Số lượng còn lại:</strong> {{ $voucher['quantity'] }}</p>
+                            <p><strong>Giảm giá:</strong> {{ $voucher['discount_amount'] }} ₫</p>
+                            <p><strong>Ngày hết hạn:</strong> {{ $voucher['end_date'] }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
 </div>
+
+<script>
+    // Copy coupon code to clipboard
+    function copyCouponCode(code) {
+        navigator.clipboard.writeText(code).then(function() {
+            alert('Mã giảm giá đã được sao chép!');
+        }).catch(function(error) {
+            alert('Không thể sao chép mã giảm giá: ' + error);
+        });
+    }
+
+    // Toggle show/hide voucher details
+    function toggleDetails(code) {
+        const detailsDiv = document.getElementById('voucher-details-' + code);
+        if (detailsDiv.classList.contains('d-none')) {
+            detailsDiv.classList.remove('d-none');
+        } else {
+            detailsDiv.classList.add('d-none');
+        }
+    }
+</script>
