@@ -30,7 +30,7 @@ class PublicNotification implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('public-notifications'),
+            new Channel('public'),
         ];
     }
     public function broadcastWith()

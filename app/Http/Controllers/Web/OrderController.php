@@ -93,14 +93,17 @@ class OrderController extends Controller
 
         if (isset($data['errors'])) {
             if ($request->ajax()) {
-                return response()->json($data, 422);
+                return response()->json([
+                    'errors' => $data['errors'],
+                    'message' => 'Dữ liệu đầu vào không hợp lệ. Vui lòng kiểm tra lại.'
+                ], 422);
             } else {
                 return back()->withErrors($data['errors'])->withInput();
             }
         } else {
             if ($request->ajax()) {
                 $html = view('admin.order.order_list', $data)->render();
-                $pagination = $data['orders']->links()->render(); // Trả về HTML phân trang
+                $pagination = $data['orders']->links()->render();
                 return response()->json([
                     'html' => $html,
                     'pagination' => $pagination,
@@ -111,7 +114,6 @@ class OrderController extends Controller
             }
         }
     }
-
     public function updateStatus($orderId)
     {
         try {

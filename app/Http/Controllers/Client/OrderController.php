@@ -78,9 +78,26 @@ class OrderController extends Controller
     public function orders(Request $request)
     {
         $data = $this->orderService->searchOrders($request);
+
+        // Kiểm tra nếu có lỗi validate
+        if (isset($data['errors'])) {
+            return redirect()->back()->withErrors($data['errors'])->withInput();
+        }
+
+        // Đảm bảo các biến mặc định nếu không có dữ liệu
+        $data = array_merge([
+            'orders' => collect([]), // Trả về collection rỗng nếu không có đơn hàng
+            'totalOrders' => 0,
+            'openOrders' => 0,
+            'averagePrice' => 0,
+            'totalRevenue' => 0,
+            'groupStatuses' => [],
+            'groupStatusCounts' => [],
+            'statuses' => [],
+        ], $data);
+
         return view('client.user.index', $data);
     }
-
     public function retryPayment(Request $request, $orderId)
     {
         try {

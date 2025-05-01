@@ -8,6 +8,7 @@ use App\Models\UserAddress;
 use App\Services\UserService;
 use App\Services\AddressService;
 use App\Services\OrderService;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -17,21 +18,42 @@ class AuthController extends Controller
     protected $userService;
     protected $addressService;
     protected $orderService;
+    protected $voucherService;
+    
     public function __construct(
         UserService $userService,
         AddressService $addressService,
-        OrderService $orderService
+        OrderService $orderService,
+        VoucherService $voucherService
     ) {
         $this->orderService = $orderService;
         $this->userService = $userService;
         $this->addressService = $addressService;
+        $this->voucherService = $voucherService;    
     }
 
     public function myAccount(Request $request)
     {
         $user = $this->userService->details();
         $addresses = $user ? $this->userService->getAddress($user) : collect([]);
-        $data = $this->orderService->searchOrders($request, 10); // Gọi hàm searchOrders đã cập nhật
+        $data = $this->orderService->searchOrders($request);
+
+        // Kiểm tra nếu có lỗi validate
+        if (isset($data['errors'])) {
+            return redirect()->back()->withErrors($data['errors'])->withInput();
+        }
+
+        // Đảm bảo các biến mặc định nếu không có dữ liệu
+        $data = array_merge([
+            'orders' => collect([]), // Trả về collection rỗng nếu không có đơn hàng
+            'totalOrders' => 0,
+            'openOrders' => 0,
+            'averagePrice' => 0,
+            'totalRevenue' => 0,
+            'groupStatuses' => [],
+            'groupStatusCounts' => [],
+            'statuses' => [],
+        ], $data);
         $wardData = [];
         if ($addresses->count() > 0) {
             $wardIds = $addresses->pluck('id_ward')->filter()->unique()->toArray();
@@ -40,11 +62,12 @@ class AuthController extends Controller
                 $wardData[$ward->id] = $ward;
             }
         }
+        $vouchers = $this->voucherService->getValidVouchers();
         if (isset($data['errors'])) {
-            return view('client.user.index', compact('user', 'addresses', 'wardData'))
+            return view('client.user.index', compact('user', 'addresses', 'wardData','vouchers'))
                 ->withErrors($data['errors']);
         }
-        return view('client.user.index', compact('user', 'addresses', 'wardData'), $data);
+        return view('client.user.index', compact('user', 'addresses', 'wardData','vouchers'), $data);
     }
 
     public function createAddress(Request $request)

@@ -167,44 +167,65 @@
                             <input type="text" name="search" class="form-control" value="{{ request('search') }}"
                                 placeholder="Search by code, name, email">
                         </div>
+                        <div class="row">
+                            <div class="mb-3 col-5">
+                                <label for="min_total" class="form-label">Min Total</label>
+                                <input type="number" name="min_total" class="form-control"
+                                    value="{{ request('min_total') }}" min="0" max="1000000000" step="0.01">
+                                @error('min_total')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <!-- Max Total -->
+                            <div class="mb-3 col-5">
+                                <label for="max_total" class="form-label">Max Total</label>
+                                <input type="number" name="max_total" class="form-control"
+                                    value="{{ request('max_total') }}" min="0" max="1000000000" step="0.01">
+                                @error('max_total')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3 col-2">
+                                <label for="sort_order" class="form-label">Sort</label>
+                                <select name="sort_order" class="form-control">
+                                    <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>
+                                        Descending
+                                    </option>
+                                    <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>
+                                        Ascending
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
                         <!-- Min Total -->
-                        <div class="mb-3">
-                            <label for="min_total" class="form-label">Min Total</label>
-                            <input type="number" name="min_total" class="form-control" value="{{ request('min_total') }}"
-                                placeholder="Min Total">
-                        </div>
-                        <!-- Max Total -->
-                        <div class="mb-3">
-                            <label for="max_total" class="form-label">Max Total</label>
-                            <input type="number" name="max_total" class="form-control"
-                                value="{{ request('max_total') }}" placeholder="Max Total">
-                        </div>
+
                         <!-- Date From -->
                         <div class="mb-3">
                             <label for="date_from" class="form-label">Date From</label>
                             <input type="date" name="date_from" class="form-control"
-                                value="{{ request('date_from') }}">
+                                value="{{ request('date_from') }}" min="{{ now()->subYears(2)->toDateString() }}"
+                                max="{{ now()->toDateString() }}">
+                            @error('date_from')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Date To -->
                         <div class="mb-3">
                             <label for="date_to" class="form-label">Date To</label>
-                            <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                            <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}"
+                                min="{{ now()->subYears(2)->toDateString() }}" max="{{ now()->toDateString() }}">
+                            @error('date_to')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <!-- Clear Date Filters -->
                         <div class="mb-3">
                             <button type="button" class="btn btn-link" id="clearDateFilters">Xem tất cả (Không giới hạn
                                 thời gian)</button>
                         </div>
                         <!-- Sort Order -->
-                        <div class="mb-3">
-                            <label for="sort_order" class="form-label">Sort Order</label>
-                            <select name="sort_order" class="form-control">
-                                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending
-                                </option>
-                                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending
-                                </option>
-                            </select>
-                        </div>
+
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-primary">Apply Filters</button>

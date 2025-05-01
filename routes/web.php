@@ -40,6 +40,8 @@ use App\Http\Controllers\Client\CommentController;;
 
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Client\StatisticController as ClientStatisticController;
+use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 use App\Http\Controllers\Web\AddressController;
 use App\Http\Controllers\Web\BannerController;
 use App\Http\Controllers\Web\ChatController;
@@ -52,7 +54,9 @@ use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
-
+Route::prefix('/')->as('client.')->group(function(){
+    Route::get('/', [HomeController::class, 'index'])->name('home');  
+}); 
 
 // Người dùng
 Route::middleware(['auth'])->group(function () {
@@ -417,6 +421,17 @@ Route::prefix('client')->name('client.')->group(
             }
         );
 
+        Route::prefix('statistics')->controller(ClientStatisticController::class)->name('statistics.')->group(function () {
+            Route::get('chart_user', 'chart_user')->name('chart_user');
+            Route::get('/order-status-stats', 'getOrderStatusStats')->name('getOrderStatusStats');
+        });
+
+        Route::prefix('vouchers')->controller(ClientVoucherController::class)->name('vouchers.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('detail/{id}',  'detail')->name('detail'); 
+        });
+        
+
         Route::controller(ShopController::class)->group(function () {
             Route::get('shop', 'shop')->name('shop');
             Route::get('/shop/filter', [ShopController::class, 'filter'])->name('filter');
@@ -434,6 +449,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/clear',  'clearCart');
                 Route::post('/save-to-db',  'saveSessionCartToDatabase');
                 Route::get('view-cart', 'viewCart')->name('viewCart');
+
             }
         );
 
