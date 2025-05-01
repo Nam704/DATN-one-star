@@ -180,8 +180,9 @@
             const newComment = `
                 <div class="reviews_comment_box">
                     <div class="comment_thmb">
-              <img  src="{{ asset(auth()->user()->profile_image ? 'storage/' . auth()->user()->profile_image : 'admin/assets/images/user-201.png') }}"  alt="Avatar" 
-                  style="width: 60px; height: 60px; object-fit: cover;">
+             <img src="{{ auth()->check() && auth()->user()->profile_image ? asset('storage/' . auth()->user()->profile_image) : asset('admin/assets/images/user-201.png') }}" 
+     alt="Avatar" 
+     style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
                     <div class="comment_text">
                         <div class="reviews_meta">
