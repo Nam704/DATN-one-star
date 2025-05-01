@@ -1,46 +1,90 @@
-<!-- resources/views/client/user/vouchers.blade.php -->
+<div class="tab-pane fade show active" id="voucher">
+    <h3 class="mb-4">Mã Giảm Giá</h3>
 
-<div class="tab-pane fade" id="voucher">
-    <h3 class="text-xl font-semibold mb-4">Mã Giảm Giá</h3>
-
-    <!-- Danh sách mã giảm giá -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach ($vouchers as $voucher)
             <div class="col">
-                <div class="card shadow-sm border-light rounded">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $voucher['name'] }}</h5>
-                        <p class="card-text text-muted">{{ $voucher['description'] }}</p>
+                <div class="card h-100 border-0 shadow-sm rounded">
+                    <div class="card-body d-flex flex-column">
+                        <!-- Tên và mô tả ngắn -->
+                        <h5 class="text-primary mb-2">{{ $voucher['name'] }}</h5>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-success font-weight-bold">{{ $voucher['discount_amount'] }} ₫</span>
-                            <span class="text-muted">{{ $voucher['end_date'] }}</span>
-                        </div>
-
-                        <div class="mt-3">
-                            @if($voucher['quantity'] > 0)
-                                <button class="btn btn-primary w-100" onclick="copyCouponCode('{{ $voucher['code'] }}')">Sao chép mã</button>
+                        <!-- Dòng mô tả rút gọn -->
+                        <p class="mb-2 text-dark">
+                            @if ($voucher['type'] === 'percent')
+                                Giảm {{ $voucher['discount_amount'] }}%
+                                @if (!empty($voucher['max_discount_amount']))
+                                    tối đa {{ number_format($voucher['max_discount_amount']) }}đ
+                                @endif
                             @else
-                                <button class="btn btn-secondary w-100" disabled>Hết hàng</button>
+                                Giảm {{ number_format($voucher['discount_amount']) }}%
+                                @if (!empty($voucher['max_discount_amount']))
+                                    (tối đa {{ number_format($voucher['max_discount_amount']) }}đ)
+                                @endif
                             @endif
+
+                            @if (!empty($voucher['min_amount']))
+                                cho đơn hàng từ {{ number_format($voucher['min_amount']) }}đ
+                            @endif
+                        </p>
+
+                        <!-- Hạn sử dụng -->
+                        <small class="text-muted mb-2">
+                            Hạn dùng: {{ \Carbon\Carbon::parse($voucher['end_date'])->format('H:i d/m/Y') }}
+                        </small>
+
+                        <!-- Lượt còn lại và giới hạn -->
+                        @if ((!empty($voucher['user_limit']) && $voucher['user_limit'] > 0) || (!empty($voucher['quantity']) && $voucher['quantity'] > 0))
+                            <small class="text-success mb-3">
+                                @if (!empty($voucher['user_limit']) && $voucher['user_limit'] > 0)
+                                    Áp dụng {{ $voucher['user_limit'] }} lần/người
+                                @endif
+                                @if (!empty($voucher['user_limit']) && $voucher['user_limit'] > 0 && !empty($voucher['quantity']) && $voucher['quantity'] > 0)
+                                    –
+                                @endif
+                                @if (!empty($voucher['quantity']) && $voucher['quantity'] > 0)
+                                    Còn {{ $voucher['quantity'] }} lượt
+                                @endif
+                            </small>
+                        @endif
+
+                        <!-- Chi tiết ẩn -->
+                        <div class="collapse mb-3" id="details-{{ $voucher['code'] }}">
+                            <div class="bg-light p-2 rounded border">
+                                @if (!empty($voucher['products']))
+                                    <p class="mb-1 fw-bold">Áp dụng cho sản phẩm:</p>
+                                    <ul class="ps-3 mb-2">
+                                        @foreach ($voucher['products'] as $product)
+                                            <li>{{ $product }}</li>
+                                        @endforeach
+                                    </ul>
+                                @elseif (!empty($voucher['categories']))
+                                    <p class="mb-1 fw-bold">Áp dụng cho danh mục:</p>
+                                    <ul class="ps-3 mb-2">
+                                        @foreach ($voucher['categories'] as $category)
+                                            <li>{{ $category }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="text-muted mb-0">Áp dụng cho tất cả sản phẩm</p>
+                                @endif
+                            </div>
                         </div>
 
-                        <div class="mt-3">
-                            @if($voucher['quantity'] > 0)
-                                <button class="btn btn-info w-100" onclick="toggleDetails('{{ $voucher['code'] }}')">Xem chi tiết</button>
+                        <!-- Nút hành động -->
+                        <div class="mt-auto d-flex gap-2">
+                            @if ($voucher['quantity'] > 0)
+                                <button class="btn btn-sm btn-primary w-50" onclick="copyCouponCode('{{ $voucher['code'] }}')">
+                                    Lấy mã
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary w-50" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#details-{{ $voucher['code'] }}">
+                                    Xem chi tiết
+                                </button>
                             @else
-                                <button class="btn btn-secondary w-100" disabled>Hết hạn</button>
+                                <button class="btn btn-sm btn-secondary w-100" disabled>Hết mã</button>
                             @endif
-                        </div>
-                    </div>
-
-                    <!-- Modal chi tiết voucher -->
-                    <div id="voucher-details-{{ $voucher['code'] }}" class="card-footer d-none">
-                        <div class="text-muted mt-2">
-                            <p><strong>Miêu tả:</strong> {{ $voucher['description'] }}</p>
-                            <p><strong>Số lượng còn lại:</strong> {{ $voucher['quantity'] }}</p>
-                            <p><strong>Giảm giá:</strong> {{ $voucher['discount_amount'] }} ₫</p>
-                            <p><strong>Ngày hết hạn:</strong> {{ $voucher['end_date'] }}</p>
                         </div>
                     </div>
                 </div>
@@ -50,22 +94,11 @@
 </div>
 
 <script>
-    // Copy coupon code to clipboard
     function copyCouponCode(code) {
-        navigator.clipboard.writeText(code).then(function() {
-            alert('Mã giảm giá đã được sao chép!');
-        }).catch(function(error) {
-            alert('Không thể sao chép mã giảm giá: ' + error);
+        navigator.clipboard.writeText(code).then(() => {
+            alert('Đã sao chép mã: ' + code);
+        }).catch(err => {
+            alert('Không thể sao chép mã: ' + err);
         });
-    }
-
-    // Toggle show/hide voucher details
-    function toggleDetails(code) {
-        const detailsDiv = document.getElementById('voucher-details-' + code);
-        if (detailsDiv.classList.contains('d-none')) {
-            detailsDiv.classList.remove('d-none');
-        } else {
-            detailsDiv.classList.add('d-none');
-        }
     }
 </script>
