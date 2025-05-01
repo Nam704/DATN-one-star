@@ -31,7 +31,24 @@ class AuthController extends Controller
     {
         $user = $this->userService->details();
         $addresses = $user ? $this->userService->getAddress($user) : collect([]);
-        $data = $this->orderService->searchOrders($request, 10); // Gọi hàm searchOrders đã cập nhật
+        $data = $this->orderService->searchOrders($request);
+
+        // Kiểm tra nếu có lỗi validate
+        if (isset($data['errors'])) {
+            return redirect()->back()->withErrors($data['errors'])->withInput();
+        }
+
+        // Đảm bảo các biến mặc định nếu không có dữ liệu
+        $data = array_merge([
+            'orders' => collect([]), // Trả về collection rỗng nếu không có đơn hàng
+            'totalOrders' => 0,
+            'openOrders' => 0,
+            'averagePrice' => 0,
+            'totalRevenue' => 0,
+            'groupStatuses' => [],
+            'groupStatusCounts' => [],
+            'statuses' => [],
+        ], $data);
         $wardData = [];
         if ($addresses->count() > 0) {
             $wardIds = $addresses->pluck('id_ward')->filter()->unique()->toArray();

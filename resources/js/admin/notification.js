@@ -1,8 +1,8 @@
 import "../app.js";
 
 $(document).ready(function () {
-    const baseUrl = window.location.origin; // Hoặc lấy từ biến môi trường
-    const userId = window.App.userId; // Giả định userId được truyền từ server
+    const baseUrl = GlobalUtils.baseUrl;
+    const userId = currentUserId;
     const $notificationBadge = $("#notification_badge");
     const $notificationList = $("#notification_simplebar");
     const $notificationTabs = $("#notification-tabs");
@@ -12,7 +12,7 @@ $(document).ready(function () {
 
     // Khởi tạo Echo để lắng nghe các kênh thông báo
     function initializeEcho() {
-        const userRole = window.App.userRole; // Giả định vai trò được truyền từ server (admin, user, employee)
+        const userRole = "admin"; // Giả định vai trò được truyền từ server (admin, user, employee)
         const channels = [
             {
                 name: `private-notifications.${userId}`,

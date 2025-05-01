@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\UserRestriction;
 use App\Models\Voucher;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -414,7 +415,60 @@ class OrderService
             return false;
         }
     }
+    protected function validateSearchInput(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'search' => 'nullable|string|max:255|min:3',
+            'group_status' => ['nullable', Rule::in(array_merge(['All'], Cache::remember('group_statuses', 60 * 60 * 24, function () {
+                return Order_status::select('group_status')
+                    ->distinct()
+                    ->whereNotNull('group_status')
+                    ->pluck('group_status')
+                    ->toArray();
+            })))],
+            'status_id' => 'nullable|integer|exists:order_statuses,id|min:1',
+            'min_total' => 'nullable|numeric|min:0|max:100000000',
+            'max_total' => 'nullable|numeric|min:0|max:100000000|gte:min_total',
+            'min_shipping' => 'nullable|numeric|min:0|max:1000000',
+            'max_shipping' => 'nullable|numeric|min:0|max:1000000|gte:min_shipping',
+            'date_from' => 'nullable|date|before_or_equal:today|after_or_equal:' . now()->subYears(2)->toDateString(),
+            'date_to' => 'nullable|date|after_or_equal:date_from|before_or_equal:today',
+            'sort_by' => 'nullable|string|in:created_at,total,code',
+            'sort_order' => 'nullable|string|in:asc,desc',
+        ], [
 
+            'search.min' => 'Từ khóa tìm kiếm phải có ít nhất 3 ký tự.',
+            'group_status.in' => 'Nhóm trạng thái không hợp lệ.',
+            'status_id.exists' => 'Trạng thái đơn hàng không hợp lệ.',
+            'min_total.max' => 'Tổng giá trị tối thiểu không được vượt quá 1 tỷ VNĐ.',
+            'max_total.gte' => 'Tổng giá trị tối đa phải lớn hơn hoặc bằng tổng giá trị tối thiểu.',
+            'min_shipping.max' => 'Phí vận chuyển tối thiểu không được vượt quá 1 triệu VNĐ.',
+            'max_shipping.gte' => 'Phí vận chuyển tối đa phải lớn hơn hoặc bằng phí vận chuyển tối thiểu.',
+            'date_from.before_or_equal' => 'Ngày bắt đầu không được trong tương lai.',
+            'date_from.after_or_equal' => 'Ngày bắt đầu không được trước 2 năm.',
+            'date_to.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'date_to.before_or_equal' => 'Ngày kết thúc không được trong tương lai.',
+            'sort_by.in' => 'Cột sắp xếp không hợp lệ.',
+            'sort_order.in' => 'Thứ tự sắp xếp không hợp lệ.',
+        ]);
+
+        // Kiểm tra khoảng thời gian tối đa
+        $validator->after(function ($validator) use ($request) {
+            if ($request->filled('date_from') && $request->filled('date_to')) {
+                $dateFrom = Carbon::parse($request->date_from);
+                $dateTo = Carbon::parse($request->date_to);
+                if ($dateTo->diffInYears($dateFrom) > 1) {
+                    $validator->errors()->add('date_to', 'Khoảng thời gian không được vượt quá 1 năm.');
+                }
+            }
+        });
+
+        if ($validator->fails()) {
+            return ['errors' => $validator->errors()];
+        }
+
+        return [];
+    }
     public function searchOrders(Request $request, $perPage = 10)
     {
         $user = Auth::user();
@@ -422,23 +476,14 @@ class OrderService
             throw new \Exception('User not authenticated.');
         }
 
-        // Validator cho các tham số đầu vào
-        $validator = Validator::make($request->all(), [
-            'search' => 'nullable|string|max:255',
-            'group_status' => 'nullable|string',
-            'status_id' => 'nullable|integer|exists:order_statuses,id',
-            'min_total' => 'nullable|numeric|min:0',
-            'max_total' => 'nullable|numeric|min:0',
-            'min_shipping' => 'nullable|numeric|min:0',
-            'max_shipping' => 'nullable|numeric|min:0',
-            'date_from' => 'nullable|date|before_or_equal:date_to',
-            'date_to' => 'nullable|date|after_or_equal:date_from',
-            'sort_by' => 'nullable|string|in:created_at,total,code',
-            'sort_order' => 'nullable|string|in:asc,desc',
-        ]);
-
-        if ($validator->fails()) {
-            return ['errors' => $validator->errors()];
+        // Validate dữ liệu đầu vào
+        $validationResult = $this->validateSearchInput($request);
+        if (!empty($validationResult['errors'])) {
+            Log::warning('Validation failed in searchOrders', [
+                'errors' => $validationResult['errors']->toArray(),
+                'request' => $request->all(),
+            ]);
+            return ['errors' => $validationResult['errors']];
         }
 
         // Truy vấn chính cho danh sách đơn hàng
@@ -446,7 +491,7 @@ class OrderService
 
         // Áp dụng bộ lọc tìm kiếm
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = trim($request->input('search')); // Làm sạch chuỗi tìm kiếm
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
                     ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
@@ -503,7 +548,7 @@ class OrderService
 
         // Áp dụng các bộ lọc tương tự cho metricQuery
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = trim($request->input('search'));
             $metricQuery->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
                     ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
@@ -552,7 +597,7 @@ class OrderService
         $orders = $query->paginate($perPage);
 
         // Cache danh sách group_status
-        $groupStatuses = Cache::remember('group_statuses', 60 * 60, function () {
+        $groupStatuses = Cache::remember('group_statuses', 60 * 60 * 24, function () {
             return Order_status::select('group_status')
                 ->distinct()
                 ->whereNotNull('group_status')
@@ -571,7 +616,7 @@ class OrderService
             'max_shipping',
             'date_from',
             'date_to'
-        ]))), 60, function () use ($dateFrom, $dateTo, $groupStatuses, $request, $user) {
+        ]))), 60 * 5, function () use ($dateFrom, $dateTo, $groupStatuses, $request, $user) {
             $counts = [];
             $query = Order::selectRaw('order_statuses.group_status, COUNT(*) as count')
                 ->where('orders.id_user', $user->id)
@@ -590,7 +635,7 @@ class OrderService
 
             // Áp dụng bộ lọc tìm kiếm
             if ($request->filled('search')) {
-                $search = $request->input('search');
+                $search = trim($request->input('search'));
                 $query->where(function ($q) use ($search) {
                     $q->where('code', 'like', "%{$search}%")
                         ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(user_data, '$.name')) LIKE ?", ["%{$search}%"])
@@ -608,7 +653,7 @@ class OrderService
         });
 
         // Cache danh sách trạng thái
-        $statuses = Cache::remember('order_statuses', 60 * 60, function () {
+        $statuses = Cache::remember('order_statuses', 60 * 60 * 24, function () {
             return Order_status::select('id', 'name')->get();
         });
 

@@ -8,11 +8,9 @@
     <!-- Begin page -->
     <div class="wrapper">
 
-
         <!-- ========== Topbar Start ========== -->
         @include('admin.layouts.topbar')
         <!-- ========== Topbar End ========== -->
-
 
         <!-- ========== Left Sidebar Start ========== -->
         @include('admin.layouts.leftSidebar')
@@ -28,31 +26,34 @@
 
                 <!-- Flash Messages -->
                 <div class="container-fluid mt-2">
-                    @if(session('success'))
+                    @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
 
-                    @if(session('error'))
+                    @if (session('error'))
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
                         </div>
                     @endif
 
-                    @if(session('warning'))
+                    @if (session('warning'))
                         <div class="alert alert-warning alert-dismissible fade show" role="alert">
                             {{ session('warning') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
                         </div>
                     @endif
 
-                    @if(session('info'))
+                    @if (session('info'))
                         <div class="alert alert-info alert-dismissible fade show" role="alert">
                             {{ session('info') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
                         </div>
                     @endif
                 </div>
@@ -96,11 +97,11 @@
     @stack('scripts')
     <script>
         const currentUserId = "{{ auth()->id() }}";
- // Auto-hide alerts after 5 seconds
-        document.addEventListener('DOMContentLoaded', function () {
-             setTimeout(function () {
-                 const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function (alert) {
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
                     const bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 });
@@ -108,16 +109,12 @@
         });
     </script>
     @vite('resources/js/app.js')
-    @vite('resources/js/public.js')
-    @vite('resources/js/private.js')
-    @vite('resources/js/admin.js')
-    @vite('resources/js/employee.js')
-    @vite('resources/js/user.js')
+    {{-- @vite('resources/js/public.js')
+    @vite('resources/js/admin.js') --}}
+    @vite('resources/js/admin/notification.js')
 
     <!-- App js -->
     <script src="{{ asset('admin/assets/js/app.min.js') }}"></script>
-
-
 
     <!-- Thêm JS của Select2 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
