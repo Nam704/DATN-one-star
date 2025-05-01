@@ -100,7 +100,7 @@
 
             @if (!$hasCommented)
                 <div class="comment_title mt-4">
-                    <h2>Thêm đánh giá và bình luậncủa bạn</h2>
+                    <h2>Thêm đánh giá và bình luận của bạn</h2>
                 </div>
 
                 <div class="product_ratting mb-10">
@@ -175,7 +175,7 @@
         .then(response => response.json())
         .then(data => {
             alert(data.message);
-                 const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}'
+                 const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}';
             // Tạo HTML mới cho bình luận
             const newComment = `
                 <div class="reviews_comment_box">
