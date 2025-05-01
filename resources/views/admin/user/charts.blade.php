@@ -26,11 +26,9 @@
                         <div class="float-end">
                             <i class="mdi mdi-account-multiple-plus widget-icon"></i>
                         </div>
-                        <h6 class="text-uppercase mt-0" title="Customers">Tài khoản mới</h6>
+                        <h6 class="text-uppercase mt-0" title="Customers">Tổng tài khoản mới(trong tháng)</h6>
                         <h2 class="my-2">{{ $currentMonthCount }}</h2>
                         <p class="mb-0">
-                            <span class="badge bg-white bg-opacity-10 me-1">{{ $growthRate }}%</span>
-                            <span class="text-nowrap">So với tháng trước</span>
                         </p>
                     </div>
                 </div>
@@ -45,8 +43,6 @@
                         <h6 class="text-uppercase mt-0" title="Customers">Tổng tài khoản</h6>
                         <h2 class="my-2">{{ $totalUsers }}</h2>
                         <p class="mb-0">
-                            <span class="badge bg-white bg-opacity-10 me-1"></span>
-                            <span class="text-nowrap">Since last month</span>
                         </p>
                     </div>
                 </div>
@@ -58,11 +54,9 @@
                         <div class="float-end">
                             <i class="mdi mdi-wifi widget-icon"></i>
                         </div>
-                        <h6 class="text-uppercase mt-0" title="Customers">Đã đặt hàng</h6>
-                        <h2 class="my-2">{{ $activeUsers }}</h2>
+                        <h6 class="text-uppercase mt-0" title="Customers">Tổng tài khoản đã đặt hàng</h6>
+                        <h2 class="my-2">{{ $totalUsersWithOrders }}</h2>
                         <p class="mb-0">
-                            <span class="badge bg-white bg-opacity-25 me-1">{{ $activePercentage }}%</span>
-                            <span class="text-nowrap">So với tổng tài khoản</span>
                         </p>
                     </div>
                 </div>

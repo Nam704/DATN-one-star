@@ -19,7 +19,7 @@ class EmployeeNotification implements ShouldBroadcast
     }
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('employee-notifications')];
+        return [new PrivateChannel('employee')];
     }
     public function broadcastWith()
     {

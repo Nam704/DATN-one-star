@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class OrderServiceManager
 {
@@ -209,17 +210,38 @@ class OrderServiceManager
     public function searchOrders(Request $request, $perPage = 10)
     {
         $validator = Validator::make($request->all(), [
-            'search' => 'nullable|string|max:255',
-            'group_status' => 'nullable|string',
-            'status_id' => 'nullable|integer|exists:order_statuses,id',
-            'min_total' => 'nullable|numeric|min:0',
-            'max_total' => 'nullable|numeric|min:0',
-            'min_shipping' => 'nullable|numeric|min:0',
-            'max_shipping' => 'nullable|numeric|min:0',
-            'date_from' => 'nullable|date|before_or_equal:date_to',
-            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'search' => 'nullable|string|max:255|min:3|regex:/^[\w\s@.]+$/',
+            'group_status' => ['nullable', Rule::in(array_merge(['All'], Cache::remember('group_statuses', 60 * 60 * 24, function () {
+                return Order_status::select('group_status')
+                    ->distinct()
+                    ->whereNotNull('group_status')
+                    ->pluck('group_status')
+                    ->toArray();
+            })))],
+            'status_id' => 'nullable|integer|exists:order_statuses,id|min:1',
+            'min_total' => 'nullable|numeric|min:0|max:100000000',
+            'max_total' => 'nullable|numeric|min:0|max:100000000|gte:min_total',
+            'min_shipping' => 'nullable|numeric|min:0|max:1000000',
+            'max_shipping' => 'nullable|numeric|min:0|max:1000000|gte:min_shipping',
+            'date_from' => 'nullable|date|before_or_equal:today|after_or_equal:' . now()->subYears(2)->toDateString(),
+            'date_to' => 'nullable|date|after_or_equal:date_from|before_or_equal:today',
             'sort_by' => 'nullable|string|in:created_at,total,code',
             'sort_order' => 'nullable|string|in:asc,desc',
+        ], [
+            'search.regex' => 'Từ khóa tìm kiếm chỉ được chứa chữ, số, khoảng trắng, @ và .',
+            'search.min' => 'Từ khóa tìm kiếm phải có ít nhất 3 ký tự.',
+            'group_status.in' => 'Nhóm trạng thái không hợp lệ.',
+            'status_id.exists' => 'Trạng thái đơn hàng không hợp lệ.',
+            'min_total.max' => 'Tổng giá trị tối thiểu không được vượt quá 100tr VNĐ.',
+            'max_total.gte' => 'Tổng giá trị tối đa phải lớn hơn hoặc bằng tổng giá trị tối thiểu.',
+            'min_shipping.max' => 'Phí vận chuyển tối thiểu không được vượt quá 1 triệu VNĐ.',
+            'max_shipping.gte' => 'Phí vận chuyển tối đa phải lớn hơn hoặc bằng phí vận chuyển tối thiểu.',
+            'date_from.before_or_equal' => 'Ngày bắt đầu không được trong tương lai.',
+            'date_from.after_or_equal' => 'Ngày bắt đầu không được trước 2 năm.',
+            'date_to.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'date_to.before_or_equal' => 'Ngày kết thúc không được trong tương lai.',
+            'sort_by.in' => 'Cột sắp xếp không hợp lệ.',
+            'sort_order.in' => 'Thứ tự sắp xếp không hợp lệ.',
         ]);
 
         if ($validator->fails()) {

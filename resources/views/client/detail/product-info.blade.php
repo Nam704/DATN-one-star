@@ -69,7 +69,10 @@
             @foreach($comments as $comment)
                 <div class="reviews_comment_box" id="comment_{{ $comment->id }}">
                     <div class="comment_thmb">
-                        <img src="{{ asset('storage/' . ($comment->user->profile_image ?? 'admin/assets/images/user-201.png')) }}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+                    <img 
+        src="{{ asset($comment->user->profile_image ? 'storage/' . $comment->user->profile_image : 'admin/assets/images/user-201.png') }}" 
+        alt="Avatar" 
+        style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
                     <div class="comment_text">
                         <div class="reviews_meta">
@@ -91,12 +94,13 @@
         {{-- Form gửi bình luận --}}
         @auth
             @php
+            
                 $hasCommented = $comments->where('user_id', auth()->id())->count() > 0;
             @endphp
 
             @if (!$hasCommented)
                 <div class="comment_title mt-4">
-                    <h2>Thêm đánh giá và bình luậncủa bạn</h2>
+                    <h2>Thêm đánh giá và bình luận của bạn</h2>
                 </div>
 
                 <div class="product_ratting mb-10">
@@ -153,6 +157,12 @@
     document.getElementById('comment_form')?.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        if (!{{ auth()->check() ? 'true' : 'false' }}) {
+        alert('Vui lòng đăng nhập để gửi bình luận.');
+        window.location.href = '{{ route('auth.getFormLogin') }}'; // Chuyển hướng đến trang đăng nhập
+        return;
+    }
+    
         let formData = new FormData(this);
 
         fetch('{{ route('client.products.storecomment') }}', {
@@ -165,12 +175,13 @@
         .then(response => response.json())
         .then(data => {
             alert(data.message);
-
+                 const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}';
             // Tạo HTML mới cho bình luận
             const newComment = `
                 <div class="reviews_comment_box">
                     <div class="comment_thmb">
-                        <img src="{{ asset('storage/' . (auth()->user()->profile_image ?? 'admin/assets/images/user-201.png')) }}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
+              <img  src="{{ asset(auth()->user()->profile_image ? 'storage/' . auth()->user()->profile_image : 'admin/assets/images/user-201.png') }}"  alt="Avatar" 
+                  style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
                     <div class="comment_text">
                         <div class="reviews_meta">
@@ -181,7 +192,7 @@
                                     ).join('')}
                                 </ul>
                             </div>
-                            <p><strong>{{ auth()->user()->name }}</strong> - hôm nay</p>
+                            <p><strong>${userName}</strong> - hôm nay</p>
                             <span>${formData.get('comment')}</span>
                         </div>
                     </div>
@@ -201,7 +212,7 @@
             document.querySelector('.comment_title')?.remove();
 
             const note = document.createElement('p');
-            note.textContent = 'Bạn đã bình luận sản phẩm này.';
+            note.textContent = '';
             document.querySelector('.reviews_wrapper').appendChild(note);
         })
         .catch(error => {

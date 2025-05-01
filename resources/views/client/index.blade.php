@@ -13,7 +13,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="section_title">
-                        <h2><span> <strong>Our</strong>Products</span></h2>
+                        <h2><span> <strong>Sản phẩm theo danh mục</strong></span></h2>
                         <ul class="product_tab_button nav" role="tablist" id="nav-tab">
 
                             @foreach ($categories as $index => $item)
@@ -47,29 +47,12 @@
                                             <h3><a
                                                     href="{{ route('client.products.detail', $product->id) }}">{{ $product->name }}</a>
                                             </h3>
-                                            <p class="manufacture_product"><a href="#">Accessories</a></p>
                                         </div>
                                         <div class="product_thumb">
                                             <a class="primary_img"
                                                 href="{{ route('client.products.detail', $product->id) }}"><img
                                                     src="{{ asset($product->image_primary) }}" alt=""></a>
 
-                                            <div class="label_product">
-                                                <span class="label_sale">-57%</span>
-                                            </div>
-
-                                            <div class="action_links">
-                                                <ul>
-                                                    <li class="quick_button"><a href="#" data-bs-toggle="modal"
-                                                            data-bs-target="#modal_box" title="quick view"> <span
-                                                                class="lnr lnr-magnifier"></span></a></li>
-                                                    <li class="wishlist"><a href="wishlist.html"
-                                                            title="Add to Wishlist"><span class="lnr lnr-heart"></span></a>
-                                                    </li>
-                                                    <li class="compare"><a href="compare.html" title="compare"><span
-                                                                class="lnr lnr-sync"></span></a></li>
-                                                </ul>
-                                            </div>
                                         </div>
                                         <div class="product_content">
                                             <div class="product_ratings">
@@ -85,11 +68,7 @@
                                                 <div class="price_box">
                                                     <span class="regular_price">
                                                         {{ number_format($product->min_price, 0, ',', '.') }} ₫</span>
-
                                                 </div>
-                                                {{-- <div class="add_to_cart">
-                                    <a href="cart.html" title="add to cart"><span class="lnr lnr-cart"></span></a>
-                                </div> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -103,10 +82,10 @@
             </div>
 
             <!-- Phần Recommended Products -->
-            <div class="row">
+            <div class="row " style="margin-top: 40px;">
                 <div class="col-12">
                     <div class="section_title">
-                        <h2><span> <strong>Recommended </strong>Products</span></h2>
+                        <h2><span> <strong>Sản phẩm được đề xuất</strong></span></h2>
                     </div>
                 </div>
             </div>
@@ -125,7 +104,6 @@
                                             {{ $product->name }}
                                         </a>
                                     </h3>
-                                    <p class="manufacture_product"><a href="#">Accessories</a></p>
                                 </div>
                                 <div class="product_thumb">
                                     <a class="primary_img" href="{{ route('client.products.detail', $product->id) }}">
@@ -135,26 +113,6 @@
                                         @if ($product->discount_percent)
                                             <span class="label_sale">-{{ $product->discount_percent }}%</span>
                                         @endif
-                                    </div>
-                                    <div class="action_links">
-                                        <ul>
-                                            <li class="quick_button">
-                                                <a href="#" data-bs-toggle="modal" data-bs-target="#modal_box"
-                                                    title="quick view">
-                                                    <span class="lnr lnr-magnifier"></span>
-                                                </a>
-                                            </li>
-                                            <li class="wishlist">
-                                                <a href="wishlist.html" title="Add to Wishlist">
-                                                    <span class="lnr lnr-heart"></span>
-                                                </a>
-                                            </li>
-                                            <li class="compare">
-                                                <a href="compare.html" title="compare">
-                                                    <span class="lnr lnr-sync"></span>
-                                                </a>
-                                            </li>
-                                        </ul>
                                     </div>
                                 </div>
                                 <div class="product_content">

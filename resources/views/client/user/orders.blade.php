@@ -143,6 +143,7 @@
     <div>{{ $orders->links() }}</div>
 
     <!-- Filter Modal -->
+    <!-- Filter Modal -->
     <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -164,6 +165,9 @@
                                     </option>
                                 @endforeach
                             </select>
+                            @error('group_status')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Specific Status -->
                         <div class="mb-3">
@@ -177,43 +181,102 @@
                                     </option>
                                 @endforeach
                             </select>
+                            @error('status_id')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Search -->
                         <div class="mb-3">
-                            <label for="search" class="form-label">Search by code, name, email</label>
+                            <label for="search" class="form-label">Search by code</label>
                             <input type="text" name="search" class="form-control" value="{{ request('search') }}"
                                 placeholder="Search by code, name, email">
+                            @error('search')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Min Total -->
                         <div class="mb-3">
                             <label for="min_total" class="form-label">Min Total</label>
                             <input type="number" name="min_total" class="form-control"
-                                value="{{ request('min_total') }}" placeholder="Min Total">
+                                value="{{ request('min_total') }}" placeholder="Min Total" min="0"
+                                max="1000000000">
+                            @error('min_total')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Max Total -->
                         <div class="mb-3">
                             <label for="max_total" class="form-label">Max Total</label>
                             <input type="number" name="max_total" class="form-control"
-                                value="{{ request('max_total') }}" placeholder="Max Total">
+                                value="{{ request('max_total') }}" placeholder="Max Total" min="0"
+                                max="100000000">
+                            @error('max_total')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
-
+                        <!-- Min Shipping -->
+                        {{-- <div class="mb-3">
+                            <label for="min_shipping" class="form-label">Min Shipping</label>
+                            <input type="number" name="min_shipping" class="form-control"
+                                value="{{ request('min_shipping') }}" placeholder="Min Shipping" min="0"
+                                max="1000000">
+                            @error('min_shipping')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <!-- Max Shipping -->
+                        <div class="mb-3">
+                            <label for="max_shipping" class="form-label">Max Shipping</label>
+                            <input type="number" name="max_shipping" class="form-control"
+                                value="{{ request('max_shipping') }}" placeholder="Max Shipping" min="0"
+                                max="1000000">
+                            @error('max_shipping')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div> --}}
                         <!-- Date From -->
                         <div class="mb-3">
                             <label for="date_from" class="form-label">Date From</label>
                             <input type="date" name="date_from" class="form-control"
-                                value="{{ request('date_from') }}">
+                                value="{{ request('date_from') }}" min="{{ now()->subYears(2)->toDateString() }}"
+                                max="{{ now()->toDateString() }}">
+                            @error('date_from')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Date To -->
                         <div class="mb-3">
                             <label for="date_to" class="form-label">Date To</label>
                             <input type="date" name="date_to" class="form-control"
-                                value="{{ request('date_to') }}">
+                                value="{{ request('date_to') }}" min="{{ now()->subYears(2)->toDateString() }}"
+                                max="{{ now()->toDateString() }}">
+                            @error('date_to')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Clear Date Filters -->
                         <div class="mb-3">
                             <button type="button" class="btn btn-link" id="clearDateFilters">
                                 Clear Date Filters
                             </button>
+                        </div>
+                        <!-- Sort By -->
+                        <div class="mb-3">
+                            <label for="sort_by" class="form-label">Sort By</label>
+                            <select name="sort_by" class="form-control">
+                                <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>
+                                    Created At
+                                </option>
+                                <option value="total" {{ request('sort_by') == 'total' ? 'selected' : '' }}>
+                                    Total
+                                </option>
+                                <option value="code" {{ request('sort_by') == 'code' ? 'selected' : '' }}>
+                                    Order Code
+                                </option>
+                            </select>
+                            @error('sort_by')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Sort Order -->
                         <div class="mb-3">
@@ -226,6 +289,9 @@
                                     Ascending
                                 </option>
                             </select>
+                            @error('sort_order')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">

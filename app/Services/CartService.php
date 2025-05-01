@@ -12,6 +12,67 @@ use Illuminate\Support\Collection;
 
 class CartService
 {
+    // Trong CartService.php
+    public function updateCartAfterOrder(array $orderedVariants, ?int $userId): void
+    {
+        if ($userId) {
+            // Xử lý giỏ hàng trong cơ sở dữ liệu
+            $this->updateDatabaseCartAfterOrder($userId, $orderedVariants);
+        } else {
+            // Xử lý giỏ hàng trong session
+            $this->updateSessionCartAfterOrder($orderedVariants);
+        }
+    }
+
+    private function updateDatabaseCartAfterOrder(int $userId, array $orderedVariants): void
+    {
+        DB::transaction(function () use ($userId, $orderedVariants) {
+            $cart = Cart::where('id_user', $userId)->first();
+            if (!$cart) {
+                return; // Không có giỏ hàng, không cần xử lý
+            }
+
+            foreach ($orderedVariants as $orderedVariant) {
+                $variantId = $orderedVariant['id_variant'];
+                $orderedQuantity = $orderedVariant['quantity'];
+
+                $cartDetail = $cart->details()->where('id_variant', $variantId)->first();
+                if ($cartDetail) {
+                    $newQuantity = $cartDetail->quantity - $orderedQuantity;
+                    if ($newQuantity <= 0) {
+                        // Xóa sản phẩm khỏi giỏ hàng nếu số lượng <= 0
+                        $cartDetail->delete();
+                    } else {
+                        // Cập nhật số lượng mới
+                        $cartDetail->update(['quantity' => $newQuantity]);
+                    }
+                }
+            }
+        });
+    }
+
+    private function updateSessionCartAfterOrder(array $orderedVariants): void
+    {
+        $cart = Session::get('cart', []);
+
+        foreach ($orderedVariants as $orderedVariant) {
+            $variantId = $orderedVariant['id_variant'];
+            $orderedQuantity = $orderedVariant['quantity'];
+
+            if (isset($cart[$variantId])) {
+                $newQuantity = $cart[$variantId]['quantity'] - $orderedQuantity;
+                if ($newQuantity <= 0) {
+                    // Xóa sản phẩm khỏi giỏ hàng session
+                    unset($cart[$variantId]);
+                } else {
+                    // Cập nhật số lượng mới
+                    $cart[$variantId]['quantity'] = $newQuantity;
+                }
+            }
+        }
+
+        Session::put('cart', $cart);
+    }
     public function getCart(): Collection|array
     {
         return Auth::check()

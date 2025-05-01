@@ -22,6 +22,7 @@
                                             <li><a href="{{ route('client.checkout.index') }}">Thanh toán </a></li>
                                             <li><a href="{{ route('client.user.myAccount') }}">Tài khoản </a></li>
                                             <li><a href="{{ route('client.carts.viewCart') }}">Giỏ hàng</a></li>
+                                            <li><a href="{{ route('client.statistics.chart_user')}}">Thống kê</a></li>
 
                                             <li class="nav-item">
                                                 <a href="#" class="nav-link"
@@ -44,7 +45,7 @@
                                         <ul class="dropdown_links">
 
                                             <li><a href="{{ route('auth.getFormLogin') }}">Đăng nhập</a></li>
-
+                                            <li><a href="{{ route('auth.getFormRegister') }}">Đăng ký</a></li>
                                         </ul>
                                     </li>
                                 @endif
