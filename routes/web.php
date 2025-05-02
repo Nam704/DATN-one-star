@@ -54,7 +54,7 @@ use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
-Route::prefix('/')->as('client.')->group(function () {
+Route::prefix('/')->as('client.')->group(function (){
     Route::get('/', [HomeController::class, 'index'])->name('home');
 });
 
