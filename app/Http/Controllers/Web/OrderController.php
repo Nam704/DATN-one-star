@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Web;
 use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\OrderServiceManager as OrderService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -155,5 +157,22 @@ class OrderController extends Controller
         }
 
         return view('admin.order.detail', compact('order', 'orderDetails', 'orderService'));
+    }
+    public function byUser($userId)
+    {
+        // Xác định khoảng thời gian "hôm nay"
+        $startDate = Carbon::today()->startOfDay();
+        $endDate   = Carbon::today()->endOfDay();
+
+        // Lấy tên user để hiển thị
+        $userName = User::find($userId)->name ?? 'Unknown';
+
+        // Chỉ lấy các order của user trong ngày hôm nay
+        $orders = Order::where('id_user', $userId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.order.by_user', compact('orders', 'userName'));
     }
 }

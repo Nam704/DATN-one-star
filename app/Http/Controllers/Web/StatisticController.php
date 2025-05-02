@@ -68,7 +68,7 @@ class StatisticController extends Controller
     {
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        
+
         $start_date = $start_date ? $start_date . ' 00:00:00' : null;
         $end_date   = $end_date   ? $end_date   . ' 23:59:59' : null;
         $top_sale_products = $this->product->top_sale_products($start_date, $end_date);
@@ -873,8 +873,16 @@ class StatisticController extends Controller
             ->where('name', 'Pending')
             ->value('id');
         $cancelledStatusId = DB::table('order_statuses')
-            ->where('name', 'Cancelled')
-            ->value('id');
+            ->whereIn('name', [
+                'Cancel Requested',
+                'Cancel Under Review',
+                'Cancel Approved',
+                'Cancel Rejected',
+                'Cancelled',
+                'Failed Delivery'
+            ])
+            ->pluck('id')
+            ->toArray();
 
         // Tổng doanh thu trong ngày (chỉ tính đơn Delivered)
         $totalRevenue = DB::table('orders')
@@ -953,13 +961,13 @@ class StatisticController extends Controller
         $cancelledProducts = DB::table('order_cancellations')
             ->join('orders', 'order_cancellations.order_id', '=', 'orders.id')
             ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
-            ->join('order_details', 'orders.id', '=', 'order_details.id_order') // Sửa lại ở đây
+            ->join('order_details', 'orders.id', '=', 'order_details.id_order')
             ->join('product_variants', 'order_details.id_variant', '=', 'product_variants.id')
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select(
                 'order_cancellation_reasons.id as reason_id',
                 'products.name as product_name',
-                DB::raw('SUM(order_details.quantity) as quantity')
+                DB::raw('SUM(order_details.quantity) as total_cancelled')   // ← đây
             )
             ->whereDate('orders.created_at', $date)
             ->where('orders.id_order_status', $cancelledStatusId)
@@ -999,8 +1007,17 @@ class StatisticController extends Controller
         // 2. Lấy ID của các trạng thái cần thiết
         $paidStatusId = DB::table('order_statuses')->where('name', 'Paid')->value('id');
         $deliveredStatusId = DB::table('order_statuses')->where('name', 'Delivered')->value('id');
-        $cancelledStatusId = DB::table('order_statuses')->where('name', 'Cancelled')->value('id');
-
+        $cancelledStatusId = DB::table('order_statuses')
+            ->whereIn('name', [
+                'Cancel Requested',
+                'Cancel Under Review',
+                'Cancel Approved',
+                'Cancel Rejected',
+                'Cancelled',
+                'Failed Delivery'
+            ])
+            ->pluck('id')
+            ->toArray();
         // 3. Tính toán các chỉ số tổng quan
 
         // Tổng doanh thu (chỉ tính đơn hàng có trạng thái Delivered)
@@ -1045,7 +1062,7 @@ class StatisticController extends Controller
                 DB::raw('DATE(created_at) as order_date'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
-                DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status IN (' . implode(',', $cancelledStatusId) . ') THEN 1 ELSE 0 END) as cancelled_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as day_revenue')
             )
             ->whereBetween('created_at', $dateRange)
@@ -1178,7 +1195,17 @@ class StatisticController extends Controller
 
         // 2. Lấy ID trạng thái
         $deliveredStatusId = DB::table('order_statuses')->where('name', 'Delivered')->value('id');
-        $cancelledStatusId = DB::table('order_statuses')->where('name', 'Cancelled')->value('id');
+        $cancelledStatusId = DB::table('order_statuses')
+            ->whereIn('name', [
+                'Cancel Requested',
+                'Cancel Under Review',
+                'Cancel Approved',
+                'Cancel Rejected',
+                'Cancelled',
+                'Failed Delivery'
+            ])
+            ->pluck('id')
+            ->toArray();
         $paidStatusId = DB::table('order_statuses')->where('name', 'Paid')->value('id');
 
         // 3. Tính toán các chỉ số tổng quan
@@ -1218,7 +1245,7 @@ class StatisticController extends Controller
                 DB::raw('DATE(created_at) as order_date'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
-                DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status IN (' . implode(',', $cancelledStatusId) . ') THEN 1 ELSE 0 END) as cancelled_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as day_revenue')
             )
             ->whereBetween('created_at', $dateRange)
@@ -1363,7 +1390,17 @@ class StatisticController extends Controller
 
         // 2. Lấy ID các trạng thái cần thiết
         $deliveredStatusId = DB::table('order_statuses')->where('name', 'Delivered')->value('id');
-        $cancelledStatusId = DB::table('order_statuses')->where('name', 'Cancelled')->value('id');
+        $cancelledStatusId = DB::table('order_statuses')
+            ->whereIn('name', [
+                'Cancel Requested',
+                'Cancel Under Review',
+                'Cancel Approved',
+                'Cancel Rejected',
+                'Cancelled',
+                'Failed Delivery'
+            ])
+            ->pluck('id')
+            ->toArray();
 
         // 3. Tính toán các chỉ số tổng quan
         // Tổng doanh thu (chỉ tính đơn Delivered)
@@ -1400,7 +1437,7 @@ class StatisticController extends Controller
                 DB::raw('MONTH(created_at) as month'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN 1 ELSE 0 END) as delivered_orders'),
-                DB::raw('SUM(CASE WHEN id_order_status = ' . $cancelledStatusId . ' THEN 1 ELSE 0 END) as cancelled_orders'),
+                DB::raw('SUM(CASE WHEN id_order_status IN (' . implode(',', $cancelledStatusId) . ') THEN 1 ELSE 0 END) as cancelled_orders'),
                 DB::raw('SUM(CASE WHEN id_order_status = ' . $deliveredStatusId . ' THEN total ELSE 0 END) as month_revenue')
             )
             ->whereBetween('created_at', $dateRange)

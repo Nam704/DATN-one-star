@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attribute;
 use App\Models\Banner;
 use App\Models\Brand;
 use App\Models\Category;
@@ -48,30 +49,27 @@ class ShopController extends Controller
         // Lấy tham số 'categories' và ép thành mảng
         $selectedCategories = $request->input('categories', []);
         if (!is_array($selectedCategories)) {
-            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
             $selectedCategories = explode(',', $selectedCategories);
         }
 
-        if (!empty($selectedCategories)) {
-            // Lấy danh sách các ID của danh mục được chọn và các danh mục con của nó
-            $allCategoryIds = Category::whereIn('id', $selectedCategories)
-                ->orWhereIn('id_parent', $selectedCategories)
-                ->pluck('id')
-                ->toArray();
-
-            $productsQuery->whereIn('id_category', $allCategoryIds);
+        $selectedBrands = $request->input('brands', []);
+        if (!is_array($selectedBrands)) {
+            $selectedBrands = explode(',', $selectedBrands);
         }
 
-
-        $selectedBrands = $request->input('brand', $request->input('brands', []));
-        if (!is_array($selectedBrands)) {
-            // Nếu là chuỗi, giả sử các id được phân tách bởi dấu phẩy
-            $selectedBrands = explode(',', $selectedBrands);
+        // Áp filter lên productsQuery:
+        if (!empty($selectedCategories)) {
+            // ví dụ: lọc cả parent và children
+            $allCategoryIds = Category::whereIn('id', $selectedCategories)
+                ->orWhereIn('id_parent', $selectedCategories)
+                ->pluck('id')->toArray();
+            $productsQuery->whereIn('id_category', $allCategoryIds);
         }
 
         if (!empty($selectedBrands)) {
             $productsQuery->whereIn('id_brand', $selectedBrands);
         }
+
 
         // Apply price filter based on expected_price from import_details (nếu cần)
         if ($request->has('min_price') && $request->has('max_price')) {
@@ -99,8 +97,27 @@ class ShopController extends Controller
             return $product;
         });
 
+        $attributes = Attribute::where('status', 'active')
+            ->with(['values' => fn($q) => $q->where('status', 'active')])
+            ->get();
+
+        // 2) Đọc param lọc attribute_values[]
+        $selectedAttrValues = $request->input('attribute_values', []);
+        if (!is_array($selectedAttrValues)) {
+            $selectedAttrValues = explode(',', $selectedAttrValues);
+        }
+
+        // Áp vào productsQuery sau phần filter brands/categories:
+        if (!empty($selectedAttrValues)) {
+            $productsQuery->whereHas('variants', function ($q) use ($selectedAttrValues) {
+                $q->whereHas('attributeValues', function ($q2) use ($selectedAttrValues) {
+                    $q2->whereIn('attribute_values.id', $selectedAttrValues);
+                });
+            });
+        }
+
         // Return view with data
-        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice', 'banners'));
+        return view('client.shops.shop', compact('categories', 'brands', 'products', 'maxPrice', 'banners', 'attributes', 'selectedCategories', 'selectedBrands', 'selectedAttrValues'));
     }
 
     public function filter(Request $request)
@@ -145,6 +162,16 @@ class ShopController extends Controller
         // Lọc theo tên sản phẩm nếu có tham số 'search'
         if (!empty($search)) {
             $productsQuery->where('name', 'like', '%' . $search . '%');
+        }
+        //lọc atribute
+        $attrVals = $request->input('attribute_values', []);
+        if (!is_array($attrVals)) {
+            $attrVals = explode(',', $attrVals);
+        }
+        if (!empty($attrVals)) {
+            $productsQuery->whereHas('variants', function ($q) use ($attrVals) {
+                $q->whereHas('attributeValues', fn($q2) => $q2->whereIn('attribute_values.id', $attrVals));
+            });
         }
 
         // Sắp xếp sản phẩm theo yêu cầu của người dùng

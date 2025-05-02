@@ -1,8 +1,30 @@
 @extends('client.layouts.home.layout')
 @section('content')
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/7.2.96/css/materialdesignicons.min.css">
+
+    <style>
+        .btn-check:checked+.btn-outline-dark {
+            background-color: #0d6efd !important;
+            /* primary */
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-dark:hover {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+    </style>
     <div class="shop_area shop_reverse">
         <div class="container">
             <div class="row">
+                @php
+                    // Nếu controller đã pass mảng, sử dụng luôn; nếu không, fallback về request()->input(...)
+                    $selectedCategories = $selectedCategories ?? request()->input('categories', []);
+                    $selectedBrands = $selectedBrands ?? request()->input('brands', []);
+                    $selectedAttrs = request()->input('attribute_values', []);
+                @endphp
                 <!-- Sidebar: Bộ lọc -->
                 <div class="col-lg-3 col-md-12">
                     <aside class="sidebar_widget">
@@ -29,35 +51,48 @@
                             </div>
                             <div class="widget_list widget_categories" id="filters">
                                 <form id="filter-form" method="GET" action="{{ route('client.shop') }}">
+                                    <div class="d-grid mb-4">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                                data-bs-target="#attributeModal">
+                                            <i class="mdi mdi-filter-menu"></i> Lọc thuộc tính
+                                        </button>
+                                    </div>
+
                                     <!-- Bộ lọc theo danh mục -->
                                     <div class="widget_list widget_categories">
                                         <div id="categories">
-                                            <h2>Categories</h2>
+                                            <h2>Danh mục</h2>
                                             <ul>
                                                 @foreach ($categories as $category)
                                                     <li>
-                                                        <input type="checkbox" name="categories[]" class="category-filter"
-                                                            value="{{ $category->id }}"
-                                                            @if (in_array($category->id, old('categories', []))) checked @endif>
-                                                        {{ $category->name }}
+                                                        <label>
+                                                            <input type="checkbox" name="categories[]"
+                                                                class="category-filter" value="{{ $category->id }}"
+                                                                {{ in_array($category->id, $selectedCategories) ? 'checked' : '' }}>
+                                                            {{ $category->name }}
+                                                        </label>
                                                     </li>
                                                 @endforeach
+
                                             </ul>
                                         </div>
                                     </div>
                                     <!-- Bộ lọc theo thương hiệu -->
                                     <div class="widget_list widget_categories">
                                         <div id="brands">
-                                            <h3>Brands</h3>
+                                            <h2>Thương hiệu</h2>
                                             <ul>
                                                 @foreach ($brands as $brand)
                                                     <li>
-                                                        <input type="checkbox" name="brands[]" class="brand-filter"
-                                                            value="{{ $brand->id }}"
-                                                            @if (in_array($brand->id, old('brands', []))) checked @endif>
-                                                        {{ $brand->name }}
+                                                        <label>
+                                                            <input type="checkbox" name="brands[]" class="brand-filter"
+                                                                value="{{ $brand->id }}"
+                                                                {{ in_array($brand->id, $selectedBrands) ? 'checked' : '' }}>
+                                                            {{ $brand->name }}
+                                                        </label>
                                                     </li>
                                                 @endforeach
+
                                             </ul>
                                         </div>
                                     </div>
@@ -70,29 +105,30 @@
                 <div class="col-lg-9 col-md-12">
                     {{-- product-list.blade.php --}}
                     <div class="shop_banner">
-                    <div class="slider_area owl-carousel">
-                    @foreach($banners as $banner)
-                    <!-- <div class="single_slider d-flex align-items-center" > -->
-                        <div class="slider_content" style="background-image: url('{{ Storage::url($banner->image) }}');">
-                            <h2>{{ $banner->title }}</h2>
-                            <h1>{{ $banner->description }}</h1>
-                            <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                        <div class="slider_area owl-carousel">
+                            @foreach ($banners as $banner)
+                                <!-- <div class="single_slider d-flex align-items-center" > -->
+                                <div class="slider_content"
+                                    style="background-image: url('{{ Storage::url($banner->image) }}');">
+                                    <h2>{{ $banner->title }}</h2>
+                                    <h1>{{ $banner->description }}</h1>
+                                    <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                                </div>
+                                <!-- </div> -->
+                            @endforeach
                         </div>
-                    <!-- </div> -->
-                    @endforeach
-                </div>
                     </div>
                     <div class="shop_title">
-                        <h1>shop</h1>
+                        <h1>Sản Phẩm</h1>
                     </div>
                     <div class="shop_toolbar_wrapper">
                         <div class="shop_toolbar_btn">
-                            <button data-role="grid_3" type="button" class="active btn-grid-3" data-toggle="tooltip"
-                                title="3"></button>
-                            <button data-role="grid_4" type="button" class="btn-grid-4" data-toggle="tooltip"
+                            {{-- <button data-role="grid_3" type="button" class="active btn-grid-3" data-toggle="tooltip"
+                                title="3"></button> --}}
+                            {{-- <button data-role="grid_4" type="button" class="btn-grid-4" data-toggle="tooltip"
                                 title="4"></button>
                             <button data-role="grid_list" type="button" class="btn-list" data-toggle="tooltip"
-                                title="List"></button>
+                                title="List"></button> --}}
                         </div>
                         <div class="niceselect_option2">
                             <div class="mb-3">
@@ -109,7 +145,7 @@
 
 
                         <div class="page_amount">
-                            <p>Showing 1–9 of 21 results</p>
+                            {{-- <p>Showing 1–9 of 21 results</p> --}}
                         </div>
                     </div>
                     <div class="row shop_wrapper" id="product-list">
@@ -124,139 +160,132 @@
             </div>
         </div>
     </div>
+
+
+
+    {{-- --- Modal Attributes --- --}}
+    <div class="modal fade" id="attributeModal" tabindex="-1" aria-labelledby="attributeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-md">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title mb-0">
+                        <i class="mdi mdi-filter-menu"></i> Lọc theo thuộc tính
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    @php
+                        $selectedAttrs = is_array($selectedAttrs) ? $selectedAttrs : explode(',', $selectedAttrs);
+                    @endphp
+                    @forelse ($attributes as $attr)
+                        <div class="mb-4">
+                            <h6 class="fw-semibold text-dark">{{ $attr->name }}</h6>
+                            <div class="attribute-tags">
+                                @foreach ($attr->values as $val)
+                                    <input type="checkbox" class="btn-check attribute-filter"
+                                        value="{{ $val->id }}" id="attrval-{{ $val->id }}"
+                                        {{ in_array($val->id, $selectedAttrs) ? 'checked' : '' }}>
+                                    <label class="btn btn-outline-dark btn-sm rounded-pill me-1 mb-2"
+                                        for="attrval-{{ $val->id }}">
+                                        {{ $val->value }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted">Không có thuộc tính nào để lọc.</p>
+                    @endforelse
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="applyAttributeFilter">Áp dụng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
-
     <script>
-        // Sử dụng Cleave.js để định dạng số ngay khi nhập với onValueChanged callback
-        var cleaveMin = new Cleave('#min-price', {
+        // Cleave.js cho price
+        new Cleave('#min-price', {
             numeral: true,
-            numeralThousandsGroupStyle: 'thousand',
-            numeralDecimalMark: ',',
             delimiter: '.',
-            onValueChanged: function(e) {
-                if (e.target.rawValue === '') {
-                    e.target.value = '';
-                }
-            }
+            numeralDecimalMark: ',',
+            numeralThousandsGroupStyle: 'thousand',
+            numeralDecimalScale: 0
+        });
+        new Cleave('#max-price', {
+            numeral: true,
+            delimiter: '.',
+            numeralDecimalMark: ',',
+            numeralThousandsGroupStyle: 'thousand',
+            numeralDecimalScale: 0
         });
 
-        var cleaveMax = new Cleave('#max-price', {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand',
-            numeralDecimalMark: ',',
-            delimiter: '.',
-            onValueChanged: function(e) {
-                if (e.target.rawValue === '') {
-                    e.target.value = '';
-                }
-            }
-        });
-
-        // Hàm kiểm tra và hiển thị thông báo lỗi nếu giá nhập không hợp lệ
+        // Validate price
         function validatePrices() {
-            // Lấy giá trị chưa được định dạng (dạng số nguyên)
-            let minRaw = $('#min-price').val().replace(/\./g, '').replace(/,/g, '');
-            let maxRaw = $('#max-price').val().replace(/\./g, '').replace(/,/g, '');
-            let minPrice = minRaw === '' ? null : parseInt(minRaw);
-            let maxPrice = maxRaw === '' ? null : parseInt(maxRaw);
-            let errorMsg = '';
-
-            // Kiểm tra nếu Giá cao vượt quá 50.000.000
-            if (maxPrice !== null && maxPrice > 50000000) {
-                errorMsg = "Giá cao không được vượt quá 50.000.000";
-            }
-            // Kiểm tra nếu Giá thấp vượt quá Giá cao
-            else if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
-                errorMsg = "Giá thấp không thể vượt quá Giá cao";
-            }
-
-            $('#price-error').text(errorMsg);
-            return errorMsg === '';
+            let min = parseInt($('#min-price').val().replace(/\D/g, '')) || 0,
+                max = parseInt($('#max-price').val().replace(/\D/g, '')) || 0,
+                err = '';
+            if (max > 50000000) err = 'Giá cao không vượt quá 50.000.000';
+            else if (min > max) err = 'Giá thấp không vượt quá giá cao';
+            $('#price-error').text(err);
+            return !err;
         }
 
-        // Hàm gửi dữ liệu lọc sản phẩm qua AJAX
+        // Gửi AJAX
         function fetchFilteredProducts() {
-            if (!validatePrices()) {
-                return;
-            }
-            let params = new URLSearchParams();
+            if (!validatePrices()) return;
+            let p = new URLSearchParams();
 
-            // Lấy danh sách category được chọn
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('categories[]', el.value);
-                }
+            // Categories
+            document.querySelectorAll('.category-filter').forEach(ch => {
+                if (ch.checked) p.append('categories[]', ch.value);
             });
-            // Lấy danh sách brand được chọn
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                if (el.checked) {
-                    params.append('brands[]', el.value);
-                }
+            // Brands
+            document.querySelectorAll('.brand-filter').forEach(ch => {
+                if (ch.checked) p.append('brands[]', ch.value);
             });
+            // Attributes
+            document.querySelectorAll('.attribute-filter').forEach(ch => {
+                if (ch.checked) p.append('attribute_values[]', ch.value);
+            });
+            // Price
+            let min = $('#min-price').val().replace(/\D/g, ''),
+                max = $('#max-price').val().replace(/\D/g, '');
+            if (min) p.append('min_price', min);
+            if (max) p.append('max_price', max);
 
-            // Lấy giá trị khoảng giá từ input, loại bỏ dấu phân cách
-            let minPrice = $('#min-price').val().replace(/\./g, '').replace(/,/g, '');
-            let maxPrice = $('#max-price').val().replace(/\./g, '').replace(/,/g, '');
-            if (minPrice !== '') params.append('min_price', minPrice);
-            if (maxPrice !== '') params.append('max_price', maxPrice);
+            // Sort
+            let s = $('#orderby').val();
+            if (s) p.append('orderby', s);
 
-            // Lấy giá trị sắp xếp nếu có
-            let sortEl = document.getElementById('orderby');
-            if (sortEl && sortEl.value) {
-                params.append('orderby', sortEl.value);
-            }
-
-            fetch('{{ route('client.filter') }}?' + params.toString())
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('product-list').innerHTML = data.products;
-                    document.getElementById('pagination').innerHTML = data.pagination;
+            fetch(`{{ route('client.filter') }}?${p}`, {
+                    headers: {
+                        Accept: 'application/json'
+                    }
                 })
-                .catch(error => console.error('Error:', error));
+                .then(r => r.json())
+                .then(json => {
+                    $('#product-list').html(json.products);
+                    $('#pagination').html(json.pagination);
+                });
         }
 
-        $(document).ready(function() {
-            // Lắng nghe sự thay đổi của input, checkbox, dropdown
-            $('#min-price, #max-price').on('input', function() {
-                validatePrices();
+        $(function() {
+            // sự kiện filter
+            $('#min-price,#max-price').on('input', fetchFilteredProducts);
+            $('.category-filter,.brand-filter').on('change', fetchFilteredProducts);
+            $('#orderby').on('change', fetchFilteredProducts);
+
+            // modal Attributes -> Áp dụng
+            $('#applyAttributeFilter').on('click', () => {
+                bootstrap.Modal.getInstance($('#attributeModal')).hide();
                 fetchFilteredProducts();
             });
-
-            document.querySelectorAll('.category-filter').forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-            document.querySelectorAll('.brand-filter').forEach(function(el) {
-                el.addEventListener('change', fetchFilteredProducts);
-            });
-
-            let sortSelect = document.getElementById('short');
-            if (sortSelect) {
-                sortSelect.addEventListener('change', fetchFilteredProducts);
-            }
         });
-        document.getElementById('orderby').addEventListener('change', fetchFilteredProducts);
     </script>
 @endsection
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const orderBySelect = document.getElementById("orderby");
-        const productList = document.getElementById("product-list");
-
-        orderBySelect.addEventListener("change", function() {
-            let products = Array.from(document.querySelectorAll(".pro"));
-
-            if (this.value === "price_asc") {
-                products.sort((a, b) => a.getAttribute("data-price") - b.getAttribute("data-price"));
-            } else if (this.value === "price_desc") {
-                products.sort((a, b) => b.getAttribute("data-price") - a.getAttribute("data-price"));
-            }
-
-            productList.innerHTML = "";
-            products.forEach(product => productList.appendChild(product));
-        });
-    });
-</script>
-

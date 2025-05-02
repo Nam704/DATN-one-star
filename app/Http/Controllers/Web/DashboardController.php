@@ -34,15 +34,15 @@ class DashboardController extends Controller
                 "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
                 "revenue" => $this->order
                     ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
-                    ->whereNotIn('order_statuses.name', ['Cancelled']) 
+                    ->whereNotIn('order_statuses.name', ['Cancelled'])
                     ->whereBetween('orders.created_at', [$start_date, $end_date])
                     ->sum('orders.total'),
 
                 "order" => $this->order
-                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  
+                    ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
                     ->whereBetween('orders.created_at', [$start_date, $end_date])
                     ->count(),
-                    
+
                 "user" => $this->user->whereBetween('created_at', [$start_date, $end_date])->count()
             ];
             // 2. Tính topUserPurchases *tĩnh* (loại trừ Cancelled)
@@ -81,17 +81,18 @@ class DashboardController extends Controller
                 ->get()
                 ->groupBy('id_user');
 
-            $userStats = $topUsers->map(function ($u) use ($productRows) {
-                $prods = $productRows[$u->id_user] ?? collect();
-                $list  = $prods->map(fn($r) => "{$r->product_name} ({$r->qty})")->implode(', ');
-                return [
-                    'user_name'       => $u->user_name,
-                    'email'           => $u->email ?: '-',
-                    'phone'           => $u->phone ?: '-',
-                    'products_bought' => $list ?: '-',
-                    'total_purchase'  => $u->total_purchase,
-                ];
-            });
+                $userStats = $topUsers->map(function ($u) use ($productRows) {
+                    $prods = $productRows[$u->id_user] ?? collect();
+                    $list  = $prods->map(fn($r) => "{$r->product_name} ({$r->qty})")->implode(', ');
+                    return [
+                        'id_user'         => $u->id_user,       
+                        'user_name'       => $u->user_name,
+                        'email'           => $u->email ?: '-',
+                        'phone'           => $u->phone ?: '-',
+                        'products_bought' => $list ?: '-',
+                        'total_purchase'  => $u->total_purchase,
+                    ];
+                });
             return view('admin.index', compact(
                 'countData',
                 'userStats',

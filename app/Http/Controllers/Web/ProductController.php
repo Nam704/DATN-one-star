@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -372,6 +374,27 @@ class ProductController extends Controller
     }
     public function filter(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'category'     => 'nullable|exists:categories,id',
+            'brand'        => 'nullable|exists:brands,id',
+            'stock'        => 'nullable|in:in_stock,out_of_stock,low_stock,quantity',
+            'quantity'     => 'nullable|required_if:stock,quantity|integer|min:0',
+            'sort_view'    => 'nullable|in:asc,desc',
+            'min_price'    => 'nullable|numeric|min:0',
+            'max_price'    => 'nullable|numeric|min:0|gte:min_price',
+            'created_from' => 'nullable|date',
+            'created_to'   => 'nullable|date|after_or_equal:created_from|before_or_equal:today',
+        ], [
+            'quantity.required_if'         => 'Khi chọn “Số lượng cụ thể” bạn phải nhập số lượng.',
+            'max_price.gte'                => 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.',
+            'created_to.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'created_to.before_or_equal'   => 'Ngày kết thúc không được lớn hơn hôm nay.',
+        ]);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+        
         $query = (new Product)->listActive();
 
         if ($request->filled('category')) {
