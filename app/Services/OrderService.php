@@ -294,7 +294,22 @@ class OrderService
             ], 400);
         }
     }
+    public function updateOrderStatus($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        $currentStatus = $order->orderStatus;
 
+        $nextStatus = $currentStatus->nextStatus;
+
+        if (!$nextStatus) {
+            return null;
+        }
+
+        $order->id_order_status = $nextStatus->id;
+        $order->save();
+
+        return $order;
+    }
     public function cancelOrder($orderId, $reasonId)
     {
         try {

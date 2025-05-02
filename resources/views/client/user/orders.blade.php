@@ -122,7 +122,7 @@
                             <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                             <td>
                                 <a href="{{ route('client.orders.detail', $order->id) }}"
-                                    class="btn btn-sm btn-info">View</a>
+                                    class="btn btn-sm btn-info">Xem</a>
                                 @php
                                     $retryPaymentService = app(\App\Services\RetryPaymentService::class);
                                     $canRetry = $retryPaymentService->canRetryPayment($order->id);
@@ -130,6 +130,10 @@
                                 @if ($canRetry['success'])
                                     <a href="" class="btn btn-sm btn-warning " data-id="{{ $order->id }}"
                                         id="retry-payment">Retry Payment</a>
+                                @endif
+                                @if (in_array($order->orderStatus->name, ['Shipping']))
+                                    <button class="btn btn-sm btn-warning update-status"
+                                        data-id="{{ $order->id }}">Đã nhận</button>
                                 @endif
                             </td>
                         </tr>

@@ -54,7 +54,7 @@ use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
-Route::prefix('/')->as('client.')->group(function (){
+Route::prefix('/')->as('client.')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
 });
 
@@ -463,7 +463,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detailOrder')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
-
+                Route::post('/{orderId}/update-status',  'updateStatus')->name('updateStatus');
                 Route::get('/',  'orders')->name('list');
                 Route::post('/{orderId}/retry-payment',  'retryPayment')->name('retryPayment');
                 Route::post('/{orderId}/cancel', 'cancelOrder')->name('cancelOrder');
