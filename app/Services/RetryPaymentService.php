@@ -34,21 +34,21 @@ class RetryPaymentService
 
             if ($order->id_user !== Auth::id()) {
                 $message = "Bạn không có quyền thử lại thanh toán cho đơn hàng {$order->code}.";
-                Log::info($message, $context);
+                // Log::info($message, $context);
                 return ['success' => false, 'message' => $message];
             }
 
             $eligibleOrderStatuses = ['Payment Failed', 'Payment Expired', 'Payment Retry Requested', 'Awaiting Payment'];
             if (!in_array($order->orderStatus->name, $eligibleOrderStatuses)) {
                 $message = "Đơn hàng {$order->code} không thể thanh toán lại do trạng thái không hợp lệ ({$order->orderStatus->name}).";
-                Log::info($message, $context);
+                // Log::info($message, $context);
                 return ['success' => false, 'message' => $message];
             }
 
             $allowedMethods = config('payment.allowed_retry_methods', ['VNPAY']);
             if (!in_array($order->payment_method, $allowedMethods)) {
                 $message = "Phương thức thanh toán {$order->payment_method} không được hỗ trợ cho thanh toán lại.";
-                Log::info($message, $context);
+                // Log::info($message, $context);
                 return ['success' => false, 'message' => $message];
             }
 
@@ -56,7 +56,7 @@ class RetryPaymentService
             $timeLimit = Carbon::parse($order->created_at)->addHours($retryTimeLimitHours);
             if (Carbon::now()->greaterThan($timeLimit)) {
                 $message = "Đã quá thời gian cho phép ($retryTimeLimitHours giờ) để thanh toán lại đơn hàng {$order->code}.";
-                Log::info($message, $context);
+                // Log::info($message, $context);
                 return ['success' => false, 'message' => $message];
             }
 
@@ -64,7 +64,7 @@ class RetryPaymentService
                 $variant = Product_variant::lockForUpdate()->find($detail->id_variant);
                 if (!$variant || $variant->quantity < $detail->quantity) {
                     $message = "Sản phẩm trong đơn hàng {$order->code} không còn đủ tồn kho.";
-                    Log::info($message, array_merge($context, ['variant_id' => $detail->id_variant]));
+                    // Log::info($message, array_merge($context, ['variant_id' => $detail->id_variant]));
                     return ['success' => false, 'message' => $message];
                 }
             }
@@ -105,7 +105,7 @@ class RetryPaymentService
                     $order->save();
 
                     $message = "Đơn hàng {$order->code} đã bị hủy do vượt quá số lần thử thanh toán ($maxAttempts lần).";
-                    Log::info($message, $context);
+                    // Log::info($message, $context);
                     $this->notifyClient($order, 'Đơn hàng đã bị hủy', $message);
 
                     return [
@@ -130,7 +130,7 @@ class RetryPaymentService
 
                 if ($paymentResult['code'] === '00') {
                     $message = "Yêu cầu thanh toán lại cho đơn hàng {$order->code} đã được khởi tạo.";
-                    Log::info($message, $context);
+                    // Log::info($message, $context);
                     return [
                         'success' => true,
                         'message' => $message,
@@ -139,7 +139,7 @@ class RetryPaymentService
                     ];
                 } else {
                     $message = "Không thể tạo yêu cầu thanh toán cho đơn hàng {$order->code}: " . ($paymentResult['message'] ?? 'Lỗi không xác định');
-                    Log::warning($message, $context);
+                    // Log::warning($message, $context);
                     $this->notifyClient($order, 'Yêu cầu thanh toán thất bại', $message);
                     return [
                         'success' => false,

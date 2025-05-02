@@ -124,7 +124,6 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('accept-all', 'acceptAll')->name('acceptAll');
             Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation');
             Route::get('user/{userId}', 'byUser')->name('byUser');
-
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
@@ -281,7 +280,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-products');
             Route::post('open-product/{id}', 'openProduct')->name('openProduct')->middleware('permission:edit-products');
             Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail')->middleware('permission:view-products');
-            Route::get('/filter','filter')->name('filter');
+            Route::get('/filter', 'filter')->name('filter');
         });
 
         //Address
@@ -449,7 +448,6 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/clear',  'clearCart');
                 Route::post('/save-to-db',  'saveSessionCartToDatabase');
                 Route::get('view-cart', 'viewCart')->name('viewCart');
-
             }
         );
 
