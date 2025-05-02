@@ -165,8 +165,8 @@
                         @if (
                             $order->orderStatus->nextStatus &&
                                 !in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))
-                            <a href="{{ route('admin.orders.updateStatus', $order->id) }}" class="btn btn-warning mb-2">Cập
-                                nhật trạng thái</a>
+                            <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Update
+                                Status</button>
                         @endif
 
                         <!-- Hiển thị thông báo -->
@@ -182,3 +182,6 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+    @vite('resources/js/admin/detailOrder.js')
+@endpush
