@@ -54,9 +54,9 @@ use App\Http\Controllers\Web\VoucherController;
 use App\Models\Voucher;
 
 
-Route::prefix('/')->as('client.')->group(function(){
-    Route::get('/', [HomeController::class, 'index'])->name('home');  
-}); 
+Route::prefix('/')->as('client.')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+});
 
 // Người dùng
 Route::middleware(['auth'])->group(function () {
@@ -124,7 +124,6 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('accept-all', 'acceptAll')->name('acceptAll')->middleware('permission:edit-orders');
             Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation')->middleware('permission:edit-orders');
             Route::get('user/{userId}', 'byUser')->name('byUser');
-
         });
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
@@ -282,7 +281,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::delete('lock/{id}', 'lock')->name('lock')->middleware('permission:edit-products');
             Route::post('open-product/{id}', 'openProduct')->name('openProduct')->middleware('permission:edit-products');
             Route::get('product-variant-detail/{productId}/{variantId}', 'variantDetails')->name('product-variant-detail')->middleware('permission:view-products');
-            Route::get('/filter','filter')->name('filter');
+            Route::get('/filter', 'filter')->name('filter');
         });
 
         //Address
@@ -429,9 +428,9 @@ Route::prefix('client')->name('client.')->group(
 
         Route::prefix('vouchers')->controller(ClientVoucherController::class)->name('vouchers.')->group(function () {
             Route::get('/',  'index')->name('index');
-            Route::get('detail/{id}',  'detail')->name('detail'); 
+            Route::get('detail/{id}',  'detail')->name('detail');
         });
-        
+
 
         Route::controller(ShopController::class)->group(function () {
             Route::get('shop', 'shop')->name('shop');
@@ -450,7 +449,6 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/clear',  'clearCart');
                 Route::post('/save-to-db',  'saveSessionCartToDatabase');
                 Route::get('view-cart', 'viewCart')->name('viewCart');
-
             }
         );
 
@@ -466,7 +464,7 @@ Route::prefix('client')->name('client.')->group(
                 Route::post('/store', 'store')->name('store');
                 Route::get('/detail/{id}', 'detailOrder')->name('detail');
                 Route::get('/check-order', 'check')->name('check');
-
+                Route::post('/{orderId}/update-status',  'updateStatus')->name('updateStatus');
                 Route::get('/',  'orders')->name('list');
                 Route::post('/{orderId}/retry-payment',  'retryPayment')->name('retryPayment');
                 Route::post('/{orderId}/cancel', 'cancelOrder')->name('cancelOrder');

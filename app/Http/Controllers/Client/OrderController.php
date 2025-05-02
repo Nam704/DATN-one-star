@@ -36,7 +36,33 @@ class OrderController extends Controller
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
     }
+    public function updateStatus($orderId)
+    {
+        try {
+            $order = $this->orderService->updateOrderStatus($orderId);
 
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trạng thái đã đạt tối đa hoặc không thể cập nhật.',
+                ], 400);
+            }
+
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công.',
+                'order' => $order,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi cập nhật trạng thái đơn hàng: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
     public function store(Request $request)
     {
         try {

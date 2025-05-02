@@ -145,7 +145,9 @@ window.GlobalUtils = {
     },
 
     // Cập nhật UI cho mini-cart (đã sửa lại)
+    // Cập nhật UI cho mini-cart
     updateCartUI(cartItems) {
+        console.log("cartitem", cartItems);
         const $cart_quantity = $(".cart_quantity");
         const $cartContainer = $(".cart_items");
         $cartContainer.empty();
@@ -155,7 +157,6 @@ window.GlobalUtils = {
                 "<p class='text-center'>Your cart is empty.</p>"
             );
             $cart_quantity.text("0");
-
             $(".cart-total").text(GlobalUtils.formatPrice(0));
             return;
         }
@@ -170,25 +171,27 @@ window.GlobalUtils = {
             }
 
             const formattedPrice = GlobalUtils.formatPrice(item.price);
+            // Giả sử item.id là ID của sản phẩm (product ID), thay vì id_variant nếu cần
+            const productDetailUrl = `${GlobalUtils.baseUrl}/client/products/detail/${item.id_product}`;
 
             const cartItem = `
-                <div class="cart_item">
-                    <div class="cart_img">
-                        <a href="#"><img src="${item.image}" alt="${item.name}"></a>
-                    </div>
-                    <div class="cart_info">
-                        <a href="#">${item.name}</a>
-                        <span class="sku">SKU: ${item.sku}</span>
-                        <span class="quantity">Qty: ${item.quantity}</span>
-                        <span class="price_cart">${formattedPrice}</span>
-                    </div>
-                    <div class="cart_remove">
-                        <a href="#" class="delete_item" data-id="${item.id_variant}">
-                            <i class="ion-android-close"></i>
-                        </a>
-                    </div>
+            <div class="cart_item">
+                <div class="cart_img">
+                    <a href="${productDetailUrl}"><img src="${item.image}" alt="${item.name}"></a>
                 </div>
-            `;
+                <div class="cart_info">
+                    <a href="${productDetailUrl}">${item.name}</a>
+                    <span class="sku">SKU: ${item.sku}</span>
+                    <span class="quantity">Qty: ${item.quantity}</span>
+                    <span class="price_cart">${formattedPrice}</span>
+                </div>
+                <div class="cart_remove">
+                    <a href="#" class="delete_item" data-id="${item.id_variant}">
+                        <i class="ion-android-close"></i>
+                    </a>
+                </div>
+            </div>
+        `;
             $cartContainer.append(cartItem);
         });
 

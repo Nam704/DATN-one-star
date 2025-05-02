@@ -47,7 +47,7 @@ class CartController extends Controller
     public function addToCart(Request $request): JsonResponse
     {
         try {
-            Log::info($request->all());
+            // Log::info($request->all());
             $validated = $request->validate([
                 'id_variant' => 'required|exists:product_variants,id',
                 'quantity' => 'required|integer|min:1'

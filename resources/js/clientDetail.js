@@ -113,7 +113,55 @@ $(document).ready(function () {
             // GlobalUtils.showNotification(event.message);
         }
     );
+    $(document).on("click", ".update-status", function (e) {
+        e.preventDefault();
+        const orderId = $(this).data("id"); // Lấy orderId từ thuộc tính data-id
+        const $button = $(this); // Lưu tham chiếu đến nút được nhấn
 
+        // Vô hiệu hóa nút để tránh nhấn nhiều lần
+        $button.prop("disabled", true).text("Đang xử lý...");
+
+        // Gửi yêu cầu AJAX bằng Axios
+        axios
+            .post(`/client/orders/${orderId}/update-status`, {
+                _token: csrfToken, // Gửi CSRF token nếu cần
+            })
+            .then((response) => {
+                const data = response.data;
+
+                if (data.success) {
+                    // Cập nhật trạng thái trong giao diện
+                    const $row = $button.closest("tr"); // Tìm hàng chứa nút
+                    const $statusBadge = $row.find(".badge"); // Tìm badge hiển thị trạng thái
+
+                    // Giả sử trạng thái mới là "Delivered" (có thể điều chỉnh theo logic thực tế)
+                    $statusBadge
+                        .text("Delivered") // Cập nhật văn bản trạng thái
+                        .removeClass("bg-warning") // Xóa lớp cũ
+                        .addClass("bg-success"); // Thêm lớp mới cho trạng thái Delivered
+
+                    // Xóa nút "Đã nhận" vì trạng thái đã được cập nhật
+                    $button.remove();
+
+                    // Hiển thị thông báo thành công
+                    GlobalUtils.showNotification(
+                        "Cập nhật trạng thái thành công!"
+                    );
+                } else {
+                    // Hiển thị thông báo lỗi từ server
+                    alert(data.message || "Không thể cập nhật trạng thái.");
+                    $button.prop("disabled", false).text("Đã nhận"); // Khôi phục nút
+                }
+            })
+            .catch((error) => {
+                // Xử lý lỗi mạng hoặc server
+                const errorMessage =
+                    error.response?.data?.message ||
+                    "Lỗi hệ thống. Vui lòng thử lại.";
+                alert(errorMessage);
+                $button.prop("disabled", false).text("Đã nhận"); // Khôi phục nút
+            });
+    });
     $("#save_address").click(function (e) {
         e.preventDefault();
         var is_default = $("#is_default").is(":checked") ? 1 : 0;

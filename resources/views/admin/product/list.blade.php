@@ -161,12 +161,12 @@
                             <label class="form-label">Khoảng giá</label>
                             <div class="row">
                                 <div class="col">
-                                    <input type="number" class="form-control" name="min_price"
-                                        placeholder="Giá tối thiểu">
+                                    <input type="text" class="form-control" name="min_price"
+                                        placeholder="Giá tối thiểu" maxlength="20" inputmode="decimal">
                                 </div>
                                 <div class="col">
-                                    <input type="number" class="form-control" name="max_price"
-                                        placeholder="Giá tối đa">
+                                    <input type="text" class="form-control" name="max_price" placeholder="Giá tối đa"
+                                        maxlength="20" inputmode="decimal">
                                 </div>
                             </div>
                         </div>
@@ -176,7 +176,8 @@
                             <div class="row">
                                 <div class="col">
                                     <input type="date" class="form-control" name="created_from"
-                                        placeholder="Từ ngày">
+                                        value="{{ old('created_from') }}" max="{{ now()->toDateString() }}"
+                                        onchange="this.blur()" placeholder="Từ ngày">
                                 </div>
                                 <div class="col">
                                     <input type="date" name="created_to" id="created_to" class="form-control"
@@ -204,8 +205,9 @@
 @endpush
 @push('scripts')
     <script>
-        $(document).ready(function() {
-            // Hiển thị/ẩn input quantity
+        $(function() {
+            // Ẩn input quantity lúc đầu và chuyển đổi show/hide
+            $('#quantity').hide();
             $('#stock').on('change', function() {
                 if (this.value === 'quantity') {
                     $('#quantity').show();
@@ -214,115 +216,157 @@
                 }
             });
 
-            // Xóa hết các error trước khi chạy validate/lần AJAX mới
+            // Hàm xóa hết lỗi
             function clearErrors() {
+                // Xóa alert summary
+                $('#filterModal .validation-summary').remove();
+                // Xóa từng error message
                 $('.validation-error').remove();
+                // Bỏ class invalid
                 $('.is-invalid').removeClass('is-invalid');
-                $('#filterModal .modal-body .alert').remove();
             }
 
+            // Handle nút Áp dụng bộ lọc
             $('#applyFilter').on('click', function(e) {
-
                 e.preventDefault();
                 clearErrors();
 
-                // --- 1. Client-side validation ---
-                var errors = {};
-                var stock = $('#stock').val();
-                var quantity = $('#quantity').val().trim();
-                var minPrice = $('input[name="min_price"]').val().trim();
-                var maxPrice = $('input[name="max_price"]').val().trim();
-                var fromDate = $('input[name="created_from"]').val();
-                var toDate = $('input[name="created_to"]').val();
-                var sortView = $('#sort_view').val();
-                var today = new Date().toISOString().split('T')[0];
+                let errors = {};
 
-                // 1. Validate quantity
+                // Lấy giá trị thô
+                const minRaw = $('input[name="min_price"]').val().trim();
+                const maxRaw = $('input[name="max_price"]').val().trim();
+                const fromDate = $('input[name="created_from"]').val();
+                const toDate = $('input[name="created_to"]').val();
+                const stock = $('#stock').val();
+                const quantity = $('#quantity').val().trim();
+
+                // 1. Validate số lượng khi chọn stock=quantity
                 if (stock === 'quantity') {
                     if (!quantity) {
-                        errors.quantity = 'Bạn phải nhập số lượng khi chọn Số lượng cụ thể.';
-                    } else if (!/^\d+$/.test(quantity) || parseInt(quantity, 10) < 0) {
-                        errors.quantity = 'Số lượng phải là số nguyên từ 0 trở lên.';
+                        errors.quantity = 'Bạn phải nhập số lượng khi chọn "Số lượng cụ thể".';
+                    } else if (!/^\d+$/.test(quantity)) {
+                        errors.quantity = 'Số lượng phải là số nguyên không âm.';
                     }
                 }
 
-                // 2. Validate price range
-                if (minPrice && maxPrice) {
-                    var min = parseFloat(minPrice),
-                        max = parseFloat(maxPrice);
-                    if (isNaN(min) || isNaN(max)) {
-                        errors.max_price = 'Giá phải là số hợp lệ.';
-                    } else if (max < min) {
-                        errors.max_price = 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.';
+                // 2. Validate price (chỉ cho [0-9.])
+                const numPattern = /^[0-9.]+$/;
+                if (minRaw && !numPattern.test(minRaw)) {
+                    errors.min_price = 'Giá tối thiểu chỉ gồm chữ số và dấu chấm.';
+                }
+                if (maxRaw && !numPattern.test(maxRaw)) {
+                    errors.max_price = 'Giá tối đa chỉ gồm chữ số và dấu chấm.';
+                }
+                // Parse int và so sánh
+                if (minRaw && numPattern.test(minRaw)) {
+                    const minVal = parseInt(minRaw.replace(/\./g, ''), 10);
+                    if (minVal < 0) {
+                        errors.min_price = 'Giá tối thiểu >= 0.';
+                    } else if (minVal > 100000000) {
+                        errors.min_price = 'Giá tối thiểu <= 100.000.000.';
+                    }
+                }
+                if (maxRaw && numPattern.test(maxRaw)) {
+                    const maxVal = parseInt(maxRaw.replace(/\./g, ''), 10);
+                    if (maxVal < 0) {
+                        errors.max_price = 'Giá tối đa >= 0.';
+                    } else if (maxVal > 100000000) {
+                        errors.max_price = 'Giá tối đa <= 100.000.000.';
+                    }
+                }
+                // So sánh min <= max
+                if (!errors.min_price && !errors.max_price && minRaw && maxRaw) {
+                    const minVal = parseInt(minRaw.replace(/\./g, ''), 10);
+                    const maxVal = parseInt(maxRaw.replace(/\./g, ''), 10);
+                    if (maxVal < minVal) {
+                        errors.max_price = 'Giá tối đa phải >= Giá tối thiểu.';
                     }
                 }
 
-                // 3. Validate date range
-                if (fromDate && toDate && toDate < fromDate) {
-                    errors.created_to = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.';
+                // 3. Validate ngày tạo
+                if (fromDate && toDate) {
+                    if (new Date(fromDate) > new Date(toDate)) {
+                        errors.created_to = 'Ngày kết thúc phải ≥ Ngày bắt đầu.';
+                    }
                 }
-                if (toDate && toDate > today) {
-                    errors.created_to = 'Ngày kết thúc không được lớn hơn hôm nay.';
-                }
+                // 4. Bạn có thể thêm validate sort_view nếu cần
 
-                // 4. Validate sort_view
-                if (sortView && !['asc', 'desc'].includes(sortView)) {
-                    errors.sort_view = 'Kiểu sắp xếp không hợp lệ.';
-                }
-
-                // Nếu có lỗi client, show và dừng
+                // Nếu có lỗi, hiển thị và dừng
                 if (Object.keys(errors).length) {
-                    $('#filterModal .modal-body').prepend(
-                        '<div class="alert alert-danger validation-error">Vui lòng sửa các lỗi trước khi áp dụng bộ lọc:</div>'
-                    );
+                    // Thêm summary alert lên đầu modal-body
+                    $('#filterModal .modal-body').prepend(`
+                <div class="alert alert-danger validation-summary">
+                    Vui lòng sửa các lỗi trước khi áp dụng:
+                </div>
+            `);
+                    // Hiển thị từng lỗi
                     $.each(errors, function(field, msg) {
-                        var $fld = $('[name="' + field + '"]');
-                        if (field === 'quantity') {
-                            $fld = $('#quantity');
-                        }
-                        if ($fld.length) {
-                            $fld.addClass('is-invalid');
-                            $('<small class="text-danger validation-error">' + msg + '</small>')
-                                .insertAfter($fld);
-                        }
+                        let $fld = $('[name="' + field + '"]');
+                        // với quantity, field name=quantity, đã đúng
+                        $fld.addClass('is-invalid');
+                        $('<small class="text-danger validation-error">' + msg + '</small>')
+                            .insertAfter($fld);
                     });
                     return;
                 }
-
-                // --- 2. Server-side với AJAX ---
+                if (!fromDate && toDate) {
+                    // bạn đã có đoạn gán ngược; giữ lại nếu muốn
+                    $('input[name="created_from"]').val(toDate);
+                }
+                // XỬ LÝ CHO TRƯỜNG HỢP only fromDate
+                if (fromDate && !toDate) {
+                    const today = new Date().toISOString().split('T')[0];
+                    $('input[name="created_to"]').val(today);
+                }
+                // Nếu không có lỗi client, gửi AJAX GET
                 $.ajax({
                     url: $('#filterForm').attr('action'),
-                    method: $('#filterForm').attr('method'), // bây giờ là GET
+                    method: $('#filterForm').attr('method'), // GET
                     data: $('#filterForm').serialize(),
                     headers: {
                         'Accept': 'application/json'
                     },
                     success: function(html) {
+                        // Cập nhật table body
                         $('#fixed-header-datatable tbody').html(html);
                         $('#filterModal').modal('hide');
                     },
                     error: function(xhr) {
                         if (xhr.status === 422 && xhr.responseJSON?.errors) {
-                            // xử lý lỗi như trước
+                            // Xử lý lỗi validation từ server nếu cần
                         } else {
                             console.error('AJAX error:', xhr.status, xhr.responseText);
-                            alert('Đã có lỗi xảy ra, vui lòng thử lại sau.');
+                            alert('Đã có lỗi xảy ra, vui lòng thử lại.');
                         }
                     }
                 });
-
-
-
             });
+
+            // Reset filter
             $('#resetFilter').on('click', function(e) {
                 e.preventDefault();
                 clearErrors();
-
                 $('#filterForm')[0].reset();
-
                 $('#quantity').hide();
-
             });
+            // Chặn nhập số âm và giới hạn 9 chữ số cho min_price và max_price
+            $('input[name="min_price"], input[name="max_price"]')
+                .attr('inputmode', 'numeric')
+                // Chặn gõ ký tự không phải số
+                .on('keypress', function(e) {
+                    if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                })
+                // Khi người dùng paste hoặc nhập, làm sạch và giới hạn 9 chữ số
+                .on('input', function() {
+                    let cleaned = this.value.replace(/\D/g, ''); // chỉ giữ số
+                    if (cleaned.length > 9) {
+                        cleaned = cleaned.substring(0, 9); // giới hạn 9 chữ số
+                    }
+                    this.value = cleaned;
+                });
         });
     </script>
 @endpush

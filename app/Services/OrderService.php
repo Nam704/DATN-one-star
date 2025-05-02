@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Jobs\ExpireOrder;
+use App\Mail\OrderPlacedMail;
 use App\Models\Order;
 use App\Models\Order_detail;
 use App\Models\Order_status;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Services\VoucherService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class OrderService
 {
@@ -192,7 +194,24 @@ class OrderService
                     $orderDetail->total = $inputVariant['price'] * $inputVariant['quantity'];
                     $orderDetail->save();
                 }
+                $orderDetails = $order->detailsOrder();
 
+                // Gửi email qua queue cho người dùng
+                $userEmail = $orderDetails['user_email'];
+                if ($userEmail && $userEmail !== 'N/A') {
+                    try {
+                        Mail::to($userEmail)->queue(new OrderPlacedMail($orderDetails));
+                        Log::info('Đã xếp hàng email xác nhận đơn hàng', [
+                            'order_id' => $order->id,
+                            'email' => $userEmail,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Lỗi khi xếp hàng email xác nhận đơn hàng: ' . $e->getMessage(), [
+                            'order_id' => $order->id,
+                            'email' => $userEmail,
+                        ]);
+                    }
+                }
                 // Cập nhật giỏ hàng
                 $cartService = app(CartService::class);
                 $cartService->updateCartAfterOrder($variants, auth()->id());
@@ -275,7 +294,22 @@ class OrderService
             ], 400);
         }
     }
+    public function updateOrderStatus($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        $currentStatus = $order->orderStatus;
 
+        $nextStatus = $currentStatus->nextStatus;
+
+        if (!$nextStatus) {
+            return null;
+        }
+
+        $order->id_order_status = $nextStatus->id;
+        $order->save();
+
+        return $order;
+    }
     public function cancelOrder($orderId, $reasonId)
     {
         try {

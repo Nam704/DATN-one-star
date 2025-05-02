@@ -44,7 +44,6 @@ class HomeController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         $brands = Brand::where('status', 'active')
-            ->whereHas('products') // Chỉ lấy thương hiệu có sản phẩm
             ->withCount('products') // Đếm số sản phẩm liên quan
             ->get();
         return view('client.index', compact('categories', 'recommendedProducts', 'banners', 'brands', 'category'));

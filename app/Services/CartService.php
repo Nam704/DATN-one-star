@@ -172,6 +172,7 @@ class CartService
                     'quantity' => $item->quantity,
                     'image' => $item->variant->images->url ?? null,
                     'name' => $item->variant->product->name,
+                    'id_product' => $item->variant->product->id,
                     'values' => $item->variant->attributeValues->map(function ($attr) {
                         return [
                             'attribute_name' => $attr->attribute_name,

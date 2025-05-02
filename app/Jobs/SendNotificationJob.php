@@ -42,21 +42,6 @@ class SendNotificationJob implements ShouldQueue
                 'goto_route' => $this->data['goto_route'],
                 'expires_at' => $this->data['expires_at'],
             ]);
-            Log::info('data trong job', [$notification]);
-
-            $eventClass = match ($this->data['type']) {
-                'public' => PublicNotification::class,
-                'private' => PrivateNotification::class,
-                'user' => UserNotification::class,
-                'employee' => EmployeeNotification::class,
-                'admin' => AdminNotification::class,
-                default => null,
-            };
-
-            if ($eventClass) {
-                broadcast(new $eventClass($this->data))->toOthers();
-            }
-
             Log::info('Tạo và gửi thông báo thành công', [
                 'notification_id' => $notification->id,
                 'title' => $this->data['title'],
