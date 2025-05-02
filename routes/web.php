@@ -141,6 +141,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts')->middleware('role:admin');
             Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts')->middleware('role:admin');
             Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory')->middleware('role:admin');
+            Route::get('exportProductCancelleds', 'exportProductCancelleds')->name('exportProductCancelleds')->middleware('role:admin');
             Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts')->middleware('role:admin');
             Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts')->middleware('role:admin');
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts')->middleware('role:admin');

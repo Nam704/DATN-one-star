@@ -82,7 +82,7 @@ class Category extends Model
                 -- Tổng doanh thu từ các đơn hàng hợp lệ
                 COALESCE(SUM(
                     CASE
-                        WHEN order_statuses.name NOT IN ("Cancelled", "Cancel Requested", "Cancel Under Review", "Cancel Approved", "Cancel Rejected", "Failed Delivery")
+                        WHEN order_statuses.name = "Delivered" 
                              AND orders.created_at BETWEEN ? AND ?
                         THEN order_details.quantity * order_details.unit_price
                         ELSE 0

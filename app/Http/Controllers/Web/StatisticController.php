@@ -41,6 +41,21 @@ class StatisticController extends Controller
             $countData = [
                 "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
 
+        'canceled_products' => DB::table('order_details')
+        ->join('orders', 'orders.id', '=', 'order_details.id_order')  // Liên kết với bảng orders
+        ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  // Liên kết với bảng order_statuses
+        ->whereIn('order_statuses.name', ['canceled', 'cancelled', 'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 'Cancel Rejected', 'Failed Delivery']) // Các trạng thái hủy
+        ->whereBetween('orders.created_at', [$start_date, $end_date])
+        ->sum('order_details.quantity'),  // Tổng số sản phẩm bị hủy
+
+    // Số lượng sản phẩm hoàn thành
+    'completed_products' => DB::table('order_details')
+        ->join('orders', 'orders.id', '=', 'order_details.id_order')  // Liên kết với bảng orders
+        ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  // Liên kết với bảng order_statuses
+        ->where('order_statuses.name', 'Delivered')  // Trạng thái hoàn thành
+        ->whereBetween('orders.created_at', [$start_date, $end_date])
+        ->sum('order_details.quantity'),  // Tổng số sản phẩm hoàn thành
+
             ];
             $topProduct = [
                 "least_sold_products" => $this->product->least_sold_products($start_date, $end_date),
@@ -49,6 +64,7 @@ class StatisticController extends Controller
             $categories_with_revenue = $this->category->categories_with_revenue($start_date, $end_date);
             $top_view_products = $this->product->where('status', 'active')->where('view', '>', 0)->orderBy('view', 'desc')->take(10)->get();
             $top_comment_products = $this->product->top_comment_products($start_date, $end_date);
+            $cancelledProducts = $this->product->productCancelleds($start_date, $end_date);
             return view('admin.statistic.productstatistic', compact(
                 'countData',
                 'topProduct',
@@ -56,6 +72,7 @@ class StatisticController extends Controller
                 'categories_with_revenue',
                 'top_view_products',
                 'top_comment_products',
+                'cancelledProducts',
                 'start_date',
                 'end_date'
             ));
@@ -650,6 +667,7 @@ class StatisticController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
+    
     public function exportTopViewProducts()
     {
         // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm
@@ -734,6 +752,123 @@ class StatisticController extends Controller
         ]);
     }
 
+    public function exportProductCancelleds(Request $request)
+    {
+        // Lấy tham số ngày bắt đầu và kết thúc từ request
+        $start_date = $request->input('start_date');
+        $end_date   = $request->input('end_date');
+
+        // Nếu không có ngày, dùng giá trị mặc định (ngày hôm nay)
+        $start_date = $start_date ?: now()->startOfDay();  // Thời gian bắt đầu là 00:00:00
+        $end_date   = $end_date ?: now()->endOfDay();      // Thời gian kết thúc là 23:59:59
+
+        // Đảm bảo cả hai ngày đều là đối tượng Carbon
+        $start_date = Carbon::parse($start_date)->startOfDay();
+        $end_date   = Carbon::parse($end_date)->endOfDay();
+
+        // Lấy dữ liệu sản phẩm sắp hết hàng theo khoảng thời gian
+        $products = $this->product->productCancelleds($start_date, $end_date);
+
+        // Khởi tạo Spreadsheet và lấy sheet chính
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 1. Tiêu đề báo cáo (dòng 1)
+        $sheet->setCellValue('A1', 'Top sản phẩm bán tệ');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // 2. Hiển thị ngày bắt đầu và kết thúc (dòng 2)
+        $displayStart = $start_date ? $start_date : 'Chưa chọn';
+        $displayEnd   = $end_date ? $end_date : 'Chưa chọn';
+        $sheet->setCellValue('A2', "Ngày bắt đầu: $displayStart");
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('D2', "Ngày kết thúc: $displayEnd");
+        $sheet->mergeCells('D2:E2');
+        $sheet->getStyle('A2:E2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2:E2')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Dòng 3 để tạo khoảng cách
+        $sheet->mergeCells('A3:E3');
+
+        // 3. Header bảng (dòng 4)
+        $sheet->setCellValue('A4', 'STT');
+        $sheet->setCellValue('B4', 'Tên Sản Phẩm');
+        $sheet->setCellValue('C4', 'Ảnh ');
+        $sheet->setCellValue('D4', 'Tổng Số Lượng');
+        $headerRange = 'A4:E4';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+        );
+
+        // Thiết lập độ rộng cột cố định cho cột C (ảnh)
+        $sheet->getColumnDimension('C')->setWidth(20);
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 4. Ghi dữ liệu (từ dòng 5)
+        $row = 5;
+        if ($products->isEmpty()) {
+            $sheet->setCellValue('A5', 'Không có sản phẩm nào trong khoảng thời gian này.');
+            $sheet->mergeCells('A5:E5');
+            $sheet->getStyle('A5')->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        } else {
+            $stt = 1;
+            foreach ($products as $product) {
+                // STT và Tên sản phẩm
+                $sheet->setCellValue('A' . $row, $stt++);
+                $sheet->setCellValue('B' . $row, $product->name);
+                $sheet->setCellValue('D' . $row, $product->total_cancelled);
+
+                // Chèn ảnh vào cột C
+                $imagePath = public_path($product->image_primary);
+                if (file_exists($imagePath)) {
+                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                    $drawing->setPath($imagePath);
+                    $drawing->setName('Product Image');
+                    $drawing->setDescription('Product Image');
+                    $drawing->setCoordinates('C' . $row);
+                    $drawing->setWidth(50);
+                    $drawing->setHeight(50);
+                    // Điều chỉnh offset để ảnh nằm gần giữa ô
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setWorksheet($sheet);
+                    $sheet->getRowDimension($row)->setRowHeight(60);
+                } else {
+                    $sheet->setCellValue('C' . $row, 'No image');
+                }
+
+                // Căn giữa nội dung của hàng
+                $sheet->getStyle("A{$row}:D{$row}")
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $row++;
+            }
+        }
+
+        // 5. Xuất file Excel
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'productcancelleds' . $start_date . '_to_' . $end_date . '.xlsx';
+
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment;filename=\"{$fileName}\"",
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
     public function exportTopCommentProducts(Request $request)
     {
         // Lấy tham số ngày bắt đầu và kết thúc từ request

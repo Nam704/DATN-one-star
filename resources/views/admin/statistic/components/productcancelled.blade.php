@@ -4,9 +4,9 @@
             <div class="card-widgets">
                 <a href="javascript:;" onclick="loadCancelledChartData()" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
             </div>
-            <h5 class="header-title mb-0">Sản phẩm bị hủy</h5>
-            <div class="pt-3">
-                <canvas id="cancelledProductChart" style="height: 400px;"></canvas>
+            <h5 class="header-title mb-0">Sản phẩm bị hủy trong ngày</h5>
+            <div id="cancelled-products-collapse" class="collapse pt-3 show">
+                <canvas id="cancelledProductChart"></canvas>
             </div>
         </div>
     </div>
@@ -42,6 +42,8 @@
                     return;
                 }
 
+                response.sort((a, b) => b.total_cancelled - a.total_cancelled);
+
                 let labels = response.map(item => item.name);
                 let values = response.map(item => item.total_cancelled);
                 let colors = labels.map(() =>
@@ -53,24 +55,41 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'SL hủy',
+                            label: 'Số lượng bị hủy',
                             data: values,
                             backgroundColor: colors,
                             borderColor: colors.map(c => c.replace('0.8', '1')),
-                            borderWidth: 1
+                            borderWidth: 1,
+                            barThickness: 12,
+                            categoryPercentage: 0.8,
+                            barPercentage: 0.8
                         }]
                     },
                     options: {
-                        indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            },
+                            y: {
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0
+                                }
+                            }
+                        },
                         plugins: {
-                            legend: { display: false },
+                            legend: {
+                                display: false
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function (context) {
-                                        let sum = context.dataset.data.reduce((a, b) => Number(a) + Number(b), 0);
-                                        return `${context.label}: ${context.raw} sản phẩm (${((context.raw / sum) * 100).toFixed(2)}%)`;
+                                        var sum = context.dataset.data.reduce((a, b) => Number(a) + Number(b), 0);
+                                        return `${context.label}: ${context.raw} sản phẩm `;
                                     }
                                 }
                             }
