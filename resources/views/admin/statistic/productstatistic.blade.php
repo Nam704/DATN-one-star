@@ -54,15 +54,15 @@
 
 
     @include('admin.statistic.components.bieu_do')
-    <form action="{{ route('admin.statistics.productStatistics') }}" method="GET" class="mb-3">
+    <form  action="{{ route('admin.statistics.productStatistics') }}" method="GET" class="mb-3">
         <div class="row">
             <div class="col-md-4">
                 <label for="start_date">Ngày bắt đầu</label>
-                <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfDay()->toDateString()) }}" class="form-control">
+                <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfDay()->toDateString()) }}" max="{{ now()->toDateString() }}" class="form-control">
             </div>
             <div class="col-md-4">
                 <label for="end_date">Ngày kết thúc</label>
-                <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->endOfDay()->toDateString()) }}" class="form-control">
+                <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->endOfDay()->toDateString()) }}" max="{{ now()->toDateString() }}" class="form-control">
             </div>
             <div class="col-md-4 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">Lọc</button>
