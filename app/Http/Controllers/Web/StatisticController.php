@@ -49,7 +49,7 @@ class StatisticController extends Controller
         ->sum('order_details.quantity'),  // Tổng số sản phẩm bị hủy
 
     // Số lượng sản phẩm hoàn thành
-    'completed_products' => DB::table('order_details')
+       'completed_products' => DB::table('order_details')
         ->join('orders', 'orders.id', '=', 'order_details.id_order')  // Liên kết với bảng orders
         ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  // Liên kết với bảng order_statuses
         ->where('order_statuses.name', 'Delivered')  // Trạng thái hoàn thành
