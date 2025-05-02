@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Models\Order;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
@@ -16,15 +18,31 @@ class NotificationController extends Controller
         $this->notificationService = $notificationService;
     }
 
+    public function getNotifications(int $userId, Request $request)
+    {
+        $perPage = $request->input('per_page', 15);
+        $category = $request->input('category');
+        $notifications = $this->notificationService->getNotificationsByUser($userId, $perPage, $category);
+        return response()->json([
+            'success' => true,
+            'data' => $notifications->items(),
+            'pagination' => [
+                'total' => $notifications->total(),
+                'per_page' => $notifications->perPage(),
+                'current_page' => $notifications->currentPage(),
+                'last_page' => $notifications->lastPage(),
+            ],
+        ]);
+    }
+
     public function getUnreadCount(int $userId)
     {
         $notifications = $this->notificationService->getUnreadNotifications($userId)
-            ->load('fromUser'); // Giả sử có quan hệ fromUser trong model Notification
+            ->load('fromUser');
 
-        // Lọc chỉ lấy tên từ fromUser
         $notifications->transform(function ($notification) {
-            $notification->from_user_name = $notification->fromUser->name ?? null; // Lấy tên hoặc null nếu fromUser không tồn tại
-            unset($notification->fromUser); // Loại bỏ thuộc tính fromUser nếu không cần
+            $notification->from_user_name = $notification->fromUser->name ?? null;
+            unset($notification->fromUser);
             return $notification;
         });
         return response()->json([
@@ -32,13 +50,41 @@ class NotificationController extends Controller
             'notifications' => $notifications
         ]);
     }
-    public function markAsRead($id)
+
+    public function markAsRead(Request $request, $id)
     {
+        $userId = $request->input('user_id');
         $notification = Notification::findOrFail($id);
+
+        if ($notification->to_user_id !== $userId) {
+            Log::info('notification', [$notification, $userId]);
+
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $notification->status = 'read';
+        $notification->read_at = now();
         $notification->save();
-        // dd($notification);
 
         return response()->json(['message' => 'Notification marked as read'], 200);
+    }
+
+    public function getOrderDetailsFromNotification($notificationId, Request $request)
+    {
+        $userId = $request->input('user_id');
+        $notification = Notification::where('id', $notificationId)
+            ->where('to_user_id', $userId)
+            ->firstOrFail();
+
+        if ($notification->category !== 'order' || !$notification->goto_id) {
+            return response()->json(['message' => 'Invalid notification for order details'], 400);
+        }
+
+        $order = Order::findOrFail($notification->goto_id);
+        return response()->json([
+            'success' => true,
+            'order' => $order,
+            'notification' => $notification,
+        ]);
     }
 }

@@ -224,7 +224,19 @@
                 // $('#date-error').addClass('d-none').find('.date-error-text').text('');
             }
 
+                    $('#quantity').hide().val('');
+                }
+            });
+
+            // Xóa hết các error trước khi chạy validate/lần AJAX mới
+            function clearErrors() {
+                $('.validation-error').remove();
+                $('.is-invalid').removeClass('is-invalid');
+                $('#filterModal .modal-body .alert').remove();
+            }
+
             $('#applyFilter').on('click', function(e) {
+
                 e.preventDefault();
                 clearErrors();
 
@@ -292,42 +304,109 @@ if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
                     return;
                 }
                 // ngược lại gửi AJAX như cũ
+                clearErrors();
+
+                // --- 1. Client-side validation ---
+                var errors = {};
+                var stock = $('#stock').val();
+                var quantity = $('#quantity').val().trim();
+                var minPrice = $('input[name="min_price"]').val().trim();
+                var maxPrice = $('input[name="max_price"]').val().trim();
+                var fromDate = $('input[name="created_from"]').val();
+                var toDate = $('input[name="created_to"]').val();
+                var sortView = $('#sort_view').val();
+                var today = new Date().toISOString().split('T')[0];
+
+                // 1. Validate quantity
+                if (stock === 'quantity') {
+                    if (!quantity) {
+                        errors.quantity = 'Bạn phải nhập số lượng khi chọn Số lượng cụ thể.';
+                    } else if (!/^\d+$/.test(quantity) || parseInt(quantity, 10) < 0) {
+                        errors.quantity = 'Số lượng phải là số nguyên từ 0 trở lên.';
+                    }
+                }
+
+                // 2. Validate price range
+                if (minPrice && maxPrice) {
+                    var min = parseFloat(minPrice),
+                        max = parseFloat(maxPrice);
+                    if (isNaN(min) || isNaN(max)) {
+                        errors.max_price = 'Giá phải là số hợp lệ.';
+                    } else if (max < min) {
+                        errors.max_price = 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.';
+                    }
+                }
+
+                // 3. Validate date range
+                if (fromDate && toDate && toDate < fromDate) {
+                    errors.created_to = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.';
+                }
+                if (toDate && toDate > today) {
+                    errors.created_to = 'Ngày kết thúc không được lớn hơn hôm nay.';
+                }
+
+                // 4. Validate sort_view
+                if (sortView && !['asc', 'desc'].includes(sortView)) {
+                    errors.sort_view = 'Kiểu sắp xếp không hợp lệ.';
+                }
+
+                // Nếu có lỗi client, show và dừng
+                if (Object.keys(errors).length) {
+                    $('#filterModal .modal-body').prepend(
+                        '<div class="alert alert-danger validation-error">Vui lòng sửa các lỗi trước khi áp dụng bộ lọc:</div>'
+                    );
+                    $.each(errors, function(field, msg) {
+                        var $fld = $('[name="' + field + '"]');
+                        if (field === 'quantity') {
+                            $fld = $('#quantity');
+                        }
+                        if ($fld.length) {
+                            $fld.addClass('is-invalid');
+                            $('<small class="text-danger validation-error">' + msg + '</small>')
+                                .insertAfter($fld);
+                        }
+                    });
+                    return;
+                }
+
+                // --- 2. Server-side với AJAX ---
                 $.ajax({
                     url: $('#filterForm').attr('action'),
                     method: $('#filterForm').attr('method'),
                     data: $('#filterForm').serialize(),
                     success(html) {
+                    url: $('#filterForm').attr('action'),
+                    method: $('#filterForm').attr('method'), // bây giờ là GET
+                    data: $('#filterForm').serialize(),
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    success: function(html) {
                         $('#fixed-header-datatable tbody').html(html);
                         $('#filterModal').modal('hide');
                     },
-                    error(xhr) {
-                        console.error(xhr);
-                        alert('Có lỗi, thử lại.');
+                    error: function(xhr) {
+                        if (xhr.status === 422 && xhr.responseJSON?.errors) {
+                            // xử lý lỗi như trước
+                        } else {
+                            console.error('AJAX error:', xhr.status, xhr.responseText);
+                            alert('Đã có lỗi xảy ra, vui lòng thử lại sau.');
+                        }
                     }
                 });
-            });
 
+
+
+            });
             $('#resetFilter').on('click', function(e) {
                 e.preventDefault();
                 clearErrors();
+
                 $('#filterForm')[0].reset();
+
                 $('#quantity').hide();
+
             });
-            $('#filterModal input[name="min_price"], #filterModal input[name="max_price"]')
-                .attr('inputmode', 'numeric')
-                .on('input', function() {
-                    // 1) Loại bỏ hết ký tự không phải số
-                    let s = this.value.replace(/\D/g, '');
-
-                    // 2) Giới hạn độ dài tối đa 9 ký tự (max 999999999)
-                    if (s.length > 9) {
-                        s = s.slice(0, 9);
-                    }
-
-                    // 3) Gán lại raw digits (không clamp giá trị)
-                    this.value = s;
-                });
-
         });
     </script>
 @endpush
