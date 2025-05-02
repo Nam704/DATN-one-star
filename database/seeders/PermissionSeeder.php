@@ -35,6 +35,7 @@ class PermissionSeeder extends Seeder
             'categories',
             'orders',
             'blogs',
+            'comments',
             'vouchers',
             'suppliers',
             'imports',
@@ -63,7 +64,7 @@ class PermissionSeeder extends Seeder
                 ]);
             }else if ($module === 'orders') {
                 // chỉ tạo quyền view và edit cho orders
-                foreach (['view', 'edit','delete'] as $action) {
+                foreach (['view', 'edit'] as $action) {
                     Permission::create([
                         'name' => "$action-$module",
                         'display_name' => ucfirst($action) . ' ' . ucfirst($module),
@@ -103,26 +104,6 @@ class PermissionSeeder extends Seeder
                     ]);
                 }
             }
-        }
-
-        // Also create some special permissions
-        $specialPermissions = [
-            [
-                'name' => 'dashboard-access',
-                'display_name' => 'Access Dashboard',
-                'description' => 'Can access admin dashboard',
-                'module' => 'dashboard',
-            ],
-            [
-                'name' => 'settings-access',
-                'display_name' => 'Access Settings',
-                'description' => 'Can access system settings',
-                'module' => 'settings',
-            ],
-        ];
-
-        foreach ($specialPermissions as $permission) {
-            Permission::create($permission);
         }
 
         // Assign all permissions to admin role
