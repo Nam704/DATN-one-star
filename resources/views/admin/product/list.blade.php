@@ -310,7 +310,15 @@
                     });
                     return;
                 }
-
+                if (!fromDate && toDate) {
+                    // bạn đã có đoạn gán ngược; giữ lại nếu muốn
+                    $('input[name="created_from"]').val(toDate);
+                }
+                // XỬ LÝ CHO TRƯỜNG HỢP only fromDate
+                if (fromDate && !toDate) {
+                    const today = new Date().toISOString().split('T')[0];
+                    $('input[name="created_to"]').val(today);
+                }
                 // Nếu không có lỗi client, gửi AJAX GET
                 $.ajax({
                     url: $('#filterForm').attr('action'),

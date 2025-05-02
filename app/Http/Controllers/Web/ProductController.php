@@ -465,6 +465,7 @@ class ProductController extends Controller
 
         if ($from) {
             $query->whereDate('products.created_at', '>=', $from);
+            $to = $to ?: now()->toDateString();
         }
         if ($to) {
             $query->whereDate('products.created_at', '<=', $to);

@@ -15,6 +15,30 @@
             border-color: #0a58ca !important;
             color: #fff !important;
         }
+
+        ul.list-unstyled {
+            scroll-behavior: smooth;
+        }
+
+        .slider_content {
+            width: 726px;
+            height: 194px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            color: white;
+            /* hoặc màu chữ bạn mong muốn */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 30px;
+            /* tạo khoảng cách bên trái */
+        }
+
+        .slider_area {
+            max-width: 726px;
+            margin: auto;
+        }
     </style>
     <div class="shop_area shop_reverse">
         <div class="container">
@@ -107,14 +131,11 @@
                     <div class="shop_banner">
                         <div class="slider_area owl-carousel">
                             @foreach ($banners as $banner)
-                                <!-- <div class="single_slider d-flex align-items-center" > -->
                                 <div class="slider_content"
                                     style="background-image: url('{{ Storage::url($banner->image) }}');">
-                                    <h2>{{ $banner->title }}</h2>
-                                    <h1>{{ $banner->description }}</h1>
-                                    <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                                    {{-- <h2>{{ $banner->title }}</h2>
+                                    <h1>{{ $banner->description }}</h1> --}}
                                 </div>
-                                <!-- </div> -->
                             @endforeach
                         </div>
                     </div>
@@ -206,150 +227,151 @@
 
 @endsection
 @section('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
-<script>
-$(function(){
-    const MAX_PRICE = 100000000;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
+    <script>
+        $(function() {
+            const MAX_PRICE = 100000000;
 
-const cleaveMin = new Cleave('#min-price', {
-    numeral: true,
-    delimiter: '.',
-    numeralDecimalMark: ',',
-    numeralThousandsGroupStyle: 'thousand',
-    numeralDecimalScale: 0,
-    numeralPositiveOnly: true
-});
-const cleaveMax = new Cleave('#max-price', {
-    numeral: true,
-    delimiter: '.',
-    numeralDecimalMark: ',',
-    numeralThousandsGroupStyle: 'thousand',
-    numeralDecimalScale: 0,
-    numeralPositiveOnly: true
-});
+            const cleaveMin = new Cleave('#min-price', {
+                numeral: true,
+                delimiter: '.',
+                numeralDecimalMark: ',',
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: 0,
+                numeralPositiveOnly: true
+            });
+            const cleaveMax = new Cleave('#max-price', {
+                numeral: true,
+                delimiter: '.',
+                numeralDecimalMark: ',',
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: 0,
+                numeralPositiveOnly: true
+            });
 
-function enforceMax(cleaveInst){
-    const raw = cleaveInst.getRawValue();
-    const num = parseInt(raw,10) || 0;
-    if(num > MAX_PRICE){
-        $('#price-error').text(`Giá tối đa là ${MAX_PRICE.toLocaleString()}`);
-    } else {
-        $('#price-error').text('');
-    }
-}
+            function enforceMax(cleaveInst) {
+                const raw = cleaveInst.getRawValue();
+                const num = parseInt(raw, 10) || 0;
+                if (num > MAX_PRICE) {
+                    $('#price-error').text(`Giá tối đa là ${MAX_PRICE.toLocaleString()}`);
+                } else {
+                    $('#price-error').text('');
+                }
+            }
 
-$('#min-price').on('input', function(){
-    enforceMax(cleaveMin);
-    fetchFilteredProducts();
-});
-$('#max-price').on('input', function(){
-    enforceMax(cleaveMax);
-    fetchFilteredProducts();
-});
+            $('#min-price').on('input', function() {
+                enforceMax(cleaveMin);
+                fetchFilteredProducts();
+            });
+            $('#max-price').on('input', function() {
+                enforceMax(cleaveMax);
+                fetchFilteredProducts();
+            });
 
-// Chặn nhập nếu đã đủ 9 chữ số raw, và chỉ cho phép [0-9.]
-$('#min-price, #max-price')
-    .on('keypress', function(e){
-        // tìm instance tương ứng
-        const inst = this.id==='min-price' ? cleaveMin : cleaveMax;
-        // nếu là chữ số và raw đã đủ 9 thì block
-        if(/\d/.test(e.key) && inst.getRawValue().length >= 9){
-            e.preventDefault();
-            return;
-        }
-        // block ký tự không phải [0-9 .]
-        if(!/[0-9\.]/.test(e.key)){
-            e.preventDefault();
-        }
-    })
-    .on('paste', function(e){
-        const inst = this.id==='min-price' ? cleaveMin : cleaveMax;
-        // lấy chỉ chữ số từ paste
-        const pasted = (e.originalEvent || e).clipboardData.getData('text').replace(/\D/g,'');
-        // nếu sẽ vượt quá 9 chữ số raw → block
-        if(inst.getRawValue().length + pasted.length > 9){
-            e.preventDefault();
-        }
-    });
+            // Chặn nhập nếu đã đủ 9 chữ số raw, và chỉ cho phép [0-9.]
+            $('#min-price, #max-price')
+                .on('keypress', function(e) {
+                    // tìm instance tương ứng
+                    const inst = this.id === 'min-price' ? cleaveMin : cleaveMax;
+                    // nếu là chữ số và raw đã đủ 9 thì block
+                    if (/\d/.test(e.key) && inst.getRawValue().length >= 9) {
+                        e.preventDefault();
+                        return;
+                    }
+                    // block ký tự không phải [0-9 .]
+                    if (!/[0-9\.]/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                })
+                .on('paste', function(e) {
+                    const inst = this.id === 'min-price' ? cleaveMin : cleaveMax;
+                    // lấy chỉ chữ số từ paste
+                    const pasted = (e.originalEvent || e).clipboardData.getData('text').replace(/\D/g, '');
+                    // nếu sẽ vượt quá 9 chữ số raw → block
+                    if (inst.getRawValue().length + pasted.length > 9) {
+                        e.preventDefault();
+                    }
+                });
 
-    // 4) Chặn nhập ký tự không phải số / dấu '.'
-    $('#min-price, #max-price')
-        .on('keypress', function(e){
-            if(!/[0-9\.]/.test(e.key)) e.preventDefault();
-        })
-        .on('paste', function(e){
-            const text = (e.originalEvent || e).clipboardData.getData('text');
-            if(!/^[0-9\.]+$/.test(text)) e.preventDefault();
+            // 4) Chặn nhập ký tự không phải số / dấu '.'
+            $('#min-price, #max-price')
+                .on('keypress', function(e) {
+                    if (!/[0-9\.]/.test(e.key)) e.preventDefault();
+                })
+                .on('paste', function(e) {
+                    const text = (e.originalEvent || e).clipboardData.getData('text');
+                    if (!/^[0-9\.]+$/.test(text)) e.preventDefault();
+                });
+
+            // 5) Validate trước khi gọi AJAX (nếu cần)
+            function validatePrices() {
+                let min = parseInt(cleaveMin.getRawValue(), 10) || 0;
+                let max = parseInt(cleaveMax.getRawValue(), 10) || 0;
+                if (min < 0) {
+                    $('#price-error').text('Giá thấp ≥ 0');
+                    return false;
+                }
+                if (max < 0) {
+                    $('#price-error').text('Giá cao ≥ 0');
+                    return false;
+                }
+                if (max > MAX_PRICE) {
+                    $('#price-error').text(`Giá cao ≤ ${MAX_PRICE.toLocaleString()}`);
+                    return false;
+                }
+                if (min > max) {
+                    $('#price-error').text('Giá thấp ≤ Giá cao');
+                    return false;
+                }
+                $('#price-error').text('');
+                return true;
+            }
+
+            // 6) Hàm lấy và render sản phẩm
+            function fetchFilteredProducts() {
+                if (!validatePrices()) return;
+                let params = new URLSearchParams();
+
+                // Categories
+                $('.category-filter:checked').each((_, el) => {
+                    params.append('categories[]', el.value);
+                });
+                // Brands
+                $('.brand-filter:checked').each((_, el) => {
+                    params.append('brands[]', el.value);
+                });
+                // Attributes
+                $('.attribute-filter:checked').each((_, el) => {
+                    params.append('attribute_values[]', el.value);
+                });
+                // Price
+                const min = cleaveMin.getRawValue();
+                const max = cleaveMax.getRawValue();
+                if (min) params.append('min_price', min);
+                if (max) params.append('max_price', max);
+                // Sort
+                const order = $('#orderby').val();
+                if (order) params.append('orderby', order);
+
+                fetch(`{{ route('client.filter') }}?${params}`, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(json => {
+                        $('#product-list').html(json.products);
+                        $('#pagination').html(json.pagination);
+                    });
+            }
+
+            // 7) Khởi động sự kiện khác
+            $('.category-filter, .brand-filter').on('change', fetchFilteredProducts);
+            $('#orderby').on('change', fetchFilteredProducts);
+            $('#applyAttributeFilter').on('click', () => {
+                bootstrap.Modal.getInstance($('#attributeModal')).hide();
+                fetchFilteredProducts();
+            });
         });
-
-    // 5) Validate trước khi gọi AJAX (nếu cần)
-    function validatePrices(){
-        let min = parseInt(cleaveMin.getRawValue(), 10) || 0;
-        let max = parseInt(cleaveMax.getRawValue(), 10) || 0;
-        if(min < 0) {
-            $('#price-error').text('Giá thấp ≥ 0');
-            return false;
-        }
-        if(max < 0) {
-            $('#price-error').text('Giá cao ≥ 0');
-            return false;
-        }
-        if(max > MAX_PRICE){
-            $('#price-error').text(`Giá cao ≤ ${MAX_PRICE.toLocaleString()}`);
-            return false;
-        }
-        if(min > max){
-            $('#price-error').text('Giá thấp ≤ Giá cao');
-            return false;
-        }
-        $('#price-error').text('');
-        return true;
-    }
-
-    // 6) Hàm lấy và render sản phẩm
-    function fetchFilteredProducts(){
-        if(!validatePrices()) return;
-        let params = new URLSearchParams();
-
-        // Categories
-        $('.category-filter:checked').each((_,el) => {
-            params.append('categories[]', el.value);
-        });
-        // Brands
-        $('.brand-filter:checked').each((_,el) => {
-            params.append('brands[]', el.value);
-        });
-        // Attributes
-        $('.attribute-filter:checked').each((_,el) => {
-            params.append('attribute_values[]', el.value);
-        });
-        // Price
-        const min = cleaveMin.getRawValue();
-        const max = cleaveMax.getRawValue();
-        if(min) params.append('min_price', min);
-        if(max) params.append('max_price', max);
-        // Sort
-        const order = $('#orderby').val();
-        if(order) params.append('orderby', order);
-
-        fetch(`{{ route('client.filter') }}?${params}`, {
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(json => {
-            $('#product-list').html(json.products);
-            $('#pagination').html(json.pagination);
-        });
-    }
-
-    // 7) Khởi động sự kiện khác
-    $('.category-filter, .brand-filter').on('change', fetchFilteredProducts);
-    $('#orderby').on('change', fetchFilteredProducts);
-    $('#applyAttributeFilter').on('click', () => {
-        bootstrap.Modal.getInstance($('#attributeModal')).hide();
-        fetchFilteredProducts();
-    });
-});
-</script>
+    </script>
 @endsection
-
