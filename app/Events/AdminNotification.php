@@ -22,9 +22,7 @@ class AdminNotification implements ShouldBroadcast
 
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('admin'),
-        ];
+        return [new PrivateChannel('admin-notifications')];
     }
 
     public function broadcastWith()

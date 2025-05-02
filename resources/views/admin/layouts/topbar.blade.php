@@ -59,12 +59,11 @@
                     <i class="ri-notification-3-line fs-22"></i>
                     <span id="notification_badge" class="noti-icon-badge badge text-bg-pink">0</span>
                 </a>
-                <div id="notification_list"
-                    class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg py-0">
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg py-0">
                     <div class="p-2 border-top-0 border-start-0 border-end-0 border-dashed border">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h6 class="m-0 fs-16 fw-semibold"> Notification</h6>
+                                <h6 class="m-0 fs-16 fw-semibold">Notification</h6>
                             </div>
                             <div class="col-auto">
                                 <a href="javascript:void(0);" class="text-dark text-decoration-underline">
@@ -73,9 +72,8 @@
                             </div>
                         </div>
                     </div>
-                    <ul class="nav nav-tabs nav-tabs-custom" id="notification-tabs"></ul>
                     <div id="notification_simplebar" style="max-height: 300px;" data-simplebar>
-                        <!-- Danh sách thông báo -->
+                        <!-- Danh sách thông báo sẽ được render động bởi JS -->
                     </div>
                     @if (auth()->user())
                         <a href="{{ route('auth.getProfileAdmin', ['id' => auth()->user()->id]) }}"
@@ -85,6 +83,7 @@
                     @endif
                 </div>
             </li>
+
             <li class="d-none d-sm-inline-block">
                 <a class="nav-link" data-bs-toggle="offcanvas" href="#theme-settings-offcanvas">
                     <i class="ri-settings-3-line fs-22"></i>
@@ -109,8 +108,8 @@
                     <span class="d-lg-block d-none">
                         <h5 class="my-0 fw-normal d-flex align-items-center gap-1">
                             @if (Auth::check())
-                                <span class="text-overflow m-0 me-1" style="font-size:.9rem">{{ Auth::user()->name }}
-                                </span>
+                                <span class="text-overflow m-0 me-1"
+                                    style="font-size:.9rem">{{ Auth::user()->name }}</span>
                             @else
                                 <span class="text-overflow m-0 me-1" style="font-size:.9rem">Guest</span>
                             @endif

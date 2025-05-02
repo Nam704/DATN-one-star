@@ -10,9 +10,57 @@ $(document).ready(function () {
     const categories = ["all", "payment", "order", "promotion", "system"];
     let currentCategory = "all";
 
+    // Hàm tính thời gian tương đối (ví dụ: "1 min ago")
+    function timeAgo(date) {
+        const now = new Date();
+        const past = new Date(date);
+        const diffInSeconds = Math.floor((now - past) / 1000);
+
+        if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours} hours ago`;
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays} days ago`;
+    }
+
+    // Ánh xạ danh mục thông báo với màu sắc và biểu tượng
+    function getCategoryStyles(category) {
+        const styles = {
+            payment: {
+                bg: "bg-success-subtle",
+                text: "text-success",
+                icon: "credit-card",
+            },
+            order: {
+                bg: "bg-warning-subtle",
+                text: "text-warning",
+                icon: "package",
+            },
+            promotion: {
+                bg: "bg-pink-subtle",
+                text: "text-pink",
+                icon: "gift",
+            },
+            system: {
+                bg: "bg-primary-subtle",
+                text: "text-primary",
+                icon: "alert-circle",
+            },
+        };
+        return (
+            styles[category] || {
+                bg: "bg-primary-subtle",
+                text: "text-primary",
+                icon: "comment-account-outline",
+            }
+        );
+    }
+
     // Khởi tạo Echo để lắng nghe các kênh thông báo
     function initializeEcho() {
-        const userRole = "admin"; // Giả định vai trò được truyền từ server (admin, user, employee)
+        const userRole = "admin";
         const channels = [
             {
                 name: `private-notifications.${userId}`,
@@ -29,10 +77,9 @@ $(document).ready(function () {
 
         channels.forEach(({ name, event }) => {
             window.Echo.private(name).listen(event, (notification) => {
-                console.log(`New ${event}:`, notification);
                 showToast(notification);
                 updateNotification(notification);
-                loadNotifications(currentCategory); // Làm mới danh sách
+                loadNotifications(currentCategory);
             });
         });
     }
@@ -59,23 +106,23 @@ $(document).ready(function () {
 
     // Cập nhật danh sách thông báo
     function updateNotification(notification) {
-        const listContent = $notificationList.find(".simplebar-content");
+        let listContent = $notificationList.find(".simplebar-content");
         if (!listContent.length) {
-            console.error("SimpleBar content area not found!");
-            return;
+            $notificationList.html('<div class="simplebar-content"></div>');
+            listContent = $notificationList.find(".simplebar-content");
         }
 
-        // Cập nhật badge
         const currentCount = parseInt($notificationBadge.text()) || 0;
         $notificationBadge.text(currentCount + 1);
 
-        // Tạo phần tử thông báo
         const priorityClass =
             {
                 high: "border-danger text-danger",
                 medium: "border-info",
                 low: "border-secondary",
             }[notification.priority] || "";
+
+        const { bg, text, icon } = getCategoryStyles(notification.category);
 
         const item = $("<a>", {
             href: notification.goto_route
@@ -84,21 +131,18 @@ $(document).ready(function () {
                   }`
                 : "#",
             class: `dropdown-item notify-item ${
-                notification.status === "unread" ? "unread-noti" : ""
+                notification.status === "unread" ? "unread-noti" : "read-noti"
             } ${priorityClass}`,
             "data-id": notification.id,
+            "data-category": notification.category,
         }).html(`
-            <div class="notify-icon bg-${
-                notification.category || "system"
-            }-subtle">
-                <i class="mdi mdi-${getIconForCategory(
-                    notification.category
-                )} text-${notification.category || "system"}"></i>
+            <div class="notify-icon ${bg}">
+                <i class="mdi mdi-${icon} ${text}"></i>
             </div>
             <p class="notify-details">${notification.title}
-                <small class="noti-time">${new Date(
+                <small class="noti-time">${timeAgo(
                     notification.created_at
-                ).toLocaleString()}</small>
+                )}</small>
             </p>
         `);
 
@@ -106,18 +150,6 @@ $(document).ready(function () {
         if ($notificationList[0].SimpleBar) {
             $notificationList[0].SimpleBar.recalculate();
         }
-    }
-
-    // Lấy biểu tượng cho danh mục
-    function getIconForCategory(category) {
-        return (
-            {
-                payment: "credit-card",
-                order: "package",
-                promotion: "gift",
-                system: "alert-circle",
-            }[category] || "comment-account-outline"
-        );
     }
 
     // Tải danh sách thông báo từ API
@@ -128,12 +160,18 @@ $(document).ready(function () {
         $notificationList.html(
             '<div class="text-center p-2"><span class="spinner-border spinner-border-sm"></span> Đang tải...</div>'
         );
+
         axios
             .get(`${baseUrl}/api/notifications/user/${userId}`, { params })
             .then((response) => {
                 const notifications = response.data.data;
-                const listContent =
-                    $notificationList.find(".simplebar-content");
+                let listContent = $notificationList.find(".simplebar-content");
+                if (!listContent.length) {
+                    $notificationList.html(
+                        '<div class="simplebar-content"></div>'
+                    );
+                    listContent = $notificationList.find(".simplebar-content");
+                }
                 listContent.empty();
 
                 if (!notifications.length) {
@@ -151,6 +189,10 @@ $(document).ready(function () {
                             low: "border-secondary",
                         }[notification.priority] || "";
 
+                    const { bg, text, icon } = getCategoryStyles(
+                        notification.category
+                    );
+
                     const item = $("<a>", {
                         href: notification.goto_route
                             ? `${baseUrl}/${notification.goto_route.replace(
@@ -165,32 +207,29 @@ $(document).ready(function () {
                         class: `dropdown-item notify-item ${
                             notification.status === "unread"
                                 ? "unread-noti"
-                                : ""
+                                : "read-noti"
                         } ${priorityClass}`,
                         "data-id": notification.id,
+                        "data-category": notification.category,
                     }).html(`
-                        <div class="notify-icon bg-${
-                            notification.category || "system"
-                        }-subtle">
-                            <i class="mdi mdi-${getIconForCategory(
-                                notification.category
-                            )} text-${notification.category || "system"}"></i>
+                        <div class="notify-icon ${bg}">
+                            <i class="mdi mdi-${icon} ${text}"></i>
                         </div>
                         <p class="notify-details">${notification.title}
-                            <small class="noti-time">${new Date(
+                            <small class="noti-time">${timeAgo(
                                 notification.created_at
-                            ).toLocaleString()}</small>
+                            )}</small>
                         </p>
                     `);
 
                     listContent.append(item);
                 });
 
-                // Cập nhật badge dựa trên số thông báo chưa đọc
                 const unreadCount = notifications.filter(
                     (n) => n.status === "unread"
                 ).length;
                 $notificationBadge.text(unreadCount || "");
+
                 if ($notificationList[0].SimpleBar) {
                     $notificationList[0].SimpleBar.recalculate();
                 }
@@ -202,7 +241,6 @@ $(document).ready(function () {
                     backgroundColor:
                         "linear-gradient(to right, #ff4444, #ff6666)",
                 }).showToast();
-                console.error("Error loading notifications:", error);
             });
     }
 
@@ -211,15 +249,17 @@ $(document).ready(function () {
         e.preventDefault();
         const $item = $(this);
         const notificationId = $item.data("id");
+        const category = $item.data("category");
         const href = $item.attr("href");
 
         // Đánh dấu thông báo là đã đọc
         axios
-            .post(`${baseUrl}/api/notifications/${notificationId}/read`, {
-                user_id: userId,
-            })
+            .post(
+                `${baseUrl}/api/admin/notifications/mark-read/${notificationId}`,
+                { user_id: userId }
+            )
             .then(() => {
-                $item.removeClass("unread-noti");
+                $item.removeClass("unread-noti").addClass("read-noti");
                 const currentCount = parseInt($notificationBadge.text()) || 0;
                 $notificationBadge.text(
                     currentCount > 0 ? currentCount - 1 : ""
@@ -229,9 +269,11 @@ $(document).ready(function () {
                 console.error("Error marking notification as read:", error);
             });
 
-        // Chuyển hướng nếu có href
-        if (href !== "#") {
-            window.location.href = href;
+        // Nếu là thông báo đơn hàng, điều hướng đến trang chi tiết đơn hàng
+        if (category === "order" && href !== "#") {
+            window.location.href = href; // Điều hướng đến client.order.detail/{order_id}
+        } else if (href !== "#") {
+            window.location.href = href; // Điều hướng đến các route khác
         }
     });
 
@@ -250,8 +292,14 @@ $(document).ready(function () {
         axios
             .post(`${baseUrl}/api/notifications/clear-all`, { user_id: userId })
             .then(() => {
-                $notificationList
-                    .find(".simplebar-content")
+                let listContent = $notificationList.find(".simplebar-content");
+                if (!listContent.length) {
+                    $notificationList.html(
+                        '<div class="simplebar-content"></div>'
+                    );
+                    listContent = $notificationList.find(".simplebar-content");
+                }
+                listContent
                     .empty()
                     .append(
                         '<p class="text-center p-2">Không có thông báo nào.</p>'
@@ -271,7 +319,6 @@ $(document).ready(function () {
                     backgroundColor:
                         "linear-gradient(to right, #ff4444, #ff6666)",
                 }).showToast();
-                console.error("Error clearing notifications:", error);
             });
     });
 
@@ -279,18 +326,18 @@ $(document).ready(function () {
     const tabHtml = categories
         .map(
             (cat) => `
-                <li class="nav-item">
-                    <a class="nav-link ${
-                        cat === "all" ? "active" : ""
-                    }" href="#" data-category="${cat}">
-                        ${
-                            cat === "all"
-                                ? "Tất cả"
-                                : cat.charAt(0).toUpperCase() + cat.slice(1)
-                        }
-                    </a>
-                </li>
-            `
+        <li class="nav-item">
+            <a class="nav-link ${
+                cat === "all" ? "active" : ""
+            }" href="#" data-category="${cat}">
+                ${
+                    cat === "all"
+                        ? "Tất cả"
+                        : cat.charAt(0).toUpperCase() + cat.slice(1)
+                }
+            </a>
+        </li>
+    `
         )
         .join("");
     $notificationTabs.html(tabHtml);
