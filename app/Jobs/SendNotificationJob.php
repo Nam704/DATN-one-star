@@ -42,6 +42,7 @@ class SendNotificationJob implements ShouldQueue
                 'goto_route' => $this->data['goto_route'],
                 'expires_at' => $this->data['expires_at'],
             ]);
+            Log::info('data trong job', [$notification]);
 
             $eventClass = match ($this->data['type']) {
                 'public' => PublicNotification::class,
@@ -59,6 +60,7 @@ class SendNotificationJob implements ShouldQueue
             Log::info('Tạo và gửi thông báo thành công', [
                 'notification_id' => $notification->id,
                 'title' => $this->data['title'],
+                'data' => $notification,
             ]);
         } catch (\Exception $e) {
             Log::error('Lỗi khi xử lý SendNotificationJob: ' . $e->getMessage(), [

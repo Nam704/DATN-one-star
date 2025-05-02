@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Validator;
 
 class NotificationService
 {
-    // Ánh xạ category với route mặc định
     protected $routeMap = [
         'payment' => 'client.user.myAccount',
         'order' => 'client.order.detail',
@@ -28,9 +27,6 @@ class NotificationService
         // Constructor logic (nếu cần)
     }
 
-    /**
-     * Validate dữ liệu thông báo trước khi xử lý
-     */
     protected function validateNotificationData(array $data, array $additionalRules = []): void
     {
         $rules = array_merge([
@@ -41,8 +37,7 @@ class NotificationService
             'type' => 'required|string',
             'category' => 'nullable|string|in:payment,order,promotion,system',
             'priority' => 'nullable|string|in:high,medium,low',
-            // 'status' => 'required|string|in:unread,read',
-            'goto_id' => 'nullable',
+            'goto_id' => 'nullable|integer',
             'goto_route' => 'nullable|string',
             'expires_at' => 'nullable|date',
         ], $additionalRules);
@@ -53,9 +48,6 @@ class NotificationService
         }
     }
 
-    /**
-     * Gửi thông báo công khai
-     */
     public function sendPublic(array $data): void
     {
         try {
@@ -84,12 +76,9 @@ class NotificationService
         }
     }
 
-    /**
-     * Chuẩn bị dữ liệu thông báo với các giá trị mặc định
-     */
     protected function prepareNotificationData(array $data, string $type): array
     {
-        return [
+        $preparedData = [
             'type' => $data['type'] ?? $type,
             'category' => $data['category'] ?? 'system',
             'priority' => $data['priority'] ?? 'medium',
@@ -102,11 +91,10 @@ class NotificationService
             'goto_route' => $data['goto_route'] ?? ($this->routeMap[$data['category'] ?? 'system'] ?? 'client.dashboard'),
             'expires_at' => $data['expires_at'] ?? now()->addDays(7),
         ];
+        Log::debug('Dữ liệu sau khi chuẩn bị:', $preparedData); // Thêm log
+        return $preparedData;
     }
 
-    /**
-     * Gửi thông báo đến một vai trò cụ thể
-     */
     private function sendToRole(array $data, string $role, ?int $specificUserId = null): void
     {
         try {
@@ -175,12 +163,10 @@ class NotificationService
 
     public function sendAdmin(array $data, ?int $specificUserId = null): void
     {
+        Log::debug('Dữ liệu đầu vào sendAdmin:', $data); // Thêm log để kiểm tra
         $this->sendToRole($data, 'admin', $specificUserId);
     }
 
-    /**
-     * Gửi thông báo riêng tư đến một người dùng cụ thể
-     */
     public function sendPrivate(array $data): void
     {
         try {
@@ -212,9 +198,21 @@ class NotificationService
         }
     }
 
-    /**
-     * Tạo bản ghi thông báo trong cơ sở dữ liệu
-     */
+    public function createOrderNotification(int $userId, int $orderId, string $title, string $message): Notification
+    {
+        return $this->createNotification([
+            'type' => 'private',
+            'category' => 'order',
+            'priority' => 'high',
+            'title' => $title,
+            'message' => $message,
+            'to_user_id' => $userId,
+            'goto_id' => $orderId,
+            'goto_route' => 'client.order.detail',
+            'expires_at' => now()->addDays(7),
+        ]);
+    }
+
     public function createNotification(array $data): Notification
     {
         return Notification::create([
@@ -232,9 +230,6 @@ class NotificationService
         ]);
     }
 
-    /**
-     * Đánh dấu thông báo là đã đọc
-     */
     public function markAsRead(int $notificationId, int $userId): bool
     {
         try {
@@ -259,9 +254,6 @@ class NotificationService
         }
     }
 
-    /**
-     * Đánh dấu tất cả thông báo của người dùng là đã đọc
-     */
     public function markAllAsRead(int $userId): bool
     {
         try {
@@ -280,14 +272,13 @@ class NotificationService
         }
     }
 
-    /**
-     * Lấy tất cả thông báo của một người dùng với phân trang
-     */
     public function getNotificationsByUser(int $userId, int $perPage = 15, ?string $category = null, ?string $priority = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = Notification::where('to_user_id', $userId)
-            ->whereNull('expires_at')
-            ->orWhere('expires_at', '>', now());
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
 
         if ($category) {
             $query->where('category', $category);
@@ -301,9 +292,6 @@ class NotificationService
             ->paginate($perPage);
     }
 
-    /**
-     * Lấy thông báo chưa đọc của một người dùng với phân trang
-     */
     public function getUnreadNotifications(int $userId, int $perPage = 15, ?string $category = null, ?string $priority = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = Notification::where('to_user_id', $userId)
@@ -323,9 +311,6 @@ class NotificationService
             ->paginate($perPage);
     }
 
-    /**
-     * Xóa thông báo
-     */
     public function deleteNotification(int $notificationId): bool
     {
         try {

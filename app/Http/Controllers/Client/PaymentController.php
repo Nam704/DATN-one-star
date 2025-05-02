@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
@@ -63,7 +62,7 @@ class PaymentController extends Controller
 
         // Xử lý kết quả thanh toán
         if ($responseCode == '00') {
-            event(new OrderNotification($order));
+
             $this->orderStatusService->markVNPAYPaid($order);
 
             return redirect()->route('client.user.myAccount')->with('success', 'Thanh toán thành công!');

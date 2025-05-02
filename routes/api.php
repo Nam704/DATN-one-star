@@ -1,8 +1,6 @@
 <?php
 
-
 use App\Http\Controllers\Api\AttributeController;
-
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CategoryBlogController;
 use App\Http\Controllers\Api\TagController;
@@ -11,123 +9,90 @@ use App\Http\Controllers\Api\ImportDetailController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Http\Request;
-
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\NotificationController;
-
 use App\Http\Controllers\Api\ProductImageDescriptionController;
 use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\Client\CartControllerSession;
 use App\Http\Controllers\Client\CartController;
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\OrderController;
 
 Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus']);
+Route::get('/notifications/user/{userId}', [NotificationController::class, 'getNotifications']);
 
-Route::prefix('admin')->group(
-    function () {
-        Route::prefix('attributes')->controller(AttributeController::class)->group(function () {
-            Route::get('get-all', 'getAll');
-            Route::get('get-by-id/{id}', 'getAttributeById');
-            Route::post('creat-values/{id}', 'createValue');
-            Route::post('add', 'store');
-            // Route::post('update/{id}', 'update');
-            // Route::delete('delete/{id}', 'delete');
+Route::prefix('admin')->group(function () {
+    Route::prefix('attributes')->controller(AttributeController::class)->group(function () {
+        Route::get('get-all', 'getAll');
+        Route::get('get-by-id/{id}', 'getAttributeById');
+        Route::post('creat-values/{id}', 'createValue');
+        Route::post('add', 'store');
+    });
 
-        });
-        Route::prefix('brands')->controller(BrandController::class)->group(function () {
-            Route::post('add', 'store');
-        });
+    Route::prefix('brands')->controller(BrandController::class)->group(function () {
+        Route::post('add', 'store');
+    });
 
-        Route::prefix('users')->name('user.')->group(
-            function () {}
-        );
-        Route::prefix('categories')->controller(CategoryController::class)->group(
-            function () {
+    Route::prefix('users')->name('user.')->group(function () {});
 
-                Route::post('add', 'store');
-            }
-        );
+    Route::prefix('categories')->controller(CategoryController::class)->group(function () {
+        Route::post('add', 'store');
+    });
 
-
-        Route::prefix('categoryBlog')->controller(CategoryBlogController::class)->group(
-            function () {
-                Route::post('add', 'store');
-                Route::get('list', 'list');
-            }
-        );
-
-        Route::prefix('tags')->controller(TagController::class)->group(
-            function () {
-                Route::post('add', 'store');
-                Route::get('list', 'list');
-            }
-        );
-
-        Route::prefix('product-images-description')
-            ->controller(ProductImageDescriptionController::class)
-            ->group(
-                function () {
-                    Route::post('/upload', 'uploadImage'); // Upload ảnh
-                    Route::delete('/{id}', 'deleteImage'); // Xóa ảnh
-                    Route::post('/update-description',  'updateDescription'); // Cập nhật nội dung mô tả
-                }
-            );
-
-        Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(
-            function () {
-                Route::get('/unread/{userId}', 'getUnreadCount');
-                Route::post('/mark-read/{id}',  'markAsRead');
-            }
-        );
-        Route::prefix('imports')->controller(ImportController::class)->group(
-            function () {
-                Route::post('accept-all', 'acceptAll')->name('acceptAll');
-                Route::post('reject-all', 'rejectAll')->name('rejectAll');
-                // Route::get('provinces', 'getProvinces');
-                Route::get('{id}/details', [ImportController::class, 'getImportDetails']);
-                Route::post('/confirm-import', [ImportController::class, 'confirmImport'])->name('import.confirm');
-            }
-        );
-    }
-);
-Route::prefix('product-variants')->controller(ProductVariantController::class)->group(
-    function () {
-        Route::get('/{idProduct}', 'getProductVariants');
-        Route::get('total/{idProduct}', 'total');
-        Route::get('/attribute-value/{id}',  'show');
-    }
-);
-Route::prefix('products')->controller(ProductController::class)->group(
-    function () {
-        Route::get('total', 'total');
+    Route::prefix('categoryBlog')->controller(CategoryBlogController::class)->group(function () {
+        Route::post('add', 'store');
         Route::get('list', 'list');
-    }
-);
-Route::prefix('address')->controller(AddressController::class)->name('address.')->group(
-    function () {
-        Route::get('provinces', 'getProvinces');
-        Route::get('districts/{provinceId}',  'getDistrictsByProvince');
-        Route::get('wards/{districtId}', 'getWardsByDistrict');
-        Route::get('details', 'detail');
-        Route::get('detail-default', 'detailDefault');
-    }
-);
-Route::prefix('client')->group(
-    function () {
-        Route::prefix('users')->name('user.')->group(
-            function () {}
-        );
-        // Route::prefix('carts')->controller(CartController::class)->name('carts.')->group(
-        //     function () {
-        //         Route::post('add', 'addToCart');
-        //     }
-        // );
+    });
 
-    }
-);
+    Route::prefix('tags')->controller(TagController::class)->group(function () {
+        Route::post('add', 'store');
+        Route::get('list', 'list');
+    });
+
+    Route::prefix('product-images-description')->controller(ProductImageDescriptionController::class)->group(function () {
+        Route::post('/upload', 'uploadImage');
+        Route::delete('/{id}', 'deleteImage');
+        Route::post('/update-description', 'updateDescription');
+    });
+
+    Route::prefix('notifications')->controller(NotificationController::class)->name('notifications.')->group(function () {
+        Route::get('/unread/{userId}', 'getUnreadCount');
+        Route::post('/mark-read/{id}', 'markAsRead');
+        Route::get('/order-details/{notificationId}', 'getOrderDetailsFromNotification');
+    });
+
+    Route::prefix('imports')->controller(ImportController::class)->group(function () {
+        Route::post('accept-all', 'acceptAll')->name('acceptAll');
+        Route::post('reject-all', 'rejectAll')->name('rejectAll');
+        Route::get('{id}/details', [ImportController::class, 'getImportDetails']);
+        Route::post('/confirm-import', [ImportController::class, 'confirmImport'])->name('import.confirm');
+    });
+});
+
+Route::prefix('product-variants')->controller(ProductVariantController::class)->group(function () {
+    Route::get('/{idProduct}', 'getProductVariants');
+    Route::get('total/{idProduct}', 'total');
+    Route::get('/attribute-value/{id}', 'show');
+});
+
+Route::prefix('products')->controller(ProductController::class)->group(function () {
+    Route::get('total', 'total');
+    Route::get('list', 'list');
+});
+
+Route::prefix('address')->controller(AddressController::class)->name('address.')->group(function () {
+    Route::get('provinces', 'getProvinces');
+    Route::get('districts/{provinceId}', 'getDistrictsByProvince');
+    Route::get('wards/{districtId}', 'getWardsByDistrict');
+    Route::get('details', 'detail');
+    Route::get('detail-default', 'detailDefault');
+});
+
+Route::prefix('client')->group(function () {
+    Route::prefix('users')->name('user.')->group(function () {});
+});
+
 Route::post('/coupon/apply', [VoucherController::class, 'applyCoupon']);
 Route::get('/vouchers/valid', [VoucherController::class, 'getValidVouchers']);
 Route::get('/vouchers/{code}/products', [VoucherController::class, 'getApplicableProducts']);

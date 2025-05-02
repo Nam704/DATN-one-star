@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Order_status;
@@ -146,7 +145,7 @@ class OrderController extends Controller
 
             $reasonId = $request->input('reason_id');
             $order = $this->orderService->cancelOrder($orderId, $reasonId);
-            event(new OrderNotification($order));
+
             return redirect()->back()->with('success', 'Yêu cầu hủy đơn hàng đã được gửi.');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator)->withInput();
