@@ -61,7 +61,5 @@
 @endsection
 @section('scripts')
     @vite('resources/js/address.js')
-
-    {{-- <script src="{{ asset('client/api/accountDetails.js') }}"></script> --}}
     @vite('resources/js/clientDetail.js')
 @endsection
