@@ -105,7 +105,7 @@
     <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="filterForm">
+                <form id="filterForm" action="{{ route('admin.products.filter') }}" method="GET">
                     <div class="modal-header">
                         <h5 class="modal-title" id="filterModalLabel">Filter Products</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -161,12 +161,12 @@
                             <label class="form-label">Khoảng giá</label>
                             <div class="row">
                                 <div class="col">
-                                    <input type="number" class="form-control" name="min_price"
-                                        placeholder="Giá tối thiểu">
+                                    <input type="text" class="form-control" name="min_price"
+                                        placeholder="Giá tối thiểu" maxlength="20" inputmode="decimal">
                                 </div>
                                 <div class="col">
-                                    <input type="number" class="form-control" name="max_price"
-                                        placeholder="Giá tối đa">
+                                    <input type="text" class="form-control" name="max_price" placeholder="Giá tối đa"
+                                        maxlength="20" inputmode="decimal">
                                 </div>
                             </div>
                         </div>
@@ -176,10 +176,13 @@
                             <div class="row">
                                 <div class="col">
                                     <input type="date" class="form-control" name="created_from"
-                                        placeholder="Từ ngày">
+                                        value="{{ old('created_from') }}" max="{{ now()->toDateString() }}"
+                                        onchange="this.blur()" placeholder="Từ ngày">
                                 </div>
                                 <div class="col">
-                                    <input type="date" class="form-control" name="created_to" placeholder="Đến ngày">
+                                    <input type="date" name="created_to" id="created_to" class="form-control"
+                                        value="{{ old('created_to') }}" max="{{ now()->toDateString() }}"
+                                        onchange="this.blur()">
                                 </div>
                             </div>
                             <small class="form-text text-muted">
@@ -189,6 +192,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-outline-warning" id="resetFilter">Reset bộ lọc</button>
                         <button type="button" class="btn btn-primary" id="applyFilter">Áp dụng bộ lọc</button>
                     </div>
                 </form>
@@ -207,29 +211,123 @@
                 if (this.value === 'quantity') {
                     $('#quantity').show();
                 } else {
-                    $('#quantity').hide().val(''); // Ẩn và xóa giá trị khi không cần
+                    $('#quantity').hide().val('');
                 }
             });
 
-            // Bắt sự kiện click nút Apply Filter
+            // Xóa hết các error trước khi chạy validate/lần AJAX mới
+            function clearErrors() {
+                $('.validation-error').remove();
+                $('.is-invalid').removeClass('is-invalid');
+                $('#filterModal .modal-body .alert').remove();
+                // $('#price-error').hide().text('');
+                // $('#date-error').addClass('d-none').find('.date-error-text').text('');
+            }
+
             $('#applyFilter').on('click', function(e) {
                 e.preventDefault();
-                var formData = $('#filterForm').serialize();
-                console.log('Form data:', formData); // Debug dữ liệu gửi đi
+                clearErrors();
 
+                // Lấy nguyên raw input (có dấu . hay - nếu user gõ)
+                var minRaw = $('input[name="min_price"]').val().trim();
+                var maxRaw = $('input[name="max_price"]').val().trim();
+                var errors = {}; // <-- Đưa lên đầu
+
+var fromDate = $('[name="created_from"]').val();
+var toDate = $('[name="created_to"]').val();
+
+if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+    errors.created_to = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.';
+}
+
+
+                // 1. Nếu user nhập giá, phải chỉ gồm [0-9 .] thôi
+                var validPattern = /^[0-9.]+$/;
+                if (minRaw && !validPattern.test(minRaw)) {
+                    errors.min_price = 'Giá tối thiểu chỉ được gồm chữ số và dấu chấm.';
+                }
+                if (maxRaw && !validPattern.test(maxRaw)) {
+                    errors.max_price = 'Giá tối đa chỉ được gồm chữ số và dấu chấm.';
+                }
+
+                // 2. Chuyển về số thực để so sánh
+                if (minRaw && validPattern.test(minRaw)) {
+                    var minVal = parseInt(minRaw.replace(/\./g, ''), 10);
+                    if (isNaN(minVal) || minVal < 0) {
+                        errors.min_price = 'Giá tối thiểu phải lớn hơn hoặc bằng 0.';
+                    } else if (minVal > 100000000) {
+                        errors.min_price = 'Giá tối thiểu không được vượt quá 100.000.000.';
+                    }
+                }
+                if (maxRaw && validPattern.test(maxRaw)) {
+                    var maxVal = parseInt(maxRaw.replace(/\./g, ''), 10);
+                    if (isNaN(maxVal) || maxVal < 0) {
+                        errors.max_price = 'Giá tối đa phải lớn hơn hoặc bằng 0.';
+                    } else if (maxVal > 100000000) {
+                        errors.max_price = 'Giá tối đa không được vượt quá 100.000.000.';
+                    }
+                }
+
+                // 3. So sánh min <= max
+                if (!errors.min_price && !errors.max_price && minRaw && maxRaw) {
+                    var minVal = parseInt(minRaw.replace(/\./g, ''), 10);
+                    var maxVal = parseInt(maxRaw.replace(/\./g, ''), 10);
+                    if (maxVal < minVal) {
+                        errors.max_price = 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.';
+                    }
+                }
+
+                // Nếu có lỗi thì hiển thị và dừng
+                if (Object.keys(errors).length) {
+                    $('#filterModal .modal-body')
+                        .prepend(
+                            '<div class="alert alert-danger validation-error">Vui lòng sửa trước khi lọc:</div>'
+                        );
+                    $.each(errors, function(field, msg) {
+                        var $fld = $('[name="' + field + '"]');
+                        $fld.addClass('is-invalid');
+                        $('<small class="text-danger validation-error">' + msg + '</small>')
+                            .insertAfter($fld);
+                    });
+                    return;
+                }
+                // ngược lại gửi AJAX như cũ
                 $.ajax({
-                    url: '{{ route('admin.products.filter') }}',
-                    method: 'GET',
-                    data: formData,
-                    success: function(html) {
+                    url: $('#filterForm').attr('action'),
+                    method: $('#filterForm').attr('method'),
+                    data: $('#filterForm').serialize(),
+                    success(html) {
                         $('#fixed-header-datatable tbody').html(html);
                         $('#filterModal').modal('hide');
                     },
-                    error: function(xhr) {
-                        console.error('AJAX error:', xhr.responseText);
+                    error(xhr) {
+                        console.error(xhr);
+                        alert('Có lỗi, thử lại.');
                     }
                 });
             });
+
+            $('#resetFilter').on('click', function(e) {
+                e.preventDefault();
+                clearErrors();
+                $('#filterForm')[0].reset();
+                $('#quantity').hide();
+            });
+            $('#filterModal input[name="min_price"], #filterModal input[name="max_price"]')
+                .attr('inputmode', 'numeric')
+                .on('input', function() {
+                    // 1) Loại bỏ hết ký tự không phải số
+                    let s = this.value.replace(/\D/g, '');
+
+                    // 2) Giới hạn độ dài tối đa 9 ký tự (max 999999999)
+                    if (s.length > 9) {
+                        s = s.slice(0, 9);
+                    }
+
+                    // 3) Gán lại raw digits (không clamp giá trị)
+                    this.value = s;
+                });
+
         });
     </script>
 @endpush

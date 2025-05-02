@@ -55,8 +55,8 @@ use App\Models\Voucher;
 
 
 Route::prefix('/')->as('client.')->group(function(){
-    Route::get('/', [HomeController::class, 'index'])->name('home');  
-}); 
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+});
 
 // Người dùng
 Route::middleware(['auth'])->group(function () {
@@ -426,9 +426,9 @@ Route::prefix('client')->name('client.')->group(
 
         Route::prefix('vouchers')->controller(ClientVoucherController::class)->name('vouchers.')->group(function () {
             Route::get('/',  'index')->name('index');
-            Route::get('detail/{id}',  'detail')->name('detail'); 
+            Route::get('detail/{id}',  'detail')->name('detail');
         });
-        
+
 
         Route::controller(ShopController::class)->group(function () {
             Route::get('shop', 'shop')->name('shop');

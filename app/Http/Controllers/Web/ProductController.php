@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -282,23 +284,23 @@ class ProductController extends Controller
             $orderId = $orderDetail->order->id;
             $statusName = $orderDetail->order->orderStatus->name;
 
-             // Giải mã dữ liệu địa chỉ
-        $address = json_decode($orderDetail->order->address_data); // Giải mã dữ liệu JSON
+            // Giải mã dữ liệu địa chỉ
+            $address = json_decode($orderDetail->order->address_data); // Giải mã dữ liệu JSON
 
-        // Lấy các trường địa chỉ
-        $province = $address->name_province ?? 'N/A';
-        $district = $address->name_district ?? 'N/A';
-        $ward = $address->name_ward ?? 'N/A';
-        $addressDetail = $address->address_detail ?? 'N/A';
+            // Lấy các trường địa chỉ
+            $province = $address->name_province ?? 'N/A';
+            $district = $address->name_district ?? 'N/A';
+            $ward = $address->name_ward ?? 'N/A';
+            $addressDetail = $address->address_detail ?? 'N/A';
             if (!isset($users[$userId])) {
                 $users[$userId] = [
                     'user' => $orderDetail->order->user,
-                     'address' => [
-                    'province' => $province,
-                    'district' => $district,
-                    'ward' => $ward,
-                    'address_detail' => $addressDetail,
-                ],
+                    'address' => [
+                        'province' => $province,
+                        'district' => $district,
+                        'ward' => $ward,
+                        'address_detail' => $addressDetail,
+                    ],
                     'orders' => []
                 ];
             }
@@ -372,6 +374,38 @@ class ProductController extends Controller
     }
     public function filter(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'category'     => 'nullable|exists:categories,id',
+            'brand'        => 'nullable|exists:brands,id',
+            'stock'        => 'nullable|in:in_stock,out_of_stock,low_stock,quantity',
+            'quantity'     => 'nullable|required_if:stock,quantity|integer|min:0',
+            'sort_view'    => 'nullable|in:asc,desc',
+            'min_price'    => 'nullable|numeric|min:0|max:100000000',
+            'max_price'    => 'nullable|numeric|min:0|max:100000000|gte:min_price',
+            'created_from' => 'nullable|date',
+            'created_to'   => 'nullable|date|after_or_equal:created_from|before_or_equal:today',
+        ], [
+            'quantity.required_if'         => 'Khi chọn “Số lượng cụ thể” bạn phải nhập số lượng.',
+            'max_price.gte'                => 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.',
+            'created_to.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'created_to.before_or_equal'   => 'Ngày kết thúc không được lớn hơn hôm nay.',
+            'min_price.max'                => 'Giá tối thiểu không được vượt quá 100.000.000.',
+            'max_price.max'                => 'Giá tối đa không được vượt quá 100.000.000.',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                // Trả JSON 422 để client-side bắt và hiển thị (nếu muốn)
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+            // Với form POST truyền về (non-AJAX) thì redirect back
+            return redirect()->back()
+                             ->withErrors($validator)
+                             ->withInput();
+        }
+
         $query = (new Product)->listActive();
 
         if ($request->filled('category')) {
