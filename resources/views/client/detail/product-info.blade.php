@@ -138,9 +138,9 @@
                     </form>
                 </div>
             @elseif (!$hasPurchased)
-                <p class="mt-3 text-gray-500">Bạn cần mua sản phẩm này và nhận hàng để được đánh giá.</p>
+                <p class="mt-3 text-gray-500"></p>
             @else
-                <p class="mt-3 text-gray-500">Bạn đã đánh giá sản phẩm này.</p>
+                <p class="mt-3 text-gray-500"></p>
             @endif
         @else
             <p class="mt-3">Vui lòng <a href="{{ route('auth.getFormLogin') }}">đăng nhập</a> để bình luận.</p>
@@ -226,7 +226,7 @@
                 // Thêm thông báo "Bạn đã đánh giá"
                 const note = document.createElement('p');
                 note.className = 'mt-3 text-gray-500';
-                note.textContent = 'Bạn đã đánh giá sản phẩm này.';
+                note.textContent = '';
                 document.querySelector('.reviews_wrapper').appendChild(note);
             } else {
                 alert(data.message); // Hiển thị lỗi từ server
