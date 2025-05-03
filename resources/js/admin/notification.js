@@ -6,10 +6,20 @@ $(document).ready(function () {
     const $notificationBadge = $("#notification_badge");
     const $notificationList = $("#notification_simplebar");
     const $notificationTabs = $("#notification-tabs");
-    const $clearAllLink = $("#notification_list .text-decoration-underline");
+    const $clearAllLink = $("#clear_all");
+
     const categories = ["all", "payment", "order", "promotion", "system"];
     let currentCategory = "all";
-
+    let simpleBarInstance;
+    try {
+        simpleBarInstance = new SimpleBar($notificationList[0], {
+            autoHide: true,
+            scrollbarMinSize: 25,
+        });
+        console.log("SimpleBar initialized successfully:", simpleBarInstance);
+    } catch (error) {
+        console.error("Failed to initialize SimpleBar:", error);
+    }
     // Hàm tính thời gian tương đối (ví dụ: "1 min ago")
     function timeAgo(date) {
         const now = new Date();
@@ -147,12 +157,11 @@ $(document).ready(function () {
         `);
 
         listContent.prepend(item);
-        if ($notificationList[0].SimpleBar) {
-            $notificationList[0].SimpleBar.recalculate();
-        }
+        // Cập nhật SimpleBar sau khi thêm nội dung
+        simpleBarInstance.recalculate();
     }
 
-    // Tải danh sách thông báo từ API
+    // Cập nhật hàm loadNotifications
     function loadNotifications(category = "all") {
         const params = { per_page: 15 };
         if (category !== "all") params.category = category;
@@ -178,6 +187,7 @@ $(document).ready(function () {
                     listContent.append(
                         '<p class="text-center p-2">Không có thông báo nào.</p>'
                     );
+                    simpleBarInstance.recalculate();
                     return;
                 }
 
@@ -230,9 +240,8 @@ $(document).ready(function () {
                 ).length;
                 $notificationBadge.text(unreadCount || "");
 
-                if ($notificationList[0].SimpleBar) {
-                    $notificationList[0].SimpleBar.recalculate();
-                }
+                // Cập nhật SimpleBar sau khi tải danh sách
+                simpleBarInstance.recalculate();
             })
             .catch((error) => {
                 Toastify({
