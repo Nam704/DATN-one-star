@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('google_id')->unique()->nullable();
             $table->string('phone')->unique()->nullable();
-            $table->string('is_lock')->default('active');
+            $table->boolean('is_lock')->default(false);
             $table->string('status')->default('active');
             $table->unsignedBigInteger('id_role');
             $table->timestamp('email_verified_at')->nullable();

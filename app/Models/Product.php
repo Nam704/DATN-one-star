@@ -20,6 +20,7 @@ class Product extends Model
         'id_category',
         'description',
         'image_primary',
+        'view',
         'status',
         'created_at',
         'updated_at',
@@ -74,6 +75,12 @@ class Product extends Model
     {
         return $this->hasMany(Product_albums::class, 'id_product');
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);  // mới
+    }
+
     public function getProductWithDetails()
     {
         return $this->load([
@@ -192,13 +199,15 @@ class Product extends Model
             ->get();
     }
     public function top_sale_products_today($start_date, $end_date)
+
     {
         if ($start_date && $end_date) {
             return DB::table('products')
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
-                ->where('orders.id_order_status', '=', 7)
+                ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+                ->whereNotIn('order_statuses.name', ['Cancelled'])
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -216,7 +225,8 @@ class Product extends Model
             ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
-            ->where('orders.id_order_status', '=', 4)
+            ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+            ->whereNotIn('order_statuses.name', ['Cancelled'])
             ->select(
                 'products.id',
                 'products.name',
@@ -225,6 +235,47 @@ class Product extends Model
             )
             ->groupBy('products.id', 'products.name', 'products.image_primary')
             ->orderBy('total_sold', 'desc')
+            ->orderBy('products.name', 'asc')
+            ->limit(10)
+            ->get();
+    }
+    public function top_sale_products_today($start_date, $end_date)
+    {
+        if ($start_date && $end_date) {
+            return DB::table('products')
+                ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+                ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+                ->join('orders', 'order_details.id_order', '=', 'orders.id')
+                ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+                ->whereNotIn('order_statuses.name', ['Cancelled'])
+                ->whereBetween('orders.created_at', [$start_date, $end_date])
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.image_primary',
+                    DB::raw('SUM(order_details.quantity) as total_sold')
+                )
+                ->groupBy('products.id', 'products.name', 'products.image_primary')
+                ->orderBy('total_sold', 'desc')
+                ->limit(10)
+                ->get();
+        }
+
+        return DB::table('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->join('orders', 'order_details.id_order', '=', 'orders.id')
+            ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+            ->whereNotIn('order_statuses.name', ['Cancelled'])
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('SUM(order_details.quantity) as total_sold')
+            )
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->orderBy('total_sold', 'desc')
+            ->orderBy('products.name', 'asc')
             ->limit(10)
             ->get();
     }
@@ -234,24 +285,32 @@ class Product extends Model
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+
+            ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+
             ->select(
                 'products.id',
                 'products.name',
                 'products.image_primary',
                 DB::raw("
-                COALESCE(SUM(
-                    CASE
-                        WHEN orders.id_order_status = 7
-                        " . ($start_date && $end_date ? " AND orders.created_at BETWEEN '$start_date' AND '$end_date'" : "") . "
-                        THEN order_details.quantity
-                        ELSE 0
-                    END
-                ), 0) as total_sold
-            ")
+
+              COALESCE(SUM(
+                  CASE
+                      WHEN order_statuses.name != 'Cancelled'
+                      " . ($start_date && $end_date ? " AND orders.created_at BETWEEN '$start_date' AND '$end_date'" : "") . "
+                      THEN order_details.quantity
+                      ELSE 0
+                  END
+              ), 0) as total_sold
+          ")
+
             )
             ->where('products.status', 'active')
             ->groupBy('products.id', 'products.name', 'products.image_primary')
             ->orderBy('total_sold', 'asc')
+
+            ->orderBy('products.name', 'asc')
+
             ->limit(10);
 
         return $query->get();
@@ -262,6 +321,7 @@ class Product extends Model
     {
         return DB::table('products')
             ->where('status', '=', 'active')
+            ->where('view', '>', 0)
             ->select(
                 'id',
                 'name',
@@ -273,47 +333,66 @@ class Product extends Model
             ->get();
     }
 
+    public function top_view_product()
+    {
+        return DB::table('products')
+            ->where('status', '=', 'active')
+            ->where('view', '>', 0)
+            ->select(
+                'id',
+                'name',
+                'image_primary',
+                'view'
+            )
+            ->orderBy('view', 'desc')
+            ->get();
+    }
 
-    public function least_sold_products($startDate, $endDate)
+
+    public function least_sold_products($start_date, $end_date, $min_sales = 3)
     {
         return DB::table('products')
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+            ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') //them
             ->select(
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(CASE WHEN orders.id_order_status = 7 AND orders.created_at BETWEEN "' . $startDate . '" AND "' . $endDate . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
+                DB::raw('COALESCE(SUM(CASE  WHEN order_statuses.name != "Cancelled" AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
-            ->where('product_variants.status', '=', 'active')  // Kiểm tra trạng thái sản phẩm variant
+            ->where('products.created_at', '<=', $end_date) // Chỉ lấy sản phẩm đã tồn tại trước hoặc tại $endDate
             ->groupBy('products.id', 'products.name', 'products.image_primary')
-            ->orderBy('total_sold', 'asc')  // Sắp xếp theo số lượng bán (từ thấp đến cao)
+            ->having(DB::raw('total_sold'), '<=', $min_sales)
+            ->orderBy('total_sold', 'asc')
             ->get();
     }
 
-
-
-    public function low_stock_products($startDate, $endDate)
+    public function low_stock_products()
     {
         $query = DB::table('products')
-            ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->select(
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('SUM(product_variants.quantity) as total_quantity')
+                DB::raw('COALESCE(SUM(product_variants.quantity), 0) as total_quantity')
             )
             ->where('products.status', '=', 'active')
-            ->where('product_variants.status', '=', 'active')
-            ->whereBetween('product_variants.updated_at', [$startDate, $endDate])
+            ->where(function ($q) {
+                $q->where('product_variants.status', '=', 'active')
+                    ->orWhereNull('product_variants.status');
+            })
             ->groupBy('products.id', 'products.name', 'products.image_primary')
-            ->havingRaw('SUM(product_variants.quantity) < 10')
+            ->havingRaw('COALESCE(SUM(product_variants.quantity), 0) < 10')
             ->orderBy('total_quantity', 'asc');
 
         return $query->get();
     }
+
+
 
 
     // sản phẩm đã bán
@@ -325,7 +404,8 @@ class Product extends Model
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
-                ->where('orders.id_order_status', '=', 7)
+                ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+                ->whereNotIn('order_statuses.name', ['Cancelled'])
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -341,7 +421,8 @@ class Product extends Model
             ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
-            ->where('orders.id_order_status', '=', 7)
+            ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
+            ->whereNotIn('order_statuses.name', ['Cancelled'])
             ->select(
                 'products.id',
                 'products.name',
@@ -350,16 +431,26 @@ class Product extends Model
             )
             ->groupBy('products.id', 'products.name', 'products.image_primary')
             ->orderBy('total_sold', 'desc')
+            ->orderBy('products.name', 'asc')
             ->get();
     }
 
-    public function comments()
+    public function top_comment_products($start_date, $end_date)
     {
-        return $this->hasMany(ProductComment::class)->whereNull('parent_id')->with('replies');;
-    }
+        return DB::table('products')
+            ->join('comments', 'products.id', '=', 'comments.product_id')
+            ->where('products.status', 'active')
+            ->whereBetween('comments.created_at', [$start_date, $end_date])
+            ->groupBy('products.id', 'products.name', 'products.image_primary')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.image_primary',
+                DB::raw('COUNT(comments.id) as total_comments')
+            )
+            ->orderByDesc('total_comments')
+            ->orderBy('products.name', 'asc')
+            ->get();
 
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
     }
 }

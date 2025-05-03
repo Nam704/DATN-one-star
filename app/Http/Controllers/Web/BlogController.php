@@ -38,14 +38,32 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'required|string|max:255|unique:blogs,title',
+            'content' => 'required|string',
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+        ], [
+            'title.required' => 'Tiêu đề bài viết là bắt buộc.',
+            'title.string' => 'Tiêu đề bài viết phải là một chuỗi ký tự.',
+            'title.max' => 'Tiêu đề bài viết không được quá 255 ký tự.',
+            'title.unique' => 'Tiêu đề bài viết đã tồn tại. Vui lòng chọn tiêu đề khác.',
+
+            'content.required' => 'Nội dung bài viết là bắt buộc.',
+            'content.string' => 'Nội dung bài viết phải là một chuỗi ký tự.',
+
+            'thumbnail.required' => 'Không được để trống ảnh',
+            'thumbnail.image' => 'Ảnh bài viết phải là một tệp hình ảnh.',
+            'thumbnail.mimes' => 'Ảnh bài viết phải có định dạng jpeg, png, jpg, gif, webp hoặc svg.',
+            'thumbnail.max' => 'Ảnh bài viết không được vượt quá 2MB.',
+        ]);
+
         $blog_data = $this->BlogService->createBlog($request);
-        // Lấy danh sách blog mới nhất
+
         $blogs = Blog::latest()->get();
-        $categories = CategoryBlog::with(['blogs' => function ($query) {
-            $query->whereNull('deleted_at')->with('tags');
-        }])->get();
-        return view('admin.blog.index', compact('blogs', 'categories'));
+
+        return view('admin.blog.index', compact('blogs'));
     }
+
 
     public function show(string $id)
     {
@@ -62,8 +80,25 @@ class BlogController extends Controller
         return view('admin.blog.edit', compact('tags', 'categoryBlog', 'blog'));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'title' => 'required|string|max:255|unique:blogs,title,' . $id,
+            'content' => 'required|string',
+            'category_id' => 'required|exists:category_blog,id',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', 
+        ],
+    [
+        'title.required' => 'Vui lòng nhập tên bài viết.',
+        'title.max' => 'Nhập tối đa 255 từ.',
+        'title.unique' => 'Tiêu đề bị trùng',
+        'content.required' => 'Vui lòng nhập nội dung bài viết.',
+        'category_id.required' => 'Vui lòng chọn danh mục.',
+        'thumbnail.image' => 'Vui lòng chọn một file ảnh hợp lệ.',
+        'thumbnail.mimes' => 'File ảnh phải có định dạng jpeg, png, jpg, gif, webp hoặc svg.',
+        'thumbnail.max' => 'File ảnh không được vượt quá 2MB.'
+    ]);
+
         $blog = $this->BlogService->updateBlog($request, $id);
         $blogs = Blog::latest()->get();
         $categories = CategoryBlog::with(['blogs' => function ($query) {
@@ -71,6 +106,7 @@ class BlogController extends Controller
         }])->get();
         return view('admin.blog.index', compact('blogs', 'categories'));
     }
+
 
     public function destroy($id)
     {
@@ -81,7 +117,7 @@ class BlogController extends Controller
             $blog->delete(); // Xóa mềm
 
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'Bài viết đã được xóa mềm!']);
+            return response()->json(['success' => true, 'message' => 'Bài viết đã được xóa!']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Lỗi khi xóa bài viết!', 'error' => $e->getMessage()]);
@@ -95,10 +131,10 @@ class BlogController extends Controller
     }
 
     public function restore($id)
-    {
-        try {
-            $blog = Blog::onlyTrashed()->findOrFail($id);
-            $blog->restore();
+{
+    try {
+        $blog = Blog::onlyTrashed()->findOrFail($id);
+        $blog->restore();
 
             return response()->json(['success' => true, 'message' => 'Bài viết đã được khôi phục!']);
         } catch (\Exception $e) {

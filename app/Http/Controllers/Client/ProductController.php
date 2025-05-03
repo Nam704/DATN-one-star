@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
+use App\Models\Order;
+use App\Models\Order_status;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
@@ -17,21 +20,56 @@ class ProductController extends Controller
     public function detail($id)
     {
         $product = $this->productService->productDetail($id);
+
+        // Tự động tăng view mỗi lần xem chi tiết
+        $product->increment('view');
+
         $relatedProducts = Product::where('id_category', $product->id_category)
             ->where('id', '!=', $product->id)
             ->limit(4)
             ->get();
 
-        $comments = $product->comments()
-            ->whereNull('parent_id')
-            ->with('user')
-            ->get();
-
         $product_comment = Product::withCount('comments')->find($id);
         $totalComments = $product_comment->comments_count;
 
+        $comments = Comment::with('user')->where('product_id', $id)->where('status', 'active')->get();
+
         return view('client.detail.index', compact('product', 'relatedProducts', 'comments', 'totalComments'));
     }
+
+    public function storecomment(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'comment' => 'required|string',
+            'rating' => 'nullable|integer|min:1|max:5',
+        ]);
+
+        // kiểm tra sản phẩm đã bình luận rồi
+        $existing = Comment::where('product_id', $request->product_id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($existing) {
+            return response()->json(['message' => 'Cảm ơn bạn đã đánh giá và bình luận sản phẩm'], 400);
+        }
+
+        $comment = Comment::create([
+            'user_id' => auth()->id(),
+            'product_id' => $request->product_id,
+            'comment' => $request->comment,
+            'rating' => $request->rating ?? 5,
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'message' => 'Cảm ơn bạn đã đánh giá và bình luận sản phẩm của chúng tôi!',
+            'comment' => $comment->comment,
+            'rating' => $comment->rating
+        ]);
+    }
+
+
 
     public function related($id)
     {

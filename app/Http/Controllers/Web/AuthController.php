@@ -50,41 +50,50 @@ class AuthController extends Controller
     }
     public function login(AuthRequest $request)
     {
-
         try {
-
             $credentials = $request->only('email', 'password');
 
+            $user = User::where('email', $credentials['email'])->first();
+
+            if ($user && $user->is_lock) {
+                return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.');
+            }
+
             if (Auth::attempt($credentials, $request->filled('remember'))) {
-
                 $user = Auth::user();
+
+                //khóa tk
+                if ($user->is_lock) {
+                    Auth::logout();
+                    return redirect()->route('auth.getFormLogin')->withErrors([
+                        'email' => 'Tài khoản của bạn đã bị khóa.'
+                    ]);
+                }
+
+
                 if ($user->isAdmin()) {
-                    return redirect()->route('admin.dashboard'); // Admin dashboard
+                    return redirect()->route('admin.dashboard');
                 } elseif ($user->isUser()) {
-                    // return "go to user dashboard";
-                    return redirect()->route('client.home'); // Admin dashboard
-
-                    // return redirect()->route('user.dashboard'); // User dashboard
+                    return redirect()->route('client.home');
                 } elseif ($user->isEmployee()) {
-                    return redirect()->route('admin.dashboard'); // Admin dashboard
-
-                    // return "go to employee dashboard";
-                    // return redirect()->route('employee.dashboard'); // Client dashboard
+                    return redirect()->route('admin.dashboard');
                 }
             } else {
                 // return "out auth attempt";
-                return redirect()->back()->with('error', 'Cannot log in, please check your email and password again.');
+                return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra lại email và mật khẩu.');
             }
+
+            return redirect()->back()->with('error', 'Không thể đăng nhập, vui lòng kiểm tra email và mật khẩu.');
         } catch (\Exception $e) {
             // Handle the exception
             // return "in try catch";
-            return redirect()->back()->with('error', 'An error occurred during login.');
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi trong quá trình đăng nhập.');
         }
     }
-    function logout()
+    function logout(Request $request)
     {
         Auth::logout();
-
+        $request->session()->invalidate();
         return redirect()->route('auth.login');
     }
     public function getFormRegister()
@@ -106,9 +115,21 @@ class AuthController extends Controller
 
         Register::dispatch($user);
 
+        // Đăng nhập ngay lập tức
         Auth::login($user);
         $this->cartService->store($user->id);
-        return redirect()->route('auth.login')->with('success', 'Registration successful! Please login.');
+
+        // Chuyển hướng dựa trên vai trò người dùng
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->isUser()) {
+            return redirect()->route('client.home');
+        } elseif ($user->isEmployee()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        // Trường hợp mặc định nếu không xác định được vai trò
+        return redirect()->route('auth.login')->with('success', 'Registration successful. Please login.');
     }
     function  getFormForgotPassword()
     {

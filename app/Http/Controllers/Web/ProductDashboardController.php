@@ -37,7 +37,7 @@ class ProductDashboardController extends Controller
      {
          $start_date = $request->start_date;
          $end_date = $request->end_date;
-         $top_view_product = $this->product->top_view_product($start_date, $end_date);
+         $top_view_product = $this->product->top_view_product_today($start_date, $end_date);
          return response()->json($top_view_product);
      }
  
@@ -47,5 +47,13 @@ class ProductDashboardController extends Controller
          $end_date = $request->end_date;
          $top_least_products = $this->product->least_sold_products_today($start_date, $end_date);
          return response()->json($top_least_products);
+     }
+
+     public function lowStockProducts(Request $request)
+     {
+         $start_date = $request->start_date;
+         $end_date = $request->end_date;
+         $low_stock_products = $this->product->low_stock_products($start_date, $end_date);
+         return response()->json($low_stock_products);
      }
 }

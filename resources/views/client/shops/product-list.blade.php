@@ -8,7 +8,6 @@
                         {{ $product->name }}
                     </a>
                 </h3>
-                <p class="manufacture_product"><a href="#">Accessories</a></p>
             </div>
             <div class="product_thumb"
                 style="width:200px; height:250px; overflow:hidden; position:relative; padding: 5px; margin: auto; background-color: #fff; box-sizing: border-box;">
@@ -21,7 +20,7 @@
                     <img src="{{ asset($product->image_primary) }}" alt="{{ $product->name }}"
                         style="width:100%; height:100%; object-fit:contain; opacity:0; transition: opacity 0.3s; display:block;">
                 </a>
-                <div class="action_links">
+                {{-- <div class="action_links">
                     <ul>
                         <li class="quick_button">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#modal_box" title="quick view">
@@ -39,7 +38,7 @@
                             </a>
                         </li>
                     </ul>
-                </div>
+                </div> --}}
             </div>
             <div class="product_content grid_content">
                 <div class="content_inner">
@@ -56,11 +55,11 @@
                         <div class="price_box">
                             <span class="current_price">{{ number_format($product->min_price, 0, ',', '.') }}đ</span>
                         </div>
-                        <div class="add_to_cart">
+                        {{-- <div class="add_to_cart">
                             <a href="cart.html" title="add to cart">
                                 <span class="lnr lnr-cart"></span>
                             </a>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

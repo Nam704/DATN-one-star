@@ -1,32 +1,167 @@
+import "./app.js";
 $(document).ready(function () {
-    console.log("this is account details");
+    // console.log("this is account details");
     var csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
+    const $retryPaymentBtn = $("#retry-payment");
+
+    $retryPaymentBtn.on("click", function (e) {
+        e.preventDefault();
+        const orderId = $(this).data("id");
+        const $button = $(this);
+
+        // Vô hiệu hóa nút để ngăn nhấp đúp
+        $button.prop("disabled", true);
+        GlobalUtils.showNotification("Đang xử lý thanh toán...");
+
+        axios
+            .post(
+                `${GlobalUtils.baseUrl}/client/orders/${orderId}/retry-payment`
+            )
+            .then((response) => {
+                const data = response.data;
+
+                if (data.success && data.code === "PAYMENT_INITIATED") {
+                    // Kiểm tra redirectUrl trước khi chuyển hướng
+                    console.log(data);
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        GlobalUtils.showNotification(
+                            "Lỗi: Không nhận được URL thanh toán từ server.",
+                            { backgroundColor: "#ff4444" }
+                        );
+                        $button.prop("disabled", false);
+                    }
+                } else {
+                    // Xử lý các mã lỗi cụ thể
+                    let errorMessage;
+                    switch (data.code) {
+                        case "CANNOT_RETRY":
+                            errorMessage =
+                                data.message ||
+                                "Không thể thử lại thanh toán cho đơn hàng này.";
+                            break;
+                        case "MAX_ATTEMPTS_EXCEEDED":
+                            errorMessage =
+                                "Đơn hàng đã bị hủy do vượt quá số lần thử thanh toán.";
+                            break;
+                        case "PAYMENT_INITIATION_FAILED":
+                            errorMessage =
+                                "Không thể khởi tạo thanh toán. Vui lòng thử lại.";
+                            break;
+                        case "SYSTEM_ERROR":
+                            errorMessage =
+                                "Lỗi hệ thống. Vui lòng thử lại sau.";
+                            break;
+                        default:
+                            errorMessage =
+                                data.message ||
+                                "Lỗi không xác định khi xử lý thanh toán.";
+                    }
+                    GlobalUtils.showNotification(errorMessage, {
+                        backgroundColor: "#ff4444",
+                    });
+                    $button.prop("disabled", false);
+                }
+            })
+            .catch((error) => {
+                // Xử lý lỗi mạng hoặc server (500, 404, v.v.)
+                const errorMessage =
+                    error.response?.data?.message ||
+                    "Lỗi kết nối server. Vui lòng thử lại.";
+                GlobalUtils.showNotification(errorMessage, {
+                    backgroundColor: "#ff4444",
+                });
+                $button.prop("disabled", false);
+            });
+    });
 
     // Lắng nghe sự kiện từ kênh riêng tư cho người dùng
     window.Echo.private(`notifications.${user.id}`).listen(
         "OrderNotification",
         (event) => {
-            // Cập nhật trạng thái đơn hàng trong bảng
-            console.log(event.order);
-            const orderId = event.order.id; // ID của đơn hàng nhận từ sự kiện
-            const orderStatus = event.status; // Trạng thái đơn hàng nhận từ sự kiện
+            // Log để kiểm tra dữ liệu từ sự kiện
+            console.log("Order event:", event.order);
 
-            // Tìm đơn hàng trong bảng và cập nhật trạng thái
+            const orderId = event.order.id; // ID của đơn hàng
+            const orderStatus = event.status; // Trạng thái đơn hàng từ sự kiện
+
+            // Tìm hàng trong bảng bằng id
             const orderRow = document.getElementById(`order-${orderId}`);
             if (orderRow) {
-                const statusCell = orderRow.querySelector(".status");
+                const statusCell = orderRow.querySelector(".status"); // Tìm thẻ <span class="status">
                 if (statusCell) {
-                    statusCell.textContent = orderStatus; // Cập nhật trạng thái đơn hàng
+                    // Cập nhật nội dung trạng thái
+                    statusCell.textContent = orderStatus;
+
+                    // Cập nhật class của badge dựa trên trạng thái (tùy chọn)
+                    if (orderStatus === "Delivered") {
+                        statusCell.className = "status badge bg-success";
+                    } else if (orderStatus === "Cancelled") {
+                        statusCell.className = "status badge bg-danger";
+                    } else {
+                        statusCell.className = "status badge bg-warning";
+                    }
                 }
+            } else {
+                console.warn(`Không tìm thấy hàng với id: order-${orderId}`);
             }
 
-            // Hiển thị thông báo cho người dùng
-            // alert(event.message);
+            // Hiển thị thông báo (nếu cần)
+            // GlobalUtils.showNotification(event.message);
         }
     );
+    $(document).on("click", ".update-status", function (e) {
+        e.preventDefault();
+        const orderId = $(this).data("id"); // Lấy orderId từ thuộc tính data-id
+        const $button = $(this); // Lưu tham chiếu đến nút được nhấn
 
+        // Vô hiệu hóa nút để tránh nhấn nhiều lần
+        $button.prop("disabled", true).text("Đang xử lý...");
+
+        // Gửi yêu cầu AJAX bằng Axios
+        axios
+            .post(`/client/orders/${orderId}/update-status`, {
+                _token: csrfToken, // Gửi CSRF token nếu cần
+            })
+            .then((response) => {
+                const data = response.data;
+
+                if (data.success) {
+                    // Cập nhật trạng thái trong giao diện
+                    const $row = $button.closest("tr"); // Tìm hàng chứa nút
+                    const $statusBadge = $row.find(".badge"); // Tìm badge hiển thị trạng thái
+
+                    // Giả sử trạng thái mới là "Delivered" (có thể điều chỉnh theo logic thực tế)
+                    $statusBadge
+                        .text("Delivered") // Cập nhật văn bản trạng thái
+                        .removeClass("bg-warning") // Xóa lớp cũ
+                        .addClass("bg-success"); // Thêm lớp mới cho trạng thái Delivered
+
+                    // Xóa nút "Đã nhận" vì trạng thái đã được cập nhật
+                    $button.remove();
+
+                    // Hiển thị thông báo thành công
+                    GlobalUtils.showNotification(
+                        "Cập nhật trạng thái thành công!"
+                    );
+                } else {
+                    // Hiển thị thông báo lỗi từ server
+                    alert(data.message || "Không thể cập nhật trạng thái.");
+                    $button.prop("disabled", false).text("Đã nhận"); // Khôi phục nút
+                }
+            })
+            .catch((error) => {
+                // Xử lý lỗi mạng hoặc server
+                const errorMessage =
+                    error.response?.data?.message ||
+                    "Lỗi hệ thống. Vui lòng thử lại.";
+                alert(errorMessage);
+                $button.prop("disabled", false).text("Đã nhận"); // Khôi phục nút
+            });
+    });
     $("#save_address").click(function (e) {
         e.preventDefault();
         var is_default = $("#is_default").is(":checked") ? 1 : 0;
@@ -75,7 +210,6 @@ $(document).ready(function () {
                 $("#save_address").text("Save Address");
 
                 refreshAddressList();
-
             },
             error: function (xhr, status, error) {
                 console.error(error);
@@ -91,37 +225,139 @@ $(document).ready(function () {
 
     $(document).on("click", ".edit-address", function () {
         var addressId = $(this).data("id");
-        var addressDetail = $(this).data("detail");
         var wardId = $(this).data("ward");
-        var districtId = $(this).data("district");
         var provinceId = $(this).data("province");
-        var isDefault = $(this).data("default") == 1;
 
-        $("#address_id").val(addressId);
-        $("#address_detail").val(addressDetail);
-        $("#is_default").prop("checked", isDefault);
+        // Gửi yêu cầu AJAX để lấy thông tin chi tiết địa chỉ
+        $.ajax({
+            type: "get",
+            url: "http://127.0.0.1:8000/api/address/details",
+            data: {
+                id: addressId,
+            },
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
+                if (response) {
+                    var data = response;
 
-        if (provinceId) {
-           setTimeout(function () {
-                $("#province").val(provinceId).trigger("change");
+                    // Điền thông tin vào form
+                    $("#address_id").val(addressId);
+                    $("#address_detail").val(data.address_detail);
 
-                setTimeout(function () {
-                    if (districtId) {
-                        $("#district").val(districtId).trigger("change");
+                    // 1. Tải danh sách tỉnh (provinces) từ API và điền vào dropdown #province
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/address/provinces", // API lấy danh sách tỉnh
+                        dataType: "json",
+                        success: function (provinces) {
+                            // Xóa các options cũ trong dropdown province
+                            $("#province").html(
+                                '<option value="">Chọn Tỉnh/Thành phố</option>'
+                            );
+                            // Thêm các options vào dropdown #province
+                            $.each(provinces, function (key, province) {
+                                var selected =
+                                    province.id == data.province_id
+                                        ? "selected"
+                                        : "";
+                                $("#province").append(
+                                    '<option value="' +
+                                        province.id +
+                                        '" ' +
+                                        selected +
+                                        ">" +
+                                        province.name +
+                                        "</option>"
+                                );
+                            });
+                            // Kích hoạt dropdown #province
+                            $("#province").prop("disabled", false);
 
-                        setTimeout(function () {
-                            if (wardId) {
-                                $("#ward").val(wardId);
-                            }
-                        }, 500);
+                            // Sau khi province đã được cập nhật, tiếp tục tải district
+                            loadDistricts(data.province_id, data.district_id);
+                        },
+                    });
+
+                    // 3. Kiểm tra nếu địa chỉ này là mặc định, đánh dấu checkbox
+                    if (data.is_default) {
+                        $("#is_default").prop("checked", true);
+                    } else {
+                        $("#is_default").prop("checked", false);
                     }
-                }, 500);
-            }, 100);
+                } else {
+                    alert("Không tìm thấy dữ liệu địa chỉ.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                alert("Có lỗi khi lấy dữ liệu địa chỉ.");
+            },
+        });
+
+        // Hàm tải district từ API
+        function loadDistricts(provinceId, selectedDistrictId) {
+            // Gửi yêu cầu AJAX để lấy danh sách district cho tỉnh đã chọn
+            $.ajax({
+                url: "/api/address/districts/" + provinceId, // API lấy danh sách quận theo tỉnh
+                type: "GET",
+                dataType: "json",
+                success: function (districts) {
+                    // Xóa các options cũ trong dropdown district
+                    $("#district").html(
+                        '<option value="">Chọn Quận/Huyện</option>'
+                    );
+                    // Thêm các options vào dropdown #district
+                    $.each(districts, function (key, district) {
+                        var selected =
+                            district.id == selectedDistrictId ? "selected" : "";
+                        $("#district").append(
+                            '<option value="' +
+                                district.id +
+                                '" ' +
+                                selected +
+                                ">" +
+                                district.name +
+                                "</option>"
+                        );
+                    });
+                    // Kích hoạt dropdown #district
+                    $("#district").prop("disabled", false);
+
+                    // Sau khi district đã được cập nhật, tiếp tục tải ward
+                    loadWards(selectedDistrictId);
+                },
+            });
         }
 
-        $("#save_address").text("Update Address");
-
-
+        // Hàm tải wards từ API
+        function loadWards(districtId) {
+            // Gửi yêu cầu AJAX để lấy danh sách ward cho quận đã chọn
+            $.ajax({
+                url: "/api/address/wards/" + districtId, // API lấy danh sách phường theo quận
+                type: "GET",
+                dataType: "json",
+                success: function (wards) {
+                    // Xóa các options cũ trong dropdown ward
+                    $("#ward").html('<option value="">Chọn Phường/Xã</option>');
+                    // Thêm các options vào dropdown #ward
+                    $.each(wards, function (key, ward) {
+                        var selected = ward.id == wardId ? "selected" : "";
+                        $("#ward").append(
+                            '<option value="' +
+                                ward.id +
+                                '" ' +
+                                selected +
+                                ">" +
+                                ward.name +
+                                "</option>"
+                        );
+                    });
+                    // Kích hoạt dropdown #ward
+                    $("#ward").prop("disabled", false);
+                },
+            });
+        }
     });
 
     $(document).on("click", ".delete-address", function () {
@@ -175,7 +411,6 @@ $(document).ready(function () {
                         "</div>"
                 );
 
-
                 refreshAddressList();
             },
             error: function (xhr, status, error) {
@@ -189,14 +424,11 @@ $(document).ready(function () {
         });
     });
 
-
     $(document).on("click", "#cancel-edit", function () {
         resetAddressForm();
 
-
         $("#save_address").text("Save Address");
     });
-
 
     function resetAddressForm() {
         $("#address_id").val("");
@@ -206,13 +438,11 @@ $(document).ready(function () {
         $("#address-alert").html("");
     }
 
-
     function refreshAddressList() {
         $.ajax({
             url: "http://127.0.0.1:8000/client/users/get-addresses",
             method: "GET",
             success: function (response) {
-
                 var tableBody = $("#address-list-table tbody");
                 tableBody.empty();
 

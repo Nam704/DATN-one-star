@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->foreignId('reason_id')->constrained('order_cancellation_reasons')->onDelete('cascade');
-            $table->string('form')->default('client');
+            $table->string('note')->nullable();
+            $table->foreignId('previous_status_id')->nullable()->constrained('order_statuses')->onDelete('set null');
+
+            $table->string('from')->default('client');
             $table->string('status')->default('pending');
             $table->timestamps();
         });

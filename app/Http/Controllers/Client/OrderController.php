@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Order_status;
 use App\Services\NotificationService;
 use App\Services\OrderService;
 use App\Services\OrderStatusService;
 use App\Services\PaymentService;
 use App\Services\RetryPaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -20,13 +22,13 @@ class OrderController extends Controller
     protected $orderStatusService;
     protected $notificationService;
     protected $retryPaymentService;
+
     public function __construct(
         RetryPaymentService $retryPaymentService,
         OrderService $orderService,
         PaymentService $paymentService,
         NotificationService $notificationService,
         OrderStatusService $orderStatusService
-
     ) {
         $this->retryPaymentService = $retryPaymentService;
         $this->orderStatusService = $orderStatusService;
@@ -34,101 +36,157 @@ class OrderController extends Controller
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
     }
-    public function retryPayment(Request $request)
+    public function updateStatus($orderId)
     {
-        $orderId = $request->input('order_id');
-        // Log::info($orderId);
-        $order = Order::find($orderId);
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
+        try {
+            $order = $this->orderService->updateOrderStatus($orderId);
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trạng thái đã đạt tối đa hoặc không thể cập nhật.',
+                ], 400);
+            }
+
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công.',
+                'order' => $order,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi cập nhật trạng thái đơn hàng: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
         }
-        $result =   $this->retryPaymentService->retryPayment($orderId);
-        return response()->json($result);
     }
     public function store(Request $request)
     {
         try {
-            $dataSession = session('dataCheckout');
-
-            $data = [
-                'order' => $dataSession['cart'],
-                'details' => $dataSession['details'],
-                'user' => $request->input('userData'),
-            ];
-            $data['order']['payment_method'] = $request->input('payment_method');
-            $dataFormatted = [
-                "id_user" => $data["order"]["id_user"] ?? null,
-                "user_name" => $data["user"]["name"] ?? null,
-                "phone_number" => $data["user"]["phone"] ?? null,
-                "email" => $data["user"]["email"] ?? null,
-                "id_address" => $data["user"]["id_address"] ?? null,
-                "address_detail" => $data["user"]["address"] ?? null,
-                "note" => $data["user"]["order_note"] ?? null,
-                "subtotal" => $data["order"]["subTotal"] ?? 0,
-                "shipping" => $data["order"]["shipping"] ?? 0,
-                "payment_method" => $data["order"]["payment_method"],
-                "id_ward" => $data["user"]["ward"] ?? null,
-                "total" => $data["order"]["total"] ?? 0,
-                "status" => "Awaiting Payment",
-                "id_voucher" => null,
-            ];
-
-            $order_details = [];
-            foreach ($data["details"] as $item) {
-                $order_details[] = [
-                    "id_variant" => $item["id_variant"],
-                    "quantity" => $item["quantity"],
-                    "unit_price" => $item["price"],
-                    "total" => $item["product_total"],
-                ];
+            if (!session()->has('checkout_data')) {
+                throw new \Exception('Dữ liệu thanh toán không tồn tại hoặc đã hết hạn.');
             }
-            $dataFormatted['order_details'] = $order_details;
-            Log::info($dataFormatted);
-            $order = $this->orderService->store($dataFormatted);
-            $this->orderStatusService->updateInitialStatus($order);
 
-            $redirect_url = route('client.user.myAccount');
-            return response()->json([
-                'status' => 'success',
-                'redirect_url' => $redirect_url,
-            ]);
+            $response = $this->orderService->handleCreateOrder($request);
+            if ($response->getStatusCode() === 201) {
+                $data = $response->getData(true);
+                if (!isset($data['data']) || !is_array($data['data'])) {
+                    throw new \Exception('Dữ liệu đơn hàng từ service không hợp lệ.');
+                }
+                return response()->json($data, 201);
+            }
+            return $response;
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::error('Error in order store', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all(),
+            ]);
             return response()->json([
-                'error' => $e->getMessage(),
+                'success' => false,
+                'message' => $e->getMessage(),
+                'debug' => config('app.debug') ? [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ] : [],
+                'data' => null,
             ], 400);
         }
     }
-    public function cancel(Request $request)
-    {
-        $order = $this->orderService->cancelOrder($request);
-        event(new OrderNotification($order));
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đã hủy đơn hàng',
+    public function orders(Request $request)
+    {
+        $data = $this->orderService->searchOrders($request);
 
-        ]);
+        // Kiểm tra nếu có lỗi validate
+        if (isset($data['errors'])) {
+            return redirect()->back()->withErrors($data['errors'])->withInput();
+        }
+
+        // Đảm bảo các biến mặc định nếu không có dữ liệu
+        $data = array_merge([
+            'orders' => collect([]), // Trả về collection rỗng nếu không có đơn hàng
+            'totalOrders' => 0,
+            'openOrders' => 0,
+            'averagePrice' => 0,
+            'totalRevenue' => 0,
+            'groupStatuses' => [],
+            'groupStatusCounts' => [],
+            'statuses' => [],
+        ], $data);
+
+        return view('client.user.index', $data);
     }
-    function  check()
+    public function retryPayment(Request $request, $orderId)
     {
-        $data = [
-            'title' => 'New Order',
-            'message' => "New Order, vui lòng kiểm tra và xác nhận!",
-            'from_user_id' => null,
-            'to_user_id' => null,
-            'type' => 'orders',
-            'status' => 'unread',
-            'goto_id' => null,
-        ];
-        $this->notificationService->sendPrivate($data);
+        try {
+            $result = $this->retryPaymentService->retryPayment($orderId);
+            if ($result['success']) {
+                $data = $result['paymentResult'];
+                Log::info('Retry payment successful', ['order_id' => $orderId, 'result' => $result]);
+                return response()->json([
+                    'success' => true,
+                    'message' => $result['message'],
+                    'code' => $result['code'],
+                    'redirectUrl' => $data['redirectUrl'], // URL để chuyển hướng tới VNPAY
+                ], 200);
+            }
+
+            // Trả về lỗi chi tiết nếu thất bại
+            Log::warning('Retry payment failed', ['order_id' => $orderId, 'result' => $result]);
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+                'code' => $result['code'],
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error in retryPayment', [
+                'message' => $e->getMessage(),
+                'order_id' => $orderId,
+                'user_id' => Auth::id(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi không xác định khi thử lại thanh toán: ' . $e->getMessage(),
+                'code' => 'UNKNOWN_ERROR',
+            ], 500);
+        }
     }
-    public function detail($id)
+    public function cancelOrder(Request $request, $orderId)
     {
-        $order = $this->orderService->getOrderDetail($id);
-        $listReason = $this->orderService->listReason();
-        // return $order;
-        return view('client.orders.detail', compact('order', 'listReason'));
-        // dd($order);
+        try {
+            $request->validate([
+                'reason_id' => 'required|exists:order_cancellation_reasons,id',
+            ], [
+                'reason_id.required' => 'Vui lòng chọn lý do hủy.',
+                'reason_id.exists' => 'Lý do hủy không hợp lệ.',
+            ]);
+
+            $reasonId = $request->input('reason_id');
+            $order = $this->orderService->cancelOrder($orderId, $reasonId);
+
+            return redirect()->back()->with('success', 'Yêu cầu hủy đơn hàng đã được gửi.');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+
+
+    public function detailOrder($id)
+    {
+        $order = Order::findOrFail($id);
+        $orderDetails = $order->detailsOrder();
+        $orderService = app(\App\Services\OrderService::class);
+        return view('client.orders.detail', compact('order', 'orderDetails', 'orderService'));
     }
 }

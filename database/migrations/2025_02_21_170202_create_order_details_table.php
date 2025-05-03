@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('order_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_order')->constrained('orders')->onDelete('cascade');
-            $table->foreignId('id_variant')->constrained('product_variants')->onDelete('cascade');
+            $table->foreignId('id_variant')->nullable()->constrained('product_variants')->onDelete('set null'); // Đổi thành set null
+            $table->json('variant_data'); // Snapshot đầy đủ
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);
             $table->decimal('total', 15, 2);

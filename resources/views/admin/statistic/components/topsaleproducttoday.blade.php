@@ -4,7 +4,7 @@
                         <div class="card-widgets">
                             <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
                         </div>
-                        <h5 class="header-title mb-0">Top sale products today</h5>
+                        <h5 class="header-title mb-0">Top 10 sản phẩm bán chạy trong ngày</h5>
 
                         <div id="weeklysales-collapse" class="collapse pt-3 show">
                             <canvas id="myChartTopProduct"></canvas>

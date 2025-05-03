@@ -7,8 +7,8 @@
     <div class="row">
         <!-- Card: Tổng Đơn Hàng -->
         <div class="col-md-3">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
                     <h6 class="text-uppercase mt-0">Tổng Đơn Hàng</h6>
                     <h2 class="my-2">{{ number_format($totalOrders) }}</h2>
                 </div>
@@ -17,8 +17,8 @@
 
         <!-- Card: Tổng Đơn Pending -->
         <div class="col-md-3">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
+            <div class="card text-white bg-success">
+                <div class="card-body">
                     <h6 class="text-uppercase mt-0">Tổng Đơn Pending</h6>
                     <h2 class="my-2">{{ number_format($pendingOrders) }}</h2>
                 </div>
@@ -122,6 +122,44 @@
             </div> <!-- End Card -->
         </div>
     </div>
+
+    <!-- Row: Biểu đồ Lý Do Bị Hủy và TOP 20 Sản Phẩm Bị Hủy -->
+    <div class="row">
+        <!-- Cột trái: Biểu đồ cột Lý Do Bị Hủy Đơn -->
+        <div class="col-md-6">
+            <div class="card mb-4" style="height:450px;">
+                <div class="card-body" style="position: relative; height: 100%;">
+                    <h5 class="header-title mb-3">Biểu Đồ Lý Do Bị Hủy Đơn</h5>
+                    <canvas id="cancelReasonsChart" style="height:100%;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Danh sách TOP 20 Sản Phẩm Bị Hủy Nhiều Nhất -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="header-title mb-3">TOP 20 Sản Phẩm Bị Hủy Nhiều Nhất</h5>
+                    @if ($cancelledProducts->isNotEmpty())
+                        <ul class="list-group">
+                            @foreach ($cancelledProducts as $index => $product)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ $index + 1 }}. {{ $product->product_name }}
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ number_format($product->total_cancelled) }}
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-center text-muted">Không có dữ liệu sản phẩm bị hủy cho khoảng thời gian này.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="row">
         <div class="col-lg-6">
             <div class="card">
@@ -196,65 +234,6 @@
         </div>
 
     </div>
-    <!-- Nạp ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script>
-        // Lấy dữ liệu thống kê cho biểu đồ từ controller (truyền qua Blade)
-        var orderStatuses = {!! json_encode($statistics->pluck('status')) !!};
-        var orderCounts = {!! json_encode($statistics->pluck('total')) !!};
-
-        var options = {
-            series: [{
-                name: "Order Count",
-                data: orderCounts
-            }],
-            chart: {
-                height: 377,
-                type: 'bar'
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '50%'
-                }
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            dataLabels: {
-                enabled: false
-            },
-            xaxis: {
-                categories: orderStatuses
-            },
-            yaxis: {
-                title: {
-                    text: "Number of Orders"
-                }
-            },
-            legend: {
-                offsetY: 7
-            },
-            grid: {
-                padding: {
-                    bottom: 20
-                }
-            },
-            fill: {
-                opacity: 1
-            },
-            tooltip: {
-                y: {
-                    formatter: function(val) {
-                        return val;
-                    }
-                }
-            }
-        };
-        var chart = new ApexCharts(document.querySelector("#order-status-chart"), options);
-        chart.render();
-    </script>
 @endsection
 
 @push('styles')
@@ -262,5 +241,117 @@
 @endpush
 
 @push('scripts')
-    <x-admin.data-table-scripts />
+    {{-- 1. Nạp và khởi tạo ApexCharts cho Order Status --}}
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var orderStatuses = @json($statistics->pluck('status'));
+            var orderCounts = @json($statistics->pluck('total'));
+
+            var options = {
+                series: [{
+                    name: "Order Count",
+                    data: orderCounts
+                }],
+                chart: {
+                    height: 377,
+                    type: 'bar'
+                },
+                plotOptions: {
+                    bar: {
+                        columnWidth: '50%'
+                    }
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: orderStatuses
+                },
+                yaxis: {
+                    title: {
+                        text: "Number of Orders"
+                    }
+                },
+                legend: {
+                    offsetY: 7
+                },
+                grid: {
+                    padding: {
+                        bottom: 20
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val;
+                        }
+                    }
+                }
+            };
+            new ApexCharts(document.querySelector("#order-status-chart"), options).render();
+        });
+    </script>
+
+    {{-- 2. Nạp và khởi tạo Chart.js cho Cancel Reasons --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('cancelReasonsChart').getContext('2d');
+            var labels = @json($cancelReasons->pluck('reason'));
+            var data = @json($cancelReasons->pluck('total'));
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Số đơn bị hủy',
+                        data: data,
+                        backgroundColor: labels.map(() => 'rgba(54, 162, 235, 0.7)'),
+                        borderColor: labels.map(() => 'rgba(54, 162, 235, 1)'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Số lượng đơn'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Lý do hủy'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' đơn';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 @endpush

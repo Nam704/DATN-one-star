@@ -11,10 +11,6 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 Broadcast::channel('chat', function (User $user) {
 
-    // Select * from rooms where user_id = $user->id and id = $roomId;
-    // if ($user->canJoinRoom($roomId)) {
-    //     return ['id' => $user->id, 'name' => $user->name];
-    // }
 
     return ['id' => $user->id, 'name' => $user->name];
 });
@@ -26,10 +22,8 @@ Broadcast::channel('private-notifications', function ($user) {
 Broadcast::channel('public', function () {
     return true;
 });
-Broadcast::channel('admin', function ($user) {
-    if ($user->isAdmin()) {
-        return true;
-    }
+Broadcast::channel('admin-notifications', function ($user) {
+    return $user->isAdmin();
 });
 
 Broadcast::channel('notifications.{userId}', function ($user, $userId) {
@@ -40,7 +34,7 @@ Broadcast::channel('orders.{orderId}', function (User $user, int $orderId) {
     $order = Order::find($orderId);
     return $order && $user->id === $order->id_user;
 });
-Broadcast::channel('employee', function ($user) {
+Broadcast::channel('employee-notifications', function ($user) {
     if ($user->isEmployee()) {
         return true;
     }

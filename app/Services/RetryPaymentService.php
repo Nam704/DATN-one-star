@@ -4,173 +4,192 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Order_status;
+use App\Models\Product_variant;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class RetryPaymentService
 {
     protected $paymentService;
+    protected $notificationService;
+    protected $orderStatusService;
 
-    public function __construct(PaymentService $paymentService)
-    {
+    public function __construct(
+        PaymentService $paymentService,
+        NotificationService $notificationService,
+        OrderStatusService $orderStatusService
+    ) {
         $this->paymentService = $paymentService;
+        $this->notificationService = $notificationService;
+        $this->orderStatusService = $orderStatusService;
     }
 
-    /**
-     * Xử lý yêu cầu thử lại thanh toán từ client.
-     *
-     * @param int $orderId
-     * @return array
-     */
+    public function canRetryPayment($orderId)
+    {
+        try {
+            $order = Order::lockForUpdate()->findOrFail($orderId);
+            $context = ['order_id' => $orderId, 'user_id' => Auth::id()];
+
+            if ($order->id_user !== Auth::id()) {
+                $message = "Bạn không có quyền thử lại thanh toán cho đơn hàng {$order->code}.";
+                // Log::info($message, $context);
+                return ['success' => false, 'message' => $message];
+            }
+
+            $eligibleOrderStatuses = ['Payment Failed', 'Payment Expired', 'Payment Retry Requested', 'Awaiting Payment'];
+            if (!in_array($order->orderStatus->name, $eligibleOrderStatuses)) {
+                $message = "Đơn hàng {$order->code} không thể thanh toán lại do trạng thái không hợp lệ ({$order->orderStatus->name}).";
+                // Log::info($message, $context);
+                return ['success' => false, 'message' => $message];
+            }
+
+            $allowedMethods = config('payment.allowed_retry_methods', ['VNPAY']);
+            if (!in_array($order->payment_method, $allowedMethods)) {
+                $message = "Phương thức thanh toán {$order->payment_method} không được hỗ trợ cho thanh toán lại.";
+                // Log::info($message, $context);
+                return ['success' => false, 'message' => $message];
+            }
+
+            $retryTimeLimitHours = config('payment.retry_time_limit_hours', 12);
+            $timeLimit = Carbon::parse($order->created_at)->addHours($retryTimeLimitHours);
+            if (Carbon::now()->greaterThan($timeLimit)) {
+                $message = "Đã quá thời gian cho phép ($retryTimeLimitHours giờ) để thanh toán lại đơn hàng {$order->code}.";
+                // Log::info($message, $context);
+                return ['success' => false, 'message' => $message];
+            }
+
+            foreach ($order->orderDetails as $detail) {
+                $variant = Product_variant::lockForUpdate()->find($detail->id_variant);
+                if (!$variant || $variant->quantity < $detail->quantity) {
+                    $message = "Sản phẩm trong đơn hàng {$order->code} không còn đủ tồn kho.";
+                    // Log::info($message, array_merge($context, ['variant_id' => $detail->id_variant]));
+                    return ['success' => false, 'message' => $message];
+                }
+            }
+
+            return ['success' => true, 'message' => 'Đơn hàng đủ điều kiện để thanh toán lại.'];
+        } catch (\Exception $e) {
+            $message = "Lỗi hệ thống khi kiểm tra thanh toán lại đơn hàng {$orderId}: {$e->getMessage()}";
+            Log::error($message, [
+                'order_id' => $orderId,
+                'user_id' => Auth::id(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+            return ['success' => false, 'message' => $message];
+        }
+    }
+
     public function retryPayment($orderId)
     {
-        // Lấy thông tin đơn hàng
-        $order = Order::find($orderId);
-        // Log::info($order);
-        if (!$order) {
-            return ['success' => false, 'message' => 'Đơn hàng không tồn tại.'];
-        }
-        if (!$order->status) {
-            return ['success' => false, 'message' => 'Trạng thái đơn hàng không tồn tại.'];
-        }
-        // Kiểm tra trạng thái đơn hàng
-        if (!in_array($order->status->name, ['Payment Failed', 'Payment Expired'])) {
-            return ['success' => false, 'message' => 'Đơn hàng không thể thử lại thanh toán.'];
-        }
+        return DB::transaction(function () use ($orderId) {
+            try {
+                $order = Order::lockForUpdate()->findOrFail($orderId);
+                $context = ['order_id' => $orderId, 'user_id' => Auth::id()];
 
-        // Kiểm tra số lần thử lại thanh toán
-        // if ($order->payment_retry_count >= 3) {
-        //     return ['success' => false, 'message' => 'Đơn hàng đã thử lại thanh toán quá số lần cho phép.'];
-        // }
+                $check = $this->canRetryPayment($orderId);
+                if (!$check['success']) {
+                    return [
+                        'success' => false,
+                        'message' => $check['message'],
+                        'code' => 'CANNOT_RETRY',
+                    ];
+                }
 
-        // Thực hiện thử lại thanh toán
-        try {
-            $paymentResult = $this->attemptPayment($order);
+                $maxAttempts = config('payment.max_retry_attempts', 3);
+                if ($order->payment_attempts >= $maxAttempts) {
+                    $this->revertStock($order);
+                    $order->id_order_status = Order_status::where('name', 'Cancelled')->value('id');
+                    $order->payment_status = 'Cancelled';
+                    $order->save();
 
-            // if ($paymentResult['success']) {
-            //     // Cập nhật trạng thái đơn hàng thành "Paid"
-            //     $order->payment_retry_count += 1;
-            //     $order->order_status_id = Order_status::where('name', 'Paid')->first()->id;
-            //     $order->save();
-            return ['success' => true, 'message' => 'Thanh toán đã được thử lại thành công.'];
-            // } else {
-            //     // Cập nhật trạng thái đơn hàng thành "Payment Retry Failed"
-            //     $order->payment_retry_count += 1;
-            //     $order->order_status_id = Order_status::where('name', 'Payment Failed')->first()->id;
-            //     $order->save();
+                    $message = "Đơn hàng {$order->code} đã bị hủy do vượt quá số lần thử thanh toán ($maxAttempts lần).";
+                    // Log::info($message, $context);
+                    $this->notifyClient($order, 'Đơn hàng đã bị hủy', $message);
 
-            //     return ['success' => false, 'message' => 'Thử lại thanh toán không thành công.'];
-            // }
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi thử lại thanh toán cho đơn hàng {$order->id}: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Có lỗi xảy ra khi thử lại thanh toán.'];
-        }
-    }
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'code' => 'MAX_ATTEMPTS_EXCEEDED',
+                    ];
+                }
 
-    /**
-     * Giả lập việc thử lại thanh toán (gọi API thanh toán).
-     *
-     * @param Order $order
-     * @return array
-     */
-    private function attemptPayment(Order $order)
-    {
-        // Giả sử ở đây ta gọi một service thanh toán bên ngoài (ví dụ: VNPAY, Momo, v.v.)
-        // Dưới đây là giả lập logic thanh toán
-        try {
-            return   $paymentResult = $this->gateway_payment($order); // Gọi API thanh toán thử lại.
-            // return $paymentResult;
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi thử lại thanh toán cho đơn hàng {$order->id}: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Không thể thực hiện thanh toán lại.'];
-        }
-    }
-    function gateway_payment($order)
-    {
+                // Cập nhật trạng thái thành Awaiting Payment
+                $awaitingPaymentStatus = Order_status::where('name', 'Awaiting Payment')->first();
+                if (!$awaitingPaymentStatus) {
+                    throw new \Exception('Trạng thái Awaiting Payment không tồn tại.');
+                }
+                $order->id_order_status = $awaitingPaymentStatus->id;
+                $order->payment_status = 'Awaiting Payment';
+                $order->increment('payment_attempts');
+                $order->save();
 
+                // Tạo URL thanh toán VNPAY
+                $paymentResult = $this->paymentService->vnpay_payment($order);
 
-        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://127.0.0.1:8000/client/payment";
-        $vnp_TmnCode = "ASFZEFO2"; //Mã website tại VNPAY
-        $vnp_HashSecret = "1P0E4T01EMVDNJ0EIY4955QEHXK1IH27"; //Chuỗi bí mật
-
-        // $vnp_TxnRef = $_POST['order_id'];//Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
-        $vnp_TxnRef = time() . "" . $order->id;
-        $vnp_OrderInfo = "Thanh Toán Đơn Hàng";
-        $vnp_OrderType = "OneStar";
-        $vnp_Amount = $order->total * 100;
-        $vnp_Locale = "VN";
-        $vnp_BankCode = "NCB";
-        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
-
-        $inputData = array(
-            "vnp_Version" => "2.1.0",
-            "vnp_TmnCode" => $vnp_TmnCode,
-            "vnp_Amount" => $vnp_Amount,
-            "vnp_Command" => "pay",
-            "vnp_CreateDate" => date('YmdHis'),
-            "vnp_CurrCode" => "VND",
-            "vnp_IpAddr" => $vnp_IpAddr,
-            "vnp_Locale" => $vnp_Locale,
-            "vnp_OrderInfo" => $vnp_OrderInfo,
-            "vnp_OrderType" => $vnp_OrderType,
-            "vnp_ReturnUrl" => $vnp_Returnurl,
-            "vnp_TxnRef" => $vnp_TxnRef,
-
-        );
-
-        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
-            $inputData['vnp_BankCode'] = $vnp_BankCode;
-        }
-        if (isset($vnp_Bill_State) && $vnp_Bill_State != "") {
-            $inputData['vnp_Bill_State'] = $vnp_Bill_State;
-        }
-
-        //var_dump($inputData);
-        ksort($inputData);
-        $query = "";
-        $i = 0;
-        $hashdata = "";
-        foreach ($inputData as $key => $value) {
-            if ($i == 1) {
-                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-            } else {
-                $hashdata .= urlencode($key) . "=" . urlencode($value);
-                $i = 1;
+                if ($paymentResult['code'] === '00') {
+                    $message = "Yêu cầu thanh toán lại cho đơn hàng {$order->code} đã được khởi tạo.";
+                    // Log::info($message, $context);
+                    return [
+                        'success' => true,
+                        'message' => $message,
+                        'paymentResult' => $paymentResult,
+                        'code' => 'PAYMENT_INITIATED',
+                    ];
+                } else {
+                    $message = "Không thể tạo yêu cầu thanh toán cho đơn hàng {$order->code}: " . ($paymentResult['message'] ?? 'Lỗi không xác định');
+                    // Log::warning($message, $context);
+                    $this->notifyClient($order, 'Yêu cầu thanh toán thất bại', $message);
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'code' => 'PAYMENT_INITIATION_FAILED',
+                    ];
+                }
+            } catch (\Exception $e) {
+                $message = "Lỗi hệ thống khi thử lại thanh toán đơn hàng {$orderId}: {$e->getMessage()}";
+                Log::error($message, [
+                    'order_id' => $orderId,
+                    'user_id' => Auth::id(),
+                    'stack_trace' => $e->getTraceAsString(),
+                ]);
+                $this->notifyClient(null, 'Lỗi hệ thống', 'Có lỗi xảy ra khi thử lại thanh toán. Vui lòng thử lại sau.');
+                return [
+                    'success' => false,
+                    'message' => $message,
+                    'code' => 'SYSTEM_ERROR',
+                ];
             }
-            $query .= urlencode($key) . "=" . urlencode($value) . '&';
-        }
+        });
+    }
 
-        $vnp_Url = $vnp_Url . "?" . $query;
-        if (isset($vnp_HashSecret)) {
-            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret); //
-            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+    protected function notifyClient($order, string $title, string $message)
+    {
+
+        try {
+        } catch (\Exception $e) {
+            Log::error("Lỗi khi gửi thông báo trong RetryPaymentService: {$e->getMessage()}", [
+                'order_id' => $order ? $order->id : null,
+                'user_id' => Auth::id(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
         }
-        $returnData = array(
-            'code' => '00',
-            'message' => 'success',
-            'data' => $vnp_Url
-        );
-        // if (isset($_POST['redirect'])) {
-        //     header('Location: ' . $vnp_Url);
-        //     die();
-        // } else {
-        //     echo json_encode($returnData);
-        // }
-        // dùng echo để xuất dữ liệu ngay lập tức ra HTTP response
-        if (isset($_POST['redirect'])) {
-            echo json_encode([
-                'code' => '00',
-                'message' => 'success',
-                'redirect_url' => $vnp_Url
-            ]);
-            exit;
-        } else {
-            echo json_encode([
-                'code' => '00',
-                'message' => 'success',
-                'data' => $vnp_Url
-            ]);
-            exit;
+    }
+
+    protected function revertStock(Order $order)
+    {
+        foreach ($order->orderDetails as $detail) {
+            $variant = Product_variant::lockForUpdate()->find($detail->id_variant);
+            if ($variant) {
+                $variant->increment('quantity', $detail->quantity);
+                $message = "Hoàn kho cho sản phẩm ID {$detail->id_variant}: Tăng {$detail->quantity} đơn vị.";
+                Log::info($message, [
+                    'order_id' => $order->id,
+                    'user_id' => Auth::id(),
+                    'variant_id' => $detail->id_variant,
+                ]);
+            }
         }
     }
 }

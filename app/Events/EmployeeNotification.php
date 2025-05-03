@@ -10,27 +10,24 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EmployeeNotification
+class EmployeeNotification implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    /**
-     * Create a new event instance.
-     */
-    public function __construct()
+    public $data;
+    public function __construct($data)
     {
-        //
+        $this->data = $data;
     }
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
     public function broadcastOn(): array
     {
+        return [new PrivateChannel('employee')];
+    }
+    public function broadcastWith()
+    {
         return [
-            new PrivateChannel('channel-name'),
+            'title' => $this->data['title'],
+            'message' => $this->data['message'],
+            'from_user_id' => $this->data['from_user_id'],
+            'status' => $this->data['status'],
         ];
     }
 }

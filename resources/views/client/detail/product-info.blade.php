@@ -7,11 +7,11 @@
                         <ul class="nav" role="tablist" id="nav-tab">
                             <li>
                                 <a class="active" data-toggle="tab" href="#info" role="tab" aria-controls="info"
-                                    aria-selected="false">Description</a>
+                                    aria-selected="false">Mô tả</a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#sheet" role="tab" aria-controls="sheet"
-                                    aria-selected="false">Specification</a>
+                                    aria-selected="false">Thông số kỹ thuật</a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
@@ -21,51 +21,43 @@
                     </div>
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="info" role="tabpanel">
-                            <div class="product_info_content">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam fringilla augue nec est
-                                    tristique auctor. Donec non est at libero vulputate rutrum. Morbi ornare lectus quis
-                                    justo gravida semper. Nulla tellus mi, vulputate adipiscing cursus eu, suscipit id
-                                    nulla.</p>
-                                <p>Pellentesque aliquet, sem eget laoreet ultrices, ipsum metus feugiat sem, quis
-                                    fermentum turpis eros eget velit. Donec ac tempus ante. Fusce ultricies massa massa.
-                                    Fusce aliquam, purus eget sagittis vulputate, sapien libero hendrerit est, sed
-                                    commodo augue nisi non neque. Lorem ipsum dolor sit amet, consectetur adipiscing
-                                    elit. Sed tempor, lorem et placerat vestibulum, metus nisi posuere nisl, in accumsan
-                                    elit odio quis mi. Cras neque metus, consequat et blandit et, luctus a nunc. Etiam
-                                    gravida vehicula tellus, in imperdiet ligula euismod eget.</p>
+                            <div class="product_info_content text-center">
+                                {!! $product->description !!}
                             </div>
                         </div>
+
                         <div class="tab-pane fade" id="sheet" role="tabpanel">
                             <div class="product_d_table">
-                                <form action="#">
-                                    <table>
-                                        <tbody>
+                                <table class="table table-bordered text-center align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="first_child">Thuộc tính</th>
+                                            <th>Thông tin</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($product->attributes as $attribute)
+                                            @php
+                                                $allValues = [];
+                                                foreach ($attribute['values'] as $variants) {
+                                                    foreach ($variants as $value) {
+                                                        if (!in_array($value, $allValues)) {
+                                                            $allValues[] = $value;
+                                                        }
+                                                    }
+                                                }
+                                            @endphp
                                             <tr>
-                                                <td class="first_child">Compositions</td>
-                                                <td>Polyester</td>
+                                                <td class="first_child">{{ $attribute['name'] }}</td>
+                                                <td>{{ implode(', ', $allValues) }}</td>
                                             </tr>
-                                            <tr>
-                                                <td class="first_child">Styles</td>
-                                                <td>Girly</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="first_child">Properties</td>
-                                                <td>Short Dress</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </form>
-                            </div>
-                            <div class="product_info_content">
-                                <p>Fashion has been creating well-designed collections since 2010. The brand offers
-                                    feminine designs delivering stylish separates and statement dresses which have since
-                                    evolved into a full ready-to-wear collection in which every item is a vital part of
-                                    a woman's wardrobe. The result? Cool, easy, chic looks with youthful elegance and
-                                    unmistakable signature style. All the beautiful pieces are made in Italy and
-                                    manufactured with the greatest attention. Now Fashion extends to a range of
-                                    accessories including shoes, hats, belts and more!</p>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+
+
 
                         <div class="tab-pane fade" id="reviews" role="tabpanel">
                             <div class="reviews_wrapper">
@@ -113,83 +105,206 @@
                                 </div>
                             </div>
                         </div>
+                        <button type="submit">Gửi bình luận</button>
+                        </form>
                     </div>
-                </div>
+                @else
+                    <p class="mt-3"></p>
+                    @endif
+                @else
+                    <p class="mt-3">Vui lòng <a href="{{ route('auth.getFormLogin') }}">đăng nhập</a> để bình luận.
+                    </p>
+                @endauth
             </div>
         </div>
+
+        {{-- Script --}}
+        <script>
+            // Chọn số sao
+            document.querySelectorAll('.star_rating_input i').forEach(function(star) {
+                star.addEventListener('click', function() {
+                    let rating = this.getAttribute('data-value');
+                    document.getElementById('rating_input').value = rating;
+
+                    document.querySelectorAll('.star_rating_input i').forEach(function(s) {
+                        s.classList.remove('checked');
+                    });
+                    for (let i = 0; i < rating; i++) {
+                        document.querySelectorAll('.star_rating_input i')[i].classList.add('checked');
+                    }
+                });
+            });
+
+            // Gửi form bằng Ajax
+            document.getElementById('comment_form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (!{{ auth()->check() ? 'true' : 'false' }}) {
+                    alert('Vui lòng đăng nhập để gửi bình luận.');
+                    window.location.href = '{{ route('auth.getFormLogin') }}'; // Chuyển hướng đến trang đăng nhập
+                    return;
+                }
+
+                let formData = new FormData(this);
+
+                fetch('{{ route('client.products.storecomment') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}';
+                        // Tạo HTML mới cho bình luận
+                        const newComment = `
+                <div class="reviews_comment_box">
+                    <div class="comment_thmb">
+              <img  src="{{ asset(auth()->user()->profile_image ? 'storage/' . auth()->user()->profile_image : 'admin/assets/images/user-201.png') }}"  alt="Avatar"
+                  style="width: 60px; height: 60px; object-fit: cover;">
+                    </div>
+                    <div class="comment_text">
+                        <div class="reviews_meta">
+                            <div class="star_rating">
+                                <ul>
+                                    ${[...Array(5)].map((_, i) =>
+                                        `<li><i class="ion-ios-star${i < formData.get('rating') ? '' : '-outline'}"></i></li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                            <p><strong>${userName}</strong> - hôm nay</p>
+                            <span>${formData.get('comment')}</span>
+                        </div>
+                    </div>
+                </div>`;
+
+                        // Thêm bình luận mới vào dưới cùng
+                        document.getElementById('comment_list').insertAdjacentHTML('beforeend', newComment);
+
+                        // Cập nhật số lượng
+                        let totalElem = document.getElementById('total_comments');
+                        let currentCount = parseInt(totalElem.textContent);
+                        totalElem.textContent = (currentCount + 1) + ' đánh giá cho {{ $product->name }}';
+
+                        // Ẩn form sau khi gửi thành công
+                        document.querySelector('.product_review_form')?.remove();
+                        document.querySelector('.product_ratting')?.remove();
+                        document.querySelector('.comment_title')?.remove();
+
+                        const note = document.createElement('p');
+                        note.textContent = '';
+                        document.querySelector('.reviews_wrapper').appendChild(note);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Đã có lỗi xảy ra, vui lòng thử lại.');
+                    });
+            });
+        </script>
+
+        <style>
+            .star_rating_input i {
+                font-size: 24px;
+                color: #ddd;
+                cursor: pointer;
+            }
+
+            .star_rating_input i.checked {
+                color: #f5c518 !important;
+                /* vàng */
+            }
+
+            .star_rating ul li i,
+            .reviews_meta .ion-ios-star {
+                color: #f5c518 !important;
+            }
+
+            .reviews_meta .ion-ios-star-outline {
+                color: #ddd !important;
+            }
+        </style>
+
+
+
     </div>
+</div>
+</div>
+</div>
+</div>
 </div>
 
 
 <!--product area start-->
 <section class="product_area mb-50">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="section_title">
-                    <h2><span><strong>Related</strong> Products</span></h2>
-                </div>
-                <div class="product_carousel product_column5 owl-carousel">
-                    @if ($relatedProducts->count() > 0)
-                        @foreach ($relatedProducts as $related)
-                            <div class="single_product">
-                                <div class="product_thumb">
-                                    <a class="primary_img" href="{{ route('client.products.detail', $related->id) }}">
-                                        <img src="{{ asset($related->image_primary) }}" alt="{{ $related->name }}">
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="section_title">
+                <h2><span><strong>Related</strong> Products</span></h2>
+            </div>
+            <div class="product_carousel product_column5 owl-carousel">
+                @if ($relatedProducts->count() > 0)
+                    @foreach ($relatedProducts as $related)
+                        <div class="single_product">
+                            <div class="product_thumb">
+                                <a class="primary_img" href="{{ route('client.products.detail', $related->id) }}">
+                                    <img src="{{ asset($related->image_primary) }}" alt="{{ $related->name }}">
+                                </a>
+                                @if ($related->image_secondary)
+                                    <a class="secondary_img"
+                                        href="{{ route('client.products.detail', $related->id) }}">
+                                        <img src="{{ asset($related->image_secondary) }}"
+                                            alt="{{ $related->name }}">
                                     </a>
-                                    @if ($related->image_secondary)
-                                        <a class="secondary_img"
-                                            href="{{ route('client.products.detail', $related->id) }}">
-                                            <img src="{{ asset($related->image_secondary) }}"
-                                                alt="{{ $related->name }}">
+                                @endif
+                            </div>
+                            <div class="product_content">
+                                <div class="product_name">
+                                    <h3>
+                                        <a href="{{ route('client.products.detail', $related->id) }}">
+                                            {{ $related->name }}
                                         </a>
-                                    @endif
+                                    </h3>
                                 </div>
-                                <div class="product_content">
-                                    <div class="product_name">
-                                        <h3>
-                                            <a href="{{ route('client.products.detail', $related->id) }}">
-                                                {{ $related->name }}
-                                            </a>
-                                        </h3>
-                                    </div>
-                                    <div class="product_ratings">
-                                        <ul>
-                                            @php
-                                                // Giả sử có hàm đánh giá hoặc trường rating từ 0 đến 5
-                                                $rating = $related->rating ?? 0;
-                                            @endphp
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <li>
-                                                    <a href="#">
-                                                        <i
-                                                            class="ion-ios-star{{ $i <= $rating ? '' : '-outline' }}"></i>
-                                                    </a>
-                                                </li>
-                                            @endfor
-                                        </ul>
-                                    </div>
-                                    <div class="product_footer d-flex align-items-center">
+                                <div class="product_ratings">
+                                    <ul>
                                         @php
-                                            $prices = $related->getPriceRange();
+                                            // Giả sử có hàm đánh giá hoặc trường rating từ 0 đến 5
+                                            $rating = $related->rating ?? 0;
                                         @endphp
-                                        <div class="price_box">
-                                            <span class="current_price">
-                                                ${{ number_format($prices->min_price, 0) }}
-                                            </span>
-                                        </div>
-
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <li>
+                                                <a href="#">
+                                                    <i
+                                                        class="ion-ios-star{{ $i <= $rating ? '' : '-outline' }}"></i>
+                                                </a>
+                                            </li>
+                                        @endfor
+                                    </ul>
+                                </div>
+                                <div class="product_footer d-flex align-items-center">
+                                    @php
+                                        $prices = $related->getPriceRange();
+                                    @endphp
+                                    <div class="price_box">
+                                        <span class="current_price">
+                                            ${{ number_format($prices->min_price, 0) }}
+                                        </span>
                                     </div>
+
                                 </div>
                             </div>
-                        @endforeach
-                    @else
-                        <p>Không có sản phẩm liên quan.</p>
-                    @endif
-                </div>
+                        </div>
+                    @endforeach
+                @else
+                    <p>Không có sản phẩm liên quan.</p>
+                @endif
             </div>
         </div>
     </div>
+</div>
 </section>
 <!--product area end-->
 

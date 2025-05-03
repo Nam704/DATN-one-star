@@ -43,7 +43,7 @@ class GoogleController extends Controller
             $finduser = User::where('google_id', $user->id)->first();
             if ($finduser) {
                 Auth::login($finduser);
-                return redirect()->intended('/');
+                return redirect()->route('client.home');
             } else {
                 if ($avatar) {
                     $filename = Str::random(20) . '.jpg';
@@ -62,9 +62,9 @@ class GoogleController extends Controller
                 $this->cartService->store($newUser->id);
                 // Mail::to($email)->send(new RegisterMail($newUser));
                 Register::dispatch($newUser);
-                return redirect()->intended('/');
+                return redirect()->route('client.home');
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             dd($e->getMessage());
         }
     }

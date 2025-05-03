@@ -30,6 +30,25 @@ class User extends Authenticatable
         'status',
         'deleted_at'
     ];
+    public function isLocked()
+    {
+        return $this->is_lock;
+    }
+    public function restrictions()
+    {
+        return $this->hasMany(UserRestriction::class);
+    }
+    public function isRestrictedFromCanceling()
+    {
+        return $this->restrictions()
+            ->where('restriction_type', 'cancel_order')
+            ->where('expires_at', '>', now())
+            ->exists();
+    }
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
+    }
     public function addresses()
     {
         return $this->morphMany(Address::class, 'addressable');
@@ -125,6 +144,22 @@ class User extends Authenticatable
             return true;
         }
     }
+
+    // permissions
+    public function hasPermission($permission)
+    {
+        // Admin luôn có mọi quyền
+        if ($this->role->name === 'admin') {
+            return true;
+        }
+
+        // Check quyền thông qua role
+        if ($this->role && $this->role->permissions) {
+            return $this->role->permissions->contains('name', $permission);
+        }
+
+        return false;
+    }
     /**
      * The attributes that should be cast.
      *
@@ -161,4 +196,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
+
+    //     public function comments()
+    // {
+    //     return $this->hasMany(Comment::class); //mới
+    // }
+
 }

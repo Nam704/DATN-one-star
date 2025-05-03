@@ -17,7 +17,7 @@
 
     <!-- CSS
     ========================= -->
-    @include('client.layouts.css')
+    @include('client.layouts.home.css')
 
 </head>
 

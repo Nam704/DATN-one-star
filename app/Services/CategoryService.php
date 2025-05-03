@@ -30,6 +30,14 @@ class CategoryService
         }
         return $categories;
     }
+    public function getCategory()
+    {
+        $categories = $this->category
+        ->where('id_parent', 0)
+        ->withCount('products') // đếm số sản phẩm
+        ->get();
+        return $categories;
+    }
     public function getCategoryById($id)
     {
         return Category::find($id);

@@ -8,14 +8,14 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary">
                             <i class="ri-add-line align-middle me-1"></i>
-                            Add Blog
+                            Thêm mới
                         </a>
                         <a href="{{ route('admin.blogs.trash') }}" class="btn btn-secondary me-2">
                             <i class="ri-delete-bin-line align-middle me-1"></i>
-                            Trash
+                            Danh sách xóa
                         </a>
                     </div>
-                    <h4 class="page-title">Blog Management</h4>
+                    <h4 class="page-title">Danh sách tin tức</h4>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                 <div class="card">
                     <div class="card-body">
                         <table id="fixed-header-datatable"
-                            class="table table-striped dt-responsive nowrap table-striped w-100">
+                            class="table table-striped dt-responsive nowrap table-striped  w-100">
                             <thead>
                                 <tr>
                                     <th>STT</th>
@@ -57,15 +57,13 @@
                                             <div class="btn-group">
                                                 <a href="{{ route('admin.blogs.show', $value->id) }}">
                                                     <button type="button"
-                                                        class="btn btn-secondary btn-sm btn-warning me-1"><i
-                                                            class="mdi mdi-eye"></i></button>
+                                                        class="btn btn-secondary btn-sm btn-warning me-1">Chi tiết</button>
                                                 </a>
                                                 <a href="{{ route('admin.blogs.edit', $value->id) }}"><button
-                                                        class="btn btn-sm btn-success me-1"><i
-                                                            class="mdi mdi-comment-edit-outline"></i></button></a>
+                                                        class="btn btn-sm btn-success me-1">Sửa</button></a>
                                                 <button class="btn btn-sm btn-danger delete-btn"
                                                     data-id="{{ $value->id }}">
-                                                    <i class="mdi mdi-trash-can"></i>
+                                                    Tạm dừng
                                                 </button>
                                             </div>
                                         </td>

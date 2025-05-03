@@ -21,18 +21,16 @@
                             @foreach ($product->product_albums as $item)
                             <li>
                                 <a href="#" class="elevatezoom-gallery active" data-update=""
-                                    data-image="{{ asset($item->image_path)  }}"
-                                    data-zoom-image="{{ asset($item->image_path)  }}">
-                                    <img src="{{ asset($item->image_path)  }}" alt="zo-th-1" />
+                                    data-image="{{ asset($item->image_path) }}"
+                                    data-zoom-image="{{ asset($item->image_path) }}">
+                                    <img src="{{ asset($item->image_path) }}" alt="zo-th-1" />
                                 </a>
 
                             </li>
                             @endforeach
 
-
                         </ul>
                     </div>
-
 
                 </div>
             </div>
@@ -56,13 +54,12 @@
                                 <li><a href="#"><i class="fa fa-star"></i></a></li>
                                 <li><a href="#"><i class="fa fa-star"></i></a></li>
                                 <li><a href="#"><i class="fa fa-star"></i></a></li>
-                                <li class="review"><a href="#"> (customer review ) </a></li>
+                                <li class="review"><a href="#"> (Đánh giá khách hàng ) </a></li>
                             </ul>
 
                         </div>
                         <div class="price_box">
-                            <span class="current_price">{{ $product->min_price}} - {{ $product->max_price}}</span>
-                            {{-- <span class="old_price">$80.00</span> --}}
+                            <span class="current_price" id="price-box"></span>
 
                         </div>
                         {{-- <div class="product_desc">
@@ -78,19 +75,20 @@
                                     @php
                                     $uniqueValues = [];
                                     @endphp
-                                    <h2>{{ $attribute["name"] }}</h2>
+                                    <h2>{{ $attribute['name'] }}</h2>
                                     <select class="value-select form-control"
                                         name="attribute[{{ $attribute['name'] }}]">
                                         <option value="">Chọn</option>
-                                        @foreach ($attribute["values"] as $variant_id => $values)
+                                        @foreach ($attribute['values'] as $variant_id => $values)
                                         @foreach ($values as $value_id => $value)
                                         @if (!in_array($value, $uniqueValues))
-                                        <option value="{{ $value_id }}" data-variant-id={{ $variant_id }}>{{ $value }}
+                                        <option value="{{ $value_id }}"
+                                            data-variant-id={{ $variant_id }}>{{ $value }}
                                         </option>
                                         @endif
 
                                         @php
-                                        $uniqueValues[]=$value;
+                                        $uniqueValues[] = $value;
                                         @endphp
                                         @endforeach
                                         @endforeach
@@ -101,38 +99,24 @@
                             </div>
 
                         </div>
-                        <div class="product_variant quantity">
-                            <label>quantity</label>
+                        <div class="product_variant quantity mt-3">
+                            <label>Số lượng</label>
                             <input min="1" max="1" value="1" type="number" class="quantity-to-cart">
-                            <span>Stock: <a href="#" class="stock">{{ $product->quantity }}</a></span>
-                            <button class="button" id="add-to-cart">add to cart</button>
+                            <label>Còn : <a href="#" class="stock">{{ $product->quantity }}</a></label>
+                            <button class="button" id="add-to-cart">Thêm vào giỏ hàng</button>
 
                         </div>
                         <div class=" product_d_action">
                             <ul>
-                                <li><a href="#" title="Add to wishlist">+ Add to Wishlist</a></li>
-                                <li><a href="#" title="Add to wishlist">+ Compare</a></li>
+                                <li>Danh mục: {{ $product->category->name }}</li>
+                                <li>Thương hiệu:{{ $product->brand->name }}</li>
                             </ul>
                         </div>
-                        <div class="product_meta">
-                            <span>Category: <a href="#">{{ $product->category->name }}</a></span>
-                            <span>Brand: <a href="#">{{ $product->brand->name }}</a></span>
 
-                        </div>
 
                     </form>
                     <div class="priduct_social">
-                        <ul>
-                            <li><a class="facebook" href="#" title="facebook"><i class="fa fa-facebook"></i> Like</a>
-                            </li>
-                            <li><a class="twitter" href="#" title="twitter"><i class="fa fa-twitter"></i> tweet</a></li>
-                            <li><a class="pinterest" href="#" title="pinterest"><i class="fa fa-pinterest"></i> save</a>
-                            </li>
-                            <li><a class="google-plus" href="#" title="google +"><i class="fa fa-google-plus"></i>
-                                    share</a></li>
-                            <li><a class="linkedin" href="#" title="linkedin"><i class="fa fa-linkedin"></i> linked</a>
-                            </li>
-                        </ul>
+
                     </div>
 
                 </div>
@@ -147,6 +131,5 @@
 
 @endsection
 @section('scripts')
-
-<script src="{{ asset('client/api/productDetail.js') }}"></script>
+@vite('resources/js/client/productDetail.js')
 @endsection

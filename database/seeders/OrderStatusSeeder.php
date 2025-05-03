@@ -13,45 +13,48 @@ class OrderStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        // Danh sách tất cả trạng thái
+        // Danh sách tất cả trạng thái với group_status đã gộp
         $statuses = [
-            // Thanh toán & xử lý đơn
-            'Awaiting Payment',
-            'Payment Verification',
-            'Paid',
-            'Pending',
-            'Processing',
-            'Shipping',
-            'Delivered',
+            // Thanh toán (Payment)
+            'Awaiting Payment' => 'Payment',
+            'Payment Verification' => 'Payment',
+            'Paid' => 'Payment',
+            'Payment Failed' => 'Payment',
+            'Payment Expired' => 'Payment',
+            'Payment Retry Requested' => 'Payment',
 
-            // Lỗi & Retry thanh toán
-            'Payment Failed',
-            'Payment Expired',
-            'Payment Retry Requested',
+            // Chuẩn bị giao hàng (Awaiting Delivery)
+            'Pending' => 'Awaiting Delivery',
+            'Processing' => 'Awaiting Delivery',
 
-            // Hủy đơn
-            'Cancel Requested',
-            'Cancel Under Review',
-            'Cancel Approved',
-            'Cancel Rejected',
-            'Cancelled',
+            // Đang vận chuyển (Shipping)
+            'Shipping' => 'Shipping',
 
-            // Hoàn đơn
-            'Return Requested',
-            'Return Under Review',
-            'Return Approved',
-            'Return Rejected',
-            'Refunded',
+            // Hoàn thành (Completed)
+            'Delivered' => 'Completed',
 
-            // Trường hợp khác
-            'Failed Delivery',
+            // Hủy đơn (Cancelled)
+            'Cancel Requested' => 'Cancelled',
+            'Cancel Under Review' => 'Cancelled',
+            'Cancel Approved' => 'Cancelled',
+            'Cancel Rejected' => 'Cancelled',
+            'Cancelled' => 'Cancelled',
+            'Failed Delivery' => 'Cancelled', // Gộp Failed Delivery vào Cancelled
+
+            // Hoàn đơn/Hoàn tiền (Return/Refund)
+            'Return Requested' => 'Return/Refund',
+            'Return Under Review' => 'Return/Refund',
+            'Return Approved' => 'Return/Refund',
+            'Return Rejected' => 'Return/Refund',
+            'Refunded' => 'Return/Refund',
         ];
 
         // Chèn các trạng thái vào DB và lưu ID
         $statusIds = [];
-        foreach ($statuses as $statusName) {
+        foreach ($statuses as $statusName => $groupStatus) {
             $statusIds[$statusName] = DB::table('order_statuses')->insertGetId([
                 'name' => $statusName,
+                'group_status' => $groupStatus,
                 'created_at' => now(),
                 'updated_at' => now(),
                 'next_status_id' => null,
@@ -75,17 +78,17 @@ class OrderStatusSeeder extends Seeder
         DB::table('order_statuses')->where('id', $statusIds['Cancel Requested'])->update(['next_status_id' => $statusIds['Cancel Under Review']]);
         DB::table('order_statuses')->where('id', $statusIds['Cancel Under Review'])->update(['next_status_id' => $statusIds['Cancel Approved']]);
         DB::table('order_statuses')->where('id', $statusIds['Cancel Approved'])->update(['next_status_id' => $statusIds['Cancelled']]);
-
+        DB::table('order_statuses')->where('id', $statusIds['Cancel Rejected'])->update(['next_status_id' => $statusIds['Pending']]); // Quay lại Pending
         // Luồng hoàn đơn
         DB::table('order_statuses')->where('id', $statusIds['Return Requested'])->update(['next_status_id' => $statusIds['Return Under Review']]);
         DB::table('order_statuses')->where('id', $statusIds['Return Under Review'])->update(['next_status_id' => $statusIds['Return Approved']]);
         DB::table('order_statuses')->where('id', $statusIds['Return Approved'])->update(['next_status_id' => $statusIds['Refunded']]);
 
-        // Giao hàng thất bại → hủy hoặc hoàn
+        // Giao hàng thất bại → hủy
         DB::table('order_statuses')->where('id', $statusIds['Failed Delivery'])->update(['next_status_id' => $statusIds['Cancel Requested']]);
 
         // Các trạng thái kết thúc
-        $finalStates = ['Delivered', 'Cancelled', 'Refunded', 'Cancel Rejected', 'Return Rejected'];
+        $finalStates = ['Delivered', 'Cancelled', 'Refunded', 'Return Rejected'];
         foreach ($finalStates as $state) {
             DB::table('order_statuses')->where('id', $statusIds[$state])->update(['next_status_id' => null]);
         }

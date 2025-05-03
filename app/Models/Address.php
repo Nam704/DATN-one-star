@@ -110,8 +110,10 @@ class Address extends Model
             ->where('a.id', '=', $addressId)
             ->where('a.addressable_type', $model->getMorphClass())
             ->where('a.addressable_id', $modelId)
+            // ->where('a.is_default', '=', true)
             ->select(
                 'a.address_detail',
+                'a.is_default',
                 'w.name as ward_name',
                 'd.name as district_name',
                 'p.name as province_name',
@@ -120,7 +122,30 @@ class Address extends Model
             )
             ->first();
     }
+    public function getAddressDefault($model, $modelId, $addressId)
+    {
 
+
+        return DB::table('addresses as a')
+            ->join('wards as w', 'a.id_ward', '=', 'w.id')
+            ->join('districts as d', 'w.district_id', '=', 'd.id')
+            ->join('provinces as p', 'd.province_id', '=', 'p.id')
+            ->where('a.id', '=', $addressId)
+            ->where('a.addressable_type', $model->getMorphClass())
+            ->where('a.addressable_id', $modelId)
+            ->where('a.is_default', '=', true)
+            ->select(
+                'a.address_detail',
+                'a.is_default',
+                'a.id_ward as ward_id',
+                'w.name as ward_name',
+                'd.name as district_name',
+                'p.name as province_name',
+                'd.id as district_id',
+                'p.id as province_id'
+            )
+            ->first();
+    }
     public function ward()
     {
         return $this->belongsTo(Ward::class, 'id_ward');
