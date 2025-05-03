@@ -66,28 +66,50 @@
                     </div>
                     @endif
 
-                    <!-- Chi tiết ẩn -->
-                    <div class="collapse mb-3" id="details-{{ $voucher['code'] }}">
-                        <div class="bg-light p-3 rounded-md border">
-                            @if (!empty($voucher['applies_to']) && count($voucher['applies_to']) > 0)
-                            <p class="mb-1 font-semibold">Áp dụng cho sản phẩm:</p>
-                            <ul class="ps-3 mb-2">
-                                @foreach ($voucher['applies_to'] as $product)
-                                <li>{{ $product }}</li>
-                                @endforeach
-                            </ul>
-                            @elseif (!empty($voucher['categories']) && count($voucher['categories']) > 0)
-                            <p class="mb-1 font-semibold">Áp dụng cho danh mục:</p>
-                            <ul class="ps-3 mb-2">
-                                @foreach ($voucher['categories'] as $category)
-                                <li>{{ $category }}</li>
-                                @endforeach
-                            </ul>
-                            @else
-                            <p class="text-muted mb-0">Áp dụng cho tất cả sản phẩm</p>
-                            @endif
-                        </div>
-                    </div>
+                    @php
+    $productNames = [];
+
+    if (!empty($voucher['applies_to'])) {
+        foreach ($voucher['applies_to'] as $item) {
+            if (\Illuminate\Support\Str::startsWith($item, 'product_')) {
+                $id = (int) \Illuminate\Support\Str::after($item, 'product_');
+                $product = \App\Models\Product::find($id);
+                if ($product) {
+                    $productNames[] = $product->name;
+                }
+            } elseif (\Illuminate\Support\Str::startsWith($item, 'category_')) {
+                $id = (int) \Illuminate\Support\Str::after($item, 'category_');
+                $category = \App\Models\Category::with('products')->find($id);
+                if ($category && $category->products) {
+                    foreach ($category->products as $product) {
+                        $productNames[] = $product->name;
+                    }
+                }
+            }
+        }
+    }
+
+    // Loại bỏ tên trùng nếu sản phẩm thuộc nhiều danh mục
+    $productNames = array_unique($productNames);
+@endphp
+
+<!-- Chi tiết ẩn -->
+<div class="collapse mb-3" id="details-{{ $voucher['code'] }}">
+    <div class="bg-light p-3 rounded-md border">
+        @if (!empty($productNames))
+            <p class="mb-1 font-semibold">Áp dụng cho sản phẩm:</p>
+            <ul class="ps-3 mb-2">
+                @foreach ($productNames as $name)
+                    <li>{{ $name }}</li>
+                @endforeach
+            </ul>
+        @else
+            <p class="text-muted mb-0">Áp dụng cho tất cả sản phẩm</p>
+        @endif
+    </div>
+</div>
+
+
 
 
                     <!-- Nút hành động -->

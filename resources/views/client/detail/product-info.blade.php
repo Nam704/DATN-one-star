@@ -69,10 +69,10 @@
             @foreach($comments as $comment)
                 <div class="reviews_comment_box" id="comment_{{ $comment->id }}">
                     <div class="comment_thmb">
-                    <img 
-        src="{{ asset($comment->user->profile_image ? 'storage/' . $comment->user->profile_image : 'admin/assets/images/user-201.png') }}" 
-        alt="Avatar" 
-        style="width: 60px; height: 60px; object-fit: cover;">
+                        <img 
+                            src="{{ $comment->user->profile_image ? asset('storage/' . $comment->user->profile_image) : asset('admin/assets/images/user-201.png') }}" 
+                            alt="Avatar" 
+                            style="width: 60px; height: 60px; object-fit: cover;">
                     </div>
                     <div class="comment_text">
                         <div class="reviews_meta">
@@ -94,11 +94,21 @@
         {{-- Form gửi bình luận --}}
         @auth
             @php
-            
-                $hasCommented = $comments->where('user_id', auth()->id())->count() > 0;
+                $userId = auth()->id();
+                $hasCommented = $comments->where('user_id', $userId)->isNotEmpty();
+                $hasPurchased = \App\Models\Order::where('id_user', $userId)
+                    ->whereHas('orderDetails', function ($query) use ($product) {
+                        $query->whereHas('productVariant', function ($q) use ($product) {
+                            $q->where('id_product', $product->id); // Đúng: dùng id_product
+                        });
+                    })
+                    ->whereHas('orderStatus', function ($query) {
+                        $query->where('name', 'Delivered');
+                    })
+                    ->exists();
             @endphp
 
-            @if (!$hasCommented)
+            @if (!$hasCommented && $hasPurchased)
                 <div class="comment_title mt-4">
                     <h2>Thêm đánh giá và bình luận của bạn</h2>
                 </div>
@@ -107,13 +117,13 @@
                     <h3>Đánh giá của bạn</h3>
                     <ul class="star_rating_input">
                         @for($i = 1; $i <= 5; $i++)
-                        <li><i class="fa fa-star{{ $i <= 5 ? ' checked' : '' }}" data-value="{{ $i }}"></i></li> <!-- Mặc định 5 sao được chọn -->
+                            <li><i class="fa fa-star{{ $i <= 5 ? ' checked' : '' }}" data-value="{{ $i }}"></i></li>
                         @endfor
                     </ul>
                 </div>
 
                 <div class="product_review_form">
-                    <form id="comment_form" method="POST">
+                    <form id="comment_form" method="POST" action="{{ route('client.products.storecomment') }}">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="rating" id="rating_input" value="5">
@@ -127,15 +137,16 @@
                         <button type="submit">Gửi bình luận</button>
                     </form>
                 </div>
+            @elseif (!$hasPurchased)
+                <p class="mt-3 text-gray-500"></p>
             @else
-                <p class="mt-3"></p>
+                <p class="mt-3 text-gray-500"></p>
             @endif
         @else
             <p class="mt-3">Vui lòng <a href="{{ route('auth.getFormLogin') }}">đăng nhập</a> để bình luận.</p>
         @endauth
     </div>
 </div>
-
 {{-- Script --}}
 <script>
     // Chọn số sao
@@ -157,63 +168,69 @@
     document.getElementById('comment_form')?.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        // Kiểm tra đăng nhập
         if (!{{ auth()->check() ? 'true' : 'false' }}) {
-        alert('Vui lòng đăng nhập để gửi bình luận.');
-        window.location.href = '{{ route('auth.getFormLogin') }}'; // Chuyển hướng đến trang đăng nhập
-        return;
-    }
-    
+            alert('Vui lòng đăng nhập để gửi bình luận.');
+            window.location.href = '{{ route('auth.getFormLogin') }}';
+            return;
+        }
+
         let formData = new FormData(this);
 
         fetch('{{ route('client.products.storecomment') }}', {
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
             body: formData
         })
         .then(response => response.json())
         .then(data => {
-            alert(data.message);
-                 const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}';
-            // Tạo HTML mới cho bình luận
-            const newComment = `
-                <div class="reviews_comment_box">
-                    <div class="comment_thmb">
-              <img  src="{{ asset(auth()->user()->profile_image ? 'storage/' . auth()->user()->profile_image : 'admin/assets/images/user-201.png') }}"  alt="Avatar" 
-                  style="width: 60px; height: 60px; object-fit: cover;">
-                    </div>
-                    <div class="comment_text">
-                        <div class="reviews_meta">
-                            <div class="star_rating">
-                                <ul>
-                                    ${[...Array(5)].map((_, i) =>
-                                        `<li><i class="ion-ios-star${i < formData.get('rating') ? '' : '-outline'}"></i></li>`
-                                    ).join('')}
-                                </ul>
-                            </div>
-                            <p><strong>${userName}</strong> - hôm nay</p>
-                            <span>${formData.get('comment')}</span>
+            if (data.message.includes('Cảm ơn')) {
+                alert(data.message);
+
+                const userName = '{{ auth()->user() ? auth()->user()->name : 'Người dùng' }}';
+                const userAvatar = '{{ auth()->check() && auth()->user()->profile_image ? asset('storage/' . auth()->user()->profile_image) : asset('admin/assets/images/user-201.png') }}';
+
+                // Tạo HTML mới cho bình luận
+                const newComment = `
+                    <div class="reviews_comment_box">
+                        <div class="comment_thmb">
+                            <img src="${userAvatar}" alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;">
                         </div>
-                    </div>
-                </div>`;
+                        <div class="comment_text">
+                            <div class="reviews_meta">
+                                <div class="star_rating">
+                                    <ul>
+                                        ${[...Array(5)].map((_, i) =>
+                                            `<li><i class="ion-ios-star${i < formData.get('rating') ? '' : '-outline'}"></i></li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                                <p><strong>${userName}</strong> - hôm nay</p>
+                                <span>${formData.get('comment')}</span>
+                            </div>
+                        </div>
+                    </div>`;
 
-            // Thêm bình luận mới vào dưới cùng
-            document.getElementById('comment_list').insertAdjacentHTML('beforeend', newComment);
+                // Thêm bình luận mới vào danh sách
+                document.getElementById('comment_list').insertAdjacentHTML('beforeend', newComment);
 
-            // Cập nhật số lượng
-            let totalElem = document.getElementById('total_comments');
-            let currentCount = parseInt(totalElem.textContent);
-            totalElem.textContent = (currentCount + 1) + ' đánh giá cho {{ $product->name }}';
+                // Cập nhật số lượng bình luận
+                let totalElem = document.getElementById('total_comments');
+                let currentCount = parseInt(totalElem.textContent);
+                totalElem.textContent = (currentCount + 1) + ' đánh giá cho {{ $product->name }}';
 
-            // Ẩn form sau khi gửi thành công
-            document.querySelector('.product_review_form')?.remove();
-            document.querySelector('.product_ratting')?.remove();
-            document.querySelector('.comment_title')?.remove();
+                // Ẩn form sau khi gửi thành công
+                document.querySelector('.product_review_form')?.remove();
+                document.querySelector('.product_ratting')?.remove();
+                document.querySelector('.comment_title')?.remove();
 
-            const note = document.createElement('p');
-            note.textContent = '';
-            document.querySelector('.reviews_wrapper').appendChild(note);
+                // Thêm thông báo "Bạn đã đánh giá"
+                const note = document.createElement('p');
+                note.className = 'mt-3 text-gray-500';
+                note.textContent = '';
+                document.querySelector('.reviews_wrapper').appendChild(note);
+            } else {
+                alert(data.message); // Hiển thị lỗi từ server
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -230,7 +247,7 @@
     }
 
     .star_rating_input i.checked {
-        color: #f5c518 !important; /* vàng */
+        color: #f5c518 !important; /* Màu vàng */
     }
 
     .star_rating ul li i,
@@ -240,6 +257,27 @@
 
     .reviews_meta .ion-ios-star-outline {
         color: #ddd !important;
+    }
+
+    .product_review_form textarea {
+        width: 100%;
+        min-height: 100px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .product_review_form button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .product_review_form button:hover {
+        background-color: #0056b3;
     }
 </style>
 

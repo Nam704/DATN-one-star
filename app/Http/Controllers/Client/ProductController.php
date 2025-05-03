@@ -40,6 +40,25 @@ class ProductController extends Controller
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
     
+        $user = auth()->user();
+        $productId = $request->product_id;
+    
+        // Kiểm tra người dùng đã mua sản phẩm này chưa
+        $hasPurchased = Order::where('id_user', $user->id)
+            ->whereHas('orderDetails', function ($query) use ($productId) {
+                $query->whereHas('productVariant', function ($q) use ($productId) {
+                    $q->where('id_product', $productId); // Sửa: dùng id_product thay vì product_id
+                });
+            })
+            ->whereHas('orderStatus', function ($query) {
+                $query->where('name', 'Delivered');
+            })
+            ->exists();
+    
+        if (!$hasPurchased) {
+            return response()->json(['message' => 'Bạn cần mua sản phẩm và nhận hàng trước khi bình luận.'], 400);
+        }
+
         // kiểm tra sản phẩm đã bình luận rồi
         $existing = Comment::where('product_id', $request->product_id)
             ->where('user_id', auth()->id())

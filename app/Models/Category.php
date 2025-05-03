@@ -70,37 +70,38 @@ class Category extends Model
     public static function categories_with_revenue($start_date, $end_date)
     {
         return self::select('categories.id', 'categories.name')
-        ->leftJoin('products', 'categories.id', '=', 'products.id_category')
-        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
-        ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
-        ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
-        ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')  // sua
-        ->whereNull('categories.deleted_at')
-        ->whereNull('products.deleted_at')
-        ->groupBy('categories.id', 'categories.name')
-        ->selectRaw('
-            -- Tổng doanh thu từ đơn hàng hoàn thành
-            COALESCE(SUM(
-                CASE 
-                     WHEN order_statuses.name != "Cancelled" AND orders.created_at BETWEEN ? AND ? 
-                    THEN order_details.quantity * order_details.unit_price 
-                    ELSE 0 
-                END
-            ), 0) as total_revenue,
-
-            -- Tổng số sản phẩm được tạo trong khoảng thời gian
-            COUNT(DISTINCT 
-                CASE 
-                    WHEN products.created_at BETWEEN ? AND ? 
-                    THEN products.id 
-                    ELSE NULL 
-                END
-            ) as total_products
-        ', [$start_date, $end_date, $start_date, $end_date])
-        ->orderByDesc('total_revenue')
-        ->get();
-
+            ->leftJoin('products', 'categories.id', '=', 'products.id_category')
+            ->leftJoin('product_variants', 'products.id', '=', 'product_variants.id_product')
+            ->leftJoin('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+            ->leftJoin('orders', 'order_details.id_order', '=', 'orders.id')
+            ->leftJoin('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+            ->whereNull('categories.deleted_at')
+            ->whereNull('products.deleted_at')
+            ->groupBy('categories.id', 'categories.name')
+            ->selectRaw('
+                -- Tổng doanh thu từ các đơn hàng hợp lệ
+                COALESCE(SUM(
+                    CASE
+                        WHEN order_statuses.name = "Delivered" 
+                             AND orders.created_at BETWEEN ? AND ?
+                        THEN order_details.quantity * order_details.unit_price
+                        ELSE 0
+                    END
+                ), 0) as total_revenue,
+    
+                -- Tổng số sản phẩm được tạo trong khoảng thời gian
+                COUNT(DISTINCT
+                    CASE
+                        WHEN products.created_at BETWEEN ? AND ?
+                        THEN products.id
+                        ELSE NULL
+                    END
+                ) as total_products
+            ', [$start_date, $end_date, $start_date, $end_date])
+            ->orderByDesc('total_revenue')
+            ->get();
     }
+    
 
 }
 

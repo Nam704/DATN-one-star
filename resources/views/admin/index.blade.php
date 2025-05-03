@@ -71,7 +71,7 @@
         </div>
         <div class="row">
             @include('admin.statistic.components.topsaleproducttoday')
-            @include('admin.statistic.components.leastsoldproducttoday')
+            @include('admin.statistic.components.productcancelled')
             @include('admin.statistic.components.topviewproducttoday')
         </div> <!-- end thống kê sp -->
 

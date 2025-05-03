@@ -169,7 +169,7 @@ class Product extends Model
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
                 ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-                ->whereNotIn('order_statuses.name', ['Cancelled'])
+                ->where('order_statuses.name', '=', 'Delivered')
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -188,7 +188,7 @@ class Product extends Model
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-            ->whereNotIn('order_statuses.name', ['Cancelled'])
+            ->where('order_statuses.name', '=', 'Delivered')
             ->select(
                 'products.id',
                 'products.name',
@@ -203,13 +203,18 @@ class Product extends Model
     }
     public function top_sale_products_today($start_date, $end_date)
     {
+        $cancelledStatuses = [
+            'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 
+            'Cancel Rejected', 'Cancelled', 'Failed Delivery'
+        ];
+
         if ($start_date && $end_date) {
             return DB::table('products')
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
                 ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-                ->whereNotIn('order_statuses.name', ['Cancelled'])
+                ->whereNotIn('order_statuses.name', $cancelledStatuses)
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -228,7 +233,7 @@ class Product extends Model
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-            ->whereNotIn('order_statuses.name', ['Cancelled'])
+            ->whereNotIn('order_statuses.name', $cancelledStatuses)
             ->select(
                 'products.id',
                 'products.name',
@@ -255,7 +260,7 @@ class Product extends Model
                 DB::raw("
               COALESCE(SUM(
                   CASE 
-                      WHEN order_statuses.name != 'Cancelled'
+                         WHEN order_statuses.name = 'Delivered'
                       " . ($start_date && $end_date ? " AND orders.created_at BETWEEN '$start_date' AND '$end_date'" : "") . "
                       THEN order_details.quantity
                       ELSE 0
@@ -316,7 +321,8 @@ class Product extends Model
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(CASE  WHEN order_statuses.name != "Cancelled" AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
+                DB::raw('COALESCE(SUM(CASE   WHEN order_statuses.name = "Delivered" 
+                                         AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
             ->where('products.created_at', '<=', $end_date) // Chỉ lấy sản phẩm đã tồn tại trước hoặc tại $endDate
@@ -356,13 +362,14 @@ class Product extends Model
 
     public function productSold($start_date, $end_date)
     {
+       
         if ($start_date && $end_date) {
             return DB::table('products')
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
                 ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
                 ->join('orders', 'order_details.id_order', '=', 'orders.id')
                 ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-                ->whereNotIn('order_statuses.name', ['Cancelled'])
+                ->where('order_statuses.name', '=', 'Delivered')
                 ->whereBetween('orders.created_at', [$start_date, $end_date])
                 ->select(
                     'products.id',
@@ -379,7 +386,7 @@ class Product extends Model
             ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
             ->join('orders', 'order_details.id_order', '=', 'orders.id')
             ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id') // join trạng thái
-            ->whereNotIn('order_statuses.name', ['Cancelled'])
+            ->where('order_statuses.name', '=', 'Delivered')
             ->select(
                 'products.id',
                 'products.name',
@@ -391,6 +398,65 @@ class Product extends Model
             ->orderBy('products.name', 'asc')
             ->get();
     }
+
+    public function productCancelled($start_date, $end_date)
+{
+    $cancelledStatuses = [
+        'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 
+        'Cancel Rejected', 'Cancelled', 'Failed Delivery'
+    ];
+
+    $query = DB::table('products')
+        ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+        ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+        ->join('orders', 'order_details.id_order', '=', 'orders.id')
+        ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+        ->whereIn('order_statuses.name', $cancelledStatuses)
+        ->select(
+            'products.id',
+            'products.name',
+            'products.image_primary',
+            DB::raw('SUM(order_details.quantity) as total_cancelled')
+        )
+        ->groupBy('products.id', 'products.name', 'products.image_primary')
+        ->orderBy('total_cancelled', 'desc');
+
+    if ($start_date && $end_date) {
+        $query->whereBetween('orders.created_at', [$start_date, $end_date]);
+    }
+
+    return $query->get();
+}
+
+public function productCancelleds($start_date, $end_date)
+{
+    $cancelledStatuses = [
+        'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 
+        'Cancel Rejected', 'Cancelled', 'Failed Delivery'
+    ];
+
+    $query = DB::table('products')
+        ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
+        ->join('order_details', 'product_variants.id', '=', 'order_details.id_variant')
+        ->join('orders', 'order_details.id_order', '=', 'orders.id')
+        ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
+        ->whereIn('order_statuses.name', $cancelledStatuses)
+        ->select(
+            'products.id',
+            'products.name',
+            'products.image_primary',
+            DB::raw('SUM(order_details.quantity) as total_cancelled')
+        )
+        ->groupBy('products.id', 'products.name', 'products.image_primary')
+        ->orderBy('total_cancelled', 'desc');
+
+    if ($start_date && $end_date) {
+        $query->whereBetween('orders.created_at', [$start_date, $end_date]);
+    }
+
+    return $query->get();
+}
+
 
     public function top_comment_products($start_date, $end_date)
     {
