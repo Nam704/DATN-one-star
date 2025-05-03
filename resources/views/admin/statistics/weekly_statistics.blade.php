@@ -9,7 +9,7 @@
                 <strong>{{ $endDate->format('d/m/Y') }}</strong>
             </p>
             <p>
-                Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
+                Giá trị trung bình mỗi đơn hàng (AOV): <strong>{{ number_format($averageOrderValue, 0) }}đ</strong>
             </p>
         </div>
 
@@ -41,7 +41,7 @@
                 <div class="d-flex justify-content-end align-items-center border-start ps-3">
                     <div class="text-end">
                         <p class="text-muted mb-1">Tổng Doanh Thu Tuần</p>
-                        <h3 class="mb-0">${{ number_format($totalRevenue, 0) }}đ</h3>
+                        <h3 class="mb-0">{{ number_format($totalRevenue, 0) }}đ</h3>
                     </div>
                 </div>
             </div>

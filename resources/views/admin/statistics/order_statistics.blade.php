@@ -74,7 +74,7 @@
                                     <div class="col-md-6">
                                         <label for="date" class="form-label">Select Date:</label>
                                         <input type="date" id="date" name="date" class="form-control"
-                                            value="{{ $date }}">
+                                            value="{{ $date }}"  max="{{ now()->toDateString() }}">
                                     </div>
                                     <div class="col-md-3">
                                         <button type="submit" class="btn btn-primary w-100">View Statistics</button>

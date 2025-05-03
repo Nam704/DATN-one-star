@@ -883,11 +883,35 @@ class StatisticController extends Controller
             ])
             ->pluck('id')
             ->toArray();
+        // Trạng thái thuộc nhóm Return/Refund
+        $returnRefundStatusIds = DB::table('order_statuses')
+            ->whereIn('name', [
+                'Return Requested',
+                'Return Under Review',
+                'Return Approved',
+                'Return Rejected',
+                'Refunded'
+            ])
+            ->pluck('id')
+            ->toArray();
 
-        // Tổng doanh thu trong ngày (chỉ tính đơn Delivered)
+        // Trạng thái thanh toán thất bại hoặc chưa hoàn tất
+        $failedPaymentStatusIds = DB::table('order_statuses')
+            ->whereIn('name', [
+                'Payment Failed',
+                'Payment Expired',
+                'Payment Retry Requested'
+            ])
+            ->pluck('id')
+            ->toArray();
+
+        // Gộp tất cả các trạng thái cần loại trừ khỏi doanh thu
+        $excludedStatusIds = array_merge($cancelledStatusId, $returnRefundStatusIds, $failedPaymentStatusIds);
+
+        // Tính tổng doanh thu trong ngày, loại trừ các trạng thái trên
         $totalRevenue = DB::table('orders')
             ->whereDate('created_at', $date)
-            ->where('id_order_status', $deliveredStatusId)
+            ->whereNotIn('id_order_status', $excludedStatusIds)
             ->sum('total');
 
         // Số đơn hàng theo từng trạng thái trong ngày
@@ -924,6 +948,7 @@ class StatisticController extends Controller
             ->join('products', 'product_variants.id_product', '=', 'products.id')
             ->select('products.name as product_name', DB::raw('SUM(order_details.quantity) as total_sold'))
             ->whereDate('orders.created_at', $date)
+            ->whereNotIn('orders.id_order_status', $excludedStatusIds) // ← thêm dòng này
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(10)
@@ -938,11 +963,12 @@ class StatisticController extends Controller
                 DB::raw('SUM(orders.total) as total_purchase')
             )
             ->whereDate('orders.created_at', $date)
-            ->where('orders.id_order_status', $deliveredStatusId)
+            ->whereNotIn('orders.id_order_status', $excludedStatusIds) // ← thêm dòng này
             ->groupBy('orders.id_user', 'user_name')
             ->orderByDesc('total_purchase')
             ->limit(10)
             ->get();
+
         // Truy vấn tổng hợp lý do hủy đơn
         $cancelReasons = DB::table('order_cancellations')
             ->join('order_cancellation_reasons', 'order_cancellations.reason_id', '=', 'order_cancellation_reasons.id')
