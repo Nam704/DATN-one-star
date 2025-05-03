@@ -22,7 +22,11 @@ class BlogController extends Controller
     public function index()
     {
         $blogs = Blog::with('category', 'tags')->whereNull('deleted_at')->get();
-        return view('admin.blog.index', compact('blogs'));
+        $categories = CategoryBlog::with(['blogs' => function ($query) {
+            $query->whereNull('deleted_at')->with('tags');
+        }])->get();
+
+        return view('admin.blog.index', compact('categories', 'blogs'),);
     }
 
     public function create()
@@ -37,8 +41,10 @@ class BlogController extends Controller
         $blog_data = $this->BlogService->createBlog($request);
         // Lấy danh sách blog mới nhất
         $blogs = Blog::latest()->get();
-
-        return view('admin.blog.index', compact('blogs'));
+        $categories = CategoryBlog::with(['blogs' => function ($query) {
+            $query->whereNull('deleted_at')->with('tags');
+        }])->get();
+        return view('admin.blog.index', compact('blogs', 'categories'));
     }
 
     public function show(string $id)
@@ -60,7 +66,10 @@ class BlogController extends Controller
     {
         $blog = $this->BlogService->updateBlog($request, $id);
         $blogs = Blog::latest()->get();
-        return view('admin.blog.index', compact('blogs'));
+        $categories = CategoryBlog::with(['blogs' => function ($query) {
+            $query->whereNull('deleted_at')->with('tags');
+        }])->get();
+        return view('admin.blog.index', compact('blogs', 'categories'));
     }
 
     public function destroy($id)
@@ -86,14 +95,14 @@ class BlogController extends Controller
     }
 
     public function restore($id)
-{
-    try {
-        $blog = Blog::onlyTrashed()->findOrFail($id); 
-        $blog->restore(); 
+    {
+        try {
+            $blog = Blog::onlyTrashed()->findOrFail($id);
+            $blog->restore();
 
-        return response()->json(['success' => true, 'message' => 'Bài viết đã được khôi phục!']);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Lỗi khi khôi phục bài viết!']);
+            return response()->json(['success' => true, 'message' => 'Bài viết đã được khôi phục!']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Lỗi khi khôi phục bài viết!']);
+        }
     }
-}
 }

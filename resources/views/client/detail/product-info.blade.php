@@ -15,7 +15,7 @@
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
-                                    aria-selected="false">Comments (1)</a>
+                                    aria-selected="false">Bình luận ({{ $totalComments }})</a>
                             </li>
                         </ul>
                     </div>
@@ -69,44 +69,47 @@
 
                         <div class="tab-pane fade" id="reviews" role="tabpanel">
                             <div class="reviews_wrapper">
-                                <h2>1 review for Donec eu furniture</h2>
-                                <div class="reviews_comment_box" id="comments-section">
+                                <h2>Tất cả bình luận</h2>
+                                <div class="comments_box">
                                     @foreach ($comments as $comment)
-                                        <div class="comment_thmb">
-                                            <!-- Hiển thị avatar của người dùng -->
-                                            <img src="{{ asset($comment->user->avatar) }}" alt="User Avatar">
-                                        </div>
-                                        <div class="comment_text">
-                                            <div class="reviews_meta">
-                                                <!-- Hiển thị tên người dùng và thời gian bình luận -->
-                                                <p><strong>{{ $comment->user->name }}</strong> -
-                                                    {{ $comment->created_at->format('F d, Y') }}</p>
+                                        <div class="comment_list">
+                                            <div class="comment_thumb">
+                                                <img src="/admin/assets/images/user-201.png" alt="imgimg"
+                                                    style="width: 50px; height: 50px;">
                                             </div>
-                                            <p>{{ $comment->comment }}</p>
+                                            <div class="comment_content">
+                                                <div class="comment_meta">
+                                                    <h5>{{ $comment->user->name }}</h5>
+                                                    <span>{{ $comment->created_at->format('H:i d/m/Y') }}</span>
+                                                </div>
+                                                <p>{{ $comment->comment }}</p>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <div class="comment_title">
-                                    <h2>Add a review </h2>
-                                    <p>Your email address will not be published. Required fields are marked </p>
-                                </div>
+
                                 <div class="product_review_form">
-                                    <form id="comment-form"
-                                        action="{{ route('client.comment-product.add', ['id' => $product->id]) }}"
-                                        method="POST">
-                                        @csrf
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <label for="review_comment">Your review </label>
-                                                <textarea name="comment" id="review_comment" required></textarea>
+                                    @auth
+                                        <form id="comment-form"
+                                            action="{{ route('client.comment-product.add', ['id' => $product->id]) }}"
+                                            method="POST">
+                                            @csrf
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <textarea name="comment" id="review_comment" required placeholder="Nội dung bình luận"></textarea>
+                                                </div>
                                             </div>
-                                            <div class="col-lg-6 col-md-6">
-                                                <label for="author">Name</label>
-                                                <input id="author" name="author" type="text" required>
-                                            </div>
-                                        </div>
-                                        <button type="submit">Submit</button>
-                                    </form>
+                                            <button type="submit">Gửi bình luận</button>
+                                        </form>
+                                    @endauth
+
+                                    @guest
+                                        <p>Bạn phải
+                                            <a href="{{ route('login') }}">đăng nhập</a>
+                                            để bình luận.
+                                        </p>
+                                    @endguest
+
                                 </div>
                             </div>
                         </div>
@@ -193,25 +196,20 @@
 <script>
     $(document).ready(function() {
         const commentUrl = "{{ route('client.comment-product.add', ['id' => $product->id]) }}";
-        // Xử lý khi người dùng gửi form
+
         $('#comment-form').submit(function(e) {
-            e.preventDefault(); // Ngừng hành động mặc định của form (không reload trang)
+            e.preventDefault();
 
             var comment = $('#review_comment').val();
-            var author = $('#author').val();
-            var productId = '{{ $product->id }}'; // ID sản phẩm
 
-            // Gửi dữ liệu qua Ajax
             $.ajax({
                 url: commentUrl,
                 type: 'POST',
                 data: {
                     comment: comment,
-                    author: author,
-                    _token: '{{ csrf_token() }}' // Đảm bảo gửi token CSRF
+                    _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    // Thêm bình luận vào phần hiển thị ngay lập tức
                     $('#comments-section').prepend(`
                     <div class="reviews_comment_box">
                         <div class="comment_thmb">
@@ -220,19 +218,16 @@
                         <div class="comment_text">
                             <div class="reviews_meta">
                                 <p><strong>${response.user_name}</strong> - ${response.created_at}</p>
-                                <span>${author}</span>
                             </div>
                             <p>${response.comment.comment}</p>
                         </div>
                     </div>
                 `);
 
-                    // Reset form
                     $('#review_comment').val('');
-                    $('#author').val('');
                 },
-                error: function(xhr, status, error) {
-                    console.log("Lỗi: ", xhr.responseText); // Xem lỗi cụ thể từ Laravel
+                error: function(xhr) {
+                    console.log("Lỗi: ", xhr.responseText);
                     alert('Có lỗi xảy ra, vui lòng thử lại.');
                 }
             });

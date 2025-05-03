@@ -11,7 +11,7 @@
                             Back
                         </a>
                     </div>
-                    <h4 class="page-title">Blog Management</h4>
+                    <h4 class="page-title">Blog detail</h4>
                 </div>
             </div>
         </div>
@@ -31,7 +31,7 @@
                         <img src="{{ asset($blog->thumbnail) }}" alt="img" height="500px" width="500px" style="margin-bottom: 30px; object-fit: cover;">
                         <br>
                         <span>{!! $blog->content !!}</span>
-                        <Span>Tag : 
+                        <Span>Tag :
                             {{$tags->pluck('name')->implode(', ')}}
                         </Span>
                     </div>

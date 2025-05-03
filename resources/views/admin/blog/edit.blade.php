@@ -191,5 +191,4 @@
 
     <script src="{{ asset('admin/api/blog.js') }}"></script>
 
-    <script src="{{ asset('admin/api/testFunction.js') }}"></script>
 @endpush

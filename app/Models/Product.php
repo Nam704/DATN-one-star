@@ -355,7 +355,7 @@ class Product extends Model
 
     public function comments()
     {
-        return $this->hasMany(ProductComment::class);
+        return $this->hasMany(ProductComment::class)->whereNull('parent_id')->with('replies');;
     }
 
     public function reviews()

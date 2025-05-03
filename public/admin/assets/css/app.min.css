@@ -4,14 +4,14 @@
 :root {
     --tz-logo-lg-height: 18px;
     --tz-logo-sm-height: 22px;
-    --tz-leftbar-width: 240px;
+    --tz-leftbar-width: 210px;
     --tz-leftbar-width-md: 160px;
     --tz-leftbar-width-sm: 70px;
     --tz-leftbar-condensed-height: 1500px;
     --tz-topbar-height: 70px;
     --tz-menu-item-icon-size: 1.1rem;
     --tz-menu-item-icon-width: 40px;
-    --tz-menu-item-font-size: 0.925rem;
+    --tz-menu-item-font-size: 0.84rem;
     --tz-menu-item-padding-x: 10px;
     --tz-menu-item-padding-y: 10px;
     --tz-footer-height: 60px;
@@ -166,7 +166,7 @@ html[data-bs-theme=dark][data-topbar-color=light] {
     --tz-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --tz-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
     --tz-body-font-family: var(--tz-font-sans-serif);
-    --tz-body-font-size: 0.875rem;
+    --tz-body-font-size: 0.84rem;
     --tz-body-font-weight: 400;
     --tz-body-line-height: 1.5;
     --tz-body-color: #6c757d;
@@ -4357,8 +4357,8 @@ fieldset:disabled .btn {
 .btn-group-sm>.btn,
 .btn-sm {
     --tz-btn-padding-y: 0.28rem;
-    --tz-btn-padding-x: 0.8rem;
-    --tz-btn-font-size: 0.85rem;
+    --tz-btn-padding-x: 0.5rem;
+    --tz-btn-font-size: 0.8rem;
     --tz-btn-border-radius: var(--tz-border-radius-sm)
 }
 
@@ -4439,12 +4439,9 @@ fieldset:disabled .btn {
 }
 
 .dropdown-menu {
-<<<<<<< HEAD
-    --tz-dropdown-zindex: 1000;
-=======
-    --tz-dropdown-zindex: 1050;
->>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
-    --tz-dropdown-min-width: 10rem;
+    <<<<<<< HEAD --tz-dropdown-zindex: 1000;
+    =======--tz-dropdown-zindex: 1050;
+    >>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899 --tz-dropdown-min-width: 10rem;
     --tz-dropdown-padding-x: 0;
     --tz-dropdown-padding-y: 0.25rem;
     --tz-dropdown-spacer: 0.125rem;
@@ -17346,9 +17343,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     z-index: 1060
 }
 
-<<<<<<< HEAD
-=======
-#notification_simplebar {
+<<<<<<< HEAD=======#notification_simplebar {
     position: relative;
     max-height: 300px;
     /* Giới hạn chiều cao */
@@ -17356,8 +17351,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     /* Kích hoạt cuộn dọc */
 }
 
->>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
-.notification-list {
+>>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899 .notification-list {
     margin-left: 0
 }
 
@@ -17375,13 +17369,9 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 }
 
 .notification-list .notify-item {
-<<<<<<< HEAD
-    padding: 10px 20px
-=======
-
-    padding: 10px 20px;
+    <<<<<<< HEAD padding: 10px 20px=======padding: 10px 20px;
     transition: all 0.3s ease-in-out;
->>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
+    >>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899
 }
 
 .notification-list .notify-item.unread-noti {
@@ -17444,8 +17434,8 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     display: block
 }
 
-<<<<<<< HEAD
-=======
+<<<<<<< HEAD=======
+
 /* message-list start*/
 .message-list {
     margin-left: 0
@@ -17530,8 +17520,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 
 /* message-list end*/
 
->>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
-.profile-dropdown {
+>>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899 .profile-dropdown {
     min-width: 170px
 }
 
@@ -23172,9 +23161,7 @@ span.flatpickr-weekday {
     padding: .5rem .75rem
 }
 
-<<<<<<< HEAD
-/*# sourceMappingURL=app.min.css.map */
-
+/* trangg */
 .bootstrap-tagsinput {
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -23217,6 +23204,19 @@ span.flatpickr-weekday {
     border-radius: 3px;
     font-weight: 600
 }
-=======
-/*# sourceMappingURL=app.min.css.map */
->>>>>>> 3468205d5e69800a4f7abb24cc12f608dbe5a899
+
+/* trang viet */
+.bd-css{
+    border: 1px solid ;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 2px var(--tz-secondary-color);
+
+}
+.mess-replies{
+    margin-left: 30px;
+    margin-top: -10px;
+}
+
+
+

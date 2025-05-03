@@ -6,16 +6,12 @@
             <div class="col-12">
                 <div class="page-title-box">
                     <div class="page-title-right">
-                        <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary">
-                            <i class="ri-add-line align-middle me-1"></i>
-                            Add Comment Product
-                        </a>
                         <a href="{{ route('admin.blogs.trash') }}" class="btn btn-secondary me-2">
                             <i class="ri-delete-bin-line align-middle me-1"></i>
                             Trash
                         </a>
                     </div>
-                    <h4 class="page-title">Comment Product Management</h4>
+                    <h4 class="page-title">Quản lý bình luận</h4>
                 </div>
             </div>
         </div>
@@ -50,15 +46,10 @@
                                         <td>{{ $value->created_at->format('d/m/Y') }}</td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.blogs.show', $value->id) }}">
-                                                    <button type="button"
-                                                        class="btn btn-secondary btn-sm btn-warning me-1"><i
-                                                            class="mdi mdi-eye"></i></button>
-                                                </a>
-                                                <a href="{{ route('admin.blogs.edit', $value->id) }}"><button
+                                                <a href="{{ route('admin.comments-product.edit', $value->id) }}"><button
                                                         class="btn btn-sm btn-success me-1"><i
                                                             class="mdi mdi-comment-edit-outline"></i></button></a>
-                                                <button class="btn btn-sm btn-danger delete-btn"
+                                                <button class="btn btn-sm btn-danger delete-btn delete-comment"
                                                     data-id="{{ $value->id }}">
                                                     <i class="mdi mdi-trash-can"></i>
                                                 </button>
@@ -91,6 +82,5 @@
 
 @push('scripts')
     <x-admin.data-table-scripts />
-    <script src="{{ asset('admin/api/blog.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ asset('admin/api/comment.js') }}"></script>
 @endpush

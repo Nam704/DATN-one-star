@@ -26,8 +26,11 @@ class ProductController extends Controller
             ->whereNull('parent_id')
             ->with('user')
             ->get();
-            
-        return view('client.detail.index', compact('product', 'relatedProducts', 'comments'));
+
+        $product_comment = Product::withCount('comments')->find($id);
+        $totalComments = $product_comment->comments_count;
+
+        return view('client.detail.index', compact('product', 'relatedProducts', 'comments', 'totalComments'));
     }
 
     public function related($id)

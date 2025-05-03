@@ -6,10 +6,10 @@
             {{-- <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo"> --}}
 
             <img src=" {{ asset('admin/assets/images/logo-3.png') }}" alt="logo"
-                style="width: 190px; height: auto; margin-top: 10px;">
+                style="width: 170px; height: auto; margin-top: 10px;">
         </span>
         <span class="logo-sm">
-            <img src="{{ asset('admin/assets/images/logo-sm.png') }}" alt="small logo">
+            <img src="{{ asset('admin/assets/images/logo-3.png') }}" alt="small logo">
         </span>
     </a>
 
@@ -19,7 +19,7 @@
             <img src="{{ asset('admin/assets/images/logo-dark.png') }}" alt="dark logo">
         </span>
         <span class="logo-sm">
-            <img src="{{ asset('admin/assets/images/logo-sm.png') }}" alt="small logo">
+            <img src="{{ asset('admin/assets/images/logo-3.png') }}" alt="small logo">
         </span>
     </a>
 

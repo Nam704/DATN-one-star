@@ -284,11 +284,8 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('/{id}/show', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
-
+            Route::post('/{parentId}/reply', 'reply')->name('reply');
             Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::get('/trash', 'trash')->name('trash');
-            Route::post('/{id}/restore', 'restore')->name('restore');
-            Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
         });
 
         Route::prefix('mails')->name('mails.')->controller(MailController::class)->group(

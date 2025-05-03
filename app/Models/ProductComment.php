@@ -30,7 +30,7 @@ class ProductComment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function parentComment()
+    public function parent()
     {
         return $this->belongsTo(ProductComment::class, 'parent_id');
     }
