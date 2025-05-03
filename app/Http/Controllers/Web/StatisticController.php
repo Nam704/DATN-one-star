@@ -667,7 +667,7 @@ class StatisticController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
-    
+
     public function exportTopViewProducts()
     {
         // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm
@@ -1157,6 +1157,7 @@ class StatisticController extends Controller
 
     public function weeklyStatistics(Request $request)
     {
+        
         // 1. Lấy ngày bắt đầu và ngày kết thúc từ request, nếu không có sẽ mặc định là đầu và cuối tuần hiện tại
         $startDateInput = $request->input('start_date', now()->startOfWeek()->toDateString());
         $endDateInput   = $request->input('end_date', now()->endOfWeek()->toDateString());

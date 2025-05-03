@@ -21,7 +21,7 @@
                     <div class="col-md-6">
                         <label for="month" class="form-label">Chọn Tháng (YYYY-MM):</label>
                         <input type="month" id="month" name="month" class="form-control"
-                            value="{{ $selectedMonth->format('Y-m') }}" >
+                            value="{{ $selectedMonth->format('Y-m') }}" max="{{ now()->format('Y-m') }}">
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-primary w-100">Xem thống kê</button>
