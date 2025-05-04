@@ -7,13 +7,13 @@
                     <div class="card-header">
                         <div
                             class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                            <h4 class="card-title mb-2 mb-md-0">List Products</h4>
+                            <h4 class="card-title mb-2 mb-md-0">Quản lý sản phẩm</h4>
 
                             <div class="d-flex flex-wrap align-items-center gap-2">
 
                                 <!-- Add New Product -->
                                 <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">
-                                    <i class="mdi mdi-plus"></i> Add Product
+                                    <i class="mdi mdi-plus"></i>Thêm sản phẩm
                                 </a>
 
                                 <!-- Import/Export Group -->
@@ -50,7 +50,7 @@
                                 <!-- Filter Modal Trigger -->
                                 <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#filterModal">
-                                    <i class="mdi mdi-filter-menu"></i> Filter
+                                    <i class="mdi mdi-filter-menu"></i> Bộ lọc
                                 </button>
                             </div>
                         </div>
@@ -62,15 +62,14 @@
                             class="table table-striped dt-responsive nowrap table-striped  w-100">
                             <thead>
                                 <tr>
-
-                                    <th>Name</th>
-                                    <th>Image</th>
-                                    <th>Brand</th>
-                                    <th>Category</th>
-                                    <th>Quantity</th>
-                                    <th>Views</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Danh mục</th>
+                                    <th>Số lượng</th>
+                                    <th>Lượt xem</th>
+                                    <th>Giá bán</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
 
@@ -80,15 +79,14 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-
-                                    <th>Name</th>
-                                    <th>Image</th>
-                                    <th>Brand</th>
-                                    <th>Category</th>
-                                    <th>Quantity</th>
-                                    <th>Views</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Danh mục</th>
+                                    <th>Số lượng</th>
+                                    <th>Lượt xem</th>
+                                    <th>Giá bán</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -103,16 +101,16 @@
             <div class="modal-content">
                 <form id="filterForm" action="{{ route('admin.products.filter') }}" method="GET">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="filterModalLabel">Filter Products</h5>
+                        <h5 class="modal-title" id="filterModalLabel">Bộ lọc sản phẩm</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3 row">
                             <!-- Category -->
                             <div class="col-md-6">
-                                <label for="category" class="form-label">Category</label>
+                                <label for="category" class="form-label">Danh mục</label>
                                 <select class="form-select" id="category" name="category">
-                                    <option value="">All Categories</option>
+                                    <option value="">Tất cả danh mục</option>
                                     @foreach ($categories as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>
                                     @endforeach
@@ -121,9 +119,9 @@
 
                             <!-- Brand -->
                             <div class="col-md-6">
-                                <label for="brand" class="form-label">Brand</label>
+                                <label for="brand" class="form-label">Thương hiệu</label>
                                 <select class="form-select" id="brand" name="brand">
-                                    <option value="">All Brands</option>
+                                    <option value="">Tất cả thương hiệu</option>
                                     @foreach ($brands as $b)
                                         <option value="{{ $b->id }}">{{ $b->name }}</option>
                                     @endforeach
@@ -188,7 +186,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-outline-warning" id="resetFilter">Reset bộ lọc</button>
+                        <button type="button" class="btn btn-outline-warning" id="resetFilter">Làm mới bộ lọc</button>
                         <button type="button" class="btn btn-primary" id="applyFilter">Áp dụng bộ lọc</button>
                     </div>
                 </form>

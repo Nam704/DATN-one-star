@@ -8,10 +8,10 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.attributes.index') }}" class="btn btn-secondary">
                             <i class="ri-arrow-left-line align-middle me-1"></i>
-                            Back to Attributes
+                            Quay lại
                         </a>
                     </div>
-                    <h4 class="page-title">Trash Attributes</h4>
+                    <h4 class="page-title">Thùng rác thuộc tính</h4>
                 </div>
             </div>
         </div>
@@ -23,12 +23,12 @@
                         <table id="fixed-header-database" class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead class="table-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Deleted At</th>
-                                    <th>Actions</th>
+                                    <th>STT</th>
+                                    <th>Tên thuộc tính</th>
+                                    <th>Mô tả</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày xóa</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -8,14 +8,14 @@
                     <div class="page-title-right">
                         <a href="{{ route('admin.attributes.create') }}" class="btn btn-primary">
                             <i class="ri-add-line align-middle me-1"></i>
-                            Add Attribute
+                            Thêm thuộc tính
                         </a>
                         <a href="{{ route('admin.attributes.trash') }}" class="btn btn-warning me-2">
                             <i class="ri-delete-bin-line align-middle me-1"></i>
-                            Trash
+                            Thùng rác
                         </a>
                     </div>
-                    <h4 class="page-title">Attributes Management</h4>
+                    <h4 class="page-title">Quản lý biến thể sản phẩm</h4>
                 </div>
             </div>
         </div>
@@ -28,11 +28,11 @@
                             class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead class="table-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>STT</th>
+                                    <th>Tên thuộc tính</th>
+                                    <th>Mô tả</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hoạt động</th>
                                 </tr>
                             </thead>
                             <tbody>

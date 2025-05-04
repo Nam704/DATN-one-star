@@ -34,10 +34,10 @@
                     @enderror
                 </div>
                 <div class="mb-3">
-                    <label for="status">Status</label>
+                    <label for="status">Trạng thái</label>
                     <select class="form-select" aria-label="Default select example" name="status">
-                        <option value="active" {{ $categories->status == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ $categories->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        <option value="active" {{ $categories->status == 'active' ? 'selected' : '' }}>Hoạt động</option>
+                        <option value="inactive" {{ $categories->status == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
                     </select>
                     @error('status')
                     <div class="text-danger">{{ $message }}</div>
