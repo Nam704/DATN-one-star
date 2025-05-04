@@ -308,6 +308,41 @@
     </script>
     <script>
         $(document).ready(function() {
+            let chartInstances = {};
+
+            function updateChart(elementId, data, title) {
+                // Xóa biểu đồ cũ nếu có
+                if (chartInstances[elementId]) {
+                    chartInstances[elementId].destroy();
+                }
+
+                const categories = Object.keys(data);
+                const values = Object.values(data);
+
+                const options = {
+                    chart: {
+                        type: 'bar',
+                        height: 350
+                    },
+                    series: [{
+                        name: title,
+                        data: values
+                    }],
+                    xaxis: {
+                        categories: categories
+                    },
+                    colors: ['#007bff'],
+                    title: {
+                        text: title,
+                        align: 'center'
+                    }
+                };
+
+                const chart = new ApexCharts(document.querySelector("#" + elementId), options);
+                chart.render();
+                chartInstances[elementId] = chart;
+            }
+
             function loadCharts(date) {
                 $.ajax({
                     url: '/admin/users/getUserStats',
@@ -324,37 +359,15 @@
                 });
             }
 
-            function updateChart(elementId, data, title) {
-                let categories = Object.keys(data);
-                let values = Object.values(data);
-
-                var options = {
-                    chart: {
-                        type: 'bar',
-                        height: 350
-                    },
-                    series: [{
-                        name: title,
-                        data: values
-                    }],
-                    xaxis: {
-                        categories: categories
-                    },
-                    colors: ['#007bff']
-                };
-                new ApexCharts(document.querySelector("#" + elementId), options).render();
-            }
-
-            // Load dữ liệu ban đầu
+            // Load mặc định
             let defaultDate = $('#datePicker').val();
             loadCharts(defaultDate);
 
-            // Cập nhật khi chọn ngày khác
             $('#datePicker').on('change', function() {
-                let selectedDate = $(this).val();
-                loadCharts(selectedDate);
+                loadCharts($(this).val());
             });
         });
+    </script>
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
