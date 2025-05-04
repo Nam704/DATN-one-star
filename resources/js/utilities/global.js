@@ -18,15 +18,43 @@ window.GlobalUtils = {
     // Hiển thị thông báo (dùng chung)
     showNotification: (message, options = {}) => {
         const defaultOptions = {
-            duration: 3000,
+            duration: 3000, // Mặc định 3 giây
             gravity: "top",
             position: "right",
             backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-            stopOnFocus: true,
-            close: true,
+            stopOnFocus: true, // Dừng đếm thời gian khi hover
+            close: true, // Mặc định hiển thị nút đóng
+            persistent: false, // Mặc định không hiển thị vĩnh viễn
         };
-        const toastOptions = { ...defaultOptions, ...options, text: message };
-        Toastify(toastOptions).showToast();
+
+        // Ghi đè các tùy chọn mặc định bằng options truyền vào
+        const toastOptions = {
+            ...defaultOptions,
+            ...options,
+            text: message,
+        };
+
+        // Nếu persistent = true thì set duration = 0 (hiển thị mãi)
+        if (toastOptions.persistent) {
+            toastOptions.duration = 0;
+        }
+
+        // Tạo toast
+        const toast = Toastify(toastOptions);
+
+        // Hiển thị toast
+        toast.showToast();
+
+        // Thêm sự kiện click cho nút đóng nếu có
+        if (toastOptions.close) {
+            const closeButton =
+                toast.toastElement.querySelector(".toast-close");
+            if (closeButton) {
+                closeButton.addEventListener("click", () => {
+                    toast.hideToast();
+                });
+            }
+        }
     },
 
     // API gọi giỏ hàng (dùng chung)

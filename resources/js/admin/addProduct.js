@@ -78,24 +78,66 @@ function initFormSubmission() {
             errors.push("Số lượng biến thể không được vượt quá 50.");
         }
 
-        variantRows.each(function (index) {
+        // Lấy danh sách thuộc tính và SKU của tất cả biến thể để kiểm tra trùng lặp
+        const variantAttributes = {};
+        const variantSkus = new Set();
+
+        variantRows.each(function () {
+            const index = $(this).data("id");
             const sku = $(this)
                 .find(`input[name='product_code_${index}']`)
                 .val();
-            const image = $(this).find(
+            const imageInput = $(this).find(
                 `input[name='image_variant_${index}']`
-            )[0].files[0];
+            )[0];
+            const image = imageInput ? imageInput.files[0] : null;
+            const attributeValues = JSON.parse(
+                $(this)
+                    .find(`input[name='variant_attribute_values_${index}']`)
+                    .val()
+            );
+
+            // Kiểm tra SKU và ảnh
             if (!sku) {
                 errors.push(`Vui lòng nhập mã SKU cho biến thể #${index + 1}.`);
             }
             if (!image) {
                 errors.push(`Vui lòng chọn ảnh cho biến thể #${index + 1}.`);
             }
+
+            // Kiểm tra trùng lặp thuộc tính
+            const attrKey = JSON.stringify(
+                attributeValues
+                    .map((v) => `${v.attribute_name}:${v.value.value}`)
+                    .sort()
+            );
+            if (variantAttributes[attrKey]) {
+                errors.push(
+                    `Biến thể #${
+                        index + 1
+                    } có tổ hợp thuộc tính trùng lặp với biến thể #${
+                        variantAttributes[attrKey] + 1
+                    }.`
+                );
+            } else {
+                variantAttributes[attrKey] = index;
+            }
+
+            // Kiểm tra trùng lặp SKU
+            if (sku && variantSkus.has(sku)) {
+                errors.push(
+                    `Mã SKU "${sku}" của biến thể #${index + 1} đã bị trùng.`
+                );
+            } else if (sku) {
+                variantSkus.add(sku);
+            }
         });
 
         if (errors.length > 0) {
             GlobalUtils.showNotification(errors.join("\n"), {
                 backgroundColor: "#ff4444",
+                duration: 10000,
+                // persistent: true,
             });
             return;
         }
@@ -405,7 +447,8 @@ function showManualVariantForm() {
         });
 
         const sku = $("#manual-variant-sku").val();
-        const image = $("#manual-variant-image")[0].files[0];
+        const imageInput = document.getElementById("manual-variant-image");
+        const image = imageInput.files[0];
         if (!sku) {
             hasError = true;
             GlobalUtils.showNotification("Vui lòng nhập mã SKU cho biến thể.", {
@@ -533,6 +576,15 @@ function renderVariantsLayout(variants, isManual = false) {
                 </div>
             </div>`;
         container.append(variantRow);
+        // Gán file ảnh vào input nếu có
+        if (!Array.isArray(variant) && variant.image) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(variant.image);
+            const input = container.find(
+                `input[name='image_variant_${variantIndex}']`
+            )[0];
+            input.files = dataTransfer.files;
+        }
     });
 }
 
@@ -618,9 +670,10 @@ function prepareProductData() {
         );
         const imageInput = $(row).find(
             `input[name='image_variant_${index}']`
-        )[0].files[0];
-        if (imageInput)
-            formData.append(`variants[${index}][image]`, imageInput);
+        )[0];
+        if (imageInput && imageInput.files && imageInput.files[0]) {
+            formData.append(`variants[${index}][image]`, imageInput.files[0]);
+        }
     });
 
     return formData;
