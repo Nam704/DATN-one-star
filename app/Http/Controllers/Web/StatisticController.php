@@ -667,7 +667,7 @@ class StatisticController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
-    
+
     public function exportTopViewProducts()
     {
         // Lấy danh sách sản phẩm có trạng thái active, sắp xếp theo số view giảm dần, giới hạn 10 sản phẩm

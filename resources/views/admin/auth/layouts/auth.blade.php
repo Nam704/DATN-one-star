@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title') | Velonic - Bootstrap 5 Admin & Dashboard Template</title>
+    <title>@yield('title') | OneStar - Đăng nhập</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="A fully responsive admin theme which can be used to build CRM, CMS,ERP etc." name="description" />
     <meta content="Techzaa" name="author" />
@@ -26,19 +26,17 @@
                     <div class="card overflow-hidden">
                         <div class="row g-0">
                             <div class="col-lg-6 d-none d-lg-block p-2">
-                                <img src="{{ asset('admin/assets/images/auth-img.jpg') }}" alt=""
+                                <img src="/admin/assets/images/iphone-16-1-1700728104974843847493-1700785787200-17007857873541994545429.jpg" alt="img"
                                     class="img-fluid rounded h-100">
                             </div>
                             <div class="col-lg-6">
                                 <div class="d-flex flex-column h-100">
                                     <div class="auth-brand p-4">
-                                        <a href="index.html" class="logo-light">
-                                            <img src="{{ asset('admin/assets/images/logo.png') }}" alt="logo"
-                                                height="22">
+                                        <a href="#" class="logo-light">
+                                            <img src="/client/assets/img/logo/logo-2.png" alt="img">
                                         </a>
-                                        <a href="index.html" class="logo-dark">
-                                            <img src="{{ asset('admin/assets/images/logo-dark.png') }}" alt="dark logo"
-                                                height="22">
+                                        <a href="#" class="logo-dark">
+                                            <img src="/client/assets/img/logo/logo-2.png" alt="img" width="200px">
                                         </a>
                                     </div>
                                     <div class="p-4 my-auto">
@@ -58,7 +56,7 @@
         <span class="text-dark-emphasis">
             <script>
                 document.write(new Date().getFullYear())
-            </script> © Velonic - Theme by Techzaa
+            </script> © OneStar - The best choices
         </span>
     </footer>
 
