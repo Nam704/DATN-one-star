@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\Order;
 use App\Models\Order_status;
 use App\Models\Product;
+use App\Models\ProductComment;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
 
@@ -32,7 +33,10 @@ class ProductController extends Controller
         $product_comment = Product::withCount('comments')->find($id);
         $totalComments = $product_comment->comments_count;
 
-        $comments = Comment::with('user')->where('product_id', $id)->where('status', 'active')->get();
+        $comments = $product->comments()
+            ->whereNull('parent_id')
+            ->with('user', 'parent', 'replies.user')
+            ->get();
 
         return view('client.detail.index', compact('product', 'relatedProducts', 'comments', 'totalComments'));
     }
@@ -44,6 +48,25 @@ class ProductController extends Controller
             'comment' => 'required|string',
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
+
+        $user = auth()->user();
+        $productId = $request->product_id;
+
+        // Kiểm tra người dùng đã mua sản phẩm này chưa
+        $hasPurchased = Order::where('id_user', $user->id)
+            ->whereHas('orderDetails', function ($query) use ($productId) {
+                $query->whereHas('productVariant', function ($q) use ($productId) {
+                    $q->where('id_product', $productId); // Sửa: dùng id_product thay vì product_id
+                });
+            })
+            ->whereHas('orderStatus', function ($query) {
+                $query->where('name', 'Delivered');
+            })
+            ->exists();
+
+        if (!$hasPurchased) {
+            return response()->json(['message' => 'Bạn cần mua sản phẩm và nhận hàng trước khi bình luận.'], 400);
+        }
 
         // kiểm tra sản phẩm đã bình luận rồi
         $existing = Comment::where('product_id', $request->product_id)

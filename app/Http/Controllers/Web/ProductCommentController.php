@@ -33,12 +33,6 @@ class ProductCommentController extends Controller
         return view('admin.comment-product.edit', compact('comment', 'product'));
     }
 
-    public function update(Request $request, string $id)
-    {
-
-        return view('admin.blog.index', compact('blogs', 'categories'));
-    }
-
     public function destroy($id)
     {
         try {

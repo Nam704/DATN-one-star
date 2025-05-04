@@ -18,6 +18,7 @@ export default defineConfig({
                 "resources/js/admin/notification.js",
                 "resources/js/admin/listProduct.js",
                 "resources/js/admin/detailOrder.js",
+                "resources/js/admin/addProduct.js",
 
                 "resources/js/public.js",
                 "resources/js/private.js",

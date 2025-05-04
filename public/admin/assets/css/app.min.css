@@ -4439,9 +4439,8 @@ fieldset:disabled .btn {
 }
 
 .dropdown-menu {
-    <<<<<<< HEAD --tz-dropdown-zindex: 1000;
-    =======--tz-dropdown-zindex: 1050;
-    >>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899 --tz-dropdown-min-width: 10rem;
+    --tz-dropdown-zindex: 1000;
+    --tz-dropdown-min-width: 10rem;
     --tz-dropdown-padding-x: 0;
     --tz-dropdown-padding-y: 0.25rem;
     --tz-dropdown-spacer: 0.125rem;
@@ -17343,7 +17342,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     z-index: 1060
 }
 
-<<<<<<< HEAD=======#notification_simplebar {
+#notification_simplebar {
     position: relative;
     max-height: 300px;
     /* Giới hạn chiều cao */
@@ -17351,7 +17350,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     /* Kích hoạt cuộn dọc */
 }
 
->>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899 .notification-list {
+.notification-list {
     margin-left: 0
 }
 
@@ -17369,9 +17368,8 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 }
 
 .notification-list .notify-item {
-    <<<<<<< HEAD padding: 10px 20px=======padding: 10px 20px;
+    padding: 10px 20px;
     transition: all 0.3s ease-in-out;
-    >>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899
 }
 
 .notification-list .notify-item.unread-noti {
@@ -17434,7 +17432,6 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
     display: block
 }
 
-<<<<<<< HEAD=======
 
 /* message-list start*/
 .message-list {
@@ -17520,7 +17517,7 @@ html[data-bs-theme=dark] #light-dark-mode .ri-moon-line::before {
 
 /* message-list end*/
 
->>>>>>>3468205d5e69800a4f7abb24cc12f608dbe5a899 .profile-dropdown {
+.profile-dropdown {
     min-width: 170px
 }
 
@@ -23161,7 +23158,9 @@ span.flatpickr-weekday {
     padding: .5rem .75rem
 }
 
-/* trangg */
+
+/*# sourceMappingURL=app.min.css.map */
+
 .bootstrap-tagsinput {
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -23217,6 +23216,5 @@ span.flatpickr-weekday {
     margin-left: 30px;
     margin-top: -10px;
 }
-
 
 

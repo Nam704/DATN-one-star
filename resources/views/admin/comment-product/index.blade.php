@@ -5,12 +5,6 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <div class="page-title-right">
-                        <a href="{{ route('admin.blogs.trash') }}" class="btn btn-secondary me-2">
-                            <i class="ri-delete-bin-line align-middle me-1"></i>
-                            Trash
-                        </a>
-                    </div>
                     <h4 class="page-title">Quản lý bình luận</h4>
                 </div>
             </div>

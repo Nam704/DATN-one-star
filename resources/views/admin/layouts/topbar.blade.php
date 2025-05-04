@@ -68,14 +68,17 @@
                             <div class="col">
                                 <h6 class="m-0 fs-16 fw-semibold">Notification</h6>
                             </div>
+
                             <div class="col-auto">
-                                <a href="javascript:void(0);" class="text-dark text-decoration-underline">
+                                <a href="javascript:void(0);" class="text-dark text-decoration-underline"
+                                    id="clear_all">
                                     <small>Clear All</small>
                                 </a>
                             </div>
                         </div>
+
                     </div>
-                    <div id="notification_simplebar" style="max-height: 300px;" data-simplebar>
+                    <div id="notification_simplebar" style="max-height: 300px; overflow: auto" data-simplebar>
                         <!-- Danh sách thông báo sẽ được render động bởi JS -->
                     </div>
                     @if (auth()->user())

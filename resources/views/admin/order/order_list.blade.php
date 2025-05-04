@@ -37,7 +37,18 @@
                             class="form-control form-control-sm d-inline-block w-auto" style="margin: 5px 0;">
                         <button type="submit" class="btn btn-sm btn-danger">Reject Cancel</button>
                     </form> --}}
-                @elseif (!in_array($order->orderStatus->name, ['Shipping', 'Delivered', 'Cancelled', 'Refunded', 'Return Rejected']))
+                @elseif (
+                    !in_array($order->orderStatus->name, [
+                        'Shipping',
+                        'Delivered',
+                        'Cancelled',
+                        'Refunded',
+                        'Return Rejected',
+                        'Payment Retry Requested',
+                        'Payment Expired',
+                        'Payment Failed',
+                        'Paid',
+                    ]) && !in_array($order->orderStatus->group_status, ['Cancelled']))
                     <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Update
                         Status</button>
                 @endif

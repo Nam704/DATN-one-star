@@ -2,67 +2,65 @@
     <div class="card">
         <div class="card-body">
             <div class="card-widgets">
-                <a href="javascript:;" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
+                <a href="javascript:;" onclick="loadCancelledChartData()" data-bs-toggle="reload"><i class="ri-refresh-line"></i></a>
             </div>
-            <h5 class="header-title mb-0">Top 10 sản phẩm bán tệ trong ngày</h5>
-            <div id="yearly-sales-collapse" class="collapse pt-3 show" >
-                <canvas id="myChartProductSold"></canvas>
+            <h5 class="header-title mb-0">Sản phẩm bị hủy trong ngày</h5>
+            <div id="cancelled-products-collapse" class="collapse pt-3 show">
+                <canvas id="cancelledProductChart"></canvas>
             </div>
         </div>
     </div>
 </div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    var ctxV2 = document.getElementById('myChartProductSold').getContext('2d');
-    var myChartV2 = null;
+    var cancelledChart = null;
+    var cancelledCtx = document.getElementById('cancelledProductChart').getContext('2d');
 
-    function loadChartDataV2(fromDate = null, toDate = null) {
+    function loadCancelledChartData(fromDate = null, toDate = null) {
         var params = {};
         if (fromDate) params.start_date = fromDate;
         if (toDate) params.end_date = toDate;
 
         $.ajax({
-            url: "{{ route('admin.topLeastProducts') }}",
+            url: "{{ route('admin.productCancelled') }}",
             type: "GET",
             data: params,
             dataType: "json",
             success: function (response) {
-                console.log(response);
-                if (myChartV2) {
-                    myChartV2.destroy();
+                if (cancelledChart) {
+                    cancelledChart.destroy();
                 }
 
                 if (!response || response.length === 0) {
-                    ctxV2.clearRect(0, 0, ctxV2.canvas.width, ctxV2.canvas.height);
-                    ctxV2.font = '16px Arial';
-                    ctxV2.fillStyle = "gray";
-                    ctxV2.textAlign = 'center';
-                    ctxV2.fillText('Không có sản phẩm nào', ctxV2.canvas.width / 2, ctxV2.canvas.height / 2);
+                    cancelledCtx.clearRect(0, 0, cancelledCtx.canvas.width, cancelledCtx.canvas.height);
+                    cancelledCtx.font = '16px Arial';
+                    cancelledCtx.fillStyle = "gray";
+                    cancelledCtx.textAlign = 'center';
+                    cancelledCtx.fillText('Không có sản phẩm nào', cancelledCtx.canvas.width / 2, cancelledCtx.canvas.height / 2);
                     return;
                 }
 
-                response.sort((a, b) => a.total_sold - b.total_sold);
+                response.sort((a, b) => b.total_cancelled - a.total_cancelled);
 
-                var labels = response.map(p => p.name);
-                var values = response.map(p => p.total_sold);
-                var backgroundColors = labels.map(() =>
-                    `rgba(${Math.floor(Math.random() * 180) + 50}, 
-                           ${Math.floor(Math.random() * 180) + 50}, 
-                           ${Math.floor(Math.random() * 180) + 50}, 0.8)`
+                let labels = response.map(item => item.name);
+                let values = response.map(item => item.total_cancelled);
+                let colors = labels.map(() =>
+                    `rgba(${Math.floor(Math.random() * 180) + 50}, ${Math.floor(Math.random() * 180) + 50}, ${Math.floor(Math.random() * 180) + 50}, 0.8)`
                 );
 
-                myChartV2 = new Chart(ctxV2, {
+                cancelledChart = new Chart(cancelledCtx, {
                     type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Số lượng bán',
+                            label: 'Số lượng bị hủy',
                             data: values,
-                            backgroundColor: backgroundColors,
-                            borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                            backgroundColor: colors,
+                            borderColor: colors.map(c => c.replace('0.8', '1')),
                             borderWidth: 1,
-                            barThickness: 12, // Cột mỏng
+                            barThickness: 12,
                             categoryPercentage: 0.8,
                             barPercentage: 0.8
                         }]
@@ -99,19 +97,21 @@
                     }
                 });
             },
-            error: function (xhr, status, error) {
-                console.error("Error fetching data:", error);
+            error: function (err) {
+                console.error("Lỗi khi lấy dữ liệu:", err);
             }
         });
     }
 
     $(document).ready(function () {
-        var today = new Date();
+        const today = new Date();
         const tomorrow = new Date();
         tomorrow.setDate(today.getDate() + 1);
-        const startDay = today.toISOString().split('T')[0];
-        const endDay = tomorrow.toISOString().split('T')[0];
-        loadChartDataV2(startDay, endDay);
+
+        const start = today.toISOString().split('T')[0];
+        const end = tomorrow.toISOString().split('T')[0];
+
+        loadCancelledChartData(start, end);
     });
 </script>
 @endpush

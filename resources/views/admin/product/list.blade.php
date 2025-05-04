@@ -33,7 +33,7 @@
                                         </li>
                                         <!-- Import form -->
                                         <li>
-                                            <form action="{{ route('admin.products.importProduct') }}" method="POST"
+                                            <form action="{{ route('admin.excels.createProduct') }}" method="POST"
                                                 enctype="multipart/form-data" class="d-flex flex-column gap-2">
                                                 @csrf
                                                 <label for="excel_file" class="form-label mb-0">Upload Excel</label>
@@ -55,7 +55,6 @@
                             </div>
                         </div>
                     </div>
-
 
                     <div class="card-body">
 
@@ -97,8 +96,6 @@
             </div><!-- end col-->
         </div> <!-- end row-->
     </div>
-
-
 
     <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
         <div class="modal-dialog">

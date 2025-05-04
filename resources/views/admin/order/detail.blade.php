@@ -163,7 +163,19 @@
 
                         <!-- Nút cập nhật trạng thái -->
                         @if (
-                            $order->orderStatus->nextStatus &&
+                            !in_array($order->orderStatus->name, [
+                                'Shipping',
+                                'Delivered',
+                                'Cancelled',
+                                'Refunded',
+                                'Return Rejected',
+                                'Payment Retry Requested',
+                                'Payment Expired',
+                                'Payment Failed',
+                                'Paid',
+                            ]) &&
+                                !in_array($order->orderStatus->group_status, ['Cancelled']) &&
+                                $order->orderStatus->nextStatus &&
                                 !in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))
                             <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Update
                                 Status</button>

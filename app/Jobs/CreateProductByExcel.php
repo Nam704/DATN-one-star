@@ -49,12 +49,12 @@ class CreateProductByExcel implements ShouldQueue
     {
         $user = \App\Models\User::find($this->user_id);
         if (!$user) {
-            \Log::error("Không tìm thấy người dùng với ID: {$this->user_id}");
+            Log::error("Không tìm thấy người dùng với ID: {$this->user_id}");
             return;
         }
         $fullPath = storage_path("app/{$this->excel_file}");
         if (!file_exists($fullPath)) {
-            \Log::error("File không tồn tại: {$fullPath}");
+            Log::error("File không tồn tại: {$fullPath}");
             return;
         }
         $excel_file = $fullPath;

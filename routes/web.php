@@ -122,12 +122,12 @@ Route::prefix('chat')->name('chat.')->controller(ChatController::class)->group(f
 Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->group(
     function () {
         Route::prefix('orders')->name("orders.")->controller(OrderController::class)->group(function () {
-            Route::get('list', 'list')->name('list');
-            Route::post('update-list', 'update');
-            Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus');
-            Route::get('detail/{id}', 'detail')->name('detail');
-            Route::post('accept-all', 'acceptAll')->name('acceptAll');
-            Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation');
+            Route::get('list', 'list')->name('list')->middleware('permission:view-orders');
+            Route::post('update-list', 'update')->middleware('permission:edit-orders');
+            Route::post('/update-status/{orderId}', 'updateStatus')->name('updateStatus')->middleware('permission:edit-orders');
+            Route::get('detail/{id}', 'detail')->name('detail')->middleware('permission:view-orders');
+            Route::post('accept-all', 'acceptAll')->name('acceptAll')->middleware('permission:edit-orders');
+            Route::post('{orderId}/process-cancellation', 'processCancellation')->name('process_cancellation')->middleware('permission:edit-orders');
             Route::get('user/{userId}', 'byUser')->name('byUser');
         });
         Route::controller(DashboardController::class)->group(function () {
@@ -145,6 +145,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('exportLeastSoldProducts', 'exportLeastSoldProducts')->name('exportLeastSoldProducts')->middleware('role:admin');
             Route::get('exportLowStockProducts', 'exportLowStockProducts')->name('exportLowStockProducts')->middleware('role:admin');
             Route::get('exportProductsByCategory', 'exportProductsByCategory')->name('exportProductsByCategory')->middleware('role:admin');
+            Route::get('exportProductCancelleds', 'exportProductCancelleds')->name('exportProductCancelleds')->middleware('role:admin');
             Route::get('exportTopViewProducts', 'exportTopViewProducts')->name('exportTopViewProducts')->middleware('role:admin');
             Route::get('exportTopCommentProducts', 'exportTopCommentProducts')->name('exportTopCommentProducts')->middleware('role:admin');
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts')->middleware('role:admin');
@@ -157,7 +158,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::get('topSaleProducts', 'topSaleProducts')->name('topSaleProducts');
             Route::get('topViewProducts', 'topViewProducts')->name('topViewProducts');
             Route::get('topLeastProducts', 'topLeastProducts')->name('topLeastProducts');
-            Route::get('lowStockProducts', 'lowStockProducts')->name('lowStockProducts');
+            Route::get('productCancelled', 'productCancelled')->name('productCancelled');
         });
 
 
@@ -342,11 +343,7 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
         // comment-product
         Route::prefix('comments-product')->controller(AppProductCommentController::class)->name('comments-product.')->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/show', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
             Route::post('/{parentId}/reply', 'reply')->name('reply');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });

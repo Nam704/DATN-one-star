@@ -34,7 +34,14 @@ class DashboardController extends Controller
                 "product" => $this->product->whereBetween('created_at', [$start_date, $end_date])->count(),
                 "revenue" => $this->order
                     ->join('order_statuses', 'orders.id_order_status', '=', 'order_statuses.id')
-                    ->whereNotIn('order_statuses.name', ['Cancelled'])
+                    ->whereNotIn('order_statuses.name', [
+                        'Cancelled', 
+                        'Cancel Requested', 
+                        'Cancel Under Review', 
+                        'Cancel Approved', 
+                        'Cancel Rejected', 
+                        'Failed Delivery'
+                    ])
                     ->whereBetween('orders.created_at', [$start_date, $end_date])
                     ->sum('orders.total'),
 

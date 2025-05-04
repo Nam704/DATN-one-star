@@ -64,31 +64,17 @@
 
             <div class="col-lg-9 col-md-12">
                 <div class="slider_area owl-carousel">
-                    @foreach ($homeSlides as $slide)
-                        {{-- Ảnh chính --}}
+                    @foreach ($banners as $banner)
                         <div class="single_slider d-flex align-items-center"
-                            data-bgimg="{{ asset($slide->primaryImage->image) }}">
+                            data-bgimg="{{ Storage::url($banner->image) }}">
                             <div class="slider_content">
                                 <h2>{{ $banner->title }}</h2>
                                 <h1>{{ $banner->description }}</h1>
-                                <a class="button" href="{{ route('client.shop') }}">Xem ngay</a>
+                                <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
                             </div>
                         </div>
-
-                        {{-- Ảnh phụ nếu có --}}
-                        @foreach ($slide->secondaryImages as $image)
-                            <div class="single_slider d-flex align-items-center"
-                                data-bgimg="{{ asset($image->image) }}">
-                                <div class="slider_content">
-                                    <h2>{{ $slide->title }}</h2>
-                                    <h1>{!! $slide->description !!}</h1>
-                                    <a class="button" href="#">shopping now</a>
-                                </div>
-                            </div>
-                        @endforeach
                     @endforeach
                 </div>
-
             </div>
         </div>
     </div>
