@@ -1,13 +1,13 @@
 <div class="tab-pane fade" id="address">
-    <h3>Addresses</h3>
+    <h3>Địa chỉ giao hàng</h3>
 
     <div class="table-responsive">
         <table class="table" id="address-list-table">
             <thead>
                 <tr>
-                    <th>Address</th>
-                    <th>Default</th>
-                    <th>Actions</th>
+                    <th>Địa chỉ</th>
+                    <th>Đặt mặc định</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,21 +26,21 @@
                         <td>
                             <button class="btn btn-sm btn-primary edit-address" data-id="{{ $address->id }}"
                                 data-ward="{{ $address->id_ward ?? '' }}">
-                                Edit
+                                Sửa
                             </button>
                             @if (!$address->is_default)
                                 <button class="btn btn-sm btn-success set-default-address" data-id="{{ $address->id }}">
-                                    Set Default
+                                   Đặt mặc định
                                 </button>
                             @endif
                             <button class="btn btn-sm btn-danger delete-address" data-id="{{ $address->id }}">
-                                Delete
+                                Xóa
                             </button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="text-center">No addresses found</td>
+                        <td colspan="3" class="text-center">Không có địa chỉ</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -48,7 +48,7 @@
     </div>
 
     <div class="mb-4">
-        <h4>Add New Address</h4>
+        <h4>Thêm địa chỉ mới</h4>
         <div id="address-alert"></div>
 
         <div id="address-form" class="address-form p-3 border rounded row">
@@ -56,40 +56,40 @@
             <input type="hidden" id="address_id" value="">
 
             <div class="form-group mb-3 col-md-4">
-                <label for="province">Province/City</label>
+                <label for="province">Thành phố/Tỉnh</label>
                 <select id="province" class="form-control">
 
                 </select>
             </div>
 
             <div class="form-group mb-3 col-md-4">
-                <label for="district">District</label>
+                <label for="district">Quận/huyện</label>
                 <select id="district" class="form-control">
 
                 </select>
             </div>
 
             <div class="form-group mb-3 col-md-4">
-                <label for="ward">Ward</label>
+                <label for="ward">Phường/xã</label>
                 <select id="ward" class="form-control">
 
                 </select>
             </div>
 
             <div class="form-group mb-3 col-md-12">
-                <label for="address_detail">Address Detail</label>
+                <label for="address_detail">Địa chỉ chi tiết</label>
                 <input type="text" id="address_detail" class="form-control"
-                    placeholder="Enter your street, house number, etc.">
+                    placeholder="Số nhà, đường....">
             </div>
 
             <div class="form-check mb-3 col-md-12">
                 <input type="checkbox" id="is_default" class="form-check-input">
-                <label class="form-check-label" for="is_default">Set as default address</label>
+                <label class="form-check-label" for="is_default">Đặt làm địa chỉ mặc định</label>
             </div>
 
             <div class="">
-                <button id="save_address" class="btn btn-primary">Save Address</button>
-                <button id="cancel-edit" class="btn btn-secondary">Cancel</button>
+                <button id="save_address" class="btn btn-primary">Lưu địa chỉ</button>
+                <button id="cancel-edit" class="btn btn-secondary">Hủy bỏ</button>
             </div>
         </div>
     </div>
