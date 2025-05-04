@@ -86,10 +86,12 @@ $(document).ready(function () {
             console.log("Order event:", event.order);
 
             const orderId = event.order.id; // ID của đơn hàng
-            const orderStatus = event.status; // Trạng thái đơn hàng từ sự kiện
-
+            const orderStatus = event.order.order_status.name;
+            // console.log(orderStatus);
             // Tìm hàng trong bảng bằng id
             const orderRow = document.getElementById(`order-${orderId}`);
+            console.log(orderRow);
+
             if (orderRow) {
                 const statusCell = orderRow.querySelector(".status"); // Tìm thẻ <span class="status">
                 if (statusCell) {

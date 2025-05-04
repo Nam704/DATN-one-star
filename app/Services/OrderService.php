@@ -239,16 +239,16 @@ class OrderService
                 ]);
 
                 // Gửi thông báo đến employee
-                // $this->notificationService->sendEmployee([
-                //     'title' => 'Đơn hàng mới',
-                //     'message' => "Đơn hàng #{$order->code} vừa được tạo. Vui lòng kiểm tra và xử lý.",
-                //     'type' => 'employee',
-                //     'category' => 'order',
-                //     'priority' => 'high',
-                //     'goto_id' => $order->id,
-                //     'goto_route' => 'employee.orders.detail',
-                //     'expires_at' => now()->addDays(7),
-                // ]);
+                $this->notificationService->sendEmployee([
+                    'title' => 'Đơn hàng mới',
+                    'message' => "Đơn hàng #{$order->code} vừa được tạo. Vui lòng kiểm tra và xử lý.",
+                    'type' => 'employee',
+                    'category' => 'order',
+                    'priority' => 'high',
+                    'goto_id' => $order->id,
+                    'goto_route' => 'employee.orders.detail',
+                    'expires_at' => now()->addDays(7),
+                ]);
 
                 // Xử lý voucher nếu có
                 if ($voucher && $discount > 0) {

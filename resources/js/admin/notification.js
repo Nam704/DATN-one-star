@@ -115,6 +115,7 @@ $(document).ready(function () {
     }
 
     // Cập nhật danh sách thông báo
+    // Trong hàm updateNotification
     function updateNotification(notification) {
         let listContent = $notificationList.find(".simplebar-content");
         if (!listContent.length) {
@@ -146,22 +147,20 @@ $(document).ready(function () {
             "data-id": notification.id,
             "data-category": notification.category,
         }).html(`
-            <div class="notify-icon ${bg}">
-                <i class="mdi mdi-${icon} ${text}"></i>
-            </div>
-            <p class="notify-details">${notification.title}
-                <small class="noti-time">${timeAgo(
-                    notification.created_at
-                )}</small>
-            </p>
-        `);
+        <div class="notify-icon ${bg}">
+            <i class="mdi mdi-${icon} ${text}"></i>
+        </div>
+        <p class="notify-details">${notification.title}
+            <small class="noti-time">${timeAgo(notification.created_at)}</small>
+        </p>
+    `);
 
-        listContent.prepend(item);
-        // Cập nhật SimpleBar sau khi thêm nội dung
+        // Thêm thông báo mới vào đầu danh sách
+        listContent.prepend(item); // Đã đúng, giữ nguyên
         simpleBarInstance.recalculate();
     }
 
-    // Cập nhật hàm loadNotifications
+    // Trong hàm loadNotifications
     function loadNotifications(category = "all") {
         const params = { per_page: 15 };
         if (category !== "all") params.category = category;
@@ -190,6 +189,11 @@ $(document).ready(function () {
                     simpleBarInstance.recalculate();
                     return;
                 }
+
+                // Sắp xếp thông báo theo created_at giảm dần
+                notifications.sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                );
 
                 notifications.forEach((notification) => {
                     const priorityClass =
@@ -222,15 +226,15 @@ $(document).ready(function () {
                         "data-id": notification.id,
                         "data-category": notification.category,
                     }).html(`
-                        <div class="notify-icon ${bg}">
-                            <i class="mdi mdi-${icon} ${text}"></i>
-                        </div>
-                        <p class="notify-details">${notification.title}
-                            <small class="noti-time">${timeAgo(
-                                notification.created_at
-                            )}</small>
-                        </p>
-                    `);
+                    <div class="notify-icon ${bg}">
+                        <i class="mdi mdi-${icon} ${text}"></i>
+                    </div>
+                    <p class="notify-details">${notification.title}
+                        <small class="noti-time">${timeAgo(
+                            notification.created_at
+                        )}</small>
+                    </p>
+                `);
 
                     listContent.append(item);
                 });
@@ -240,7 +244,6 @@ $(document).ready(function () {
                 ).length;
                 $notificationBadge.text(unreadCount || "");
 
-                // Cập nhật SimpleBar sau khi tải danh sách
                 simpleBarInstance.recalculate();
             })
             .catch((error) => {

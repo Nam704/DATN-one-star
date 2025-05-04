@@ -12,7 +12,19 @@ $(document).ready(function () {
                     GlobalUtils.showNotification(response.data.message, {
                         backgroundColor: "#00b09b",
                     });
-                    // Tải lại danh sách đơn hàng
+
+                    // Cập nhật trạng thái trên giao diện
+                    const newStatus = response.data.order.order_status.name;
+                    // Lấy tên trạng thái mới
+                    console.log(newStatus);
+                    if (newStatus) {
+                        $(".badge.bg-info")
+                            .text(newStatus)
+                            .removeClass("bg-info")
+                            .addClass("bg-info"); // Giữ class bg-info
+                    }
+
+                    // Tải lại danh sách đơn hàng nếu cần
                     $("#filterForm").trigger("submit");
                 } else {
                     throw new Error(

@@ -16,12 +16,12 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="mb-3 d-flex justify-content-between">
-                            <div>
+                            <div id="order-title">
                                 <span class="me-3">{{ $orderDetails['created_at'] }}</span>
                                 <span class="me-3">#{{ $orderDetails['code'] }}</span>
                                 <span class="me-3">{{ $orderDetails['payment_method'] }}</span>
                                 <span
-                                    class="badge rounded-pill bg-info">{{ $orderDetails['order_status']['name'] ?? 'Chưa có trạng thái' }}</span>
+                                    class="badge rounded-pill bg-info order-status">{{ $orderDetails['order_status']['name'] ?? 'Chưa có trạng thái' }}</span>
                             </div>
                         </div>
                         <table class="table table-borderless">
@@ -139,56 +139,63 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <h3 class="h6">Hành động đơn hàng</h3>
-
-                        <!-- Nút thanh toán lại -->
-                        @php
-                            $retryPaymentService = app(\App\Services\RetryPaymentService::class);
-                            $canRetry = $retryPaymentService->canRetryPayment($order->id);
-                            // echo $canRetry['message'];
-                        @endphp
-                        @if ($canRetry['success'])
-                            {{-- <form action="{{ route('client.orders.retryPayment', $order->id) }}" method="POST"
-                                class="d-inline">
-                                @csrf --}}
-                            <button type="submit" class="btn btn-warning mb-2" id="retry-payment"
-                                data-id="{{ $order->id }}">Thanh toán lại</button>
-                            {{-- </form> --}}
-                        @elseif (
-                            !$canRetry['success'] &&
-                                in_array($orderDetails['order_status']['name'], [
-                                    'Payment Failed',
-                                    'Payment Expired',
-                                    'Payment Retry Requested',
-                                ]))
-                            <div class="alert alert-warning mt-2">
-                                Không thể thanh toán lại: {{ $canRetry['message'] }}
-                            </div>
-                        @endif
-
-                        <!-- Form hủy đơn hàng -->
-                        @if ($orderService->canCancelOrder($order->id))
-                            <form action="{{ route('client.orders.cancelOrder', $order->id) }}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="reason_id">Lý do hủy:</label>
-                                    <select name="reason_id" id="reason_id" class="form-control mb-2" required>
-                                        <option value="">Chọn lý do</option>
-                                        @foreach ($orderService->listReason() as $reason)
-                                            <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
-                                        @endforeach
-                                    </select>
+                        <div id="order-actions">
+                            <!-- Nút thanh toán lại -->
+                            @php
+                                $retryPaymentService = app(\App\Services\RetryPaymentService::class);
+                                $canRetry = $retryPaymentService->canRetryPayment($order->id);
+                            @endphp
+                            @if ($canRetry['success'])
+                                <button type="submit" class="btn btn-warning mb-2 retry-payment-btn" id="retry-payment"
+                                    data-id="{{ $order->id }}" data-can-retry="true">
+                                    Thanh toán lại
+                                </button>
+                            @elseif (
+                                !$canRetry['success'] &&
+                                    in_array($orderDetails['order_status']['name'], [
+                                        'Payment Failed',
+                                        'Payment Expired',
+                                        'Payment Retry Requested',
+                                    ]))
+                                <div class="alert alert-warning mt-2 retry-payment-message">
+                                    Không thể thanh toán lại: {{ $canRetry['message'] }}
                                 </div>
-                                <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
-                            </form>
-                        @endif
+                            @endif
 
-                        <!-- Hiển thị thông báo -->
-                        @if (session('success'))
-                            <div class="alert alert-success mt-2">{{ session('success') }}</div>
-                        @endif
-                        @if (session('error'))
-                            <div class="alert alert-danger mt-2">{{ session('error') }}</div>
-                        @endif
+                            <!-- Nút Đã nhận -->
+                            @if (in_array($order->orderStatus->name, ['Shipping']))
+                                <button class="btn btn-sm btn-warning update-status received-btn"
+                                    data-id="{{ $order->id }}" data-status="shipping">
+                                    Đã nhận
+                                </button>
+                            @endif
+
+                            <!-- Form hủy đơn hàng -->
+                            @if ($orderService->canCancelOrder($order->id))
+                                <form action="{{ route('client.orders.cancelOrder', $order->id) }}" method="POST"
+                                    class="cancel-order-form" data-can-cancel="true">
+                                    @csrf
+                                    <div class="form-group">
+                                        <label for="reason_id">Lý do hủy:</label>
+                                        <select name="reason_id" id="reason_id" class="form-control mb-2" required>
+                                            <option value="">Chọn lý do</option>
+                                            @foreach ($orderService->listReason() as $reason)
+                                                <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
+                                </form>
+                            @endif
+
+                            <!-- Hiển thị thông báo -->
+                            @if (session('success'))
+                                <div class="alert alert-success mt-2">{{ session('success') }}</div>
+                            @endif
+                            @if (session('error'))
+                                <div class="alert alert-danger mt-2">{{ session('error') }}</div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

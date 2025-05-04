@@ -113,7 +113,7 @@
                             <td>{{ json_decode($order->user_data, true)['email'] ?? 'N/A' }}</td>
                             <td>
                                 <span
-                                    class="badge {{ $order->orderStatus->group_status == 'Delivered' ? 'bg-success' : ($order->orderStatus->group_status == 'Cancelled' ? 'bg-danger' : 'bg-warning') }}">
+                                    class="badge status {{ $order->orderStatus->group_status == 'Delivered' ? 'bg-success' : ($order->orderStatus->group_status == 'Cancelled' ? 'bg-danger' : 'bg-warning') }}">
                                     {{ $order->orderStatus->name ?? 'N/A' }}
                                 </span>
                             </td>
@@ -129,7 +129,7 @@
                                 @endphp
                                 @if ($canRetry['success'])
                                     <a href="" class="btn btn-sm btn-warning " data-id="{{ $order->id }}"
-                                        id="retry-payment">Retry Payment</a>
+                                        id="retry-payment">Thanh toán lại</a>
                                 @endif
                                 @if (in_array($order->orderStatus->name, ['Shipping']))
                                     <button class="btn btn-sm btn-warning update-status"

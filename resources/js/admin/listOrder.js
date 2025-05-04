@@ -2,6 +2,48 @@ import Echo from "laravel-echo";
 import "../app.js";
 
 $(document).ready(function () {
+    // Kiểm tra khởi tạo Echo
+    if (!window.Echo) {
+        console.error("Echo is not initialized!");
+        return;
+    }
+
+    // Lắng nghe sự kiện AdminNotification
+    window.Echo.private("admin-notifications").listen(
+        "AdminNotification",
+        (event) => {
+            console.log("New Admin Notification:", event);
+
+            // Chỉ cập nhật nếu thông báo liên quan đến đơn hàng
+            if (event.category === "order") {
+                // Lấy bộ lọc hiện tại từ form
+                const formData = $("#filterForm")
+                    .serializeArray()
+                    .reduce((obj, item) => {
+                        obj[item.name] = item.value || null;
+                        return obj;
+                    }, {});
+
+                // Tải lại danh sách đơn hàng
+                loadOrders(`${GlobalUtils.baseUrl}/admin/orders/list`, formData)
+                    .then(() => {
+                        GlobalUtils.showNotification(
+                            event.message ||
+                                "Có đơn hàng mới, danh sách đã được cập nhật!",
+                            { backgroundColor: "#00b09b" }
+                        );
+                    })
+                    .catch((error) => {
+                        console.error("Error reloading orders:", error);
+                        GlobalUtils.showNotification(
+                            "Lỗi khi tải lại danh sách đơn hàng",
+                            { backgroundColor: "#ff4444" }
+                        );
+                    });
+            }
+        }
+    );
+
     // Hàm gửi yêu cầu AJAX để tải dữ liệu
     function loadOrders(url, params = {}) {
         return axios
@@ -10,11 +52,11 @@ $(document).ready(function () {
                 if (response.data.success) {
                     $("#ordersTable tbody").html(response.data.html);
                     $("#pagination").html(response.data.pagination);
+                    // Có thể bỏ comment nếu muốn thông báo khi tải thành công
                     // GlobalUtils.showNotification("Đã tải dữ liệu thành công", {
                     //     backgroundColor: "#00b09b",
                     // });
                 } else {
-                    // Xử lý lỗi validate
                     if (response.data.errors) {
                         const errorMessages = Object.values(
                             response.data.errors
@@ -42,11 +84,9 @@ $(document).ready(function () {
             });
     }
 
-    // Xử lý gửi form lọc
+    // Xử lý gửi form lọc (giữ nguyên code của bạn)
     $("#filterForm").on("submit", function (e) {
         e.preventDefault();
-
-        // Lấy dữ liệu từ form và chuẩn hóa thành object
         const formData = $(this)
             .serializeArray()
             .reduce((obj, item) => {
@@ -54,7 +94,7 @@ $(document).ready(function () {
                 return obj;
             }, {});
 
-        // Kiểm tra hợp lệ dữ liệu phía client
+        // Kiểm tra hợp lệ dữ liệu phía client (giữ nguyên)
         const {
             date_from,
             date_to,
@@ -69,7 +109,6 @@ $(document).ready(function () {
         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
         const minDate = twoYearsAgo.toISOString().split("T")[0];
 
-        // Kiểm tra ngày
         if (date_from && date_to && new Date(date_from) > new Date(date_to)) {
             GlobalUtils.showNotification(
                 "Ngày bắt đầu không thể sau ngày kết thúc",
@@ -105,8 +144,6 @@ $(document).ready(function () {
             );
             return;
         }
-
-        // Kiểm tra total
         if (
             min_total &&
             max_total &&
@@ -132,8 +169,6 @@ $(document).ready(function () {
             );
             return;
         }
-
-        // Kiểm tra shipping
         if (
             min_shipping &&
             max_shipping &&
@@ -159,8 +194,6 @@ $(document).ready(function () {
             );
             return;
         }
-
-        // Kiểm tra search
         if (search && search.length > 255) {
             GlobalUtils.showNotification(
                 "Từ khóa tìm kiếm không được vượt quá 255 ký tự",
@@ -176,14 +209,6 @@ $(document).ready(function () {
             return;
         }
 
-        // Thông báo nếu không chọn ngày
-        // if (!date_from && !date_to) {
-        //     GlobalUtils.showNotification("Đang hiển thị tất cả đơn hàng", {
-        //         backgroundColor: "#00b09b",
-        //     });
-        // }
-
-        // Gửi yêu cầu AJAX
         loadOrders(
             `${GlobalUtils.baseUrl}/admin/orders/list`,
             formData
@@ -192,19 +217,17 @@ $(document).ready(function () {
         });
     });
 
-    // Xử lý nút "Xem tất cả" (xóa date_from và date_to)
+    // Xử lý nút "Xem tất cả" (giữ nguyên)
     $("#clearDateFilters").on("click", function () {
         $('input[name="date_from"]').val("");
         $('input[name="date_to"]').val("");
         GlobalUtils.showNotification("Đã xóa giới hạn thời gian", {
             backgroundColor: "#00b09b",
         });
-
-        // Tự động gửi lại form sau khi xóa
         $("#filterForm").trigger("submit");
     });
 
-    // Xử lý nút "Clear" trong modal
+    // Xử lý nút "Clear" trong modal (giữ nguyên)
     $("#clearFilters").on("click", function () {
         $("#filterForm")[0].reset();
         GlobalUtils.showNotification("Đã xóa tất cả bộ lọc", {
@@ -213,17 +236,20 @@ $(document).ready(function () {
         $("#filterForm").trigger("submit");
     });
 
-    // Xử lý click vào các nút phân trang
+    // Xử lý click vào các nút phân trang (giữ nguyên)
     $(document).on("click", "#pagination .pagination a", function (e) {
         e.preventDefault();
         const url = $(this).attr("href");
         loadOrders(url);
     });
 
-    // Xử lý cập nhật trạng thái đơn hàng
+    // Xử lý cập nhật trạng thái đơn hàng (giữ nguyên)
     $(document).on("click", ".update-status", function (e) {
         e.preventDefault();
         const orderId = $(this).data("id");
+        const $button = $(this);
+
+        $button.prop("disabled", true).text("Đang xử lý...");
         axios
             .post(
                 `${GlobalUtils.baseUrl}/admin/orders/update-status/${orderId}`
@@ -233,7 +259,6 @@ $(document).ready(function () {
                     GlobalUtils.showNotification(response.data.message, {
                         backgroundColor: "#00b09b",
                     });
-                    // Tải lại danh sách đơn hàng
                     $("#filterForm").trigger("submit");
                 } else {
                     throw new Error(
@@ -249,10 +274,13 @@ $(document).ready(function () {
                 GlobalUtils.showNotification(errorMessage, {
                     backgroundColor: "#ff4444",
                 });
+            })
+            .finally(() => {
+                $button.prop("disabled", false).text("Update Status");
             });
     });
 
-    // Xử lý yêu cầu hủy đơn hàng
+    // Xử lý yêu cầu hủy đơn hàng (giữ nguyên)
     $(document).on("submit", ".cancel-order-form", function (e) {
         e.preventDefault();
         const form = $(this);
@@ -271,7 +299,6 @@ $(document).ready(function () {
                         backgroundColor: "#00b09b",
                     }
                 );
-                // Tải lại danh sách đơn hàng
                 $("#filterForm").trigger("submit");
             })
             .catch((error) => {
