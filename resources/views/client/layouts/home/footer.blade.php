@@ -71,12 +71,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="copyright_area" style="font-size: 14px; color: #555;">
-                        <p>&copy; 2025 YourBrand. Bản quyền thuộc về công ty.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 text-end">
-                    <div class="footer_payment">
-                        <img src="{{ asset('client/assets/img/icon/payment.png') }}" alt="payment methods" style="height: 30px;">
+                        <p>&copy; 2025 OneStar. Bản quyền thuộc về công ty.</p>
                     </div>
                 </div>
             </div>
