@@ -14,14 +14,14 @@
                                         <tr>
                                             <th class="product_select">
                                                 <input type="checkbox" id="select_all">
-                                                Select
+                                                Chọn hết
                                             </th>
-                                            <th class="product_name">Product</th>
-                                            <th class="product_thumb">Image</th>
-                                            <th class="product-price">Price</th>
-                                            <th class="product_quantity">Quantity</th>
-                                            <th class="product_total">Total</th>
-                                            <th class="product_remove">Delete</th>
+                                            <th class="product_name">Tên sản phẩm</th>
+                                            <th class="product_thumb">Ảnh</th>
+                                            <th class="product-price">Giá</th>
+                                            <th class="product_quantity">Số lượng</th>
+                                            <th class="product_total">Tổng giá</th>
+                                            <th class="product_remove">Xóa</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -30,7 +30,7 @@
                                 </table>
                             </div>
                             <div class="cart_clear">
-                                <button id="clear_all" class="btn btn-danger">Clear Cart</button>
+                                <button id="clear_all" class="btn btn-danger">Xóa hết</button>
                             </div>
                         </div>
                     </div>
