@@ -9,7 +9,7 @@
             Từ ngày: <strong>{{ $startOfYear->format('d/m/Y') }}</strong> đến <strong>{{ $endOfYear->format('d/m/Y') }}</strong>
         </p>
         <p>
-            Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
+            Giá trị trung bình mỗi đơn hàng (AOV): <strong>{{ number_format($averageOrderValue, 0) }}đ</strong>
         </p>
     </div>
 
@@ -30,7 +30,7 @@
             <div class="d-flex justify-content-end align-items-center border-start ps-3">
                 <div class="text-end">
                     <p class="text-muted mb-1">Tổng Doanh Thu Năm</p>
-                    <h3 class="mb-0">${{ number_format($totalRevenue, 0) }}đ</h3>
+                    <h3 class="mb-0">{{ number_format($totalRevenue, 0) }}đ</h3>
                 </div>
             </div>
         </div>
@@ -165,7 +165,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0">{{ $index + 1 }}. {{ $customer->user_name ?? 'Khách vãng lai' }}</h6>
                                 <small class="text-muted">
-                                    Tổng mua: ${{ number_format($customer->total_purchase, 2) }}
+                                    Tổng mua: {{ number_format($customer->total_purchase, 2) }}đ
                                 </small>
                                 @if(isset($customerProductsGrouped[$customer->id_user]))
                                     <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#customer-{{ $customer->id_user }}" aria-expanded="false" aria-controls="customer-{{ $customer->id_user }}">

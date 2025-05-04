@@ -9,7 +9,7 @@
                 <strong>{{ $endOfMonth->format('d/m/Y') }}</strong>
             </p>
             <p>
-                Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
+                Giá trị trung bình mỗi đơn hàng (AOV): <strong>{{ number_format($averageOrderValue, 0) }}đ</strong>
             </p>
         </div>
 
@@ -21,7 +21,7 @@
                     <div class="col-md-6">
                         <label for="month" class="form-label">Chọn Tháng (YYYY-MM):</label>
                         <input type="month" id="month" name="month" class="form-control"
-                            value="{{ $selectedMonth->format('Y-m') }}">
+                            value="{{ $selectedMonth->format('Y-m') }}" max="{{ now()->format('Y-m') }}">
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-primary w-100">Xem thống kê</button>
@@ -32,7 +32,7 @@
                 <div class="d-flex justify-content-end align-items-center border-start ps-3">
                     <div class="text-end">
                         <p class="text-muted mb-1">Tổng Doanh Thu Tháng</p>
-                        <h3 class="mb-0">${{ number_format($totalRevenue, 0) }}đ</h3>
+                        <h3 class="mb-0">{{ number_format($totalRevenue, 0) }}đ</h3>
                     </div>
                 </div>
             </div>
@@ -173,7 +173,7 @@
                                     <h6 class="mb-0">{{ $index + 1 }}.
                                         {{ $customer->user_name ?? 'Khách vãng lai' }}</h6>
                                     <small class="text-muted">
-                                        Tổng mua: ${{ number_format($customer->total_purchase, 2) }}
+                                        Tổng mua: {{ number_format($customer->total_purchase, 2) }}đ
                                     </small>
                                     @if (isset($customerProductsGrouped[$customer->id_user]))
                                         <button class="btn btn-sm btn-outline-primary" type="button"

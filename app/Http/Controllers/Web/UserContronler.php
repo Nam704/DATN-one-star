@@ -678,43 +678,46 @@ class UserContronler extends Controller
 
     public function getUserStats(Request $request)
     {
-        $selectedDate = $request->input('date', Carbon::now()->toDateString()); // Lấy ngày từ request, mặc định là hôm nay
-        $date = Carbon::parse($selectedDate);
+        $tf = $request->input('timeframe','daily');
 
-        // Thống kê theo ngày (7 ngày tính từ ngày đã chọn)
-        $dailyUsers = User::whereBetween('created_at', [$date->copy()->subDays(6), $date])
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->pluck('count', 'date');
+        switch($tf) {
+            case 'daily':
+                $date = Carbon::parse($request->input('date'));
+                $count = User::whereDate('created_at',$date)->count();
+                return response()->json(['count' => $count]);
 
-        // Thống kê theo tuần (4 tuần tính từ tuần chứa ngày đã chọn)
-        $weeklyUsers = User::whereBetween('created_at', [$date->copy()->subWeeks(3), $date])
-            ->groupBy('week')
-            ->orderBy('week', 'asc')
-            ->selectRaw('YEARWEEK(created_at) as week, COUNT(*) as count')
-            ->pluck('count', 'week');
+            case 'weekly':
+                $start = Carbon::parse($request->input('start_date'))->startOfDay();
+                $end   = Carbon::parse($request->input('end_date'))->endOfDay();
+                $daily = User::whereBetween('created_at',[$start,$end])
+                    ->selectRaw('DATE(created_at) as date, COUNT(*) as cnt')
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->pluck('cnt','date');
+                return response()->json(['daily' => $daily]);
 
-        // Thống kê theo tháng (6 tháng tính từ tháng chứa ngày đã chọn)
-        $monthlyUsers = User::whereBetween('created_at', [$date->copy()->subMonths(5), $date])
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
-            ->pluck('count', 'month');
+            case 'monthly':
+                [$y,$m] = explode('-', $request->input('month'));
+                $start = Carbon::create($y,$m,1)->startOfMonth();
+                $end   = $start->copy()->endOfMonth();
+                $daily = User::whereBetween('created_at',[$start,$end])
+                    ->selectRaw('DATE(created_at) as date, COUNT(*) as cnt')
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->pluck('cnt','date');
+                return response()->json(['daily' => $daily]);
 
-        // Thống kê theo năm (5 năm tính từ năm chứa ngày đã chọn)
-        $yearlyUsers = User::whereBetween('created_at', [$date->copy()->subYears(4), $date])
-            ->groupBy('year')
-            ->orderBy('year', 'asc')
-            ->selectRaw('YEAR(created_at) as year, COUNT(*) as count')
-            ->pluck('count', 'year');
-
-        return response()->json([
-            'dailyUsers' => $dailyUsers,
-            'weeklyUsers' => $weeklyUsers,
-            'monthlyUsers' => $monthlyUsers,
-            'yearlyUsers' => $yearlyUsers
-        ]);
+            case 'yearly':
+                $year  = (int)$request->input('year');
+                $start = Carbon::create($year,1,1)->startOfYear();
+                $end   = $start->copy()->endOfYear();
+                $monthly = User::whereBetween('created_at',[$start,$end])
+                    ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as cnt')
+                    ->groupBy('month')
+                    ->orderBy('month')
+                    ->pluck('cnt','month');
+                return response()->json(['monthly' => $monthly]);
+        }
     }
 
     public function getUserLocationStats()

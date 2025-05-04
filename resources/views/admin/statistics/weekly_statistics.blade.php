@@ -9,39 +9,47 @@
                 <strong>{{ $endDate->format('d/m/Y') }}</strong>
             </p>
             <p>
-                Giá trị trung bình mỗi đơn hàng (AOV): <strong>${{ number_format($averageOrderValue, 0) }}</strong>
+                Giá trị trung bình mỗi đơn hàng (AOV): <strong>{{ number_format($averageOrderValue, 0) }}đ</strong>
             </p>
         </div>
 
         <!-- Form chọn ngày -->
         <div class="row mb-4">
             <div class="col-md-8">
-                <form action="{{ route('admin.statistics.weeklyStatistics') }}" method="GET">
+                <form id="weeklyForm" action="{{ route('admin.statistics.weeklyStatistics') }}" method="GET">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="start_date">Ngày bắt đầu:</label>
                                 <input type="date" name="start_date" id="start_date" class="form-control"
-                                    value="{{ request('start_date', now()->startOfWeek()->toDateString()) }}">
+                                    value="{{ request('start_date', now()->startOfWeek()->toDateString()) }}" max=""
+                                    required>
+                                <div class="invalid-feedback">Ngày bắt đầu không được lớn hơn ngày kết thúc hoặc ngày hôm
+                                    nay.</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="end_date">Ngày kết thúc:</label>
                                 <input type="date" name="end_date" id="end_date" class="form-control"
-                                    value="{{ request('end_date', now()->endOfWeek()->toDateString()) }}">
+                                    value="{{ request('end_date', now()->endOfWeek()->toDateString()) }}" max=""
+                                    required>
+                                <div class="invalid-feedback">Ngày kết thúc phải sau hoặc bằng ngày bắt đầu và không được
+                                    lớn hơn ngày hôm nay.</div>
                             </div>
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-primary mt-2">Thống kê</button>
                 </form>
+
             </div>
 
             <div class="col-md-4 text-end">
                 <div class="d-flex justify-content-end align-items-center border-start ps-3">
                     <div class="text-end">
                         <p class="text-muted mb-1">Tổng Doanh Thu Tuần</p>
-                        <h3 class="mb-0">${{ number_format($totalRevenue, 0) }}đ</h3>
+                        <h3 class="mb-0">{{ number_format($totalRevenue, 0) }}đ</h3>
                     </div>
                 </div>
             </div>
@@ -242,6 +250,47 @@
     <!-- Nạp Chart.js từ CDN và Plugin Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('weeklyForm');
+            const startInput = document.getElementById('start_date');
+            const endInput = document.getElementById('end_date');
+
+            // 1. Đặt max = hôm nay
+            const today = new Date().toISOString().split('T')[0];
+            startInput.max = today;
+            endInput.max = today;
+
+            // 2. Khi start thay đổi thì đảm bảo end.min = start.value
+            startInput.addEventListener('change', () => {
+                endInput.min = startInput.value;
+            });
+
+            // 3. Validate khi submit
+            form.addEventListener('submit', function(e) {
+                let valid = true;
+
+                // Reset
+                startInput.classList.remove('is-invalid');
+                endInput.classList.remove('is-invalid');
+
+                // Kiểm tra start ≤ end
+                if (startInput.value > endInput.value) {
+                    valid = false;
+                    startInput.classList.add('is-invalid');
+                    endInput.classList.add('is-invalid');
+                }
+
+                // HTML5 sẽ tự block nếu vượt max hoặc thiếu value vì có required + max attr
+
+                if (!valid) {
+                    e.preventDefault();
+                    // Bạn cũng có thể gọi reportValidity() để show các message
+                    // form.reportValidity();
+                }
+            });
+        });
+    </script>
     <script>
         // BIỂU ĐỒ: Thống kê tổng số đơn và doanh thu theo ngày
         var weeklyData = {!! json_encode($dailyStats) !!};
