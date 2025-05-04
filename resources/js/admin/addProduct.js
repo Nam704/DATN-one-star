@@ -278,7 +278,7 @@ function handleCreateNewAttributeValue() {
         .then(({ data }) => {
             const container = attributeRow.find("#attribute_value_current");
             container.append(`
-                <span class="badge bg-info m-1 p-2 attribute-value" data-key="${data.data.id}">
+                <span class="badge bg-info m-1 p-2 attribute-value" data-key="${data.data.attribute_id}">
                     ${data.data.value} <span class="ms-2 text-bg-info remove-value" style="cursor: pointer;">×</span>
                 </span>`);
             inputContainer.hide();
@@ -698,7 +698,41 @@ function toggleVariantContent() {
 
 // Xóa biến thể
 function handleRemoveVariant() {
-    $(this).closest(".variant-row").remove();
+    const row = $(this).closest(".variant-row");
+    row.remove();
+
+    // Cập nhật lại data-id cho các biến thể còn lại
+    $(".variant-row").each(function (index) {
+        const oldId = $(this).data("id");
+        $(this).attr("data-id", index); // Cập nhật data-id
+        $(this).data("id", index); // Cập nhật giá trị data
+
+        // Cập nhật tên của các input tương ứng với data-id mới
+        $(this)
+            .find(`input[name='variant_attribute_values_${oldId}']`)
+            .attr("name", `variant_attribute_values_${index}`);
+        $(this)
+            .find(`input[name='image_variant_${oldId}']`)
+            .attr("name", `image_variant_${index}`);
+        $(this)
+            .find(`input[name='product_code_${oldId}']`)
+            .attr("name", `product_code_${index}`);
+        $(this)
+            .find(`input[name='product_quantity_${oldId}']`)
+            .attr("name", `product_quantity_${index}`);
+        $(this)
+            .find(`input[name='product_price_${oldId}']`)
+            .attr("name", `product_price_${index}`);
+
+        // Cập nhật tiêu đề của biến thể
+        $(this)
+            .find(".variant-title h6")
+            .text(
+                `#${index + 1} - ${
+                    $(this).find(".variant-title h6").text().split(" - ")[1]
+                }`
+            );
+    });
 }
 
 // Chuẩn bị dữ liệu sản phẩm trước khi gửi
@@ -886,7 +920,7 @@ function addNewAttribute() {
     }
 
     axios
-        .post("http://127.0.0.1:8000/api/admin/attributes", { name })
+        .post("http://127.0.0.1:8000/api/admin/attributes/add", { name })
         .then(({ data }) => {
             if (data.status === "success") {
                 GlobalUtils.showNotification("Thêm thuộc tính thành công!", {

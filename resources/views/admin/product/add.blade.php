@@ -97,7 +97,7 @@
                                                                 style="display: none ;">
                                                                 <input type="text" class="form-control mb-2"
                                                                     id="new_attribute_name" name="new_attribute_name"
-                                                                    placeholder="Tên hãng mới">
+                                                                    placeholder="Tên thuộc tính mới">
 
                                                                 <div class="d-flex justify-content-between col-12">
                                                                     <button type="button" id="confirm_add_attribute"
@@ -114,12 +114,12 @@
 
                                                     </div>
 
-                                                    <div class="d-flex justify-content-end mt-3">
+                                                    {{-- <div class="d-flex justify-content-end mt-3">
                                                         <button type="button" id="save-attribute-btn"
                                                             class="btn btn-primary">
                                                             Lưu chọn thuộc tính
                                                         </button>
-                                                    </div>
+                                                    </div> --}}
                                                 </div>
                                             </div>
                                             <!-- Các biến thể Tab -->
