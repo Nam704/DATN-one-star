@@ -38,7 +38,7 @@ class ProductController extends Controller
             ->with('user', 'parent', 'replies.user')
             ->get();
 
-        return view('client.detail.index', compact('product', 'relatedProducts', 'comments'));
+        return view('client.detail.index', compact('product', 'relatedProducts', 'comments', 'totalComments'));
     }
 
     public function storecomment(Request $request)
