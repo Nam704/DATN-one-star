@@ -90,7 +90,7 @@
                             <form action="{{ route('client.shop') }}" method="GET" class="search-form">
                                 <div class="search_box">
                                     <input type="text" name="search" class="search-input"
-                                        placeholder="Search entire store here …" autocomplete="off">
+                                        placeholder="Tìm kiếm sản phẩm" autocomplete="off">
                                     <button type="submit"><i class="ion-ios-search-strong"></i></button>
                                 </div>
                             </form>

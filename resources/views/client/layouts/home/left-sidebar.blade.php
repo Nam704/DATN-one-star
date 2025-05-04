@@ -69,9 +69,9 @@
                         <div class="single_slider d-flex align-items-center"
                             data-bgimg="{{ asset($slide->primaryImage->image) }}">
                             <div class="slider_content">
-                                <h2>{{ $slide->title }}</h2>
-                                <h1>{!! $slide->description !!}</h1>
-                                <a class="button" href="#">shopping now</a>
+                                <h2>{{ $banner->title }}</h2>
+                                <h1>{{ $banner->description }}</h1>
+                                <a class="button" href="{{ route('client.shop') }}">Xem ngay</a>
                             </div>
                         </div>
 

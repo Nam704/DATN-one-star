@@ -77,8 +77,6 @@
 
                             <tbody>
                                 @include('admin.product.product_table', ['products' => $products])
-
-
                             </tbody>
                             <tfoot>
                                 <tr>
