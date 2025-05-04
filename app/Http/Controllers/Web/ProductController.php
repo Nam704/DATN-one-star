@@ -112,6 +112,8 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $productData = $this->ProductService->createProduct($request);
+        // $productData = $request->all();
+
         return response()->json([
             'success' => true,
             'message' => 'Product created successfully',
@@ -120,8 +122,7 @@ class ProductController extends Controller
     }
     public function edit($id)
     {
-        // $product = Product::with(['variants.images'])->findOrFail($id);
-        // $product = Product::getProductWithDetails($id)->findOrFail($id);
+
         $product = Product::findOrFail($id);
         $product->getProductWithDetails();
 
@@ -402,8 +403,8 @@ class ProductController extends Controller
             }
             // Với form POST truyền về (non-AJAX) thì redirect back
             return redirect()->back()
-                             ->withErrors($validator)
-                             ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $query = (new Product)->listActive();
