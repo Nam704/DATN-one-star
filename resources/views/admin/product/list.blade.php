@@ -7,13 +7,13 @@
                     <div class="card-header">
                         <div
                             class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                            <h4 class="card-title mb-2 mb-md-0">List Products</h4>
+                            <h4 class="card-title mb-2 mb-md-0">Danh sách sản phẩm</h4>
 
                             <div class="d-flex flex-wrap align-items-center gap-2">
 
                                 <!-- Add New Product -->
                                 <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">
-                                    <i class="mdi mdi-plus"></i> Add Product
+                                    <i class="mdi mdi-plus"></i> Thêm mới
                                 </a>
 
                                 <!-- Import/Export Group -->
@@ -28,7 +28,7 @@
                                         <li class="mb-2">
                                             <a href="{{ route('admin.products.exportCreateExcel') }}"
                                                 class="btn btn-outline-secondary w-100 btn-sm">
-                                                <i class="mdi mdi-download"></i> Download Sample
+                                                <i class="mdi mdi-download"></i> Tải mẫu
                                             </a>
                                         </li>
                                         <!-- Import form -->
@@ -36,11 +36,11 @@
                                             <form action="{{ route('admin.excels.createProduct') }}" method="POST"
                                                 enctype="multipart/form-data" class="d-flex flex-column gap-2">
                                                 @csrf
-                                                <label for="excel_file" class="form-label mb-0">Upload Excel</label>
+                                                <label for="excel_file" class="form-label mb-0">Tải Excel</label>
                                                 <input type="file" name="excel_file" id="excel_file"
                                                     class="form-control form-control-sm" accept=".xlsx,.xls" required>
                                                 <button type="submit" class="btn btn-success btn-sm mt-1">
-                                                    <i class="mdi mdi-upload"></i> Import
+                                                    <i class="mdi mdi-upload"></i> Tạo excel
                                                 </button>
                                             </form>
                                         </li>
@@ -50,7 +50,7 @@
                                 <!-- Filter Modal Trigger -->
                                 <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#filterModal">
-                                    <i class="mdi mdi-filter-menu"></i> Filter
+                                    <i class="mdi mdi-filter-menu"></i> Lọc
                                 </button>
                             </div>
                         </div>
@@ -63,14 +63,14 @@
                             <thead>
                                 <tr>
 
-                                    <th>Name</th>
-                                    <th>Image</th>
-                                    <th>Brand</th>
-                                    <th>Category</th>
-                                    <th>Quantity</th>
-                                    <th>Views</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Danh mục</th>
+                                    <th>Số lượng</th>
+                                    <th>Lượt xem</th>
+                                    <th>Giá (Thấp nhất - Cao nhất)</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
 
@@ -81,17 +81,20 @@
                             <tfoot>
                                 <tr>
 
-                                    <th>Name</th>
-                                    <th>Image</th>
-                                    <th>Brand</th>
-                                    <th>Category</th>
-                                    <th>Quantity</th>
-                                    <th>Views</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Danh mục</th>
+                                    <th>Số lượng</th>
+                                    <th>Lượt xem</th>
+                                    <th>Giá (Thấp nhất - Cao nhất)</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </tfoot>
                         </table>
+                        <div class="d-flex justify-content-center mt-3">
+                            {{ $products->links() }}
+                        </div>
                     </div> <!-- end card body-->
                 </div> <!-- end card -->
             </div><!-- end col-->
@@ -103,16 +106,16 @@
             <div class="modal-content">
                 <form id="filterForm" action="{{ route('admin.products.filter') }}" method="GET">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="filterModalLabel">Filter Products</h5>
+                        <h5 class="modal-title" id="filterModalLabel">Lọc sản phẩm</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3 row">
                             <!-- Category -->
                             <div class="col-md-6">
-                                <label for="category" class="form-label">Category</label>
+                                <label for="category" class="form-label">Danh mục</label>
                                 <select class="form-select" id="category" name="category">
-                                    <option value="">All Categories</option>
+                                    <option value="">Toàn bộ</option>
                                     @foreach ($categories as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>
                                     @endforeach
@@ -121,9 +124,9 @@
 
                             <!-- Brand -->
                             <div class="col-md-6">
-                                <label for="brand" class="form-label">Brand</label>
+                                <label for="brand" class="form-label">Hãng</label>
                                 <select class="form-select" id="brand" name="brand">
-                                    <option value="">All Brands</option>
+                                    <option value="">Toàn bộ hãng</option>
                                     @foreach ($brands as $b)
                                         <option value="{{ $b->id }}">{{ $b->name }}</option>
                                     @endforeach

@@ -201,13 +201,6 @@ $(document).ready(function () {
             );
             return;
         }
-        if (search && !/^[\w\s@.]+$/.test(search)) {
-            GlobalUtils.showNotification(
-                "Từ khóa tìm kiếm chỉ được chứa chữ, số, khoảng trắng, @ và .",
-                { backgroundColor: "#ff4444" }
-            );
-            return;
-        }
 
         loadOrders(
             `${GlobalUtils.baseUrl}/admin/orders/list`,

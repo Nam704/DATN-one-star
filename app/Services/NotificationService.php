@@ -287,9 +287,7 @@ class NotificationService
             $query->where('priority', $priority);
         }
 
-        return $query->orderBy('priority', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        return $query->orderBy('created_at', 'desc')->orderBy('priority', 'desc')->paginate($perPage);
     }
 
     public function getUnreadNotifications(int $userId, int $perPage = 15, ?string $category = null, ?string $priority = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator

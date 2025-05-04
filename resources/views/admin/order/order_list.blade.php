@@ -21,22 +21,14 @@
             <td>{{ $order->payment_method }}</td>
             <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
             <td>
-                <a href="{{ route('admin.orders.detail', $order->id) }}" class="btn btn-sm btn-info">View</a>
+                <a href="{{ route('admin.orders.detail', $order->id) }}" class="btn btn-sm btn-info">Xem</a>
                 @if (in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))
                     <form action="{{ route('admin.orders.process_cancellation', $order->id) }}" method="POST"
                         class="cancel-order-form" style="display:inline;">
                         @csrf
                         <input type="hidden" name="action" value="approve">
-                        <button type="submit" class="btn btn-sm btn-success">Approve Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-success">Chấp nhận</button>
                     </form>
-                    {{-- <form action="{{ route('admin.orders.process_cancellation', $order->id) }}" method="POST"
-                        class="cancel-order-form" style="display:inline;">
-                        @csrf
-                        <input type="hidden" name="action" value="reject">
-                        <input type="text" name="admin_note" placeholder="Lý do từ chối"
-                            class="form-control form-control-sm d-inline-block w-auto" style="margin: 5px 0;">
-                        <button type="submit" class="btn btn-sm btn-danger">Reject Cancel</button>
-                    </form> --}}
                 @elseif (
                     !in_array($order->orderStatus->name, [
                         'Shipping',
@@ -49,8 +41,8 @@
                         'Payment Failed',
                         'Paid',
                     ]) && !in_array($order->orderStatus->group_status, ['Cancelled']))
-                    <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Update
-                        Status</button>
+                    <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Cập nhật
+                    </button>
                 @endif
             </td>
         </tr>

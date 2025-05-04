@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="tab-pane fade show active" id="orders">
                         <div class="card-header">
-                            <h3>Orders > List</h3>
+                            <h3>Đơn hàng > Danh sách</h3>
 
                             <!-- Hiển thị thông báo lỗi nếu có -->
                             @if ($errors->any())
@@ -24,7 +24,7 @@
                                 <div class="col-md-3">
                                     <div class="widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Total Orders</h5>
+                                            <h5>Tổng số đơn hàng</h5>
                                             <p>{{ $totalOrders }}</p>
                                         </div>
                                     </div>
@@ -32,7 +32,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Open Orders</h5>
+                                            <h5>Đơn hàng đang mở</h5>
                                             <p>{{ $openOrders }}</p>
                                         </div>
                                     </div>
@@ -40,7 +40,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Average Price</h5>
+                                            <h5>Giá trung bình</h5>
                                             <p>{{ number_format($averagePrice, 2) }}</p>
                                         </div>
                                     </div>
@@ -48,7 +48,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Total Revenue</h5>
+                                            <h5>Tổng doanh thu</h5>
                                             <p>{{ number_format($totalRevenue, 2) }}</p>
                                         </div>
                                     </div>
@@ -65,7 +65,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request('group_status') == 'All' || !request('group_status') ? 'active' : '' }}"
-                                                    href="?group_status=All">All</a>
+                                                    href="?group_status=All">Tất cả</a>
                                             </li>
                                             @foreach ($groupStatuses as $groupStatus)
                                                 <li class="nav-item">
@@ -79,16 +79,16 @@
                                     </div>
                                     <div class="col-md-6">
                                         <input type="text" name="search" class="form-control"
-                                            placeholder="Search by code, name, email" value="{{ request('search') }}">
+                                            placeholder="Tìm kiếm theo mã" value="{{ request('search') }}">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                             data-bs-target="#filterModal">
-                                            <i class="mdi mdi-filter-menu fs-5"></i> Filter Menu
+                                            <i class="mdi mdi-filter-menu fs-5"></i> Bộ lọc nâng cao
                                         </button>
                                     </div>
                                     <div class="col-md-1">
-                                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                                        <button type="submit" class="btn btn-primary w-100">Lọc</button>
                                     </div>
                                 </form>
                             </div>
@@ -98,15 +98,14 @@
                                 <table class="table table-striped" id="ordersTable">
                                     <thead>
                                         <tr>
-                                            <th>Number</th>
-                                            <th>Customer</th>
+                                            <th>Số thứ tự</th>
+                                            <th>Khách hàng</th>
                                             <th>Email</th>
-                                            <th>Status</th>
-                                            <th>Total</th>
-                                            {{-- <th>Shipping Cost</th> --}}
-                                            <th>Payment Method</th>
-                                            <th>Created At</th>
-                                            <th>Actions</th>
+                                            <th>Trạng thái</th>
+                                            <th>Tổng cộng</th>
+                                            <th>Phương thức thanh toán</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -130,16 +129,16 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="filterModalLabel">Bộ lọc nâng cao</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
                     <form id="filterForm" method="GET" action="{{ route('admin.orders.list') }}">
                         <!-- Group Status -->
                         <div class="mb-3">
-                            <label for="group_status" class="form-label">Group Status</label>
+                            <label for="group_status" class="form-label">Nhóm trạng thái</label>
                             <select name="group_status" class="form-control">
-                                <option value="">Select Group Status</option>
+                                <option value="">Chọn nhóm trạng thái</option>
                                 @foreach ($groupStatuses as $groupStatus)
                                     <option value="{{ $groupStatus }}"
                                         {{ request('group_status') == $groupStatus ? 'selected' : '' }}>
@@ -150,9 +149,9 @@
                         </div>
                         <!-- Specific Status -->
                         <div class="mb-3">
-                            <label for="status_id" class="form-label">Specific Status</label>
+                            <label for="status_id" class="form-label">Trạng thái cụ thể</label>
                             <select name="status_id" class="form-control">
-                                <option value="">Select Specific Status</option>
+                                <option value="">Chọn trạng thái cụ thể</option>
                                 @foreach ($statuses as $status)
                                     <option value="{{ $status->id }}"
                                         {{ request('status_id') == $status->id ? 'selected' : '' }}>
@@ -163,13 +162,13 @@
                         </div>
                         <!-- Search -->
                         <div class="mb-3">
-                            <label for="search" class="form-label">Search by code, name, email</label>
+                            <label for="search" class="form-label">Tìm kiếm theo mã</label>
                             <input type="text" name="search" class="form-control" value="{{ request('search') }}"
-                                placeholder="Search by code, name, email">
+                                placeholder="Tìm kiếm theo mã, tên, email">
                         </div>
                         <div class="row">
                             <div class="mb-3 col-5">
-                                <label for="min_total" class="form-label">Min Total</label>
+                                <label for="min_total" class="form-label">Tổng cộng tối thiểu</label>
                                 <input type="number" name="min_total" class="form-control"
                                     value="{{ request('min_total') }}" min="0" max="1000000000" step="0.01">
                                 @error('min_total')
@@ -178,7 +177,7 @@
                             </div>
                             <!-- Max Total -->
                             <div class="mb-3 col-5">
-                                <label for="max_total" class="form-label">Max Total</label>
+                                <label for="max_total" class="form-label">Tổng cộng tối đa</label>
                                 <input type="number" name="max_total" class="form-control"
                                     value="{{ request('max_total') }}" min="0" max="1000000000" step="0.01">
                                 @error('max_total')
@@ -186,13 +185,13 @@
                                 @enderror
                             </div>
                             <div class="mb-3 col-2">
-                                <label for="sort_order" class="form-label">Sort</label>
+                                <label for="sort_order" class="form-label">Sắp xếp</label>
                                 <select name="sort_order" class="form-control">
                                     <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>
-                                        Descending
+                                        Giảm dần
                                     </option>
                                     <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>
-                                        Ascending
+                                        Tăng dần
                                     </option>
                                 </select>
                             </div>
@@ -201,7 +200,7 @@
 
                         <!-- Date From -->
                         <div class="mb-3">
-                            <label for="date_from" class="form-label">Date From</label>
+                            <label for="date_from" class="form-label">Ngày bắt đầu</label>
                             <input type="date" name="date_from" class="form-control"
                                 value="{{ request('date_from') }}" min="{{ now()->subYears(2)->toDateString() }}"
                                 max="{{ now()->toDateString() }}">
@@ -211,7 +210,7 @@
                         </div>
                         <!-- Date To -->
                         <div class="mb-3">
-                            <label for="date_to" class="form-label">Date To</label>
+                            <label for="date_to" class="form-label">Ngày kết thúc</label>
                             <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}"
                                 min="{{ now()->subYears(2)->toDateString() }}" max="{{ now()->toDateString() }}">
                             @error('date_to')
@@ -228,8 +227,8 @@
 
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                            <button type="button" class="btn btn-secondary" id="clearFilters">Clear</button>
+                            <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
+                            <button type="button" class="btn btn-secondary" id="clearFilters">Xóa bộ lọc</button>
                         </div>
                     </form>
                 </div>

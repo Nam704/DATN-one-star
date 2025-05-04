@@ -54,9 +54,9 @@ class ExpireOrder implements ShouldQueue
 
                 // Kiểm tra trạng thái đơn hàng
                 if ($order->orderStatus->name != 'Paid') {
-                    $expiredOrderStatus = Order_status::where('name', 'Payment Failed')->first();
+                    $expiredOrderStatus = Order_status::where('name', 'Cancelled')->first();
                     if (!$expiredOrderStatus) {
-                        Log::error('Order status "Payment Failed" not found');
+                        Log::error('Order status "Cancelled" not found');
                         return; // Thoát nếu không tìm thấy trạng thái
                     }
 

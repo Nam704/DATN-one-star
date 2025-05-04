@@ -173,6 +173,7 @@ $(document).ready(function () {
             .get(`${baseUrl}/api/notifications/user/${userId}`, { params })
             .then((response) => {
                 const notifications = response.data.data;
+                // console.log(notifications);
                 let listContent = $notificationList.find(".simplebar-content");
                 if (!listContent.length) {
                     $notificationList.html(

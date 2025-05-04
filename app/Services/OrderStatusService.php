@@ -62,8 +62,8 @@ class OrderStatusService
 
         $orderExpire = $this->orderExpire->create([
             'id_order' => $order->id,
-            // 'expires_at' => Carbon::now()->addMinutes(15),
-            'expires_at' => Carbon::now()->addSeconds(10),
+            'expires_at' => Carbon::now()->addMinutes(15),
+            // 'expires_at' => Carbon::now()->addSeconds(10),
 
 
         ]);

@@ -210,7 +210,7 @@ class OrderServiceManager
     public function searchOrders(Request $request, $perPage = 10)
     {
         $validator = Validator::make($request->all(), [
-            'search' => 'nullable|string|max:255|min:3|regex:/^[\w\s@.]+$/',
+            'search' => 'nullable|string|max:255',
             'group_status' => ['nullable', Rule::in(array_merge(['All'], Cache::remember('group_statuses', 60 * 60 * 24, function () {
                 return Order_status::select('group_status')
                     ->distinct()
@@ -228,8 +228,6 @@ class OrderServiceManager
             'sort_by' => 'nullable|string|in:created_at,total,code',
             'sort_order' => 'nullable|string|in:asc,desc',
         ], [
-            'search.regex' => 'Từ khóa tìm kiếm chỉ được chứa chữ, số, khoảng trắng, @ và .',
-            'search.min' => 'Từ khóa tìm kiếm phải có ít nhất 3 ký tự.',
             'group_status.in' => 'Nhóm trạng thái không hợp lệ.',
             'status_id.exists' => 'Trạng thái đơn hàng không hợp lệ.',
             'min_total.max' => 'Tổng giá trị tối thiểu không được vượt quá 100tr VNĐ.',

@@ -73,7 +73,7 @@ class ProductService
     public function list()
     {
         try {
-            $products = $this->product->listActive()->get();
+            $products = $this->product->listActive()->paginate(10);
             return $products;
         } catch (\Throwable $th) {
             throw $th;
