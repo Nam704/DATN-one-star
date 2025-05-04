@@ -88,7 +88,7 @@ class ShopController extends Controller
         }
 
         // Fetch paginated products with relations
-        $products = $productsQuery->with(['variants.importDetails'])->paginate(9);
+        $products = $productsQuery->with(['variants.importDetails'])->paginate(1);
 
         // Tính toán giá tối thiểu cho mỗi sản phẩm (chỉ hiển thị min_price)
         $products->getCollection()->transform(function ($product) {

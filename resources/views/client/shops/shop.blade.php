@@ -268,42 +268,25 @@
                 fetchFilteredProducts();
             });
 
-            // Chặn nhập nếu đã đủ 9 chữ số raw, và chỉ cho phép [0-9.]
             $('#min-price, #max-price')
                 .on('keypress', function(e) {
-                    // tìm instance tương ứng
                     const inst = this.id === 'min-price' ? cleaveMin : cleaveMax;
-                    // nếu là chữ số và raw đã đủ 9 thì block
                     if (/\d/.test(e.key) && inst.getRawValue().length >= 9) {
                         e.preventDefault();
                         return;
                     }
-                    // block ký tự không phải [0-9 .]
                     if (!/[0-9\.]/.test(e.key)) {
                         e.preventDefault();
                     }
                 })
                 .on('paste', function(e) {
                     const inst = this.id === 'min-price' ? cleaveMin : cleaveMax;
-                    // lấy chỉ chữ số từ paste
                     const pasted = (e.originalEvent || e).clipboardData.getData('text').replace(/\D/g, '');
-                    // nếu sẽ vượt quá 9 chữ số raw → block
                     if (inst.getRawValue().length + pasted.length > 9) {
                         e.preventDefault();
                     }
                 });
 
-            // 4) Chặn nhập ký tự không phải số / dấu '.'
-            $('#min-price, #max-price')
-                .on('keypress', function(e) {
-                    if (!/[0-9\.]/.test(e.key)) e.preventDefault();
-                })
-                .on('paste', function(e) {
-                    const text = (e.originalEvent || e).clipboardData.getData('text');
-                    if (!/^[0-9\.]+$/.test(text)) e.preventDefault();
-                });
-
-            // 5) Validate trước khi gọi AJAX (nếu cần)
             function validatePrices() {
                 let min = parseInt(cleaveMin.getRawValue(), 10) || 0;
                 let max = parseInt(cleaveMax.getRawValue(), 10) || 0;
@@ -327,8 +310,7 @@
                 return true;
             }
 
-            // 6) Hàm lấy và render sản phẩm
-            function fetchFilteredProducts() {
+            function fetchFilteredProducts(page = 1) {
                 if (!validatePrices()) return;
                 let params = new URLSearchParams();
 
@@ -352,6 +334,12 @@
                 // Sort
                 const order = $('#orderby').val();
                 if (order) params.append('orderby', order);
+                // Page
+                params.append('page', page);
+
+                // Cập nhật URL mà không tải lại trang
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                history.pushState({}, '', newUrl);
 
                 fetch(`{{ route('client.filter') }}?${params}`, {
                         headers: {
@@ -362,15 +350,30 @@
                     .then(json => {
                         $('#product-list').html(json.products);
                         $('#pagination').html(json.pagination);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
                     });
             }
 
-            // 7) Khởi động sự kiện khác
-            $('.category-filter, .brand-filter').on('change', fetchFilteredProducts);
-            $('#orderby').on('change', fetchFilteredProducts);
+            // Sự kiện cho các bộ lọc
+            $('.category-filter, .brand-filter').on('change', function() {
+                fetchFilteredProducts();
+            });
+            $('#orderby').on('change', function() {
+                fetchFilteredProducts();
+            });
             $('#applyAttributeFilter').on('click', () => {
                 bootstrap.Modal.getInstance($('#attributeModal')).hide();
                 fetchFilteredProducts();
+            });
+
+            // Xử lý nhấp vào liên kết phân trang
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                const url = new URL($(this).attr('href'));
+                const page = url.searchParams.get('page') || 1;
+                fetchFilteredProducts(page);
             });
         });
     </script>
