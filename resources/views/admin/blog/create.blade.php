@@ -3,17 +3,9 @@
     <!-- Begin Page Content -->
     <div class="container-fluid">
         <!-- Page Heading -->
-        <div class="col-12">
-                <div class="page-title-box">
-                    <div class="page-title-right">
-                        <a href="{{ route('admin.blogs.index') }}" class="btn btn-dark">
-                            <i class="mdi mdi-arrow-left-thin"></i>
-                            Quay lại
-                        </a>
-                    </div>
-                    <h4 class="page-title">Thêm bài viết</h4>
-                </div>
-            </div>
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0 mt-4">Thêm bài viết</h4>
+        </div>
         <div>
             <form id="blog-form" action="{{ route('admin.blogs.store') }}" method="post" enctype="multipart/form-data"
                 class="form">
@@ -98,12 +90,14 @@
                                 <div class="form-group">
                                     <label class="font-weight-bold">Chọn thẻ tag:</label>
 
-                                    <select name="name[]" id="tag-select" class="select2 form-control select2-multiple"
-                                        data-toggle="select2" multiple="multiple" data-placeholder="Choose ...">
-                                        @foreach ($tags as $tag)
-                                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    @foreach ($tags as $tag)
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="name[]"
+                                                id="tag-{{ $tag->id }}" value="{{ $tag->id }}">
+                                            <label class="form-check-label"
+                                                for="tag-{{ $tag->id }}">{{ $tag->name }}</label>
+                                        </div>
+                                    @endforeach
 
                                     @error('name')
                                         <div class="text-danger">{{ $message }}</div>
@@ -121,7 +115,8 @@
                                             <button type="button" id="confirm_add_tag"
                                                 class="btn btn-primary mb-2 col-6">Xác
                                                 nhận thêm</button>
-                                            <button type="button" id="cancel_add_tag" class="btn btn-danger mb-2 col-5">Hủy
+                                            <button type="button" id="cancel_add_tag"
+                                                class="btn btn-danger mb-2 col-5">Hủy
                                                 thêm</button>
                                         </div>
                                     </div>
@@ -151,7 +146,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end">
-                   <button type="submit" class="btn btn-warning mr-2 me-2" onclick="setStatus('draft')">Bản nháp</button>
+                    <button type="submit" class="btn btn-warning mr-2" onclick="setStatus('draft')">Bản nháp</button>
                     <button type="submit" class="btn btn-success mr-2" onclick="setStatus('published')">Thêm bài viết</button>
                 </div>
 

@@ -5,13 +5,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <div class="page-title-right">
-                        <a href="{{ route('admin.blogs.index') }}" class="btn btn-dark">
-                            <i class="ri-arrow-left-line align-middle me-1"></i>
-                            Quay lại
-                        </a>
-                    </div>
-                    <h4 class="page-title">Danh sách xóa</h4>
+                    <h4 class="page-title">Quản lý bình luận</h4>
                 </div>
             </div>
         </div>
@@ -20,31 +14,38 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table id="fixed-header-database"
+                        @if (session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        <table id="fixed-header-datatable"
                             class="table table-striped dt-responsive nowrap table-striped w-100">
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Danh mục</th>
-                                    <th>Tiêu đề</th>
-                                    <th>Hình ảnh</th>
-                                    <th>Ngày xóa</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Người dùng</th>
+                                    <th>Bình luận</th>
+                                    <th>Ngày tạo</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                @foreach ($trashedBlogs as $key => $value)
+                                @foreach ($comments as $key => $value)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td>{{ $value->category->name }}</td>
-                                        <td>{{ $value->title }}</td>
-                                        <td><img src="{{ asset($value->thumbnail) }}" alt="err" height="60px"></td>
-                                        <td>{{ $value->deleted_at->format('d/m/Y') }}</td>
+                                        <td>{{ $value->product->name }}</td>
+                                        <td>{{ $value->user->name }}</td>
+                                        <td>{{ $value->comment }}</td>
+                                        <td>{{ $value->created_at->format('d/m/Y') }}</td>
                                         <td>
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-sm btn-success restore-value"
+                                                <a href="{{ route('admin.comments-product.edit', $value->id) }}"><button
+                                                        class="btn btn-sm btn-success me-1"><i
+                                                            class="mdi mdi-comment-edit-outline"></i></button></a>
+                                                <button class="btn btn-sm btn-danger delete-btn delete-comment"
                                                     data-id="{{ $value->id }}">
-                                                    <i class="ri-refresh-line me-1"></i> Khôi phục
+                                                    <i class="mdi mdi-trash-can"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -54,10 +55,10 @@
                             <tfoot>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Danh mục</th>
-                                    <th>Tiêu đề</th>
-                                    <th>Hình ảnh</th>
-                                    <th>Ngày xóa</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Người dùng</th>
+                                    <th>Bình luận</th>
+                                    <th>Ngày tạo</th>
                                     <th>Hành động</th>
                                 </tr>
                             </tfoot>
@@ -75,7 +76,5 @@
 
 @push('scripts')
     <x-admin.data-table-scripts />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('admin/api/blog.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ asset('admin/api/comment.js') }}"></script>
 @endpush

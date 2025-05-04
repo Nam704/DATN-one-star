@@ -28,8 +28,17 @@ class ProductController extends Controller
             ->where('id', '!=', $product->id)
             ->limit(4)
             ->get();
-        $comments = Comment::with('user')->where('product_id', $id)->where('status', 'active')->get();
-        return view('client.detail.index', compact('product', 'relatedProducts','comments'));
+
+        // $comments = Comment::with('user')->where('product_id', $id)->where('status', 'active')->get();
+        $product_comment = Product::withCount('comments')->find($id);
+        $totalComments = $product_comment->comments_count;
+
+        $comments = $product->comments()
+            ->whereNull('parent_id')
+            ->with('user', 'parent', 'replies.user')
+            ->get();
+
+        return view('client.detail.index', compact('product', 'relatedProducts', 'comments'));
     }
 
     public function storecomment(Request $request)
@@ -39,10 +48,10 @@ class ProductController extends Controller
             'comment' => 'required|string',
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
-    
+
         $user = auth()->user();
         $productId = $request->product_id;
-    
+
         // Kiểm tra người dùng đã mua sản phẩm này chưa
         $hasPurchased = Order::where('id_user', $user->id)
             ->whereHas('orderDetails', function ($query) use ($productId) {
@@ -54,7 +63,7 @@ class ProductController extends Controller
                 $query->where('name', 'Delivered');
             })
             ->exists();
-    
+
         if (!$hasPurchased) {
             return response()->json(['message' => 'Bạn cần mua sản phẩm và nhận hàng trước khi bình luận.'], 400);
         }
@@ -63,11 +72,11 @@ class ProductController extends Controller
         $existing = Comment::where('product_id', $request->product_id)
             ->where('user_id', auth()->id())
             ->first();
-    
+
         if ($existing) {
             return response()->json(['message' => 'Cảm ơn bạn đã đánh giá và bình luận sản phẩm'], 400);
         }
-    
+
         $comment = Comment::create([
             'user_id' => auth()->id(),
             'product_id' => $request->product_id,
@@ -75,14 +84,14 @@ class ProductController extends Controller
             'rating' => $request->rating ?? 5,
             'status' => 'active',
         ]);
-    
+
         return response()->json([
             'message' => 'Cảm ơn bạn đã đánh giá và bình luận sản phẩm của chúng tôi!',
             'comment' => $comment->comment,
             'rating' => $comment->rating
         ]);
     }
-    
+
 
 
     public function related($id)
@@ -103,5 +112,4 @@ class ProductController extends Controller
         }
         return view('client.detail.product-info', compact('product', 'relatedProducts'));
     }
-    
 }

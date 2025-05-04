@@ -76,9 +76,13 @@ class Product extends Model
         return $this->hasMany(Product_albums::class, 'id_product');
     }
 
+    // public function comments()
+    // {
+    //     return $this->hasMany(Comment::class);  // mới
+    // }
     public function comments()
     {
-        return $this->hasMany(Comment::class);  // mới
+        return $this->hasMany(ProductComment::class)->whereNull('parent_id')->with('replies');;
     }
 
     public function getProductWithDetails()
@@ -204,7 +208,7 @@ class Product extends Model
     public function top_sale_products_today($start_date, $end_date)
     {
         $cancelledStatuses = [
-            'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 
+            'Cancel Requested', 'Cancel Under Review', 'Cancel Approved',
             'Cancel Rejected', 'Cancelled', 'Failed Delivery'
         ];
 
@@ -259,7 +263,7 @@ class Product extends Model
                 'products.image_primary',
                 DB::raw("
               COALESCE(SUM(
-                  CASE 
+                  CASE
                          WHEN order_statuses.name = 'Delivered'
                       " . ($start_date && $end_date ? " AND orders.created_at BETWEEN '$start_date' AND '$end_date'" : "") . "
                       THEN order_details.quantity
@@ -321,7 +325,7 @@ class Product extends Model
                 'products.id',
                 'products.name',
                 'products.image_primary',
-                DB::raw('COALESCE(SUM(CASE   WHEN order_statuses.name = "Delivered" 
+                DB::raw('COALESCE(SUM(CASE   WHEN order_statuses.name = "Delivered"
                                          AND orders.created_at BETWEEN "' . $start_date . '" AND "' . $end_date . '" THEN order_details.quantity ELSE 0 END), 0) as total_sold')
             )
             ->where('products.status', '=', 'active')
@@ -362,7 +366,7 @@ class Product extends Model
 
     public function productSold($start_date, $end_date)
     {
-       
+
         if ($start_date && $end_date) {
             return DB::table('products')
                 ->join('product_variants', 'products.id', '=', 'product_variants.id_product')
@@ -402,7 +406,7 @@ class Product extends Model
     public function productCancelled($start_date, $end_date)
 {
     $cancelledStatuses = [
-        'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 
+        'Cancel Requested', 'Cancel Under Review', 'Cancel Approved',
         'Cancel Rejected', 'Cancelled', 'Failed Delivery'
     ];
 
@@ -431,7 +435,7 @@ class Product extends Model
 public function productCancelleds($start_date, $end_date)
 {
     $cancelledStatuses = [
-        'Cancel Requested', 'Cancel Under Review', 'Cancel Approved', 
+        'Cancel Requested', 'Cancel Under Review', 'Cancel Approved',
         'Cancel Rejected', 'Cancelled', 'Failed Delivery'
     ];
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as AppProductController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Client\ContactController;
+use App\Http\Controllers\Client\ProductCommentController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashboardController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\TemplateExportController;
 use App\Http\Controllers\Web\BlogController as AppBlogController;
+use App\Http\Controllers\Web\ProductCommentController as AppProductCommentController;
 use App\Http\Controllers\Web\ContactController as AppContactController;
 use Illuminate\Support\Facades\Mail;
 
@@ -266,6 +268,14 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin,employee'])->gro
             Route::post('restore/{id}', 'restore')->name('restore')->middleware('permission:edit-comments');
         });
 
+        // comment-product
+        Route::prefix('comments-product')->controller(AppProductCommentController::class)->name('comments-product.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::post('/{parentId}/reply', 'reply')->name('reply');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
 
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
             Route::get('/create',  'create')->name('create')->middleware('permission:create-products'); // Hiển thị form thêm sản phẩm
@@ -485,6 +495,10 @@ Route::prefix('client')->name('client.')->group(
         Route::prefix('contact')->controller(ContactController::class)->name('contact.')->group(function () {
             Route::get('/index', [ContactController::class, 'index'])->name('index');
             Route::post('/', 'store')->name('store');
+        });
+        Route::prefix('comment-product')->controller(ProductCommentController::class)->name('comment-product.')->group(function () {
+            Route::post('{id}/add', [ProductCommentController::class, 'addComment'])->name('add');
+
         });
     }
 );

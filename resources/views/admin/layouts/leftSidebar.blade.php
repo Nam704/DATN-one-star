@@ -214,7 +214,7 @@
                             @endif
                             @if (auth()->user()->hasPermission('view-comments'))
                                 <li>
-                                    <a href="{{ route('admin.comments.index') }}">Bình luận</a>
+                                    <a href="{{ route('admin.comments-product.index') }}">Bình luận</a>
                                 </li>
                             @endif
                         </ul>

@@ -186,8 +186,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'id_user');
     }
+    //     public function comments()
+    // {
+    //     return $this->hasMany(Comment::class); //mới
+    // }
     public function comments()
-{
-    return $this->hasMany(Comment::class); //mới
-}
+    {
+        return $this->hasMany(ProductComment::class);
+    }
 }

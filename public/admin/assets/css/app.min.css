@@ -23110,3 +23110,16 @@ span.flatpickr-weekday {
     border-radius: 3px;
     font-weight: 600
 }
+
+/* trang viet */
+.bd-css{
+    border: 1px solid ;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 2px var(--tz-secondary-color);
+
+}
+.mess-replies{
+    margin-left: 30px;
+    margin-top: -10px;
+}
