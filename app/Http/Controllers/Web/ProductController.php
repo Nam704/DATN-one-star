@@ -25,11 +25,11 @@ class ProductController extends Controller
 {
     protected $ProductService;
 
-
     public function __construct(ProductService $ProductService)
     {
         $this->ProductService = $ProductService;
     }
+
     public function detail($id)
     {
         $product = Product::findOrFail($id);
@@ -47,28 +47,26 @@ class ProductController extends Controller
                         'attribute_id' => $attr->attribute_id,
                         'name' => $attr->attribute_name,
                         'value' => $attr->value,
-
                     ];
                 })
             ];
         });
 
-        // return $product;
         return view('admin.product.detail')
             ->with([
                 'product' => $product
             ]);
     }
+
     public function list()
     {
-
         $products = $this->ProductService->list();
         $categories = Category::select('id', 'name')->where('status', 'Active')->get();
-        $brands     = Brand::select('id', 'name')->where('status', 'Active')->get();
-        // dd(compact('categories', 'brands'));
+        $brands = Brand::select('id', 'name')->where('status', 'Active')->get();
 
         return view('admin.product.list', compact('products', 'categories', 'brands'));
     }
+
     public function import(Request $request)
     {
         $request->validate([
@@ -77,24 +75,21 @@ class ProductController extends Controller
             'product_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Lưu ảnh vào storage
         $uploadedImages = [];
         foreach ($request->file('product_images') as $file) {
             $path = $file->store('products', 'public');
             $uploadedImages[$file->getClientOriginalName()] = $path;
         }
         $this->ProductService->createProductByExcel($request->excel_file, $uploadedImages);
-        // dd($uploadedImages);
-        // Nhập dữ liệu từ file Excel
-        // Excel::import(new CreateProductImport($uploadedImages), $request->file('excel_file'));
 
         return back()->with('success', 'Sản phẩm đã được nhập thành công!');
     }
 
-    function exportCreateExcel()
+    public function exportCreateExcel()
     {
-        return  $this->ProductService->exportProducts();
+        return $this->ProductService->exportProducts();
     }
+
     public function create()
     {
         $prepareData = $this->ProductService->prepareData();
@@ -109,20 +104,140 @@ class ProductController extends Controller
             ]
         );
     }
+
     public function store(Request $request)
     {
-        $productData = $this->ProductService->createProduct($request);
-        // $productData = $request->all();
+        try {
+            // Lấy toàn bộ dữ liệu từ request
+            $data = $request->all();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product created successfully',
-            'product' => $productData
-        ]);
+            // Decode các trường attributes từ chuỗi JSON thành mảng
+            if (isset($data['variants']) && is_array($data['variants'])) {
+                foreach ($data['variants'] as $index => &$variant) {
+                    if (isset($variant['attributes']) && is_string($variant['attributes'])) {
+                        $variant['attributes'] = json_decode($variant['attributes'], true);
+                        if (json_last_error() !== JSON_ERROR_NONE) {
+                            throw new ValidationException(Validator::make([], []), [
+                                "variants.{$index}.attributes" => ["Dữ liệu thuộc tính không phải là JSON hợp lệ."]
+                            ]);
+                        }
+                    }
+                }
+                unset($variant); // Xóa tham chiếu
+            }
+
+            // Định nghĩa các quy tắc validate
+            $rules = [
+                'name' => 'required|string|max:255|unique:products,name',
+                'id_category' => 'required|exists:categories,id',
+                'id_brand' => 'required|exists:brands,id',
+                'description' => 'nullable|string',
+                'image_primary' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'variants' => 'required|array|max:50',
+                'variants.*.code' => 'required|string|max:50',
+                'variants.*.price' => 'required|numeric|min:0',
+                'variants.*.quantity' => 'required|numeric|min:0',
+                'variants.*.attributes' => 'required|array|min:1',
+                'variants.*.attributes.*.attribute_id' => 'required|exists:attributes,id',
+                'variants.*.attributes.*.value.id_value' => 'required|exists:attribute_values,id',
+            ];
+
+            // Thêm validate cho các ảnh biến thể (image_variant_0, image_variant_1, ...)
+            foreach ($data['variants'] as $index => $variant) {
+                $rules["image_variant_{$index}"] = 'required|image|mimes:jpeg,png,jpg,gif|max:2048';
+            }
+
+            $validator = Validator::make($data, $rules, [
+                'name.required' => 'Tên sản phẩm là bắt buộc.',
+                'name.unique' => 'Tên sản phẩm đã tồn tại, vui lòng chọn tên khác.',
+                'id_category.required' => 'Danh mục là bắt buộc.',
+                'id_category.exists' => 'Danh mục không tồn tại.',
+                'id_brand.required' => 'Thương hiệu là bắt buộc.',
+                'id_brand.exists' => 'Thương hiệu không tồn tại.',
+                'image_primary.required' => 'Ảnh chính của sản phẩm là bắt buộc.',
+                'image_primary.image' => 'Ảnh chính phải là một file ảnh.',
+                'variants.required' => 'Sản phẩm phải có ít nhất một biến thể.',
+                'variants.max' => 'Số lượng biến thể không được vượt quá 50.',
+                'variants.*.code.required' => 'Mã SKU của biến thể là bắt buộc.',
+                'variants.*.price.required' => 'Giá của biến thể là bắt buộc.',
+                'variants.*.quantity.required' => 'Số lượng của biến thể là bắt buộc.',
+                'variants.*.attributes.required' => 'Biến thể phải có ít nhất một thuộc tính.',
+                'variants.*.attributes.*.attribute_id.exists' => 'Thuộc tính không tồn tại.',
+                'variants.*.attributes.*.value.id_value.exists' => 'Giá trị thuộc tính không tồn tại.',
+                'image_variant_*' => 'Ảnh của biến thể là bắt buộc và phải là file ảnh (jpeg, png, jpg, gif) với kích thước tối đa 2MB.',
+            ]);
+
+            // Nếu validation thất bại, ném ngoại lệ
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            // Chuẩn bị dữ liệu để gửi vào service
+            $preparedData = [
+                'name' => $data['name'],
+                'id_category' => $data['id_category'],
+                'id_brand' => $data['id_brand'],
+                'description' => $data['description'] ?? '',
+                'image_primary' => $request->file('image_primary'),
+                'images' => $request->file('images') ?? [],
+                'variants' => array_map(function ($variant, $index) use ($request) {
+                    return [
+                        'code' => $variant['code'],
+                        'price' => $variant['price'],
+                        'quantity' => $variant['quantity'] ?? 0,
+                        'attributes' => $variant['attributes'],
+                        'image' => $request->file("image_variant_{$index}"),
+                    ];
+                }, $data['variants'], array_keys($data['variants'])),
+            ];
+
+            // Gọi ProductService để tạo sản phẩm
+            $productData = $this->ProductService->createProduct($preparedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sản phẩm đã được tạo thành công!',
+                'product' => $productData
+            ], 201);
+        } catch (ValidationException $e) {
+            // Xử lý lỗi validation
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Xử lý lỗi cơ sở dữ liệu
+            if ($e->getCode() === '23000' && strpos($e->getMessage(), 'product_variants_sku_unique') !== false) {
+                // Lỗi trùng lặp SKU
+                preg_match("/Duplicate entry '(.+?)' for key/", $e->getMessage(), $matches);
+                $duplicateSku = $matches[1] ?? 'không xác định';
+                return response()->json([
+                    'success' => false,
+                    'message' => "Mã SKU '$duplicateSku' đã tồn tại, vui lòng sử dụng mã khác.",
+                    'errors' => ['sku' => ["Mã SKU '$duplicateSku' đã tồn tại."]]
+                ], 422);
+            }
+
+            // Các lỗi cơ sở dữ liệu khác
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra với cơ sở dữ liệu, vui lòng thử lại sau.',
+                'errors' => ['general' => [$e->getMessage()]]
+            ], 500);
+        } catch (\Exception $e) {
+            // Xử lý các lỗi khác
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tạo sản phẩm, vui lòng thử lại.',
+                'errors' => ['general' => [$e->getMessage()]]
+            ], 500);
+        }
     }
+
     public function edit($id)
     {
-
         $product = Product::findOrFail($id);
         $product->getProductWithDetails();
 
@@ -139,30 +254,27 @@ class ProductController extends Controller
                         'attribute_id' => $attr->attribute_id,
                         'name' => $attr->attribute_name,
                         'value' => $attr->value,
-
                     ];
                 })
             ];
         });
-        // return $product->variants;
+
         $prepareData = $this->ProductService->prepareData();
         $categories = $prepareData['categories'];
         $brands = $prepareData['brands'];
         $attributes = $prepareData['attributes'];
 
-        return
-            view('admin.product.edit')->with([
-                'product' => $product,
-                'categories' => $categories,
-                'brands' => $brands,
-                'attributes' => $attributes
-            ]);
+        return view('admin.product.edit')->with([
+            'product' => $product,
+            'categories' => $categories,
+            'brands' => $brands,
+            'attributes' => $attributes
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-
-        $product = $this->ProductService->updateProduct($request, $id);
+        $product = $this->ProductService->updateProduct($request->all(), $id);
 
         return response()->json([
             'success' => true,
@@ -173,14 +285,10 @@ class ProductController extends Controller
 
     public function stas($id)
     {
-        // Lấy thông tin sản phẩm với các biến thể
-        // $product = Product::getProductWithDetails($id)->findOrFail($id);
         $product = Product::findOrFail($id);
         $product->getProductWithDetails();
 
-        // Map các biến thể sản phẩm
         $product->variants = $product->variants->map(function ($variant) {
-            // dd($variant->attributeValues);
             return [
                 'id' => $variant->id,
                 'sku' => $variant->sku,
@@ -198,12 +306,10 @@ class ProductController extends Controller
             ];
         });
 
-        // Lấy thông tin đơn hàng liên quan đến sản phẩm
         $orderDetails = Order_detail::whereIn('id_variant', $product->variants->pluck('id'))
             ->with(['order', 'order.orderStatus'])
             ->get();
 
-        // Thống kê trạng thái đơn hàng
         $orderStatusStats = $orderDetails->groupBy('order.id_order_status')
             ->map(function ($orders, $statusId) {
                 return [
@@ -214,7 +320,6 @@ class ProductController extends Controller
                 ];
             });
 
-        // Thống kê biến thể sản phẩm
         $variantStats = $orderDetails->groupBy('id_variant')
             ->map(function ($orders, $variantId) {
                 return [
@@ -233,66 +338,29 @@ class ProductController extends Controller
             ]);
     }
 
-
-    // public function variantDetails($productId, $variantId)
-    // {
-    //     // Lấy thông tin sản phẩm
-    //     $product = Product::findOrFail($productId);
-
-    //     // Lấy thông tin biến thể
-    //     $variant = Product_variant::findOrFail($variantId);
-
-    //     // Lấy danh sách đơn hàng liên quan đến biến thể này
-    //     $orderDetails = Order_detail::where('id_product_variant', $variantId)
-    //         ->with(['order.user']) // Sử dụng mối quan hệ order.user
-    //         ->get();
-
-    //     // Nhóm danh sách người dùng đã đặt hàng
-    //     $users = $orderDetails->map(function ($orderDetail) {
-    //         return $orderDetail->order->user;
-    //     })->unique();
-
-    //     return view('admin.product.productVariantDetail')
-    //         ->with([
-    //             'product' => $product,
-    //             'variant' => $variant,
-    //             'users' => $users
-    //         ]);
-    // }
-
-
-
-
     public function variantDetails($productId, $variantId, Request $request)
     {
-        // Lấy thông tin sản phẩm
         $product = Product::findOrFail($productId);
-
-        // Lấy thông tin biến thể
         $variant = Product_variant::findOrFail($variantId);
 
-        // Lấy danh sách đơn hàng liên quan đến biến thể này
         $orderDetails = Order_detail::where('id_variant', $variantId)
-            ->with(['order.user', 'order.orderStatus', 'order.address']) // Lấy thông tin đơn hàng, người dùng và trạng thái
+            ->with(['order.user', 'order.orderStatus', 'order.address'])
             ->get();
 
-        // Nhóm đơn hàng theo người dùng
         $users = [];
-        $allStatuses = []; // Mảng chứa tất cả trạng thái đơn hàng
+        $allStatuses = [];
 
         foreach ($orderDetails as $orderDetail) {
             $userId = $orderDetail->order->user->id;
             $orderId = $orderDetail->order->id;
             $statusName = $orderDetail->order->orderStatus->name;
 
-            // Giải mã dữ liệu địa chỉ
-            $address = json_decode($orderDetail->order->address_data); // Giải mã dữ liệu JSON
-
-            // Lấy các trường địa chỉ
+            $address = json_decode($orderDetail->order->address_data);
             $province = $address->name_province ?? 'N/A';
             $district = $address->name_district ?? 'N/A';
             $ward = $address->name_ward ?? 'N/A';
             $addressDetail = $address->address_detail ?? 'N/A';
+
             if (!isset($users[$userId])) {
                 $users[$userId] = [
                     'user' => $orderDetail->order->user,
@@ -317,34 +385,32 @@ class ProductController extends Controller
                 $users[$userId]['orders'][$orderId]['statuses'][] = $statusName;
             }
 
-            // Thêm trạng thái vào danh sách tất cả trạng thái (loại bỏ trùng lặp)
             if (!in_array($statusName, $allStatuses)) {
                 $allStatuses[] = $statusName;
             }
         }
 
-        // Lấy trạng thái được chọn từ request
         $selectedStatus = $request->query('status');
 
         return view('admin.product.productVariantDetail', [
             'product' => $product,
             'variant' => $variant,
-            'users' => array_values($users), // Chuyển từ mảng kết hợp sang mảng tuần tự
-            'allStatuses' => $allStatuses, // Danh sách tất cả trạng thái
-            'selectedStatus' => $selectedStatus // Trạng thái được chọn
+            'users' => array_values($users),
+            'allStatuses' => $allStatuses,
+            'selectedStatus' => $selectedStatus
         ]);
     }
+
     public function lock($id)
     {
         $product = Product::findOrFail($id);
         $product->status = 'inactive';
-        $product->delete(); // Xóa mềm sản phẩm
+        $product->delete();
         $product->save();
 
-        // Xóa các mục trong giỏ hàng liên quan đến sản phẩm này
         DB::transaction(function () use ($product) {
-            $variantIds = $product->variants()->pluck('id'); // Lấy danh sách id_variant của sản phẩm
-            Cart_details::whereIn('id_variant', $variantIds)->delete(); // Xóa các mục trong CartDetail
+            $variantIds = $product->variants()->pluck('id');
+            Cart_details::whereIn('id_variant', $variantIds)->delete();
         });
 
         return redirect()->route('admin.products.list')->with('success', 'Ngừng bán sản phẩm và đã xóa khỏi giỏ hàng của người dùng');
@@ -355,53 +421,49 @@ class ProductController extends Controller
         $products = Product::onlyTrashed()->get();
         return view('admin.product.listlock', compact('products'));
     }
+
     public function openProduct($id)
     {
         $product = Product::onlyTrashed()->findOrFail($id);
 
         DB::transaction(function () use ($product) {
-            // Khôi phục sản phẩm
             $product->restore();
-            // Cập nhật trạng thái thành active
             $product->status = 'active';
             $product->save();
-
-            // (Tùy chọn) Khôi phục các biến thể liên quan nếu chúng cũng bị xóa mềm
             $product->variants()->onlyTrashed()->restore();
             $product->variants()->update(['status' => 'active']);
         });
 
         return redirect()->route('admin.products.list')->with('success', 'Sản phẩm đã được khôi phục và kích hoạt!');
     }
+
     public function filter(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'category'     => 'nullable|exists:categories,id',
-            'brand'        => 'nullable|exists:brands,id',
-            'stock'        => 'nullable|in:in_stock,out_of_stock,low_stock,quantity',
-            'quantity'     => 'nullable|required_if:stock,quantity|integer|min:0',
-            'sort_view'    => 'nullable|in:asc,desc',
-            'min_price'    => 'nullable|numeric|min:0|max:100000000',
-            'max_price'    => 'nullable|numeric|min:0|max:100000000|gte:min_price',
+            'category' => 'nullable|exists:categories,id',
+            'brand' => 'nullable|exists:brands,id',
+            'stock' => 'nullable|in:in_stock,out_of_stock,low_stock,quantity',
+            'quantity' => 'nullable|required_if:stock,quantity|integer|min:0',
+            'sort_view' => 'nullable|in:asc,desc',
+            'min_price' => 'nullable|numeric|min:0|max:100000000',
+            'max_price' => 'nullable|numeric|min:0|max:100000000|gte:min_price',
             'created_from' => 'nullable|date',
-            'created_to'   => 'nullable|date|after_or_equal:created_from|before_or_equal:today',
+            'created_to' => 'nullable|date|after_or_equal:created_from|before_or_equal:today',
         ], [
-            'quantity.required_if'         => 'Khi chọn “Số lượng cụ thể” bạn phải nhập số lượng.',
-            'max_price.gte'                => 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.',
-            'created_to.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
-            'created_to.before_or_equal'   => 'Ngày kết thúc không được lớn hơn hôm nay.',
-            'min_price.max'                => 'Giá tối thiểu không được vượt quá 100.000.000.',
-            'max_price.max'                => 'Giá tối đa không được vượt quá 100.000.000.',
+            'quantity.required_if' => 'Khi chọn “Số lượng cụ thể” bạn phải nhập số lượng.',
+            'max_price.gte' => 'Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.',
+            'created_to.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'created_to.before_or_equal' => 'Ngày kết thúc không được lớn hơn hôm nay.',
+            'min_price.max' => 'Giá tối thiểu không được vượt quá 100.000.000.',
+            'max_price.max' => 'Giá tối đa không được vượt quá 100.000.000.',
         ]);
 
         if ($validator->fails()) {
             if ($request->ajax()) {
-                // Trả JSON 422 để client-side bắt và hiển thị (nếu muốn)
                 return response()->json([
                     'errors' => $validator->errors(),
                 ], 422);
             }
-            // Với form POST truyền về (non-AJAX) thì redirect back
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -427,6 +489,7 @@ class ProductController extends Controller
         } elseif ($request->stock === 'quantity' && $request->filled('quantity')) {
             $query->having('total_quantity', '=', (int)$request->quantity);
         }
+
         if ($request->filled('min_price') && $request->filled('max_price')) {
             $min = $request->min_price;
             $max = $request->max_price;
@@ -445,10 +508,8 @@ class ProductController extends Controller
             });
         }
 
-        // 1. Xóa hết orderBy cũ nếu có
         $query->getQuery()->orders = null;
 
-        // 2. Apply order theo View nếu được chọn
         if ($request->filled('sort_view')) {
             if ($request->sort_view === 'asc') {
                 $query->orderBy('view', 'asc');
@@ -457,12 +518,12 @@ class ProductController extends Controller
             }
         }
 
-        // 3. Nếu không có sort_view, mặc định sort theo id DESC
         if (!$request->filled('sort_view')) {
             $query->orderBy('id', 'desc');
         }
+
         $from = $request->input('created_from');
-        $to   = $request->input('created_to');
+        $to = $request->input('created_to');
 
         if ($from) {
             $query->whereDate('products.created_at', '>=', $from);

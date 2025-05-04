@@ -78,10 +78,8 @@ function initFormSubmission() {
             errors.push("Số lượng biến thể không được vượt quá 50.");
         }
 
-        // Lấy danh sách thuộc tính và SKU của tất cả biến thể để kiểm tra trùng lặp
-        const variantAttributes = {};
+        // Kiểm tra SKU trùng lặp
         const variantSkus = new Set();
-
         variantRows.each(function () {
             const index = $(this).data("id");
             const sku = $(this)
@@ -91,11 +89,6 @@ function initFormSubmission() {
                 `input[name='image_variant_${index}']`
             )[0];
             const image = imageInput ? imageInput.files[0] : null;
-            const attributeValues = JSON.parse(
-                $(this)
-                    .find(`input[name='variant_attribute_values_${index}']`)
-                    .val()
-            );
 
             // Kiểm tra SKU và ảnh
             if (!sku) {
@@ -103,24 +96,6 @@ function initFormSubmission() {
             }
             if (!image) {
                 errors.push(`Vui lòng chọn ảnh cho biến thể #${index + 1}.`);
-            }
-
-            // Kiểm tra trùng lặp thuộc tính
-            const attrKey = JSON.stringify(
-                attributeValues
-                    .map((v) => `${v.attribute_name}:${v.value.value}`)
-                    .sort()
-            );
-            if (variantAttributes[attrKey]) {
-                errors.push(
-                    `Biến thể #${
-                        index + 1
-                    } có tổ hợp thuộc tính trùng lặp với biến thể #${
-                        variantAttributes[attrKey] + 1
-                    }.`
-                );
-            } else {
-                variantAttributes[attrKey] = index;
             }
 
             // Kiểm tra trùng lặp SKU
@@ -137,12 +112,16 @@ function initFormSubmission() {
             GlobalUtils.showNotification(errors.join("\n"), {
                 backgroundColor: "#ff4444",
                 duration: 10000,
-                // persistent: true,
             });
             return;
         }
 
         const formData = prepareProductData();
+        // Log nội dung của FormData
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ": " + pair[1]);
+        }
+
         axios
             .post(this.action, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -316,7 +295,7 @@ function handleGenerateVariants() {
     const variants = [];
     $(".attribute-row").each(function () {
         const attributeId = $(this).data("id");
-        const attributeName = $(this).find(".attribute-title p").text();
+        const attributeName = $(this).find(".attribute-title p").text().trim(); // Loại bỏ khoảng trắng và \n
         const values = [];
         $(this)
             .find(".attribute-value")
@@ -345,7 +324,9 @@ function showManualVariantForm() {
     if ($(".variant-row").length >= 50) {
         GlobalUtils.showNotification(
             "Không thể thêm biến thể, đã đạt tối đa 50 biến thể.",
-            { backgroundColor: "#ff4444" }
+            {
+                backgroundColor: "#ff4444",
+            }
         );
         return;
     }
@@ -366,7 +347,9 @@ function showManualVariantForm() {
                                 <div class="mb-3">
                                     <label class="form-label">Thuộc tính ${$(
                                         `.attribute-row[data-id="${attrId}"] .attribute-title p`
-                                    ).text()}</label>
+                                    )
+                                        .text()
+                                        .trim()}</label>
                                     <select class="form-control manual-variant-value" data-attr-id="${attrId}">
                                         <option value="">Chọn giá trị</option>
                                         ${$(
@@ -401,6 +384,14 @@ function showManualVariantForm() {
                                 <input type="text" class="form-control" id="manual-variant-sku" placeholder="Nhập mã sản phẩm">
                             </div>
                             <div class="mb-3">
+                                <label class="form-label">Số lượng</label>
+                                <input type="number" class="form-control" id="manual-variant-quantity" placeholder="Nhập số lượng" min="0">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Giá ($)</label>
+                                <input type="number" class="form-control" id="manual-variant-price" placeholder="Nhập giá sản phẩm" min="0" step="0.01">
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label">Ảnh biến thể</label>
                                 <input type="file" class="form-control" id="manual-variant-image" accept="image/*">
                             </div>
@@ -432,7 +423,9 @@ function showManualVariantForm() {
                 GlobalUtils.showNotification(
                     `Vui lòng chọn giá trị cho thuộc tính ${$(
                         `.attribute-row[data-id="${attrId}"] .attribute-title p`
-                    ).text()}.`,
+                    )
+                        .text()
+                        .trim()}.`,
                     { backgroundColor: "#ff4444" }
                 );
                 return false;
@@ -441,19 +434,43 @@ function showManualVariantForm() {
                 attribute_id: attrId,
                 attribute_name: $(
                     `.attribute-row[data-id="${attrId}"] .attribute-title p`
-                ).text(),
+                )
+                    .text()
+                    .trim(), // Loại bỏ khoảng trắng và \n
                 value: { id_value: valueId, value: valueText },
             });
         });
 
         const sku = $("#manual-variant-sku").val();
+        const quantity = $("#manual-variant-quantity").val();
+        const price = $("#manual-variant-price").val();
         const imageInput = document.getElementById("manual-variant-image");
         const image = imageInput.files[0];
+
+        // Validate các trường cơ bản
         if (!sku) {
             hasError = true;
             GlobalUtils.showNotification("Vui lòng nhập mã SKU cho biến thể.", {
                 backgroundColor: "#ff4444",
             });
+        }
+        if (!quantity || quantity < 0) {
+            hasError = true;
+            GlobalUtils.showNotification(
+                "Vui lòng nhập số lượng hợp lệ cho biến thể.",
+                {
+                    backgroundColor: "#ff4444",
+                }
+            );
+        }
+        if (!price || price < 0) {
+            hasError = true;
+            GlobalUtils.showNotification(
+                "Vui lòng nhập giá hợp lệ cho biến thể.",
+                {
+                    backgroundColor: "#ff4444",
+                }
+            );
         }
         if (!image) {
             hasError = true;
@@ -462,12 +479,47 @@ function showManualVariantForm() {
             });
         }
 
+        // Kiểm tra trùng lặp thuộc tính với các biến thể đã có
+        const variantAttributes = {};
+        const variantRows = $(".variant-row");
+        variantRows.each(function () {
+            const index = $(this).data("id");
+            const attributeValues = JSON.parse(
+                $(this)
+                    .find(`input[name='variant_attribute_values_${index}']`)
+                    .val()
+            );
+            const attrKey = JSON.stringify(
+                attributeValues
+                    .map((v) => `${v.attribute_name}:${v.value.value}`)
+                    .sort()
+            );
+            variantAttributes[attrKey] = index;
+        });
+
+        const newAttrKey = JSON.stringify(
+            variantData
+                .map((v) => `${v.attribute_name}:${v.value.value}`)
+                .sort()
+        );
+        if (variantAttributes[newAttrKey] !== undefined) {
+            hasError = true;
+            GlobalUtils.showNotification(
+                `Tổ hợp thuộc tính này đã tồn tại ở biến thể #${
+                    parseInt(variantAttributes[newAttrKey]) + 1
+                }.`,
+                { backgroundColor: "#ff4444" }
+            );
+        }
+
         if (hasError) return;
 
-        // Thêm SKU và ảnh vào dữ liệu biến thể
+        // Thêm SKU, quantity, price và ảnh vào dữ liệu biến thể
         const fullVariantData = {
             attributes: variantData,
             sku: sku,
+            quantity: quantity,
+            price: price,
             image: image,
         };
 
@@ -550,26 +602,32 @@ function renderVariantsLayout(variants, isManual = false) {
                             <input type="file" class="form-control image-input" name="image_variant_${variantIndex}" accept="image/*" style="opacity: 0; position: absolute; width: 100%; height: 100%;">
                             ${
                                 !Array.isArray(variant) && variant.image
-                                    ? `
-                                <img src="${URL.createObjectURL(
-                                    variant.image
-                                )}" alt="Preview" class="image-preview" style="max-height: 100%; max-width: 100%; display: block;">
-                            `
+                                    ? `<img src="${URL.createObjectURL(
+                                          variant.image
+                                      )}" alt="Preview" class="image-preview" style="max-height: 100%; max-width: 100%; display: block;">`
                                     : '<img src="" alt="Preview" class="image-preview" style="max-height: 100%; max-width: 100%; display: none;">'
                             }
                         </div>
                     </div>
                     <div class="col-md-10">
                         <div class="row mb-2">
-                            <div class="col-md-12">
-                                <label class="form-label">Mã sản phẩm(SKU)</label>
+                            <div class="col-md-4">
+                                <label class="form-label">Mã sản phẩm (SKU)</label>
                                 <input type="text" class="form-control" name="product_code_${variantIndex}" placeholder="Nhập mã sản phẩm" value="${
             !Array.isArray(variant) ? variant.sku || "" : ""
         }">
                             </div>
-                            <div class="" style="display:none;">
+                            <div class="col-md-4">
+                                <label class="form-label">Số lượng</label>
+                                <input type="number" class="form-control" name="product_quantity_${variantIndex}" placeholder="Nhập số lượng" min="0" value="${
+            !Array.isArray(variant) ? variant.quantity || "0" : "0"
+        }">
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">Giá ($)</label>
-                                <input type="number" class="form-control" name="product_price_${variantIndex}" placeholder="Nhập giá sản phẩm">
+                                <input type="number" class="form-control" name="product_price_${variantIndex}" placeholder="Nhập giá sản phẩm" min="0" step="0.01" value="${
+            !Array.isArray(variant) ? variant.price || "0" : "0"
+        }">
                             </div>
                         </div>
                     </div>
@@ -652,27 +710,41 @@ function prepareProductData() {
     formData.append("id_category", formData.get("id_category"));
     formData.append("id_brand", formData.get("id_brand"));
 
-    $(".variant-row").each((index, row) => {
+    // Duyệt qua các .variant-row và sử dụng data-id thay vì index tuần tự
+    $(".variant-row").each((_, row) => {
+        const variantId = $(row).data("id"); // Lấy data-id của variant-row
         const productCode = $(row)
-            .find(`input[name='product_code_${index}']`)
+            .find(`input[name='product_code_${variantId}']`)
+            .val();
+        const productQuantity = $(row)
+            .find(`input[name='product_quantity_${variantId}']`)
             .val();
         const productPrice = $(row)
-            .find(`input[name='product_price_${index}']`)
+            .find(`input[name='product_price_${variantId}']`)
             .val();
         const attributeValues = JSON.parse(
-            $(row).find(`input[name='variant_attribute_values_${index}']`).val()
+            $(row)
+                .find(`input[name='variant_attribute_values_${variantId}']`)
+                .val()
         );
-        formData.append(`variants[${index}][code]`, productCode);
-        formData.append(`variants[${index}][price]`, productPrice);
+
+        // Thêm dữ liệu biến thể vào FormData với chỉ số variantId
+        formData.append(`variants[${variantId}][code]`, productCode);
+        formData.append(`variants[${variantId}][quantity]`, productQuantity);
+        formData.append(`variants[${variantId}][price]`, productPrice);
         formData.append(
-            `variants[${index}][attributes]`,
+            `variants[${variantId}][attributes]`,
             JSON.stringify(attributeValues)
-        );
+        ); // Chuyển thành chuỗi JSON hợp lệ
+
         const imageInput = $(row).find(
-            `input[name='image_variant_${index}']`
+            `input[name='image_variant_${variantId}']`
         )[0];
         if (imageInput && imageInput.files && imageInput.files[0]) {
-            formData.append(`variants[${index}][image]`, imageInput.files[0]);
+            formData.append(
+                `variants[${variantId}][image]`,
+                imageInput.files[0]
+            );
         }
     });
 
@@ -717,7 +789,9 @@ function addNewCategory() {
             } else {
                 GlobalUtils.showNotification(
                     data.message || "Thêm danh mục thất bại!",
-                    { backgroundColor: "#ff4444" }
+                    {
+                        backgroundColor: "#ff4444",
+                    }
                 );
             }
         })
@@ -782,7 +856,9 @@ function addNewBrand() {
             } else {
                 GlobalUtils.showNotification(
                     data.message || "Thêm thương hiệu thất bại!",
-                    { backgroundColor: "#ff4444" }
+                    {
+                        backgroundColor: "#ff4444",
+                    }
                 );
             }
         })
@@ -826,7 +902,9 @@ function addNewAttribute() {
             } else {
                 GlobalUtils.showNotification(
                     data.message || "Thêm thuộc tính thất bại!",
-                    { backgroundColor: "#ff4444" }
+                    {
+                        backgroundColor: "#ff4444",
+                    }
                 );
             }
         })
@@ -899,13 +977,37 @@ function updateAlbumPreview() {
 // Xử lý lỗi AJAX
 function handleAjaxError(err) {
     console.error(err.response?.data || err);
-    let message = "Có lỗi xảy ra, vui lòng thử lại!";
+    let messages = [];
+
     if (err.response && err.response.data) {
-        if (err.response.data.message) {
-            message = err.response.data.message;
-        } else if (err.response.data.errors) {
-            message = Object.values(err.response.data.errors).flat().join("\n");
+        if (err.response.data.errors) {
+            // Xử lý lỗi validate chi tiết
+            Object.keys(err.response.data.errors).forEach((key) => {
+                const errorMessages = err.response.data.errors[key];
+                if (key.startsWith("variants.")) {
+                    // Lấy index của biến thể từ key (ví dụ: variants.0.price -> index = 0)
+                    const variantIndex =
+                        parseInt(key.match(/variants\.(\d+)/)?.[1] || 0) + 1;
+                    errorMessages.forEach((msg) => {
+                        messages.push(`Biến thể #${variantIndex}: ${msg}`);
+                    });
+                } else {
+                    // Lỗi không liên quan đến biến thể
+                    errorMessages.forEach((msg) => {
+                        messages.push(msg);
+                    });
+                }
+            });
+        } else if (err.response.data.message) {
+            // Lỗi chung từ server
+            messages.push(err.response.data.message);
         }
+    } else {
+        messages.push("Có lỗi xảy ra, vui lòng thử lại!");
     }
-    GlobalUtils.showNotification(message, { backgroundColor: "#ff4444" });
+
+    GlobalUtils.showNotification(messages.join("\n"), {
+        backgroundColor: "#ff4444",
+        duration: 10000,
+    });
 }
