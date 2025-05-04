@@ -79,10 +79,10 @@
                                         <p>{{ $activeUsers }} / {{ $totalUsers }}
                                             ({{ number_format($activePercentage, 2) }}%)</p>
                                     </div>
-                                    <div class="col-md-6">
+                                    {{-- <div class="col-md-6">
                                         <h4>Phần trăm tăng trưởng</h4>
                                         <p>{{ number_format($growthRate, 2) }}%</p>
-                                    </div>
+                                    </div> --}}
                                 </div>
 
                                 <div id="userStatusChart"></div>
@@ -113,12 +113,12 @@
                                         Chưa mua hàng <span
                                             class="badge bg-info-subtle text-info">{{ $totalUsersWithoutOrders }}</span>
                                     </a>
-                                    <a class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill"
+                                    {{-- <a class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill"
                                         href="#v-pills-settings" role="tab" aria-controls="v-pills-settings"
                                         aria-selected="false">
                                         Tiềm năng <span
                                             class="badge bg-info-subtle text-info">{{ $totalUsersWithMultipleOrders }}</span>
-                                    </a>
+                                    </a> --}}
                                 </div>
                             </div> <!-- end col-->
 
@@ -126,9 +126,8 @@
                                 <div class="tab-content" id="v-pills-tabContent">
                                     <div class="tab-pane fade active show" id="v-pills-home" role="tabpanel"
                                         aria-labelledby="v-pills-home-tab">
-                                        <div class="card-body">
-                                            <table id="fixed-header-datatable"
-                                                class="table table-striped dt-responsive nowrap table-striped  w-100">
+                                        <div class="scrollable-table">
+                                            <table class="table table-striped dt-responsive nowrap w-100 mb-0">
                                                 <thead>
                                                     <tr>
                                                         <th>Tên</th>
@@ -144,49 +143,31 @@
                                                     @endforeach
                                                 </tbody>
                                             </table>
-                                        </div> <!-- end card body-->
+                                        </div>
                                     </div>
                                     <div class="tab-pane fade" id="v-pills-profile" role="tabpanel"
                                         aria-labelledby="v-pills-profile-tab">
-                                        <table id="fixed-header-datatable"
-                                            class="table table-striped dt-responsive nowrap table-striped  w-100">
-                                            <thead>
-                                                <tr>
-                                                    <th>Tên</th>
-                                                    <th>Email</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($usersWithoutOrders as $value)
+                                        <div class="scrollable-table">
+                                            <table class="table table-striped dt-responsive nowrap w-100 mb-0">
+                                                <thead>
                                                     <tr>
-                                                        <td>{{ $value->name }}</td>
-                                                        <td>{{ $value->email }}</td>
+                                                        <th>Tên</th>
+                                                        <th>Email</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($usersWithoutOrders as $value)
+                                                        <tr>
+                                                            <td>{{ $value->name }}</td>
+                                                            <td>{{ $value->email }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                    <div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
-                                        aria-labelledby="v-pills-settings-tab">
-                                        <table id="fixed-header-datatable"
-                                            class="table table-striped dt-responsive nowrap table-striped  w-100">
-                                            <thead>
-                                                <tr>
-                                                    <th>Tên</th>
-                                                    <th>Email</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($usersWithMultipleOrders as $value)
-                                                    <tr>
-                                                        <td>{{ $value->name }}</td>
-                                                        <td>{{ $value->email }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div> <!-- end tab-content-->
+                                </div>
+                                <!-- end tab-content-->
                             </div> <!-- end col-->
                         </div>
                         <!-- end row-->
@@ -206,45 +187,72 @@
             </div> <!-- end col -->
             <div class="col-xl-6">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="header-title">Thống kê số tài khoản mới</h4>
-
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h4 class="header-title mb-0">Thống kê số tài khoản mới</h4>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="container">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <label for="datePicker">Chọn ngày:</label>
-                                            <input type="date" id="datePicker" class="form-control"
-                                                value="{{ now()->toDateString() }}">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h5>Theo ngày</h5>
-                                            <div id="dailyChart"></div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h5>Theo tuần</h5>
-                                            <div id="weeklyChart"></div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h5>Theo tháng</h5>
-                                            <div id="monthlyChart"></div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h5>Theo năm</h5>
-                                            <div id="yearlyChart"></div>
-                                        </div>
-                                    </div>
+                        {{-- 1. Các input filter, chỉ hiện container tương ứng --}}
+
+                        <div id="filterInputs" class="mb-3">
+                            <div data-timeframe="daily" class="filter-group">
+                                <label for="dailyDate">Chọn ngày:</label>
+                                <input type="date" id="dailyDate" class="form-control"
+                                    value="{{ now()->toDateString() }}" max="{{ now()->toDateString() }}">
+                            </div>
+                            <div data-timeframe="weekly" class="filter-group d-none">
+                                <label>Chọn khoảng:</label>
+                                <div class="d-flex gap-2">
+                                    <input type="date" id="weekStart" class="form-control"
+                                        value="{{ now()->subWeek()->startOfWeek()->toDateString() }}"
+                                        max="{{ now()->toDateString() }}">
+                                    <span class="align-self-center">→</span>
+                                    <input type="date" id="weekEnd" class="form-control"
+                                        value="{{ now()->toDateString() }}" max="{{ now()->toDateString() }}">
                                 </div>
                             </div>
+                            <div data-timeframe="monthly" class="filter-group d-none">
+                                <label for="monthPicker">Chọn tháng:</label>
+                                <input type="month" id="monthPicker" class="form-control"
+                                    value="{{ now()->format('Y-m') }}" max="{{ now()->format('Y-m') }}">
+                            </div>
+                            <div data-timeframe="yearly" class="filter-group d-none">
+                                <label for="yearPicker">Chọn năm:</label>
+                                <input type="number" id="yearPicker" class="form-control" min="2000"
+                                    max="{{ now()->year }}" step="1" value="{{ now()->year }}">
+                            </div>
+                            <button id="applyFilter" class="btn btn-primary mt-2">Lọc</button>
                         </div>
-                        <!-- end row-->
-                    </div> <!-- end card-body -->
-                </div> <!-- end card-->
+                        {{-- 2. Nav‑pills chuyển tab --}}
+                        <ul class="nav nav-pills mb-3" id="timeframeTabs" role="tablist">
+                            @foreach (['daily' => 'Theo ngày', 'weekly' => 'Theo tuần', 'monthly' => 'Theo tháng', 'yearly' => 'Theo năm'] as $tf => $label)
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link @if ($tf === 'daily') active @endif"
+                                        data-bs-toggle="pill" data-timeframe="{{ $tf }}" type="button">
+                                        {{ $label }}
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        {{-- 3. Tab content --}}
+                        <div class="tab-content">
+                            <div class="tab-pane active show" id="dailyTab">
+                                <div id="dailyChart"></div>
+                            </div>
+                            <div class="tab-pane" id="weeklyTab">
+                                <div id="weeklyChart"></div>
+                            </div>
+                            <div class="tab-pane" id="monthlyTab">
+                                <div id="monthlyChart"></div>
+                            </div>
+                            <div class="tab-pane" id="yearlyTab">
+                                <div id="yearlyChart"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
                 <div class="card">
                     <div class="card-header">
                         <h4 class="header-title">Top 5 Người Dùng Chi Tiêu Nhiều Nhất</h4>
@@ -252,7 +260,7 @@
                     <div class="card-body">
                         <div class="row">
                             <table id="fixed-header-datatable"
-                                class="table table-striped dt-responsive nowrap table-striped  w-100">
+                                class="table table-striped dt-responsive nowrap table-striped w-100">
                                 <thead>
                                     <tr>
                                         <th>Tên</th>
@@ -260,28 +268,28 @@
                                         <th>Tổng Tiền Chi Tiêu</th>
                                     </tr>
                                 </thead>
-                                <tbody id="topSpendersList">
-
-                                </tbody>
+                                <tbody id="topSpendersList"></tbody>
                             </table>
-
                         </div>
-                        <!-- end row-->
-                    </div> <!-- end card-body -->
-                </div> <!-- end card-->
-            </div> <!-- end col -->
+                    </div>
+                </div>
+            </div>
+        </div> <!-- end card-->
+    </div> <!-- end col -->
 
-        </div>
-
-        <div class="row">
-
-        </div>
+    </div>
 
     </div>
 @endsection
 
 @push('styles')
-    <x-admin.data-table-styles />
+    <style>
+        .scrollable-table {
+            max-height: 260px;
+            /* ~5 dòng x ~52px/dòng */
+            overflow-y: auto;
+        }
+    </style>
 @endpush
 
 @push('scripts')
@@ -306,56 +314,193 @@
             chart.render();
         });
     </script>
+
     <script>
-        $(document).ready(function() {
-            function loadCharts(date) {
-                $.ajax({
-                    url: '/admin/users/getUserStats',
-                    method: 'GET',
-                    data: {
-                        date: date
-                    },
-                    success: function(response) {
-                        updateChart("dailyChart", response.dailyUsers, "Tài khoản mới theo ngày");
-                        updateChart("weeklyChart", response.weeklyUsers, "Tài khoản mới theo tuần");
-                        updateChart("monthlyChart", response.monthlyUsers, "Tài khoản mới theo tháng");
-                        updateChart("yearlyChart", response.yearlyUsers, "Tài khoản mới theo năm");
-                    }
-                });
+        $(function() {
+            function showFilterGroup(tf) {
+                $('#filterInputs .filter-group').addClass('d-none');
+                $('#filterInputs [data-timeframe="' + tf + '"]').removeClass('d-none');
             }
 
-            function updateChart(elementId, data, title) {
-                let categories = Object.keys(data);
-                let values = Object.values(data);
-
-                var options = {
-                    chart: {
-                        type: 'bar',
-                        height: 350
-                    },
-                    series: [{
-                        name: title,
-                        data: values
-                    }],
-                    xaxis: {
-                        categories: categories
-                    },
-                    colors: ['#007bff']
+            function getFilterParams() {
+                let activeBtn = $('#timeframeTabs .active');
+                let tf = activeBtn.data('timeframe');
+                let params = {
+                    timeframe: tf
                 };
-                new ApexCharts(document.querySelector("#" + elementId), options).render();
+                switch (tf) {
+                    case 'daily':
+                        params.date = $('#dailyDate').val();
+                        break;
+                    case 'weekly':
+                        params.start_date = $('#weekStart').val();
+                        params.end_date = $('#weekEnd').val();
+                        break;
+                    case 'monthly':
+                        params.month = $('#monthPicker').val();
+                        break;
+                    case 'yearly':
+                        params.year = $('#yearPicker').val();
+                        break;
+                }
+                return params;
             }
 
-            // Load dữ liệu ban đầu
-            let defaultDate = $('#datePicker').val();
-            loadCharts(defaultDate);
+            function loadChart() {
+                let params = getFilterParams();
+                $.get('/admin/users/getUserStats', params)
+                    .done(function(res) {
+                        switch (params.timeframe) {
+                            case 'daily':
+                                $('#dailyChart').empty();
+                                new ApexCharts(document.querySelector("#dailyChart"), {
+                                    chart: {
+                                        type: 'bar',
+                                        height: 300
+                                    },
+                                    series: [{
+                                        name: 'Số TK mới',
+                                        data: [res.count]
+                                    }],
+                                    xaxis: {
+                                        categories: [params.date]
+                                    }
+                                }).render();
+                                break;
+                            case 'weekly':
+                                $('#weeklyChart').empty();
+                                new ApexCharts(document.querySelector("#weeklyChart"), {
+                                    chart: {
+                                        type: 'bar',
+                                        height: 300
+                                    },
+                                    series: [{
+                                        name: 'Số TK mới',
+                                        data: Object.values(res.daily)
+                                    }],
+                                    xaxis: {
+                                        categories: Object.keys(res.daily)
+                                    }
+                                }).render();
+                                break;
+                            case 'monthly':
+                                $('#monthlyChart').empty();
+                                new ApexCharts(document.querySelector("#monthlyChart"), {
+                                    chart: {
+                                        type: 'bar',
+                                        height: 300
+                                    },
+                                    series: [{
+                                        name: 'Số TK mới',
+                                        data: Object.values(res.daily)
+                                    }],
+                                    xaxis: {
+                                        categories: Object.keys(res.daily)
+                                    }
+                                }).render();
+                                break;
+                            case 'yearly':
+                                $('#yearlyChart').empty();
+                                new ApexCharts(document.querySelector("#yearlyChart"), {
+                                    chart: {
+                                        type: 'bar',
+                                        height: 300
+                                    },
+                                    series: [{
+                                        name: 'Số TK mới',
+                                        data: Object.values(res.monthly)
+                                    }],
+                                    xaxis: {
+                                        categories: Object.keys(res.monthly)
+                                    }
+                                }).render();
+                                break;
+                        }
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error loading chart:', textStatus, errorThrown);
+                    });
+            }
 
-            // Cập nhật khi chọn ngày khác
-            $('#datePicker').on('change', function() {
-                let selectedDate = $(this).val();
-                loadCharts(selectedDate);
+            $('#timeframeTabs button').click(function() {
+                $('#timeframeTabs button').removeClass('active');
+                $(this).addClass('active');
+                let tf = $(this).data('timeframe');
+                showFilterGroup(tf);
+                $('.tab-pane').removeClass('show active');
+                $('#' + tf + 'Tab').addClass('show active');
+                loadChart();
             });
+
+            $('#applyFilter').click(function() {
+                let tf = $('#timeframeTabs .active').data('timeframe');
+                let isValid = true;
+                let errorMsg = '';
+
+                // Lấy tháng và năm hiện tại
+                let currentDate = new Date();
+                let currentYear = currentDate.getFullYear();
+                let currentMonth = currentDate.getMonth() + 1; // Tháng bắt đầu từ 0, cộng thêm 1
+
+                switch (tf) {
+                    case 'daily':
+                        let dailyDate = $('#dailyDate').val();
+                        if (!dailyDate) {
+                            isValid = false;
+                            errorMsg = 'Vui lòng chọn ngày.';
+                        }
+                        break;
+                    case 'weekly':
+                        let weekStart = $('#weekStart').val();
+                        let weekEnd = $('#weekEnd').val();
+                        if (!weekStart || !weekEnd) {
+                            isValid = false;
+                            errorMsg = 'Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.';
+                        } else if (new Date(weekStart) > new Date(weekEnd)) {
+                            isValid = false;
+                            errorMsg = 'Ngày bắt đầu không thể sau ngày kết thúc.';
+                        }
+                        break;
+                    case 'monthly':
+                        let monthPicker = $('#monthPicker').val();
+                        if (!monthPicker) {
+                            isValid = false;
+                            errorMsg = 'Vui lòng chọn tháng.';
+                        } else {
+                            let [selectedYear, selectedMonth] = monthPicker.split('-').map(Number);
+                            if (selectedYear > currentYear || (selectedYear === currentYear &&
+                                    selectedMonth > currentMonth)) {
+                                isValid = false;
+                                errorMsg = 'Không thể chọn tháng trong tương lai.';
+                            }
+                        }
+                        break;
+                    case 'yearly':
+                        let yearPicker = $('#yearPicker').val();
+                        if (!yearPicker || isNaN(yearPicker) || yearPicker < 2000 || yearPicker >
+                            currentYear) {
+                            isValid = false;
+                            errorMsg = 'Vui lòng nhập năm hợp lệ (từ 2000 đến ' + currentYear + ').';
+                        }
+                        break;
+                }
+
+                if (!isValid) {
+                    alert(errorMsg);
+                    return;
+                }
+
+                // Gọi hàm loadChart() để xử lý dữ liệu sau khi validate thành công
+                loadChart();
+            });
+
+            let initialTimeframe = $('#timeframeTabs .active').data('timeframe');
+            showFilterGroup(initialTimeframe);
+            loadChart();
         });
     </script>
+
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             fetch("{{ route('admin.users.locationStats') }}")
