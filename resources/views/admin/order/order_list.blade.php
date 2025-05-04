@@ -27,7 +27,7 @@
                         class="cancel-order-form" style="display:inline;">
                         @csrf
                         <input type="hidden" name="action" value="approve">
-                        <button type="submit" class="btn btn-sm btn-success">Approve Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-success">Phê duyệt</button>
                     </form>
                     {{-- <form action="{{ route('admin.orders.process_cancellation', $order->id) }}" method="POST"
                         class="cancel-order-form" style="display:inline;">
@@ -49,8 +49,7 @@
                         'Payment Failed',
                         'Paid',
                     ]) && !in_array($order->orderStatus->group_status, ['Cancelled']))
-                    <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Update
-                        Status</button>
+                    <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Cập nhật trạng thái</button>
                 @endif
             </td>
         </tr>

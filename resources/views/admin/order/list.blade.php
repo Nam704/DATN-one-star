@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="tab-pane fade show active" id="orders">
                         <div class="card-header">
-                            <h3>Orders > List</h3>
+                            <h3>Đơn hàng > Danh sách</h3>
 
                             <!-- Hiển thị thông báo lỗi nếu có -->
                             @if ($errors->any())
@@ -24,7 +24,7 @@
                                 <div class="col-md-3">
                                     <div class="widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Total Orders</h5>
+                                            <h5>Tổng đơn hàng</h5>
                                             <p>{{ $totalOrders }}</p>
                                         </div>
                                     </div>
@@ -32,7 +32,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Open Orders</h5>
+                                            <h5>Chưa hoàn thành</h5>
                                             <p>{{ $openOrders }}</p>
                                         </div>
                                     </div>
@@ -40,7 +40,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Average Price</h5>
+                                            <h5>Trung bình </h5>
                                             <p>{{ number_format($averagePrice, 2) }}</p>
                                         </div>
                                     </div>
@@ -48,7 +48,7 @@
                                 <div class="col-md-3">
                                     <div class="card widget-flat text-bg-info">
                                         <div class="card-body">
-                                            <h5>Total Revenue</h5>
+                                            <h5>Tổng doanh thu</h5>
                                             <p>{{ number_format($totalRevenue, 2) }}</p>
                                         </div>
                                     </div>
@@ -65,7 +65,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request('group_status') == 'All' || !request('group_status') ? 'active' : '' }}"
-                                                    href="?group_status=All">All</a>
+                                                    href="?group_status=All">Tất cả</a>
                                             </li>
                                             @foreach ($groupStatuses as $groupStatus)
                                                 <li class="nav-item">
@@ -79,16 +79,16 @@
                                     </div>
                                     <div class="col-md-6">
                                         <input type="text" name="search" class="form-control"
-                                            placeholder="Search by code, name, email" value="{{ request('search') }}">
+                                            placeholder="Tìm kiếm đơn hàng..." value="{{ request('search') }}">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                             data-bs-target="#filterModal">
-                                            <i class="mdi mdi-filter-menu fs-5"></i> Filter Menu
+                                            <i class="mdi mdi-filter-menu fs-5"></i> Bộ lọc
                                         </button>
                                     </div>
-                                    <div class="col-md-1">
-                                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary ">Xác nhận lọc</button>
                                     </div>
                                 </form>
                             </div>
@@ -98,15 +98,14 @@
                                 <table class="table table-striped" id="ordersTable">
                                     <thead>
                                         <tr>
-                                            <th>Number</th>
-                                            <th>Customer</th>
+                                            <th>STT</th>
+                                            <th>Tên người dùng</th>
                                             <th>Email</th>
-                                            <th>Status</th>
-                                            <th>Total</th>
-                                            {{-- <th>Shipping Cost</th> --}}
-                                            <th>Payment Method</th>
-                                            <th>Created At</th>
-                                            <th>Actions</th>
+                                            <th>Trạng thái</th>
+                                            <th>Tổng thanh toán</th>
+                                            <th>Phương thức thanh toán</th>
+                                            <th>Ngày tạo đơn</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>

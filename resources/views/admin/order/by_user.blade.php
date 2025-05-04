@@ -4,7 +4,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">Đơn hàng của: <strong>{{ $userName }}</strong></h4>
     <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-      <i class="mdi mdi-arrow-left"></i> Quay lại Dashboard
+      <i class="mdi mdi-arrow-left"></i> Quay lại Trang quản trị
     </a>
   </div>
 

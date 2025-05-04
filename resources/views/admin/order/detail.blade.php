@@ -48,22 +48,22 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>Quantity: {{ $detail['quantity'] }}</td>
+                                        <td>Số lượng: {{ $detail['quantity'] }}</td>
                                         <td class="text-end"> {{ number_format($detail['total'], 0, ',', '.') }} ₫</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="2">Subtotal</td>
+                                    <td colspan="2">Tổng phụ</td>
                                     <td class="text-end">{{ number_format($orderDetails['subtotal'], 0, ',', '.') }} ₫</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">Shipping</td>
+                                    <td colspan="2">Phí vận chuyển</td>
                                     <td class="text-end">{{ number_format($orderDetails['shipping'], 0, ',', '.') }} ₫</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">Discount (Code: {{ $orderDetails['voucher_code'] ?? 'N/A' }})</td>
+                                    <td colspan="2">Giảm giá (Mã: {{ $orderDetails['voucher_code'] ?? 'N/A' }})</td>
                                     <td class="text-danger text-end">
                                         @if ($orderDetails['discount'] !== 'N/A')
                                             {{ number_format($orderDetails['discount'], 0, ',', '.') ?? '' }}
@@ -74,7 +74,7 @@
                                     </td>
                                 </tr>
                                 <tr class="fw-bold">
-                                    <td colspan="2">TOTAL</td>
+                                    <td colspan="2">Tổng thanh toán</td>
                                     <td class="text-end">{{ number_format($orderDetails['total'], 0, ',', '.') ?? '' }} ₫
                                     </td>
                                 </tr>
@@ -87,14 +87,14 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6">
-                                <h3 class="h6">Payment Method</h3>
+                                <h3 class="h6">Phương thức thanh toán</h3>
                                 <p>{{ $orderDetails['payment_method'] }} <br>
                                     Total: {{ number_format($orderDetails['total'], 0, ',', '.') ?? '' }} ₫ <span
                                         class="badge bg-success rounded-pill">{{ $orderDetails['payment_status'] }}</span>
                                 </p>
                             </div>
                             <div class="col-lg-6">
-                                <h3 class="h6">Billing Address</h3>
+                                <h3 class="h6">Địa chỉ </h3>
                                 <address>
                                     <strong>{{ $orderDetails['user_name'] ?? 'N/A' }}</strong><br>
                                     <p>{{ $orderDetails['address'] }}, {{ $orderDetails['ward'] }},
@@ -110,7 +110,7 @@
                 <!-- Customer Notes -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="h6">Customer Notes</h3>
+                        <h3 class="h6">Ghi chú khách hàng</h3>
                         <p>{{ $orderDetails['note'] ?? 'No notes' }}</p>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                 <!-- Order actions -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="h6">Order Actions</h3>
+                        <h3 class="h6">Trạng thái đơn hàng</h3>
 
                         <!-- Form xử lý yêu cầu hủy -->
                         @if (in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))
@@ -177,8 +177,7 @@
                                 !in_array($order->orderStatus->group_status, ['Cancelled']) &&
                                 $order->orderStatus->nextStatus &&
                                 !in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))
-                            <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Update
-                                Status</button>
+                            <button class="btn btn-sm btn-warning update-status" data-id="{{ $order->id }}">Cập nhật trạng thái</button>
                         @endif
 
                         <!-- Hiển thị thông báo -->
