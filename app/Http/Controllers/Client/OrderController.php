@@ -40,7 +40,16 @@ class OrderController extends Controller
     {
         try {
             $order = $this->orderService->updateOrderStatus($orderId);
-
+            $this->notificationService->sendAdmin([
+                'title' => 'Đơn hàng mới',
+                'message' => "Đơn hàng #{$order->code} vừa được tạo. Vui lòng kiểm tra và xử lý.",
+                'type' => 'admin',
+                'category' => 'order',
+                'priority' => 'high',
+                'goto_id' => $order->id,
+                'goto_route' => 'admin.orders.detail',
+                'expires_at' => now()->addDays(7),
+            ]);
             if (!$order) {
                 return response()->json([
                     'success' => false,

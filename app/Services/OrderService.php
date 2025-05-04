@@ -352,7 +352,16 @@ class OrderService
                 'previous_status_id' => $currentStatusId,
             ]);
 
-
+            $this->notificationService->sendAdmin([
+                'title' => 'Hủy đơn từ người dùng',
+                'message' => "Đơn hàng #{$order->code} vừa được yêu cầu hủy. Vui lòng kiểm tra và xử lý.",
+                'type' => 'admin',
+                'category' => 'order',
+                'priority' => 'high',
+                'goto_id' => $order->id,
+                'goto_route' => 'admin.orders.detail',
+                'expires_at' => now()->addDays(7),
+            ]);
 
             Cache::forget("user_cancel_count_{$user->id}");
             return $order;

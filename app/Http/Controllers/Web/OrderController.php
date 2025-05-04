@@ -6,6 +6,7 @@ use App\Events\OrderNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\OrderServiceManager as OrderService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,8 +16,13 @@ use Illuminate\Validation\ValidationException;
 class OrderController extends Controller
 {
     protected $orderService;
-    public function __construct(OrderService $orderService)
-    {
+    protected $notificationService;
+
+    public function __construct(
+        OrderService $orderService,
+        NotificationService $notificationService
+    ) {
+        $this->notificationService = $notificationService;
         $this->orderService = $orderService;
     }
     public function getRestrictedUsers(Request $request)
@@ -68,7 +74,7 @@ class OrderController extends Controller
             $adminNote = $request->input('admin_note');
 
             $order = $this->orderService->processCancelRequest($orderId, $action, $adminNote);
-
+            event(new OrderNotification($order));
             $message = match ($action) {
                 'review' => 'Yêu cầu hủy đơn hàng đang được xem xét.',
                 'approve' => 'Yêu cầu hủy đơn hàng đã được phê duyệt.',

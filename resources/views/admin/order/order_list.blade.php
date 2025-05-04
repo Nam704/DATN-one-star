@@ -23,12 +23,8 @@
             <td>
                 <a href="{{ route('admin.orders.detail', $order->id) }}" class="btn btn-sm btn-info">Xem</a>
                 @if (in_array($order->orderStatus->name, ['Cancel Requested', 'Cancel Under Review']))
-                    <form action="{{ route('admin.orders.process_cancellation', $order->id) }}" method="POST"
-                        class="cancel-order-form" style="display:inline;">
-                        @csrf
-                        <input type="hidden" name="action" value="approve">
-                        <button type="submit" class="btn btn-sm btn-success">Chấp nhận</button>
-                    </form>
+                    <button class="btn btn-sm btn-success approve-cancellation" data-id="{{ $order->id }}">Chấp
+                        nhận</button>
                 @elseif (
                     !in_array($order->orderStatus->name, [
                         'Shipping',

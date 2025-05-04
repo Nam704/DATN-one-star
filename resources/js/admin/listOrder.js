@@ -27,11 +27,11 @@ $(document).ready(function () {
                 // Tải lại danh sách đơn hàng
                 loadOrders(`${GlobalUtils.baseUrl}/admin/orders/list`, formData)
                     .then(() => {
-                        GlobalUtils.showNotification(
-                            event.message ||
-                                "Có đơn hàng mới, danh sách đã được cập nhật!",
-                            { backgroundColor: "#00b09b" }
-                        );
+                        // GlobalUtils.showNotification(
+                        //     event.message ||
+                        //         "Có đơn hàng mới, danh sách đã được cập nhật!",
+                        //     { backgroundColor: "#00b09b" }
+                        // );
                     })
                     .catch((error) => {
                         console.error("Error reloading orders:", error);
@@ -235,7 +235,66 @@ $(document).ready(function () {
         const url = $(this).attr("href");
         loadOrders(url);
     });
+    $(document).on("click", ".approve-cancellation", function (e) {
+        e.preventDefault();
+        const orderId = $(this).data("id");
+        const $button = $(this);
 
+        // Vô hiệu hóa nút và thay đổi văn bản khi đang xử lý
+        $button.prop("disabled", true).text("Đang xử lý...");
+
+        // Gửi yêu cầu POST bằng Axios
+        axios
+            .post(
+                `${GlobalUtils.baseUrl}/admin/orders/` +
+                    orderId +
+                    `/process-cancellation`,
+                {
+                    action: "approve", // Dữ liệu gửi đi, tương ứng với input hidden trong form cũ
+                    // Thêm CSRF token để bảo mật (nếu Laravel yêu cầu)
+                }
+            )
+            .then((response) => {
+                if (response.data.success) {
+                    // Hiển thị thông báo thành công
+                    GlobalUtils.showNotification(
+                        response.data.message || "Đã chấp nhận hủy đơn!",
+                        {
+                            backgroundColor: "#00b09b",
+                        }
+                    );
+
+                    // (Tùy chọn) Cập nhật giao diện nếu cần, ví dụ: thay đổi trạng thái
+                    const $row = $(`tr[data-id="${orderId}"]`);
+                    const $statusTd = $row.find("td").eq(3); // Cột trạng thái
+                    $statusTd.html(`
+                        <span class="badge bg-danger">
+                            Cancelled
+                        </span>
+                    `);
+
+                    // Ẩn hoặc xóa nút sau khi chấp nhận
+                    $button.remove();
+                } else {
+                    throw new Error(
+                        response.data.message || "Lỗi khi chấp nhận hủy đơn"
+                    );
+                }
+            })
+            .catch((error) => {
+                console.error("Lỗi khi chấp nhận hủy đơn:", error);
+                const errorMessage =
+                    error.response?.data?.message ||
+                    "Có lỗi xảy ra khi xử lý yêu cầu";
+                GlobalUtils.showNotification(errorMessage, {
+                    backgroundColor: "#ff4444",
+                });
+            })
+            .finally(() => {
+                // Khôi phục nút về trạng thái ban đầu (nếu không ẩn/xóa)
+                $button.prop("disabled", false).text("Chấp nhận");
+            });
+    });
     // Xử lý cập nhật trạng thái đơn hàng (giữ nguyên)
     $(document).on("click", ".update-status", function (e) {
         e.preventDefault();
@@ -252,7 +311,35 @@ $(document).ready(function () {
                     GlobalUtils.showNotification(response.data.message, {
                         backgroundColor: "#00b09b",
                     });
-                    // $("#filterForm").trigger("submit");
+
+                    // Lấy newStatus từ response
+                    var newStatus =
+                        response.data.order.order_status.next_status.name;
+                    console.log(newStatus);
+
+                    // Tìm hàng <tr> chứa orderId và cập nhật trạng thái trong <td>
+                    const $row = $(`tr[data-id="${orderId}"]`);
+                    const $statusTd = $row.find("td").eq(3); // Giả sử cột trạng thái là cột thứ 4
+
+                    // Xác định lớp CSS dựa trên trạng thái mới
+                    let badgeClass = "bg-warning"; // Mặc định
+                    if (newStatus.toLowerCase().includes("delivered")) {
+                        badgeClass = "bg-success";
+                    } else if (newStatus.toLowerCase().includes("cancelled")) {
+                        badgeClass = "bg-danger";
+                    }
+
+                    // Cập nhật nội dung và lớp của <span>
+                    $statusTd.html(`
+                        <span class="badge ${badgeClass}">
+                            ${newStatus}
+                        </span>
+                    `);
+
+                    // Ẩn nút "Cập nhật" nếu newStatus là "Shipping"
+                    if (newStatus.toLowerCase() === "shipping") {
+                        $row.find(".update-status").hide(); // Ẩn nút trong hàng này
+                    }
                 } else {
                     throw new Error(
                         response.data.message || "Lỗi khi cập nhật trạng thái"
