@@ -70,7 +70,7 @@
                             <div class="slider_content">
                                 <h2>{{ $banner->title }}</h2>
                                 <h1>{{ $banner->description }}</h1>
-                                <a class="button" href="{{ route('client.shop') }}">Shopping Now</a>
+                                <a class="button" href="{{ route('client.shop') }}">Xem ngay</a>
                             </div>
                         </div>
                     @endforeach

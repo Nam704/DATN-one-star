@@ -27,7 +27,7 @@
                                 <a href="#address" data-toggle="tab" class="nav-link">Địa chỉ</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#account-details" data-toggle="tab" class="nav-link">Chi tiết tài khoản</a>
+                                <a href="#account-details" data-toggle="tab" class="nav-link">Thông tin tài khoản</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#voucher" data-toggle="tab" class="nav-link">Mã giảm giá</a>
@@ -35,7 +35,7 @@
                             <li class="nav-item">
                                 <a href="#" class="nav-link"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    Logout
+                                    Đăng xuất
                                 </a>
                             </li>
                             <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"

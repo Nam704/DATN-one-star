@@ -1,5 +1,5 @@
 <div class="tab-pane fade show active" id="orders">
-    <h3>My Orders</h3>
+    <h3>Quản lý đơn hàng</h3>
 
     <!-- Hiển thị thông báo lỗi nếu có -->
     @if ($errors->any())
@@ -17,7 +17,7 @@
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
-                    <h5>Total Orders</h5>
+                    <h5>Tổng số đơn hàng</h5>
                     <p>{{ $totalOrders }}</p>
                 </div>
             </div>
@@ -25,7 +25,7 @@
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
-                    <h5>Open Orders</h5>
+                    <h5>Đơn hàng chưa giao</h5>
                     <p>{{ $openOrders }}</p>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
                         <a class="nav-link {{ request('group_status') == 'All' || !request('group_status') ? 'active' : '' }}"
-                            href="?group_status=All">All</a>
+                            href="?group_status=All">Tất cả</a>
                     </li>
                     @foreach ($groupStatuses as $groupStatus)
                         <li class="nav-item">
@@ -70,15 +70,15 @@
             </div>
             <div class="col-md-6">
                 <input type="text" name="search" class="form-control"
-                    placeholder="Search by order code, name, or email" value="{{ request('search') }}">
+                    placeholder="Tìm kiếm .... " value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
-                    <i class="mdi mdi-filter-menu fs-5"></i> Filter Menu
+                    <i class="mdi mdi-filter-menu"></i> Bộ lọc
                 </button>
             </div>
             <div class="col-md-1">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <button type="submit" class="btn btn-primary">Lọc</button>
             </div>
         </form>
     </div>
@@ -88,21 +88,20 @@
         <table class="table table-light table-striped">
             <thead>
                 <tr>
-                    <th>Number</th>
-                    <th>Customer</th>
+                    <th>STT</th>
+                    <th>Tên người nhận</th>
                     <th>Email</th>
-                    <th>Status</th>
-                    <th>Total</th>
-
-                    <th>Time</th>
-                    <th>Actions</th>
+                    <th>Trạng thái</th>
+                    <th>Tổng thanh toán</th>
+                    <th>Thời gian đặt hànghàng</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
                 @if ($orders->isEmpty())
                     <tr>
                         <td colspan="8" class="text-center">
-                            No orders found matching your filters. Please try adjusting your search criteria.
+                            Không có đơn hàng bạn đang tìm kiếm.
                         </td>
                     </tr>
                 @else
