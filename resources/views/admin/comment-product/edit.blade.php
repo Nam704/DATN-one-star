@@ -51,7 +51,6 @@
                                                     class="fw-normal text-muted float-end ms-1">{{ $comment->parent->created_at->diffForHumans() }}</small>
                                             </h5>
                                             <p class="mb-1">{{ $comment->parent->comment }}</p>
-                                            <a class="me-2" href="#">Trả lời</a>
                                         </div>
                                     </div>
                                 </div>
@@ -75,7 +74,6 @@
                                                 class="fw-normal text-muted float-end ms-1">{{ $comment->created_at->diffForHumans() }}</small>
                                         </h5>
                                         <p class="mb-1">{{ $comment->comment }}</p>
-                                        <a class="me-2" href="#">Trả lời</a>
                                     </div>
                                 </div>
                             </div>
@@ -101,7 +99,6 @@
                                                         class="fw-normal text-muted float-end ms-1">{{ $reply->created_at->diffForHumans() }}</small>
                                                 </h5>
                                                 <p class="mb-1">{{ $reply->comment }}</p>
-                                                <a class="me-2" href="#">Trả lời</a>
                                             </div>
                                         </div>
                                     </div>

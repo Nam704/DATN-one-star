@@ -14,14 +14,13 @@
                                         <tr>
                                             <th class="product_select">
                                                 <input type="checkbox" id="select_all">
-                                                Select
                                             </th>
-                                            <th class="product_name">Product</th>
-                                            <th class="product_thumb">Image</th>
-                                            <th class="product-price">Price</th>
-                                            <th class="product_quantity">Quantity</th>
-                                            <th class="product_total">Total</th>
-                                            <th class="product_remove">Delete</th>
+                                            <th class="product_name">Sản phẩm</th>
+                                            <th class="product_thumb">Hình ảnh</th>
+                                            <th class="product-price">Thành tiền</th>
+                                            <th class="product_quantity">Số lượng</th>
+                                            <th class="product_total">Tổng thanh toán</th>
+                                            <th class="product_remove">Xóa</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -30,7 +29,7 @@
                                 </table>
                             </div>
                             <div class="cart_clear">
-                                <button id="clear_all" class="btn btn-danger">Clear Cart</button>
+                                <button id="clear_all" class="btn btn-danger">Xóa giỏ hàng</button>
                             </div>
                         </div>
                     </div>
@@ -39,14 +38,14 @@
                     <div class="row">
                         <div class="col-lg-6 col-md-6">
                             <div class="coupon_code left">
-                                <h3>Coupon</h3>
+                                <h3>Mã giảm giá</h3>
                                 <div class="coupon_inner">
-                                    <p>Xem các coupon khả dụng hoặc nhập mã coupon.</p>
+                                    <p>Xem các mã giảm giá khả dụng hoặc nhập mã giảm giá.</p>
                                     <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
                                         data-bs-target="#voucherModal">Xem Coupon</button>
                                     <div class="input-group">
-                                        <input placeholder="Mã coupon" id="coupon_code" type="text" class="form-control">
-                                        <button type="submit" class="btn btn-success">Áp dụng Coupon</button>
+                                        <input placeholder="Mã giảm giá" id="coupon_code" type="text" class="form-control">
+                                        <button type="submit" class="btn btn-success">Áp dụng</button>
                                     </div>
                                 </div>
                             </div>

@@ -33,9 +33,9 @@
                                 <a href="#voucher" data-toggle="tab" class="nav-link">Mã giảm giá</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link"
+                                <a href="#" class="nav-link text-danger"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    Logout
+                                    Đăng xuất
                                 </a>
                             </li>
                             <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
