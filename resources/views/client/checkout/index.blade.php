@@ -7,22 +7,22 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6">
                         <div class="billing_details">
-                            <h3>Billing Details</h3>
+                            <h3>Chi tiết thanh toán</h3>
                             <div class="row">
                                 <div class="col-lg-12 mb-20">
-                                    <label> Name <span>*</span></label>
+                                    <label> Tên người dùng <span>*</span></label>
                                     <input id="name_user" name="name" value="{{ $user->name }}" type="text">
                                 </div>
                                 <div class="col-lg-6 mb-20">
-                                    <label>Phone<span>*</span></label>
+                                    <label>Số điện thoại<span>*</span></label>
                                     <input id="phone" name="phone" type="text" value="{{ $user->phone ?? '' }}">
                                 </div>
                                 <div class="col-lg-6 mb-20">
-                                    <label> Email Address <span>*</span></label>
+                                    <label> Email <span>*</span></label>
                                     <input id="email" name="email" type="text" value="{{ $user->email }}">
                                 </div>
                                 <div class="col-12 mb-20" id="address" data-id="{{ $id_address }}">
-                                    <label>Street address <span>*</span></label>
+                                    <label>Tên đường, số nhà...<span>*</span></label>
                                     <div class="row mb-2">
                                         <div class="col-md-4">
                                             <select name="province" class="form-select" id="province"></select>
@@ -34,28 +34,28 @@
                                             <select name="ward" class="form-select" id="ward"></select>
                                         </div>
                                     </div>
-                                    <input placeholder="House number and street name" type="text" name="address_detail"
+                                    <input placeholder="Số nhà, tên đường..." type="text" name="address_detail"
                                         id="address_detail" value="">
                                 </div>
                                 <div class="col-12">
                                     <div class="order-notes">
-                                        <label for="order_note">Order Notes</label>
-                                        <textarea id="order_note" name="order_note" placeholder="Notes about your order, e.g. special notes for delivery."></textarea>
+                                        <label for="order_note">Ghi chú</label>
+                                        <textarea id="order_note" name="order_note" placeholder="Ghi chú đơn hàng của bạn."></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="coupon_detail mt-3">
-                            <h3>COUPON DETAILS</h3>
+                            <h3>Chi tiết mã giảm giá</h3>
                             <div class="card mb-4">
                                 @if (!empty($data['coupon']))
                                     <div class="card-body">
-                                        <p><strong>Applied Coupon:</strong> {{ $data['coupon'] }}</p>
-                                        <p><strong>Discount:</strong> {{ number_format($discount, 0, ',', '.') }} ₫</p>
+                                        <p><strong>Mã giảm giá áp dụng:</strong> {{ $data['coupon'] }}</p>
+                                        <p><strong>Giảm giá:</strong> {{ number_format($discount, 0, ',', '.') }} ₫</p>
                                     </div>
                                 @else
                                     <div class="card-body">
-                                        <p>No coupon applied.</p>
+                                        <p>Không áp dụng mã giảm giá.</p>
                                     </div>
                                 @endif
                             </div>
@@ -63,13 +63,13 @@
                     </div>
                     <div class="col-lg-6 col-md-6">
 
-                        <h3>Your order</h3>
+                        <h3>Đơn hàng</h3>
                         <div class="order_table table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Total</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Tổng tiền</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -97,15 +97,15 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th>Cart Subtotal</th>
+                                        <th>Tổng giỏ hàng</th>
                                         <td>{{ number_format($cartSubtotal, 0, ',', '.') }} ₫</td>
                                     </tr>
                                     <tr>
-                                        <th>Discount</th>
+                                        <th>Giảm giá</th>
                                         <td><strong>{{ number_format($discount, 0, ',', '.') }} ₫</strong></td>
                                     </tr>
                                     <tr class="order_total">
-                                        <th>Order Total</th>
+                                        <th>Tổng thanh toán</th>
                                         <td><strong>{{ number_format($orderTotal, 0, ',', '.') }} ₫</strong></td>
                                     </tr>
                                 </tfoot>

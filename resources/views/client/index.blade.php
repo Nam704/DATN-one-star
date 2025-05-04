@@ -139,7 +139,7 @@
                                 </div>
                             </div>
                         @empty
-                            <p>No recommended products found</p>
+                            <p>Không có sản phẩm</p>
                         @endforelse
                     </div>
                 </div>

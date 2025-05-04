@@ -139,7 +139,7 @@
                         <div class="post_meta mb-4">
                             <span><i class="ion-person"></i> <a href="#">admin</a></span>
                             <span class="mx-2">|</span>
-                            <span><i class="fa fa-calendar"></i> Posted on {{ $blog->published_at }}</span>
+                            <span><i class="fa fa-calendar"></i> Đăng ngày {{ $blog->published_at }}</span>
                         </div>
                         <div class="post_content">
                             <p>{!! $blog->content !!}</p>
@@ -163,8 +163,6 @@
                                 <li class="list-inline-item"><a href="#" title="Google+" class="social-icon google-plus"><i class="fab fa-google-plus"></i></a></li>
                                 <li class="list-inline-item"><a href="#" title="LinkedIn" class="social-icon linkedin"><i class="fab fa-linkedin"></i></a></li>
                             </ul>
-
-
                         </div>
                     </div>
                 </div>
@@ -198,8 +196,8 @@
                     <div class="widget_list widget_search mb-4">
                         <h5>Search</h5>
                         <form action="#" method="GET">
-                            <input type="text" name="search" class="form-control mb-3" placeholder="Search...">
-                            <button type="submit" class="btn btn-primary w-100">Search</button>
+                            <input type="text" name="search" class="form-control mb-3" placeholder="Tìm kiếm ...">
+                            <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
                         </form>
                     </div>
 

@@ -42,7 +42,7 @@
                                 <div class="coupon_inner">
                                     <p>Xem các mã giảm giá khả dụng hoặc nhập mã giảm giá.</p>
                                     <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
-                                        data-bs-target="#voucherModal">Xem Coupon</button>
+                                        data-bs-target="#voucherModal">Xem mã giảm giá</button>
                                     <div class="input-group">
                                         <input placeholder="Mã giảm giá" id="coupon_code" type="text" class="form-control">
                                         <button type="submit" class="btn btn-success">Áp dụng</button>
@@ -81,7 +81,7 @@
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="voucherModalLabel">Coupon Khả Dụng</h5>
+                                <h5 class="modal-title" id="voucherModalLabel">Mã giảm giá khả dụng</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
