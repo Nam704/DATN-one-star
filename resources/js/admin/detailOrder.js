@@ -3,6 +3,8 @@ $(document).ready(function () {
     $(document).on("click", ".update-status", function (e) {
         e.preventDefault();
         const orderId = $(this).data("id");
+        const $button = $(this);
+        $button.prop("disabled", true);
         axios
             .post(
                 `${GlobalUtils.baseUrl}/admin/orders/update-status/${orderId}`
@@ -25,7 +27,6 @@ $(document).ready(function () {
                     }
 
                     // Tải lại danh sách đơn hàng nếu cần
-                    $("#filterForm").trigger("submit");
                 } else {
                     throw new Error(
                         response.data.message || "Lỗi khi cập nhật trạng thái"
@@ -40,6 +41,9 @@ $(document).ready(function () {
                 GlobalUtils.showNotification(errorMessage, {
                     backgroundColor: "#ff4444",
                 });
+            })
+            .finally(() => {
+                $button.prop("disabled", false).text("cập nhật");
             });
     });
 });

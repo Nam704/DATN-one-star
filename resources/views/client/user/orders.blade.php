@@ -218,27 +218,7 @@
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
-                        <!-- Min Shipping -->
-                        {{-- <div class="mb-3">
-                            <label for="min_shipping" class="form-label">Min Shipping</label>
-                            <input type="number" name="min_shipping" class="form-control"
-                                value="{{ request('min_shipping') }}" placeholder="Min Shipping" min="0"
-                                max="1000000">
-                            @error('min_shipping')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <!-- Max Shipping -->
-                        <div class="mb-3">
-                            <label for="max_shipping" class="form-label">Max Shipping</label>
-                            <input type="number" name="max_shipping" class="form-control"
-                                value="{{ request('max_shipping') }}" placeholder="Max Shipping" min="0"
-                                max="1000000">
-                            @error('max_shipping')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div> --}}
-                        <!-- Date From -->
+
                         <div class="mb-3">
                             <label for="date_from" class="form-label">Date From</label>
                             <input type="date" name="date_from" class="form-control"

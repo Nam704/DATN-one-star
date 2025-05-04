@@ -217,7 +217,7 @@ $(document).ready(function () {
         GlobalUtils.showNotification("Đã xóa giới hạn thời gian", {
             backgroundColor: "#00b09b",
         });
-        $("#filterForm").trigger("submit");
+        // $("#filterForm").trigger("submit");
     });
 
     // Xử lý nút "Clear" trong modal (giữ nguyên)
@@ -226,7 +226,7 @@ $(document).ready(function () {
         GlobalUtils.showNotification("Đã xóa tất cả bộ lọc", {
             backgroundColor: "#00b09b",
         });
-        $("#filterForm").trigger("submit");
+        // $("#filterForm").trigger("submit");
     });
 
     // Xử lý click vào các nút phân trang (giữ nguyên)
@@ -252,7 +252,7 @@ $(document).ready(function () {
                     GlobalUtils.showNotification(response.data.message, {
                         backgroundColor: "#00b09b",
                     });
-                    $("#filterForm").trigger("submit");
+                    // $("#filterForm").trigger("submit");
                 } else {
                     throw new Error(
                         response.data.message || "Lỗi khi cập nhật trạng thái"
@@ -269,7 +269,7 @@ $(document).ready(function () {
                 });
             })
             .finally(() => {
-                $button.prop("disabled", false).text("Update Status");
+                $button.prop("disabled", false).text("Cập nhật");
             });
     });
 
@@ -292,7 +292,7 @@ $(document).ready(function () {
                         backgroundColor: "#00b09b",
                     }
                 );
-                $("#filterForm").trigger("submit");
+                // $("#filterForm").trigger("submit");
             })
             .catch((error) => {
                 console.error("Lỗi khi xử lý yêu cầu hủy:", error);

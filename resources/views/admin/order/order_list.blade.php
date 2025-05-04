@@ -6,7 +6,7 @@
     </tr>
 @else
     @foreach ($orders as $order)
-        <tr>
+        <tr data-id="{{ $order->id }}">
             <td>{{ $order->code }}</td>
             <td>{{ json_decode($order->user_data, true)['name'] ?? 'N/A' }}</td>
             <td>{{ json_decode($order->user_data, true)['email'] ?? 'N/A' }}</td>

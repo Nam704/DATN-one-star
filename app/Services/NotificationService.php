@@ -137,6 +137,8 @@ class NotificationService
                 default => throw new \InvalidArgumentException("Vai trò không hợp lệ: $role"),
             };
             broadcast(new $eventClass($data))->toOthers();
+            // broadcast(new $eventClass($data));
+
 
             Log::info("Đã xếp hàng thông báo đến $role", [
                 'title' => $data['title'],
