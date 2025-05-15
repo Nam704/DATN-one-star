@@ -164,7 +164,6 @@
                             </div>
                         </div>
 
-
                         <div class="page_amount">
                             {{-- <p>Showing 1–9 of 21 results</p> --}}
                         </div>
@@ -181,8 +180,6 @@
             </div>
         </div>
     </div>
-
-
 
     {{-- --- Modal Attributes --- --}}
     <div class="modal fade" id="attributeModal" tabindex="-1" aria-labelledby="attributeModalLabel" aria-hidden="true">
@@ -328,7 +325,7 @@
             }
 
             // 6) Hàm lấy và render sản phẩm
-            function fetchFilteredProducts() {
+            function fetchFilteredProducts(page = 1) {
                 if (!validatePrices()) return;
                 let params = new URLSearchParams();
 
@@ -352,6 +349,12 @@
                 // Sort
                 const order = $('#orderby').val();
                 if (order) params.append('orderby', order);
+                // Page
+                params.append('page', page);
+
+                // Cập nhật URL mà không tải lại trang
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                history.pushState({}, '', newUrl);
 
                 fetch(`{{ route('client.filter') }}?${params}`, {
                         headers: {
@@ -362,6 +365,9 @@
                     .then(json => {
                         $('#product-list').html(json.products);
                         $('#pagination').html(json.pagination);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
                     });
             }
 
